@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a35"/>
+      <stop offset="100%" style="stop-color:#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff6b35"/>
+      <stop offset="100%" style="stop-color:#ff8a5c"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Pull-up bar -->
+  <rect x="100" y="130" width="312" height="16" rx="8" fill="url(#accent)"/>
+  <rect x="120" y="130" width="14" height="60" rx="7" fill="url(#accent)"/>
+  <rect x="378" y="130" width="14" height="60" rx="7" fill="url(#accent)"/>
+  <!-- Person silhouette doing a pull-up -->
+  <circle cx="256" cy="210" r="28" fill="url(#accent)"/>
+  <rect x="248" y="238" width="16" height="80" rx="8" fill="url(#accent)"/>
+  <!-- Arms reaching up to bar -->
+  <line x1="248" y1="255" x2="210" y2="190" stroke="url(#accent)" stroke-width="14" stroke-linecap="round"/>
+  <line x1="264" y1="255" x2="302" y2="190" stroke="url(#accent)" stroke-width="14" stroke-linecap="round"/>
+  <!-- Legs -->
+  <line x1="252" y1="318" x2="230" y2="380" stroke="url(#accent)" stroke-width="14" stroke-linecap="round"/>
+  <line x1="260" y1="318" x2="282" y2="380" stroke="url(#accent)" stroke-width="14" stroke-linecap="round"/>
+</svg>
