@@ -96,7 +96,7 @@ export default function Group() {
   async function createGroup() {
     if (!groupName.trim()) return;
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const docRef = await addDoc(collection(db, 'groups'), {
+    await addDoc(collection(db, 'groups'), {
       name: groupName,
       code,
       createdBy: user!.uid,

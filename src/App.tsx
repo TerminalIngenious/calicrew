@@ -6,7 +6,7 @@ import NewSession from './pages/NewSession';
 import LiveSession from './pages/LiveSession';
 import Progress from './pages/Progress';
 import Group from './pages/Group';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
