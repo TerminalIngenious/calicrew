@@ -110,19 +110,24 @@ export default function Group() {
 
   async function joinGroup() {
     if (!joinCode.trim()) return;
-    const q = query(collection(db, 'groups'), where('code', '==', joinCode.toUpperCase()));
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      alert('Code invalide');
-      return;
+    try {
+      const q = query(collection(db, 'groups'), where('code', '==', joinCode.toUpperCase()));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        alert('Code invalide');
+        return;
+      }
+      const groupDoc = snap.docs[0];
+      await updateDoc(doc(db, 'groups', groupDoc.id), {
+        memberIds: arrayUnion(user!.uid),
+      });
+      setShowJoin(false);
+      setJoinCode('');
+      await loadGroups();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de la jonction au groupe');
     }
-    const groupDoc = snap.docs[0];
-    await updateDoc(doc(db, 'groups', groupDoc.id), {
-      memberIds: arrayUnion(user!.uid),
-    });
-    setShowJoin(false);
-    setJoinCode('');
-    loadGroups();
   }
 
   function copyCode(code: string) {
