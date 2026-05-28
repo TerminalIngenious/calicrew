@@ -46,7 +46,7 @@ export default function Dashboard() {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Salut {user?.displayName} 💪</h1>
+          <h1>Salut {user?.displayName}</h1>
         </div>
         <button className="icon-btn" onClick={() => signOut()}>
           <LogOut size={20} />
