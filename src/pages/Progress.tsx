@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -31,11 +31,12 @@ export default function Progress() {
   async function loadSessions() {
     const q = query(
       collection(db, 'sessions'),
-      where('userId', '==', user!.uid),
-      orderBy('createdAt', 'asc')
+      where('userId', '==', user!.uid)
     );
     const snap = await getDocs(q);
-    setSessions(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session)));
+    const data = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session));
+    data.sort((a, b) => a.createdAt - b.createdAt);
+    setSessions(data);
   }
 
   const exerciseNames = [

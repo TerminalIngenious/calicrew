@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -21,19 +21,11 @@ export default function Dashboard() {
 
   async function loadData() {
     const sessionsRef = collection(db, 'sessions');
-    const q = query(
-      sessionsRef,
-      where('userId', '==', user!.uid),
-      orderBy('createdAt', 'desc'),
-      limit(5)
-    );
+    const q = query(sessionsRef, where('userId', '==', user!.uid));
     const snap = await getDocs(q);
-    const sessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session));
-    setRecentSessions(sessions);
-
-    const allQ = query(sessionsRef, where('userId', '==', user!.uid));
-    const allSnap = await getDocs(allQ);
-    const allSessions = allSnap.docs.map((d) => d.data() as Session);
+    const allSessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session));
+    allSessions.sort((a, b) => b.createdAt - a.createdAt);
+    setRecentSessions(allSessions.slice(0, 5));
 
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const thisWeek = allSessions.filter((s) => s.createdAt > weekAgo).length;
