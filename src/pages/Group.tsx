@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   collection,
@@ -13,7 +13,9 @@ import {
 import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Dumbbell, TrendingUp, Users, Copy, Trophy, Medal } from 'lucide-react';
+import { ArrowLeft, Dumbbell, TrendingUp, Users, Copy, Trophy, Medal, Search, Clock, Zap, Target } from 'lucide-react';
+
+type SortMode = 'reps' | 'variety' | 'time';
 
 export default function Group() {
   const { user } = useAuth();
@@ -24,27 +26,38 @@ export default function Group() {
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [groupName, setGroupName] = useState('');
-  const [joinCode, setJoinCode] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GroupType[]>([]);
+  const [searching, setSearching] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('reps');
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadGroups = useCallback(async () => {
     if (!user) return;
-    loadGroups();
+    try {
+      const q = query(
+        collection(db, 'groups'),
+        where('memberIds', 'array-contains', user.uid)
+      );
+      const snap = await getDocs(q);
+      const g = snap.docs.map((d) => ({ id: d.id, ...d.data() } as GroupType));
+      setGroups(g);
+      if (g.length > 0) {
+        const current = selectedGroup ? g.find((gr) => gr.id === selectedGroup.id) || g[0] : g[0];
+        setSelectedGroup(current);
+        await loadLeaderboard(current);
+      }
+    } catch (err) {
+      console.error('Erreur chargement groupes:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
-  async function loadGroups() {
-    const q = query(
-      collection(db, 'groups'),
-      where('memberIds', 'array-contains', user!.uid)
-    );
-    const snap = await getDocs(q);
-    const g = snap.docs.map((d) => ({ id: d.id, ...d.data() } as GroupType));
-    setGroups(g);
-    if (g.length > 0 && !selectedGroup) {
-      setSelectedGroup(g[0]);
-      loadLeaderboard(g[0]);
-    }
-  }
+  useEffect(() => {
+    loadGroups();
+  }, [loadGroups]);
 
   async function loadLeaderboard(group: GroupType) {
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -79,6 +92,8 @@ export default function Group() {
           sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0),
         0
       );
+      const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+      const exerciseIds = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId)));
 
       entries.push({
         uid: memberId,
@@ -86,11 +101,28 @@ export default function Group() {
         totalReps,
         totalSets,
         sessionsCount: sessions.length,
+        totalDuration,
+        exerciseVariety: exerciseIds.size,
       });
     }
 
-    entries.sort((a, b) => b.totalReps - a.totalReps);
     setLeaderboard(entries);
+  }
+
+  function getSortedLeaderboard(): LeaderboardEntry[] {
+    const sorted = [...leaderboard];
+    switch (sortMode) {
+      case 'reps':
+        sorted.sort((a, b) => b.totalReps - a.totalReps);
+        break;
+      case 'variety':
+        sorted.sort((a, b) => b.exerciseVariety - a.exerciseVariety);
+        break;
+      case 'time':
+        sorted.sort((a, b) => b.totalDuration - a.totalDuration);
+        break;
+    }
+    return sorted;
   }
 
   async function createGroup() {
@@ -105,24 +137,37 @@ export default function Group() {
     });
     setShowCreate(false);
     setGroupName('');
-    loadGroups();
+    await loadGroups();
   }
 
-  async function joinGroup() {
-    if (!joinCode.trim()) return;
+  async function searchGroups() {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
     try {
-      const q = query(collection(db, 'groups'), where('code', '==', joinCode.toUpperCase()));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        alert('Code invalide');
-        return;
-      }
-      const groupDoc = snap.docs[0];
-      await updateDoc(doc(db, 'groups', groupDoc.id), {
+      // Recherche par nom (case insensitive côté client)
+      const allGroupsSnap = await getDocs(collection(db, 'groups'));
+      const results = allGroupsSnap.docs
+        .map((d) => ({ id: d.id, ...d.data() } as GroupType))
+        .filter((g) =>
+          g.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !g.memberIds.includes(user!.uid)
+        );
+      setSearchResults(results);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function joinGroup(groupId: string) {
+    try {
+      await updateDoc(doc(db, 'groups', groupId), {
         memberIds: arrayUnion(user!.uid),
       });
       setShowJoin(false);
-      setJoinCode('');
+      setSearchQuery('');
+      setSearchResults([]);
       await loadGroups();
     } catch (err) {
       console.error(err);
@@ -143,6 +188,59 @@ export default function Group() {
     return <span className="rank-number">{index + 1}</span>;
   }
 
+  function formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (h > 0) return `${h}h${String(m).padStart(2, '0')}`;
+    return `${m} min`;
+  }
+
+  function getSortLabel(entry: LeaderboardEntry): string {
+    switch (sortMode) {
+      case 'reps':
+        return `${entry.totalReps} reps`;
+      case 'variety':
+        return `${entry.exerciseVariety} exos`;
+      case 'time':
+        return formatDuration(entry.totalDuration);
+    }
+  }
+
+  function getSortValue(entry: LeaderboardEntry): number {
+    switch (sortMode) {
+      case 'reps': return entry.totalReps;
+      case 'variety': return entry.exerciseVariety;
+      case 'time': return entry.totalDuration;
+    }
+  }
+
+  // Récompenses de la semaine
+  function getWeeklyAwards() {
+    if (leaderboard.length === 0) return [];
+    const awards: { label: string; icon: React.ReactNode; winner: string }[] = [];
+
+    const byReps = [...leaderboard].sort((a, b) => b.totalReps - a.totalReps);
+    if (byReps[0]?.totalReps > 0) {
+      awards.push({ label: 'Plus de reps', icon: <Zap size={14} />, winner: byReps[0].displayName });
+    }
+
+    const byVariety = [...leaderboard].sort((a, b) => b.exerciseVariety - a.exerciseVariety);
+    if (byVariety[0]?.exerciseVariety > 0) {
+      awards.push({ label: 'Plus varié', icon: <Target size={14} />, winner: byVariety[0].displayName });
+    }
+
+    const byTime = [...leaderboard].sort((a, b) => b.totalDuration - a.totalDuration);
+    if (byTime[0]?.totalDuration > 0) {
+      awards.push({ label: 'Plus de temps', icon: <Clock size={14} />, winner: byTime[0].displayName });
+    }
+
+    return awards;
+  }
+
+  const sortedLeaderboard = getSortedLeaderboard();
+  const awards = getWeeklyAwards();
+
   return (
     <div className="page">
       <header className="page-header">
@@ -153,7 +251,11 @@ export default function Group() {
         <div />
       </header>
 
-      {groups.length === 0 && !showCreate && !showJoin ? (
+      {loading ? (
+        <div className="loading-placeholder">
+          <div className="skeleton" style={{ height: 120 }} />
+        </div>
+      ) : groups.length === 0 && !showCreate && !showJoin ? (
         <div className="empty-group">
           <Users size={48} />
           <p>Rejoins ou crée un groupe pour te mesurer à tes potes !</p>
@@ -191,19 +293,42 @@ export default function Group() {
       {showJoin && (
         <div className="modal-card">
           <h3>Rejoindre un groupe</h3>
-          <input
-            type="text"
-            placeholder="Code d'invitation"
-            value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value)}
-            maxLength={6}
-          />
-          <div className="modal-actions">
-            <button className="secondary-btn" onClick={() => setShowJoin(false)}>
-              Annuler
+          <div className="search-bar">
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Rechercher un groupe..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && searchGroups()}
+            />
+            <button className="search-go" onClick={searchGroups} disabled={searching}>
+              {searching ? '...' : 'Chercher'}
             </button>
-            <button className="primary-btn" onClick={joinGroup}>
-              Rejoindre
+          </div>
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              {searchResults.map((g) => (
+                <div key={g.id} className="search-result-item">
+                  <div>
+                    <span className="search-result-name">{g.name}</span>
+                    <span className="search-result-members">
+                      {g.memberIds.length} membre{g.memberIds.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <button className="primary-btn small" onClick={() => joinGroup(g.id)}>
+                    Rejoindre
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {searchResults.length === 0 && searchQuery && !searching && (
+            <p className="empty" style={{ padding: '1rem 0' }}>Aucun groupe trouvé</p>
+          )}
+          <div className="modal-actions" style={{ marginTop: '0.75rem' }}>
+            <button className="secondary-btn" onClick={() => { setShowJoin(false); setSearchResults([]); setSearchQuery(''); }}>
+              Annuler
             </button>
           </div>
         </div>
@@ -223,10 +348,47 @@ export default function Group() {
             </span>
           </div>
 
+          {/* Récompenses de la semaine */}
+          {awards.length > 0 && (
+            <div className="awards-section">
+              {awards.map((award, i) => (
+                <div key={i} className="award-badge">
+                  {award.icon}
+                  <div>
+                    <span className="award-label">{award.label}</span>
+                    <span className="award-winner">{award.winner}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <section className="section">
-            <h3>Classement de la semaine</h3>
+            <div className="leaderboard-header">
+              <h3>Classement de la semaine</h3>
+              <div className="sort-tabs">
+                <button
+                  className={`sort-tab ${sortMode === 'reps' ? 'active' : ''}`}
+                  onClick={() => setSortMode('reps')}
+                >
+                  Reps
+                </button>
+                <button
+                  className={`sort-tab ${sortMode === 'variety' ? 'active' : ''}`}
+                  onClick={() => setSortMode('variety')}
+                >
+                  Variété
+                </button>
+                <button
+                  className={`sort-tab ${sortMode === 'time' ? 'active' : ''}`}
+                  onClick={() => setSortMode('time')}
+                >
+                  Temps
+                </button>
+              </div>
+            </div>
             <div className="leaderboard">
-              {leaderboard.map((entry, i) => (
+              {sortedLeaderboard.map((entry, i) => (
                 <div
                   key={entry.uid}
                   className={`leaderboard-row ${entry.uid === user!.uid ? 'me' : ''}`}
@@ -243,8 +405,8 @@ export default function Group() {
                     </span>
                   </div>
                   <div className="leaderboard-reps">
-                    <span className="reps-number">{entry.totalReps}</span>
-                    <span className="reps-label">reps</span>
+                    <span className="reps-number">{getSortValue(entry)}</span>
+                    <span className="reps-label">{getSortLabel(entry).split(' ')[1] || 'reps'}</span>
                   </div>
                 </div>
               ))}

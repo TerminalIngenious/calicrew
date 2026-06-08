@@ -13,6 +13,7 @@ export interface SetLog {
 export interface ExerciseLog {
   exerciseId: string;
   exerciseName: string;
+  exerciseCategory: string;
   targetSets: number;
   targetReps: number;
   sets: SetLog[];
@@ -25,6 +26,8 @@ export interface Session {
   exercises: ExerciseLog[];
   completed: boolean;
   createdAt: number;
+  duration?: number; // durée en secondes
+  startedAt?: number; // timestamp début
 }
 
 export interface UserProfile {
@@ -49,4 +52,6 @@ export interface LeaderboardEntry {
   totalReps: number;
   totalSets: number;
   sessionsCount: number;
+  totalDuration: number; // secondes
+  exerciseVariety: number; // nombre d'exercices différents
 }

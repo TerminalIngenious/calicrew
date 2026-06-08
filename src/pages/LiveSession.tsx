@@ -1,9 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Trophy } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Trophy, Timer, Square, Play, Settings } from 'lucide-react';
+
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
 
 export default function LiveSession() {
   const { id } = useParams<{ id: string }>();
@@ -11,16 +19,77 @@ export default function LiveSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<number>(0);
 
+  // Chrono session
+  const [elapsed, setElapsed] = useState(0);
+  const startTimeRef = useRef<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Chrono pause
+  const [restTime, setRestTime] = useState(0);
+  const [restRunning, setRestRunning] = useState(false);
+  const [restDuration, setRestDuration] = useState(90); // par défaut 1:30
+  const [showRestSettings, setShowRestSettings] = useState(false);
+  const restRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Confirmation terminer
+  const [showFinish, setShowFinish] = useState(false);
+  const [finished, setFinished] = useState(false);
+
   useEffect(() => {
     loadSession();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (restRef.current) clearInterval(restRef.current);
+    };
   }, [id]);
+
+  // Chrono session en fond
+  useEffect(() => {
+    if (session && session.startedAt && !session.completed) {
+      startTimeRef.current = session.startedAt;
+      setElapsed(Math.floor((Date.now() - session.startedAt) / 1000));
+      timerRef.current = setInterval(() => {
+        setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [session?.startedAt, session?.completed]);
 
   async function loadSession() {
     if (!id) return;
     const snap = await getDoc(doc(db, 'sessions', id));
     if (snap.exists()) {
-      setSession({ id: snap.id, ...snap.data() } as Session);
+      const data = { id: snap.id, ...snap.data() } as Session;
+      setSession(data);
+      if (data.completed) setFinished(true);
     }
+  }
+
+  // Chrono de pause
+  function startRest() {
+    setRestTime(restDuration);
+    setRestRunning(true);
+    if (restRef.current) clearInterval(restRef.current);
+    restRef.current = setInterval(() => {
+      setRestTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(restRef.current);
+          setRestRunning(false);
+          // Vibration si supporté
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function stopRest() {
+    if (restRef.current) clearInterval(restRef.current);
+    setRestRunning(false);
+    setRestTime(0);
   }
 
   async function logSet(exerciseIndex: number, setIndex: number) {
@@ -33,15 +102,13 @@ export default function LiveSession() {
     } else {
       set.reps = updated.exercises[exerciseIndex].targetReps;
       set.completed = true;
+      // Lancer le chrono de pause automatiquement
+      startRest();
     }
-
-    const allDone = updated.exercises.every((ex) => ex.sets.every((s) => s.completed));
-    updated.completed = allDone;
 
     setSession({ ...updated });
     await updateDoc(doc(db, 'sessions', id), {
       exercises: updated.exercises,
-      completed: updated.completed,
     });
   }
 
@@ -52,14 +119,22 @@ export default function LiveSession() {
     set.reps = Math.max(0, set.reps + delta);
     set.completed = set.reps > 0;
 
-    const allDone = updated.exercises.every((ex) => ex.sets.every((s) => s.completed));
-    updated.completed = allDone;
-
     setSession({ ...updated });
     await updateDoc(doc(db, 'sessions', id), {
       exercises: updated.exercises,
-      completed: updated.completed,
     });
+  }
+
+  async function finishSession() {
+    if (!session || !id) return;
+    const duration = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
+    await updateDoc(doc(db, 'sessions', id), {
+      completed: true,
+      duration,
+    });
+    if (timerRef.current) clearInterval(timerRef.current);
+    setFinished(true);
+    setShowFinish(false);
   }
 
   if (!session) return <div className="page loading">Chargement...</div>;
@@ -71,6 +146,39 @@ export default function LiveSession() {
   );
   const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
 
+  if (finished) {
+    const totalReps = session.exercises.reduce(
+      (sum, ex) => sum + ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0),
+      0
+    );
+    return (
+      <div className="page">
+        <div className="finish-screen">
+          <Trophy size={64} className="gold" />
+          <h1>Bien joué !</h1>
+          <p>Ta séance a bien été enregistrée</p>
+          <div className="finish-stats">
+            <div className="finish-stat">
+              <span className="finish-stat-value">{formatTime(elapsed)}</span>
+              <span className="finish-stat-label">Durée</span>
+            </div>
+            <div className="finish-stat">
+              <span className="finish-stat-value">{totalReps}</span>
+              <span className="finish-stat-label">Reps</span>
+            </div>
+            <div className="finish-stat">
+              <span className="finish-stat-value">{completedSets}</span>
+              <span className="finish-stat-label">Séries</span>
+            </div>
+          </div>
+          <button className="primary-btn" onClick={() => navigate('/')}>
+            Retour à l'accueil
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <header className="page-header">
@@ -78,8 +186,49 @@ export default function LiveSession() {
           <ArrowLeft size={20} />
         </button>
         <h1>Séance en cours</h1>
-        <div />
+        <div className="session-timer">
+          <Timer size={16} />
+          <span>{formatTime(elapsed)}</span>
+        </div>
       </header>
+
+      {/* Chrono de pause */}
+      <div className="rest-timer-section">
+        <div className="rest-timer-row">
+          {restRunning ? (
+            <div className={`rest-timer-display ${restTime <= 5 ? 'ending' : ''}`}>
+              <span className="rest-label">Pause</span>
+              <span className="rest-countdown">{formatTime(restTime)}</span>
+              <button className="rest-stop-btn" onClick={stopRest}>
+                <Square size={14} /> Stop
+              </button>
+            </div>
+          ) : (
+            <button className="rest-start-btn" onClick={startRest}>
+              <Play size={14} /> Pause {formatTime(restDuration)}
+            </button>
+          )}
+          <button className="icon-btn" onClick={() => setShowRestSettings(!showRestSettings)}>
+            <Settings size={18} />
+          </button>
+        </div>
+        {showRestSettings && (
+          <div className="rest-settings">
+            <span>Durée de pause :</span>
+            <div className="rest-presets">
+              {[30, 60, 90, 120, 180].map((d) => (
+                <button
+                  key={d}
+                  className={`rest-preset ${restDuration === d ? 'active' : ''}`}
+                  onClick={() => setRestDuration(d)}
+                >
+                  {formatTime(d)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="progress-bar-container">
         <div className="progress-bar" style={{ width: `${progress}%` }} />
@@ -87,13 +236,6 @@ export default function LiveSession() {
           {completedSets}/{totalSets} séries
         </span>
       </div>
-
-      {session.completed && (
-        <div className="completion-banner">
-          <Trophy size={24} />
-          <span>Séance terminée ! Bravo 🔥</span>
-        </div>
-      )}
 
       <div className="live-exercises">
         {session.exercises.map((ex, exIdx) => {
@@ -126,19 +268,9 @@ export default function LiveSession() {
                         <span className="set-target">Obj: {ex.targetReps}</span>
                       </div>
                       <div className="set-controls">
-                        <button
-                          className="reps-btn"
-                          onClick={() => adjustReps(exIdx, setIdx, -1)}
-                        >
-                          −
-                        </button>
+                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, -1)}>−</button>
                         <span className="reps-value">{set.reps}</span>
-                        <button
-                          className="reps-btn"
-                          onClick={() => adjustReps(exIdx, setIdx, 1)}
-                        >
-                          +
-                        </button>
+                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, 1)}>+</button>
                       </div>
                       <button
                         className={`validate-btn ${set.completed ? 'done' : ''}`}
@@ -155,6 +287,29 @@ export default function LiveSession() {
           );
         })}
       </div>
+
+      <button className="finish-btn floating-btn" onClick={() => setShowFinish(true)}>
+        Terminer la séance
+      </button>
+
+      {showFinish && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Terminer la séance ?</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              Durée : {formatTime(elapsed)} • {completedSets}/{totalSets} séries faites
+            </p>
+            <div className="modal-actions">
+              <button className="secondary-btn" onClick={() => setShowFinish(false)}>
+                Continuer
+              </button>
+              <button className="primary-btn" style={{ flex: 1 }} onClick={finishSession}>
+                Terminer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

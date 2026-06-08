@@ -13,7 +13,7 @@ export default function NewSession() {
   const [step, setStep] = useState<'select' | 'config'>('select');
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseConfigs, setExerciseConfigs] = useState<
-    { exercise: Exercise; targetSets: number; targetReps: number }[]
+    { exercise: Exercise; targetSets: number; targetTotal: number }[]
   >([]);
 
   function toggleExercise(ex: Exercise) {
@@ -24,34 +24,43 @@ export default function NewSession() {
 
   function goToConfig() {
     setExerciseConfigs(
-      selectedExercises.map((ex) => ({ exercise: ex, targetSets: 4, targetReps: 10 }))
+      selectedExercises.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40 }))
     );
     setStep('config');
   }
 
-  function updateConfig(index: number, field: 'targetSets' | 'targetReps', delta: number) {
+  function updateConfig(index: number, field: 'targetSets' | 'targetTotal', delta: number) {
     setExerciseConfigs((prev) =>
-      prev.map((c, i) =>
-        i === index ? { ...c, [field]: Math.max(1, c[field] + delta) } : c
-      )
+      prev.map((c, i) => {
+        if (i !== index) return c;
+        const newVal = Math.max(1, c[field] + delta);
+        return { ...c, [field]: newVal };
+      })
     );
   }
 
   async function startSession() {
-    const exercises: ExerciseLog[] = exerciseConfigs.map((c) => ({
-      exerciseId: c.exercise.id,
-      exerciseName: c.exercise.name,
-      targetSets: c.targetSets,
-      targetReps: c.targetReps,
-      sets: Array.from({ length: c.targetSets }, () => ({ reps: 0, completed: false })),
-    }));
+    const now = Date.now();
+    const exercises: ExerciseLog[] = exerciseConfigs.map((c) => {
+      const repsPerSet = Math.ceil(c.targetTotal / c.targetSets);
+      return {
+        exerciseId: c.exercise.id,
+        exerciseName: c.exercise.name,
+        exerciseCategory: c.exercise.category,
+        targetSets: c.targetSets,
+        targetReps: repsPerSet,
+        sets: Array.from({ length: c.targetSets }, () => ({ reps: 0, completed: false })),
+      };
+    });
 
     const docRef = await addDoc(collection(db, 'sessions'), {
       userId: user!.uid,
       date: new Date().toISOString().split('T')[0],
       exercises,
       completed: false,
-      createdAt: Date.now(),
+      createdAt: now,
+      startedAt: now,
+      duration: 0,
     });
 
     navigate(`/session/${docRef.id}`);
@@ -108,39 +117,45 @@ export default function NewSession() {
       </header>
 
       <div className="config-list">
-        {exerciseConfigs.map((config, i) => (
-          <div key={config.exercise.id} className="config-card">
-            <h3>{config.exercise.name}</h3>
-            <div className="config-row">
-              <span>Séries</span>
-              <div className="stepper">
-                <button onClick={() => updateConfig(i, 'targetSets', -1)}>
-                  <Minus size={16} />
-                </button>
-                <span>{config.targetSets}</span>
-                <button onClick={() => updateConfig(i, 'targetSets', 1)}>
-                  <Plus size={16} />
-                </button>
+        {exerciseConfigs.map((config, i) => {
+          const repsPerSet = Math.ceil(config.targetTotal / config.targetSets);
+          return (
+            <div key={config.exercise.id} className="config-card">
+              <h3>{config.exercise.name}</h3>
+              <div className="config-row">
+                <span>Objectif total</span>
+                <div className="stepper">
+                  <button onClick={() => updateConfig(i, 'targetTotal', -5)}>
+                    <Minus size={16} />
+                  </button>
+                  <span>{config.targetTotal}</span>
+                  <button onClick={() => updateConfig(i, 'targetTotal', 5)}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="config-row">
+                <span>Séries</span>
+                <div className="stepper">
+                  <button onClick={() => updateConfig(i, 'targetSets', -1)}>
+                    <Minus size={16} />
+                  </button>
+                  <span>{config.targetSets}</span>
+                  <button onClick={() => updateConfig(i, 'targetSets', 1)}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="config-result">
+                → {repsPerSet} reps / série
               </div>
             </div>
-            <div className="config-row">
-              <span>Reps / série</span>
-              <div className="stepper">
-                <button onClick={() => updateConfig(i, 'targetReps', -1)}>
-                  <Minus size={16} />
-                </button>
-                <span>{config.targetReps}</span>
-                <button onClick={() => updateConfig(i, 'targetReps', 1)}>
-                  <Plus size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <button className="primary-btn floating-btn" onClick={startSession}>
-        Lancer la séance 🔥
+        Lancer la séance
       </button>
     </div>
   );

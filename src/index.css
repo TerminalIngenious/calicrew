@@ -795,3 +795,370 @@ body {
   font-size: 0.7rem;
   color: var(--text-muted);
 }
+
+/* Config result */
+.config-result {
+  margin-top: 0.75rem;
+  text-align: center;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Session timer */
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Rest timer */
+.rest-timer-section {
+  margin-bottom: 1rem;
+}
+
+.rest-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rest-start-btn {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.rest-timer-display {
+  flex: 1;
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rest-timer-display.ending {
+  background: rgba(255, 71, 87, 0.1);
+  border-color: var(--danger);
+}
+
+.rest-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rest-countdown {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-green);
+  flex: 1;
+}
+
+.rest-timer-display.ending .rest-countdown {
+  color: var(--danger);
+}
+
+.rest-stop-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rest-settings {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.rest-presets {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.rest-preset {
+  padding: 0.3rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.rest-preset.active {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Finish screen */
+.finish-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80dvh;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.finish-screen h1 {
+  font-size: 1.8rem;
+}
+
+.finish-screen p {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.finish-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.finish-stat {
+  text-align: center;
+}
+
+.finish-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.finish-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.finish-btn {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.modal-overlay .modal-card {
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Session categories */
+.session-categories {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Loading */
+.loading-placeholder {
+  padding: 1rem 0;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.skeleton {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  height: 80px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 0.7rem 0;
+  font-size: 0.9rem;
+  outline: none;
+  margin-bottom: 0;
+}
+
+.search-go {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.search-result-name {
+  font-weight: 600;
+  display: block;
+}
+
+.search-result-members {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.primary-btn.small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  width: auto;
+}
+
+/* Awards */
+.awards-section {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.award-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 20px;
+  padding: 0.4rem 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: var(--accent-gold);
+}
+
+.award-label {
+  font-size: 0.7rem;
+  display: block;
+}
+
+.award-winner {
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: block;
+}
+
+/* Sort tabs */
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.leaderboard-header h3 {
+  margin-bottom: 0;
+}
+
+.sort-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.sort-tab {
+  padding: 0.3rem 0.6rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.sort-tab.active {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
