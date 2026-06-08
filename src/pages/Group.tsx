@@ -13,7 +13,7 @@ import {
 import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Dumbbell, TrendingUp, Users, Copy, Trophy, Medal, Search, Clock, Zap, Target } from 'lucide-react';
+import { Dumbbell, TrendingUp, Users, Copy, Trophy, Medal, Search, Clock, Zap, Target } from 'lucide-react';
 
 type SortMode = 'reps' | 'variety' | 'time';
 
@@ -244,11 +244,7 @@ export default function Group() {
   return (
     <div className="page">
       <header className="page-header">
-        <button className="icon-btn" onClick={() => navigate('/')}>
-          <ArrowLeft size={20} />
-        </button>
         <h1>Groupe</h1>
-        <div />
       </header>
 
       {loading ? (

@@ -4,7 +4,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Dumbbell, TrendingUp, Users } from 'lucide-react';
+import { Dumbbell, TrendingUp, Users } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -83,11 +83,7 @@ export default function Progress() {
   return (
     <div className="page">
       <header className="page-header">
-        <button className="icon-btn" onClick={() => navigate('/')}>
-          <ArrowLeft size={20} />
-        </button>
         <h1>Progression</h1>
-        <div />
       </header>
 
       <div className="filter-bar">
