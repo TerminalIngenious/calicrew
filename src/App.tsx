@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SessionsProvider } from './contexts/SessionsContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewSession from './pages/NewSession';
@@ -20,6 +21,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <SessionsProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -28,6 +30,7 @@ function App() {
           <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
           <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
         </Routes>
+        </SessionsProvider>
       </AuthProvider>
     </BrowserRouter>
   );

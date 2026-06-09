@@ -1,7 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, query, where, getDocs, getDocsFromServer } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Plus, TrendingUp, Users, Dumbbell, LogOut, RefreshCw } from 'lucide-react';
@@ -13,55 +12,35 @@ import Loader from '../components/Loader';
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [recentSessions, setRecentSessions] = useState<Session[]>([]);
-  const [stats, setStats] = useState({ totalSessions: 0, totalReps: 0, thisWeek: 0 });
-  const [loading, setLoading] = useState(true);
+  const { sessions, loading, refresh } = useUserSessions();
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = useCallback(async (forceServer = false) => {
-    if (!user) return;
-    try {
-      const sessionsRef = collection(db, 'sessions');
-      const q = query(sessionsRef, where('userId', '==', user.uid));
-      const snap = forceServer ? await getDocsFromServer(q) : await getDocs(q);
-      const allSessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session));
-      allSessions.sort((a, b) => b.createdAt - a.createdAt);
-      setRecentSessions(allSessions.slice(0, 5));
+  const recentSessions = useMemo(() => sessions.slice(0, 5), [sessions]);
 
-      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-      const thisWeek = allSessions.filter((s) => s.createdAt > weekAgo).length;
-      const totalReps = allSessions.reduce(
-        (sum, s) =>
-          sum +
-          s.exercises.reduce(
-            (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
-            0
-          ),
-        0
-      );
-
-      setStats({ totalSessions: allSessions.length, totalReps, thisWeek });
-    } catch (err) {
-      console.error('Erreur chargement dashboard:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const stats = useMemo(() => {
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const thisWeek = sessions.filter((s) => s.createdAt > weekAgo).length;
+    const totalReps = sessions.reduce(
+      (sum, s) =>
+        sum +
+        s.exercises.reduce(
+          (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
+          0
+        ),
+      0
+    );
+    return { totalSessions: sessions.length, totalReps, thisWeek };
+  }, [sessions]);
 
   async function handleRefresh() {
     setRefreshing(true);
-    await loadData(true);
+    await refresh();
+    setRefreshing(false);
   }
 
   function getSessionCategories(s: Session): string {
     const cats = [...new Set(s.exercises.map((e) => e.exerciseCategory || '').filter(Boolean))];
     if (cats.length === 0) {
-      // Fallback pour les anciennes séances sans catégorie
       return `${s.exercises.length} exo${s.exercises.length > 1 ? 's' : ''}`;
     }
     return cats.map((c) => (CATEGORY_LABELS as Record<string, string>)[c] || c).join(', ');
