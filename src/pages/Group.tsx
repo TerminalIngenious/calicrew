@@ -14,6 +14,7 @@ import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Dumbbell, TrendingUp, Users, Copy, Trophy, Medal, Search, Clock, Zap, Target } from 'lucide-react';
+import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
 
@@ -250,9 +251,7 @@ export default function Group() {
       </header>
 
       {loading ? (
-        <div className="loading-placeholder">
-          <div className="skeleton" style={{ height: 120 }} />
-        </div>
+        <div className="page loading"><Loader /></div>
       ) : groups.length === 0 && !showCreate && !showJoin ? (
         <div className="empty-group">
           <Users size={48} />

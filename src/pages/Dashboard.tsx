@@ -8,6 +8,7 @@ import { Plus, TrendingUp, Users, Dumbbell, LogOut, RefreshCw } from 'lucide-rea
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
+import Loader from '../components/Loader';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -83,11 +84,7 @@ export default function Dashboard() {
       </header>
 
       {loading ? (
-        <div className="loading-placeholder">
-          <div className="skeleton-grid">
-            <div className="skeleton" /><div className="skeleton" /><div className="skeleton" />
-          </div>
-        </div>
+        <div className="page loading"><Loader /></div>
       ) : (
         <>
           <div className="stats-grid">
