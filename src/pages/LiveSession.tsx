@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Trophy, Timer, Square, Play, Settings, Calendar, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
