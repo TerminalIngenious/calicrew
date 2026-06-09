@@ -3,7 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Trophy, Timer, Square, Play, Settings } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Trophy, Timer, Square, Play, Settings, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { CATEGORY_LABELS } from '../lib/exercises';
 import Loader from '../components/Loader';
 
 function formatTime(seconds: number): string {
@@ -153,30 +156,84 @@ export default function LiveSession() {
       (sum, ex) => sum + ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0),
       0
     );
+    const categories = [...new Set(session.exercises.map((e) => e.exerciseCategory || '').filter(Boolean))];
+    const categoryLabel = categories.map((c) => (CATEGORY_LABELS as Record<string, string>)[c] || c).join(', ');
+
     return (
       <div className="page">
-        <div className="finish-screen">
-          <Trophy size={64} className="gold" />
-          <h1>Bien joué !</h1>
-          <p>Ta séance a bien été enregistrée</p>
-          <div className="finish-stats">
-            <div className="finish-stat">
-              <span className="finish-stat-value">{formatTime(displayDuration)}</span>
-              <span className="finish-stat-label">Durée</span>
+        <header className="page-header">
+          <button className="icon-btn" onClick={() => navigate('/')}>
+            <ArrowLeft size={20} />
+          </button>
+          <h1>Récap séance</h1>
+        </header>
+
+        <div className="recap-header-card">
+          <div className="recap-date-row">
+            <Calendar size={16} />
+            <span>{format(new Date(session.date), 'EEEE d MMMM yyyy', { locale: fr })}</span>
+          </div>
+          {categoryLabel && <span className="recap-categories">{categoryLabel}</span>}
+          <div className="recap-stats-row">
+            <div className="recap-mini-stat">
+              <Timer size={14} />
+              <span>{formatTime(displayDuration)}</span>
             </div>
-            <div className="finish-stat">
-              <span className="finish-stat-value">{totalReps}</span>
-              <span className="finish-stat-label">Reps</span>
+            <div className="recap-mini-stat">
+              <span className="recap-mini-value">{totalReps}</span>
+              <span>reps</span>
             </div>
-            <div className="finish-stat">
-              <span className="finish-stat-value">{completedSets}</span>
-              <span className="finish-stat-label">Séries</span>
+            <div className="recap-mini-stat">
+              <span className="recap-mini-value">{completedSets}/{totalSets}</span>
+              <span>séries</span>
             </div>
           </div>
-          <button className="primary-btn" onClick={() => navigate('/')}>
-            Retour à l'accueil
-          </button>
+          <div className="recap-progress-bar">
+            <div className="progress-bar" style={{ width: `${progress}%` }} />
+          </div>
         </div>
+
+        <div className="recap-exercises">
+          {session.exercises.map((ex, exIdx) => {
+            const exCompletedSets = ex.sets.filter((s) => s.completed).length;
+            const exTotalReps = ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0);
+            const allDone = exCompletedSets === ex.sets.length;
+
+            return (
+              <div key={exIdx} className="recap-exercise-card">
+                <div className="recap-exercise-header">
+                  <div>
+                    <h3>{ex.exerciseName}</h3>
+                    <span className="recap-exercise-sub">
+                      Objectif : {ex.targetReps} reps × {ex.sets.length} séries
+                    </span>
+                  </div>
+                  <span className={`recap-exercise-badge ${allDone ? 'done' : 'partial'}`}>
+                    {allDone ? 'Complet' : `${exCompletedSets}/${ex.sets.length}`}
+                  </span>
+                </div>
+                <div className="recap-sets-grid">
+                  {ex.sets.map((set, setIdx) => (
+                    <div key={setIdx} className={`recap-set ${set.completed ? 'completed' : 'missed'}`}>
+                      <span className="recap-set-label">S{setIdx + 1}</span>
+                      <span className="recap-set-reps">{set.completed ? set.reps : '—'}</span>
+                      {set.completed && set.reps >= ex.targetReps && (
+                        <Check size={12} className="recap-set-check" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="recap-exercise-total">
+                  Total : {exTotalReps} reps
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button className="primary-btn" style={{ marginTop: '1rem' }} onClick={() => navigate('/')}>
+          Retour à l'accueil
+        </button>
       </div>
     );
   }
