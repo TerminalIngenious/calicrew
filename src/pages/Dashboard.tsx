@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDocsFromServer } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -17,12 +17,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (forceServer = false) => {
     if (!user) return;
     try {
       const sessionsRef = collection(db, 'sessions');
       const q = query(sessionsRef, where('userId', '==', user.uid));
-      const snap = await getDocs(q);
+      const snap = forceServer ? await getDocsFromServer(q) : await getDocs(q);
       const allSessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Session));
       allSessions.sort((a, b) => b.createdAt - a.createdAt);
       setRecentSessions(allSessions.slice(0, 5));
@@ -52,9 +52,9 @@ export default function Dashboard() {
     loadData();
   }, [loadData]);
 
-  function handleRefresh() {
+  async function handleRefresh() {
     setRefreshing(true);
-    loadData();
+    await loadData(true);
   }
 
   function getSessionCategories(s: Session): string {
