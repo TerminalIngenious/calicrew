@@ -1357,3 +1357,10 @@ body {
   color: var(--text-muted);
   text-align: right;
 }
+
+.recap-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
