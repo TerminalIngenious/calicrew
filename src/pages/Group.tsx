@@ -61,21 +61,26 @@ export default function Group() {
 
   async function loadLeaderboard(group: GroupType) {
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const entries: LeaderboardEntry[] = [];
 
-    for (const memberId of group.memberIds) {
-      const q = query(
-        collection(db, 'sessions'),
-        where('userId', '==', memberId)
-      );
-      const snap = await getDocs(q);
-      const sessions = snap.docs
+    // Charger tous les profils et sessions en parallèle
+    const [usersSnap, ...sessionSnaps] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      ...group.memberIds.map((memberId) =>
+        getDocs(query(collection(db, 'sessions'), where('userId', '==', memberId)))
+      ),
+    ]);
+
+    // Map des profils
+    const userMap = new Map<string, string>();
+    usersSnap.docs.forEach((d) => {
+      const data = d.data();
+      if (data.uid) userMap.set(data.uid, data.displayName || 'Inconnu');
+    });
+
+    const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
+      const sessions = sessionSnaps[i].docs
         .map((d) => d.data() as Session)
         .filter((s) => s.createdAt > weekAgo);
-
-      const userQ = query(collection(db, 'users'), where('uid', '==', memberId));
-      const userSnap = await getDocs(userQ);
-      const displayName = userSnap.docs[0]?.data()?.displayName || 'Inconnu';
 
       const totalReps = sessions.reduce(
         (sum, s) =>
@@ -95,16 +100,16 @@ export default function Group() {
       const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
       const exerciseIds = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId)));
 
-      entries.push({
+      return {
         uid: memberId,
-        displayName,
+        displayName: userMap.get(memberId) || 'Inconnu',
         totalReps,
         totalSets,
         sessionsCount: sessions.length,
         totalDuration,
         exerciseVariety: exerciseIds.size,
-      });
-    }
+      };
+    });
 
     setLeaderboard(entries);
   }
