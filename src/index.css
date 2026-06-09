@@ -1023,6 +1023,7 @@ body {
   50% { opacity: 0.8; }
 }
 
+.spinning svg,
 .spinning {
   animation: spin 1s linear infinite;
 }
@@ -1099,6 +1100,14 @@ body {
 }
 
 /* Awards */
+.awards-section-inline {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .awards-section {
   display: flex;
   gap: 0.5rem;
@@ -1161,4 +1170,34 @@ body {
   background: rgba(255, 107, 53, 0.15);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* Loader */
+.loader-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60dvh;
+  gap: 1rem;
+}
+
+.loader-svg .loader-person {
+  animation: pullup-attempt 1.5s ease-in-out infinite;
+  transform-origin: 100px 60px;
+}
+
+@keyframes pullup-attempt {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-12px); }
+  50% { transform: translateY(-8px); }
+  70% { transform: translateY(-15px); }
+  85% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+.loader-text {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  animation: pulse 1.5s ease-in-out infinite;
 }

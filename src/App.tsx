@@ -7,10 +7,11 @@ import LiveSession from './pages/LiveSession';
 import Progress from './pages/Progress';
 import Group from './pages/Group';
 import type { ReactNode } from 'react';
+import Loader from './components/Loader';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="page loading">Chargement...</div>;
+  if (loading) return <div className="page loading"><Loader /></div>;
   if (!user) return <Navigate to="/login" />;
   return <>{children}</>;
 }

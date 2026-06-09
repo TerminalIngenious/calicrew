@@ -196,22 +196,19 @@ export default function Group() {
     return `${m} min`;
   }
 
-  function getSortLabel(entry: LeaderboardEntry): string {
+  function getSortDisplayValue(entry: LeaderboardEntry): string {
     switch (sortMode) {
-      case 'reps':
-        return `${entry.totalReps} reps`;
-      case 'variety':
-        return `${entry.exerciseVariety} exos`;
-      case 'time':
-        return formatDuration(entry.totalDuration);
+      case 'reps': return String(entry.totalReps);
+      case 'variety': return String(entry.exerciseVariety);
+      case 'time': return formatDuration(entry.totalDuration);
     }
   }
 
-  function getSortValue(entry: LeaderboardEntry): number {
+  function getSortUnit(_entry: LeaderboardEntry): string {
     switch (sortMode) {
-      case 'reps': return entry.totalReps;
-      case 'variety': return entry.exerciseVariety;
-      case 'time': return entry.totalDuration;
+      case 'reps': return 'reps';
+      case 'variety': return 'exos';
+      case 'time': return '';
     }
   }
 
@@ -342,22 +339,20 @@ export default function Group() {
             <span className="member-count">
               {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
             </span>
-          </div>
-
-          {/* Récompenses de la semaine */}
-          {awards.length > 0 && (
-            <div className="awards-section">
-              {awards.map((award, i) => (
-                <div key={i} className="award-badge">
-                  {award.icon}
-                  <div>
-                    <span className="award-label">{award.label}</span>
-                    <span className="award-winner">{award.winner}</span>
+            {awards.length > 0 && (
+              <div className="awards-section-inline">
+                {awards.map((award, i) => (
+                  <div key={i} className="award-badge">
+                    {award.icon}
+                    <div>
+                      <span className="award-label">{award.label}</span>
+                      <span className="award-winner">{award.winner}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
 
           <section className="section">
             <div className="leaderboard-header">
@@ -401,8 +396,8 @@ export default function Group() {
                     </span>
                   </div>
                   <div className="leaderboard-reps">
-                    <span className="reps-number">{getSortValue(entry)}</span>
-                    <span className="reps-label">{getSortLabel(entry).split(' ')[1] || 'reps'}</span>
+                    <span className="reps-number">{getSortDisplayValue(entry)}</span>
+                    {getSortUnit(entry) && <span className="reps-label">{getSortUnit(entry)}</span>}
                   </div>
                 </div>
               ))}

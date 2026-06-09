@@ -4,6 +4,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
 import { ArrowLeft, Check, ChevronDown, ChevronUp, Trophy, Timer, Square, Play, Settings } from 'lucide-react';
+import Loader from '../components/Loader';
 
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -137,7 +138,7 @@ export default function LiveSession() {
     setShowFinish(false);
   }
 
-  if (!session) return <div className="page loading">Chargement...</div>;
+  if (!session) return <div className="page loading"><Loader /></div>;
 
   const totalSets = session.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
   const completedSets = session.exercises.reduce(
@@ -145,6 +146,7 @@ export default function LiveSession() {
     0
   );
   const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
+  const displayDuration = session.duration && session.duration > 0 ? session.duration : elapsed;
 
   if (finished) {
     const totalReps = session.exercises.reduce(
@@ -159,7 +161,7 @@ export default function LiveSession() {
           <p>Ta séance a bien été enregistrée</p>
           <div className="finish-stats">
             <div className="finish-stat">
-              <span className="finish-stat-value">{formatTime(elapsed)}</span>
+              <span className="finish-stat-value">{formatTime(displayDuration)}</span>
               <span className="finish-stat-label">Durée</span>
             </div>
             <div className="finish-stat">
