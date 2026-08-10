@@ -61,9 +61,6 @@ export default function Group() {
   }, [loadGroups]);
 
   async function loadLeaderboard(group: GroupType) {
-    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
-    // Charger tous les profils et sessions en parallèle
     const [usersSnap, ...sessionSnaps] = await Promise.all([
       getDocs(collection(db, 'users')),
       ...group.memberIds.map((memberId) =>
@@ -71,7 +68,6 @@ export default function Group() {
       ),
     ]);
 
-    // Map des profils
     const userMap = new Map<string, string>();
     usersSnap.docs.forEach((d) => {
       const data = d.data();
@@ -80,8 +76,7 @@ export default function Group() {
 
     const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
       const sessions = sessionSnaps[i].docs
-        .map((d) => d.data() as Session)
-        .filter((s) => s.createdAt > weekAgo);
+        .map((d) => d.data() as Session);
 
       const totalReps = sessions.reduce(
         (sum, s) =>
@@ -218,7 +213,6 @@ export default function Group() {
     }
   }
 
-  // Récompenses de la semaine
   function getWeeklyAwards() {
     if (leaderboard.length === 0) return [];
     const awards: { label: string; icon: React.ReactNode; winner: string }[] = [];
@@ -360,7 +354,7 @@ export default function Group() {
 
           <section className="section">
             <div className="leaderboard-header">
-              <h3>Classement de la semaine</h3>
+              <h3>Classement</h3>
               <div className="sort-tabs">
                 <button
                   className={`sort-tab ${sortMode === 'reps' ? 'active' : ''}`}
