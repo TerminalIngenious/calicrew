@@ -96,27 +96,33 @@ export default function Dashboard() {
                     <div className="session-card-top">
                       <span className="session-date">
                         {format(new Date(s.date), 'd MMM', { locale: fr })}
-                        <span className="session-categories"> • {getSessionCategories(s)}</span>
+                          <span className="session-categories"> • {s.mode === 'amrap' ? 'Cindy AMRAP' : getSessionCategories(s)}</span>
                       </span>
                       <span className={`session-badge ${s.completed ? 'done' : 'partial'}`}>
                         {s.completed ? 'Terminée' : 'En cours'}
                       </span>
                     </div>
                     <div className="session-card-bottom">
-                      <span>
-                        {s.exercises.reduce(
-                          (sum, ex) => sum + ex.sets.filter((set) => set.completed).length,
-                          0
-                        )}{' '}
-                        séries
-                      </span>
-                      <span>
-                        {s.exercises.reduce(
-                          (sum, ex) => sum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
-                          0
-                        )}{' '}
-                        reps
-                      </span>
+                      {s.mode === 'amrap' ? (
+                        <span>{s.amrapRounds || 0} rounds</span>
+                      ) : (
+                        <>
+                          <span>
+                            {s.exercises.reduce(
+                              (sum, ex) => sum + ex.sets.filter((set) => set.completed).length,
+                              0
+                            )}{' '}
+                            séries
+                          </span>
+                          <span>
+                            {s.exercises.reduce(
+                              (sum, ex) => sum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
+                              0
+                            )}{' '}
+                            reps
+                          </span>
+                        </>
+                      )}
                       {s.duration && s.duration > 0 && (
                         <span>
                           {Math.floor(s.duration / 60)} min

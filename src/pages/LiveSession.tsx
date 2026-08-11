@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Plus, Minus } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -35,6 +35,10 @@ export default function LiveSession() {
   const [showRestSettings, setShowRestSettings] = useState(false);
   const restRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
+  // AMRAP
+  const [amrapRounds, setAmrapRounds] = useState(0);
+  const [amrapTimeUp, setAmrapTimeUp] = useState(false);
+
   // Confirmation terminer
   const [showFinish, setShowFinish] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -52,8 +56,14 @@ export default function LiveSession() {
     if (session && session.startedAt && !session.completed) {
       startTimeRef.current = session.startedAt;
       setElapsed(Math.floor((Date.now() - session.startedAt) / 1000));
+      if (session.amrapRounds !== undefined) setAmrapRounds(session.amrapRounds);
       timerRef.current = setInterval(() => {
-        setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        const now = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        setElapsed(now);
+        if (session.mode === 'amrap' && session.amrapDuration && now >= session.amrapDuration && !amrapTimeUp) {
+          setAmrapTimeUp(true);
+          if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+        }
       }, 1000);
     }
     return () => {
@@ -129,13 +139,26 @@ export default function LiveSession() {
     });
   }
 
+  async function addAmrapRound() {
+    if (!session || !id) return;
+    const newRounds = amrapRounds + 1;
+    setAmrapRounds(newRounds);
+    await updateDoc(doc(db, 'sessions', id), { amrapRounds: newRounds });
+  }
+
+  async function removeAmrapRound() {
+    if (!session || !id || amrapRounds <= 0) return;
+    const newRounds = amrapRounds - 1;
+    setAmrapRounds(newRounds);
+    await updateDoc(doc(db, 'sessions', id), { amrapRounds: newRounds });
+  }
+
   async function finishSession() {
     if (!session || !id) return;
     const duration = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
-    await updateDoc(doc(db, 'sessions', id), {
-      completed: true,
-      duration,
-    });
+    const updateData: Record<string, unknown> = { completed: true, duration };
+    if (session.mode === 'amrap') updateData.amrapRounds = amrapRounds;
+    await updateDoc(doc(db, 'sessions', id), updateData);
     if (timerRef.current) clearInterval(timerRef.current);
     setFinished(true);
     setShowFinish(false);
@@ -158,6 +181,8 @@ export default function LiveSession() {
     );
     const categories = [...new Set(session.exercises.map((e) => e.exerciseCategory || '').filter(Boolean))];
     const categoryLabel = categories.map((c) => (CATEGORY_LABELS as Record<string, string>)[c] || c).join(', ');
+    const isAmrap = session.mode === 'amrap';
+    const displayRounds = session.amrapRounds || amrapRounds;
 
     return (
       <div className="page">
@@ -165,7 +190,7 @@ export default function LiveSession() {
           <button className="icon-btn" onClick={() => navigate('/')}>
             <ArrowLeft size={20} />
           </button>
-          <h1>Récap séance</h1>
+          <h1>{isAmrap ? 'Récap Cindy' : 'Récap séance'}</h1>
         </header>
 
         <div className="recap-header-card">
@@ -173,67 +198,196 @@ export default function LiveSession() {
             <Calendar size={16} />
             <span>{format(new Date(session.date), 'EEEE d MMMM yyyy', { locale: fr })}</span>
           </div>
-          {categoryLabel && <span className="recap-categories">{categoryLabel}</span>}
+          {isAmrap ? (
+            <span className="recap-categories">AMRAP — {session.amrapDuration ? Math.floor(session.amrapDuration / 60) : 20} min</span>
+          ) : (
+            categoryLabel && <span className="recap-categories">{categoryLabel}</span>
+          )}
           <div className="recap-stats-row">
             <div className="recap-mini-stat">
               <Timer size={14} />
               <span>{formatTime(displayDuration)}</span>
             </div>
-            <div className="recap-mini-stat">
-              <span className="recap-mini-value">{totalReps}</span>
-              <span>reps</span>
-            </div>
-            <div className="recap-mini-stat">
-              <span className="recap-mini-value">{completedSets}/{totalSets}</span>
-              <span>séries</span>
-            </div>
+            {isAmrap ? (
+              <div className="recap-mini-stat">
+                <span className="recap-mini-value">{displayRounds}</span>
+                <span>rounds</span>
+              </div>
+            ) : (
+              <>
+                <div className="recap-mini-stat">
+                  <span className="recap-mini-value">{totalReps}</span>
+                  <span>reps</span>
+                </div>
+                <div className="recap-mini-stat">
+                  <span className="recap-mini-value">{completedSets}/{totalSets}</span>
+                  <span>séries</span>
+                </div>
+              </>
+            )}
           </div>
-          <div className="recap-progress-bar">
-            <div className="progress-bar" style={{ width: `${progress}%` }} />
-          </div>
+          {!isAmrap && (
+            <div className="recap-progress-bar">
+              <div className="progress-bar" style={{ width: `${progress}%` }} />
+            </div>
+          )}
         </div>
 
-        <div className="recap-exercises">
-          {session.exercises.map((ex, exIdx) => {
-            const exCompletedSets = ex.sets.filter((s) => s.completed).length;
-            const exTotalReps = ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0);
-            const allDone = exCompletedSets === ex.sets.length;
+        {isAmrap ? (
+          <div className="recap-exercise-card">
+            <div className="recap-exercise-header">
+              <div>
+                <h3>Par round</h3>
+                <span className="recap-exercise-sub">5 tractions + 10 pompes + 15 squats</span>
+              </div>
+            </div>
+            <div className="recap-stats-row" style={{ marginTop: '0.75rem' }}>
+              <div className="recap-mini-stat">
+                <span className="recap-mini-value">{displayRounds * 30}</span>
+                <span>reps totales</span>
+              </div>
+              <div className="recap-mini-stat">
+                <span className="recap-mini-value">{displayRounds * 5}</span>
+                <span>tractions</span>
+              </div>
+              <div className="recap-mini-stat">
+                <span className="recap-mini-value">{displayRounds * 10}</span>
+                <span>pompes</span>
+              </div>
+              <div className="recap-mini-stat">
+                <span className="recap-mini-value">{displayRounds * 15}</span>
+                <span>squats</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="recap-exercises">
+            {session.exercises.map((ex, exIdx) => {
+              const exCompletedSets = ex.sets.filter((s) => s.completed).length;
+              const exTotalReps = ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0);
+              const allDone = exCompletedSets === ex.sets.length;
 
-            return (
-              <div key={exIdx} className="recap-exercise-card">
-                <div className="recap-exercise-header">
-                  <div>
-                    <h3>{ex.exerciseName}</h3>
-                    <span className="recap-exercise-sub">
-                      Objectif : {ex.targetReps} reps × {ex.sets.length} séries
+              return (
+                <div key={exIdx} className="recap-exercise-card">
+                  <div className="recap-exercise-header">
+                    <div>
+                      <h3>{ex.exerciseName}</h3>
+                      <span className="recap-exercise-sub">
+                        Objectif : {ex.targetReps} reps × {ex.sets.length} séries
+                      </span>
+                    </div>
+                    <span className={`recap-exercise-badge ${allDone ? 'done' : 'partial'}`}>
+                      {allDone ? 'Complet' : `${exCompletedSets}/${ex.sets.length}`}
                     </span>
                   </div>
-                  <span className={`recap-exercise-badge ${allDone ? 'done' : 'partial'}`}>
-                    {allDone ? 'Complet' : `${exCompletedSets}/${ex.sets.length}`}
-                  </span>
+                  <div className="recap-sets-grid">
+                    {ex.sets.map((set, setIdx) => (
+                      <div key={setIdx} className={`recap-set ${set.completed ? 'completed' : 'missed'}`}>
+                        <span className="recap-set-label">S{setIdx + 1}</span>
+                        <span className="recap-set-reps">{set.completed ? set.reps : '—'}</span>
+                        {set.completed && set.reps >= ex.targetReps && (
+                          <Check size={12} className="recap-set-check" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="recap-exercise-total">
+                    Total : {exTotalReps} reps
+                  </div>
                 </div>
-                <div className="recap-sets-grid">
-                  {ex.sets.map((set, setIdx) => (
-                    <div key={setIdx} className={`recap-set ${set.completed ? 'completed' : 'missed'}`}>
-                      <span className="recap-set-label">S{setIdx + 1}</span>
-                      <span className="recap-set-reps">{set.completed ? set.reps : '—'}</span>
-                      {set.completed && set.reps >= ex.targetReps && (
-                        <Check size={12} className="recap-set-check" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="recap-exercise-total">
-                  Total : {exTotalReps} reps
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         <button className="primary-btn" style={{ marginTop: '1rem' }} onClick={() => navigate('/')}>
           Retour à l'accueil
         </button>
+      </div>
+    );
+  }
+
+  // Mode AMRAP live
+  if (session.mode === 'amrap') {
+    const amrapTotal = session.amrapDuration || 1200;
+    const remaining = Math.max(0, amrapTotal - elapsed);
+    const amrapProgress = ((amrapTotal - remaining) / amrapTotal) * 100;
+
+    return (
+      <div className="page">
+        <header className="page-header">
+          <button className="icon-btn" onClick={() => navigate('/')}>
+            <ArrowLeft size={20} />
+          </button>
+          <h1>Cindy</h1>
+          <div className="session-timer">
+            <Timer size={16} />
+            <span>{formatTime(elapsed)}</span>
+          </div>
+        </header>
+
+        <div className={`amrap-countdown ${remaining <= 10 ? 'ending' : ''}`}>
+          <span className="amrap-countdown-label">{remaining > 0 ? 'Temps restant' : 'Temps écoulé !'}</span>
+          <span className="amrap-countdown-value">{formatTime(remaining)}</span>
+          <div className="recap-progress-bar" style={{ marginTop: '0.75rem' }}>
+            <div className="progress-bar" style={{ width: `${amrapProgress}%` }} />
+          </div>
+        </div>
+
+        <div className="amrap-round-section">
+          <span className="amrap-round-label">Rounds complétés</span>
+          <div className="amrap-round-controls">
+            <button className="amrap-round-btn" onClick={removeAmrapRound}>
+              <Minus size={24} />
+            </button>
+            <span className="amrap-round-count">{amrapRounds}</span>
+            <button className="amrap-round-btn plus" onClick={addAmrapRound}>
+              <Plus size={24} />
+            </button>
+          </div>
+          <span className="amrap-round-detail">
+            = {amrapRounds * 30} reps ({amrapRounds * 5} tractions + {amrapRounds * 10} pompes + {amrapRounds * 15} squats)
+          </span>
+        </div>
+
+        <div className="amrap-exercises-reminder">
+          <h3>1 round =</h3>
+          <div className="amrap-exercise-row">
+            <span className="amrap-ex-reps">5×</span>
+            <span>Tractions</span>
+          </div>
+          <div className="amrap-exercise-row">
+            <span className="amrap-ex-reps">10×</span>
+            <span>Pompes</span>
+          </div>
+          <div className="amrap-exercise-row">
+            <span className="amrap-ex-reps">15×</span>
+            <span>Squats</span>
+          </div>
+        </div>
+
+        <button className="finish-btn floating-btn" onClick={() => setShowFinish(true)}>
+          Terminer
+        </button>
+
+        {showFinish && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h3>Terminer le Cindy ?</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                {amrapRounds} rounds en {formatTime(elapsed)}
+              </p>
+              <div className="modal-actions">
+                <button className="secondary-btn" onClick={() => setShowFinish(false)}>
+                  Continuer
+                </button>
+                <button className="primary-btn" style={{ flex: 1 }} onClick={finishSession}>
+                  Terminer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

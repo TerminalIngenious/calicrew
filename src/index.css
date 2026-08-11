@@ -1453,3 +1453,200 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* Cindy card */
+.cindy-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(78, 205, 196, 0.08));
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+}
+
+.cindy-card-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cindy-icon {
+  color: var(--accent);
+}
+
+.cindy-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.1rem;
+}
+
+.cindy-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.cindy-badge {
+  background: var(--accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* AMRAP time picker */
+.amrap-time-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.amrap-time-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 100px;
+  justify-content: center;
+}
+
+/* AMRAP live */
+.amrap-countdown {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.amrap-countdown.ending {
+  border-color: var(--danger);
+  background: rgba(255, 71, 87, 0.08);
+}
+
+.amrap-countdown-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.amrap-countdown-value {
+  display: block;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.amrap-countdown.ending .amrap-countdown-value {
+  color: var(--danger);
+}
+
+.amrap-round-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.amrap-round-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.amrap-round-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.amrap-round-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.amrap-round-btn.plus {
+  border-color: var(--accent);
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--accent);
+}
+
+.amrap-round-count {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--accent);
+  min-width: 80px;
+  line-height: 1;
+}
+
+.amrap-round-detail {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+}
+
+.amrap-exercises-reminder {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 5rem;
+}
+
+.amrap-exercises-reminder h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.amrap-exercise-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+.amrap-ex-reps {
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 35px;
+}

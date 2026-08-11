@@ -26,8 +26,11 @@ export interface Session {
   exercises: ExerciseLog[];
   completed: boolean;
   createdAt: number;
-  duration?: number; // durée en secondes
-  startedAt?: number; // timestamp début
+  duration?: number;
+  startedAt?: number;
+  mode?: 'standard' | 'amrap';
+  amrapDuration?: number;
+  amrapRounds?: number;
 }
 
 export interface UserProfile {
