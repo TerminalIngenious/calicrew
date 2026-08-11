@@ -335,18 +335,20 @@ export default function LiveSession() {
         </div>
 
         <div className="amrap-round-section">
-          <span className="amrap-round-label">Rounds complétés</span>
-          <div className="amrap-round-controls">
-            <button className="amrap-round-btn" onClick={removeAmrapRound}>
-              <Minus size={24} />
-            </button>
+          <div className="amrap-round-count-row">
             <span className="amrap-round-count">{amrapRounds}</span>
-            <button className="amrap-round-btn plus" onClick={addAmrapRound}>
-              <Plus size={24} />
-            </button>
+            <span className="amrap-round-count-label">round{amrapRounds > 1 ? 's' : ''}</span>
           </div>
+          <button className="amrap-validate-btn" onClick={addAmrapRound}>
+            <Check size={24} /> Round complété !
+          </button>
+          {amrapRounds > 0 && (
+            <button className="amrap-undo-btn" onClick={removeAmrapRound}>
+              Annuler le dernier
+            </button>
+          )}
           <span className="amrap-round-detail">
-            = {amrapRounds * 30} reps ({amrapRounds * 5} tractions + {amrapRounds * 10} pompes + {amrapRounds * 15} squats)
+            {amrapRounds * 30} reps ({amrapRounds * 5} tractions + {amrapRounds * 10} pompes + {amrapRounds * 15} squats)
           </span>
         </div>
 

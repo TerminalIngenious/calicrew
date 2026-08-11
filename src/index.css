@@ -1581,39 +1581,56 @@ body {
   margin-bottom: 0.75rem;
 }
 
-.amrap-round-controls {
+.amrap-round-count-row {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
-  gap: 2rem;
-}
-
-.amrap-round-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
-
-.amrap-round-btn.plus {
-  border-color: var(--accent);
-  background: rgba(255, 107, 53, 0.15);
-  color: var(--accent);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .amrap-round-count {
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: 800;
   color: var(--accent);
-  min-width: 80px;
   line-height: 1;
+}
+
+.amrap-round-count-label {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.amrap-validate-btn {
+  width: 100%;
+  padding: 1.1rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.amrap-validate-btn:active {
+  transform: scale(0.97);
+}
+
+.amrap-undo-btn {
+  display: block;
+  margin: 0.5rem auto 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .amrap-round-detail {
