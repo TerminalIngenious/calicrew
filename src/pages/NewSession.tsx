@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Exercise, ExerciseLog } from '../types';
-import { ArrowLeft, Plus, Minus, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Check, X } from 'lucide-react';
 
 export default function NewSession() {
   const { user } = useAuth();
@@ -15,6 +15,44 @@ export default function NewSession() {
   const [exerciseConfigs, setExerciseConfigs] = useState<
     { exercise: Exercise; targetSets: number; targetTotal: number }[]
   >([]);
+  const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
+  const [showAddExercise, setShowAddExercise] = useState(false);
+  const [newExName, setNewExName] = useState('');
+  const [newExCategory, setNewExCategory] = useState<Exercise['category']>('push');
+
+  useEffect(() => {
+    if (user) loadCustomExercises();
+  }, [user]);
+
+  async function loadCustomExercises() {
+    if (!user) return;
+    const q = query(collection(db, 'customExercises'), where('userId', '==', user.uid));
+    const snap = await getDocs(q);
+    setCustomExercises(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Exercise)));
+  }
+
+  async function addCustomExercise() {
+    if (!newExName.trim() || !user) return;
+    const docRef = await addDoc(collection(db, 'customExercises'), {
+      name: newExName.trim(),
+      category: newExCategory,
+      isCustom: true,
+      userId: user.uid,
+    });
+    const newEx: Exercise = {
+      id: docRef.id,
+      name: newExName.trim(),
+      category: newExCategory,
+      isCustom: true,
+    };
+    setCustomExercises((prev) => [...prev, newEx]);
+    setNewExName('');
+    setShowAddExercise(false);
+  }
+
+  function getAllExercises(): Exercise[] {
+    return [...DEFAULT_EXERCISES, ...customExercises];
+  }
 
   function toggleExercise(ex: Exercise) {
     setSelectedExercises((prev) =>
@@ -66,7 +104,8 @@ export default function NewSession() {
     navigate(`/session/${docRef.id}`);
   }
 
-  const categories = [...new Set(DEFAULT_EXERCISES.map((e) => e.category))] as Exercise['category'][];
+  const allExercises = getAllExercises();
+  const categories = [...new Set(allExercises.map((e) => e.category))] as Exercise['category'][];
 
   if (step === 'select') {
     return (
@@ -83,7 +122,7 @@ export default function NewSession() {
           <section key={cat} className="section">
             <h3 className="category-title">{CATEGORY_LABELS[cat]}</h3>
             <div className="exercise-grid">
-              {DEFAULT_EXERCISES.filter((e) => e.category === cat).map((ex) => (
+              {allExercises.filter((e) => e.category === cat).map((ex) => (
                 <button
                   key={ex.id}
                   className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''}`}
@@ -96,6 +135,51 @@ export default function NewSession() {
             </div>
           </section>
         ))}
+
+        <button className="add-exercise-btn" onClick={() => setShowAddExercise(true)}>
+          <Plus size={16} /> Ajouter un exercice
+        </button>
+
+        {showAddExercise && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <div className="modal-card-header">
+                <h3>Nouvel exercice</h3>
+                <button className="icon-btn" onClick={() => setShowAddExercise(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="add-exercise-form">
+                <input
+                  type="text"
+                  placeholder="Nom de l'exercice"
+                  value={newExName}
+                  onChange={(e) => setNewExName(e.target.value)}
+                  autoFocus
+                />
+                <div className="category-picker">
+                  {(Object.entries(CATEGORY_LABELS) as [Exercise['category'], string][]).map(([key, label]) => (
+                    <button
+                      key={key}
+                      className={`category-chip ${newExCategory === key ? 'active' : ''}`}
+                      onClick={() => setNewExCategory(key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button className="secondary-btn" onClick={() => setShowAddExercise(false)}>
+                  Annuler
+                </button>
+                <button className="primary-btn" onClick={addCustomExercise} disabled={!newExName.trim()}>
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {selectedExercises.length > 0 && (
           <button className="primary-btn floating-btn" onClick={goToConfig}>
