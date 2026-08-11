@@ -274,16 +274,28 @@ export default function LiveSession() {
         {showRestSettings && (
           <div className="rest-settings">
             <span>Durée de pause :</span>
-            <div className="rest-presets">
-              {[15, 30, 45, 60, 90, 120, 180, 300].map((d) => (
-                <button
-                  key={d}
-                  className={`rest-preset ${restDuration === d ? 'active' : ''}`}
-                  onClick={() => setRestDuration(d)}
-                >
-                  {formatTime(d)}
+            <div className="rest-time-picker">
+              <div className="time-picker-col">
+                <button className="time-picker-arrow" onClick={() => setRestDuration((d) => Math.min(599, d + 60))}>
+                  <ChevronUp size={20} />
                 </button>
-              ))}
+                <span className="time-picker-value">{String(Math.floor(restDuration / 60)).padStart(2, '0')}</span>
+                <button className="time-picker-arrow" onClick={() => setRestDuration((d) => Math.max(5, d - 60))}>
+                  <ChevronDown size={20} />
+                </button>
+                <span className="time-picker-label">min</span>
+              </div>
+              <span className="time-picker-sep">:</span>
+              <div className="time-picker-col">
+                <button className="time-picker-arrow" onClick={() => setRestDuration((d) => Math.min(599, d + 5))}>
+                  <ChevronUp size={20} />
+                </button>
+                <span className="time-picker-value">{String(restDuration % 60).padStart(2, '0')}</span>
+                <button className="time-picker-arrow" onClick={() => setRestDuration((d) => Math.max(5, d - 5))}>
+                  <ChevronDown size={20} />
+                </button>
+                <span className="time-picker-label">sec</span>
+              </div>
             </div>
           </div>
         )}
