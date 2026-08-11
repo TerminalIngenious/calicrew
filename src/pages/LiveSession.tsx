@@ -275,7 +275,7 @@ export default function LiveSession() {
           <div className="rest-settings">
             <span>Durée de pause :</span>
             <div className="rest-presets">
-              {[30, 60, 90, 120, 180].map((d) => (
+              {[15, 30, 45, 60, 90, 120, 180, 300].map((d) => (
                 <button
                   key={d}
                   className={`rest-preset ${restDuration === d ? 'active' : ''}`}
