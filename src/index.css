@@ -1454,6 +1454,49 @@ body {
   color: var(--accent);
 }
 
+/* Weighted / Lestage */
+.weighted-row {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.weighted-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.toggle {
+  width: 40px;
+  height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.toggle.active {
+  background: var(--accent);
+}
+
+.toggle-knob {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.toggle.active .toggle-knob {
+  transform: translateX(18px);
+}
+
 /* Cindy card */
 .cindy-card {
   display: flex;

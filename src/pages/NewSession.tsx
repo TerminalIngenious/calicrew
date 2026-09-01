@@ -5,7 +5,7 @@ import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Exercise, ExerciseLog } from '../types';
-import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight } from 'lucide-react';
 
 export default function NewSession() {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export default function NewSession() {
   const [step, setStep] = useState<'select' | 'config'>('select');
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseConfigs, setExerciseConfigs] = useState<
-    { exercise: Exercise; targetSets: number; targetTotal: number }[]
+    { exercise: Exercise; targetSets: number; targetTotal: number; weighted: boolean; weight: number }[]
   >([]);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -35,21 +35,26 @@ export default function NewSession() {
 
   async function addCustomExercise() {
     if (!newExName.trim() || !user) return;
-    const docRef = await addDoc(collection(db, 'customExercises'), {
-      name: newExName.trim(),
-      category: newExCategory,
-      isCustom: true,
-      userId: user.uid,
-    });
-    const newEx: Exercise = {
-      id: docRef.id,
-      name: newExName.trim(),
-      category: newExCategory,
-      isCustom: true,
-    };
-    setCustomExercises((prev) => [...prev, newEx]);
-    setNewExName('');
-    setShowAddExercise(false);
+    try {
+      const docRef = await addDoc(collection(db, 'customExercises'), {
+        name: newExName.trim(),
+        category: newExCategory,
+        isCustom: true,
+        userId: user.uid,
+      });
+      const newEx: Exercise = {
+        id: docRef.id,
+        name: newExName.trim(),
+        category: newExCategory,
+        isCustom: true,
+      };
+      setCustomExercises((prev) => [...prev, newEx]);
+      setNewExName('');
+      setShowAddExercise(false);
+    } catch (err) {
+      console.error('Erreur ajout exercice:', err);
+      alert('Erreur lors de l\'ajout. Vérifie les règles Firestore.');
+    }
   }
 
   async function startAmrap() {
@@ -89,7 +94,7 @@ export default function NewSession() {
 
   function goToConfig() {
     setExerciseConfigs(
-      selectedExercises.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40 }))
+      selectedExercises.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 5 }))
     );
     setStep('config');
   }
@@ -108,7 +113,7 @@ export default function NewSession() {
     const now = Date.now();
     const exercises: ExerciseLog[] = exerciseConfigs.map((c) => {
       const repsPerSet = Math.ceil(c.targetTotal / c.targetSets);
-      return {
+      const log: ExerciseLog = {
         exerciseId: c.exercise.id,
         exerciseName: c.exercise.name,
         exerciseCategory: c.exercise.category,
@@ -116,6 +121,11 @@ export default function NewSession() {
         targetReps: repsPerSet,
         sets: Array.from({ length: c.targetSets }, () => ({ reps: 0, completed: false })),
       };
+      if (c.weighted) {
+        log.weighted = true;
+        log.weight = c.weight;
+      }
+      return log;
     });
 
     const docRef = await addDoc(collection(db, 'sessions'), {
@@ -310,8 +320,42 @@ export default function NewSession() {
                   </button>
                 </div>
               </div>
+              {config.exercise.canBeWeighted && (
+                <div className="config-row weighted-row">
+                  <div className="weighted-toggle" onClick={() => {
+                    setExerciseConfigs((prev) =>
+                      prev.map((c, idx) => idx === i ? { ...c, weighted: !c.weighted } : c)
+                    );
+                  }}>
+                    <Weight size={16} />
+                    <span>Lesté</span>
+                    <div className={`toggle ${config.weighted ? 'active' : ''}`}>
+                      <div className="toggle-knob" />
+                    </div>
+                  </div>
+                  {config.weighted && (
+                    <div className="stepper">
+                      <button onClick={() => {
+                        setExerciseConfigs((prev) =>
+                          prev.map((c, idx) => idx === i ? { ...c, weight: Math.max(0.5, c.weight - 0.5) } : c)
+                        );
+                      }}>
+                        <Minus size={16} />
+                      </button>
+                      <span>{config.weight} kg</span>
+                      <button onClick={() => {
+                        setExerciseConfigs((prev) =>
+                          prev.map((c, idx) => idx === i ? { ...c, weight: c.weight + 0.5 } : c)
+                        );
+                      }}>
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="config-result">
-                → {repsPerSet} reps / série
+                → {repsPerSet} reps / série{config.weighted ? ` • ${config.weight} kg` : ''}
               </div>
             </div>
           );

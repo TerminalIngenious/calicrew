@@ -3,6 +3,7 @@ export interface Exercise {
   name: string;
   category: 'push' | 'pull' | 'legs' | 'core' | 'skill';
   isCustom?: boolean;
+  canBeWeighted?: boolean;
 }
 
 export interface SetLog {
@@ -17,6 +18,8 @@ export interface ExerciseLog {
   targetSets: number;
   targetReps: number;
   sets: SetLog[];
+  weighted?: boolean;
+  weight?: number;
 }
 
 export interface Session {

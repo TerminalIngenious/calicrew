@@ -128,17 +128,22 @@ export default function Group() {
 
   async function createGroup() {
     if (!groupName.trim()) return;
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    await addDoc(collection(db, 'groups'), {
-      name: groupName,
-      code,
-      createdBy: user!.uid,
-      memberIds: [user!.uid],
-      createdAt: Date.now(),
-    });
-    setShowCreate(false);
-    setGroupName('');
-    await loadGroups();
+    try {
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await addDoc(collection(db, 'groups'), {
+        name: groupName,
+        code,
+        createdBy: user!.uid,
+        memberIds: [user!.uid],
+        createdAt: Date.now(),
+      });
+      setShowCreate(false);
+      setGroupName('');
+      await loadGroups();
+    } catch (err) {
+      console.error('Erreur création groupe:', err);
+      alert('Erreur lors de la création du groupe. Vérifie les règles Firestore.');
+    }
   }
 
   async function searchGroups() {
