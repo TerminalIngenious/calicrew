@@ -6,7 +6,7 @@ import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, XP_PER_QUEST, getWeekStart } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getBaseCards, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card } from '../types';
-import { Swords, Lock, Gift, Check, Package, Star, Clock } from 'lucide-react';
+import { Swords, Lock, Check, Package, Star, Clock, Trophy, Flame } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -166,164 +166,194 @@ export default function BattlePass() {
   const timeLeft = getSeasonTimeLeft(season);
   const levelInfo = getLevelFromXp(progress.passXp, season.passLevels);
   const progressPct = levelInfo.xpForNext > 0 ? (levelInfo.currentLevelXp / levelInfo.xpForNext) * 100 : 100;
+  const totalQuestsDone = season.quests.filter((q) => !q.premiumOnly || progress.isPremium).filter((q) => isQuestClaimed(q.id)).length;
+  const totalQuestsAvailable = season.quests.filter((q) => !q.premiumOnly || progress.isPremium).length;
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <h1>Battle Pass</h1>
-      </header>
-
-      <div className="bp-season-banner">
-        <div className="bp-season-top">
-          <div>
-            <h2>{season.name}</h2>
-            <span className="bp-season-theme">{season.theme}</span>
+    <div className="page bp-page">
+      <div className="bp-hero">
+        <div className="bp-hero-bg" />
+        <div className="bp-hero-content">
+          <div className="bp-hero-left">
+            <span className="bp-hero-season">{season.name}</span>
+            <h1 className="bp-hero-title">{season.theme}</h1>
+            {progress.isPremium && (
+              <span className="bp-premium-tag"><Star size={10} /> PREMIUM</span>
+            )}
           </div>
-          <div className="bp-timer">
+          <div className="bp-hero-timer">
             <Clock size={14} />
-            <span>{timeLeft.days}j {timeLeft.hours}h</span>
+            <div>
+              <span className="bp-hero-days">{timeLeft.days}</span>
+              <span className="bp-hero-days-label">jours</span>
+            </div>
           </div>
         </div>
-        {progress.isPremium && <span className="bp-premium-badge"><Star size={12} /> Premium</span>}
+        <div className="bp-hero-xp">
+          <div className="bp-hero-xp-top">
+            <span className="bp-hero-level">
+              <Flame size={14} /> Niv. {levelInfo.level}
+            </span>
+            <span className="bp-hero-xp-text">{levelInfo.currentLevelXp}/{levelInfo.xpForNext} XP</span>
+          </div>
+          <div className="bp-hero-xp-bar">
+            <div className="bp-hero-xp-fill" style={{ width: `${progressPct}%` }} />
+          </div>
+        </div>
       </div>
 
       <div className="bp-tabs">
         <button className={`bp-tab ${tab === 'quetes' ? 'active' : ''}`} onClick={() => setTab('quetes')}>
-          <Swords size={16} /> Quêtes
+          <Swords size={15} />
+          <span>Quêtes</span>
+          <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>
         </button>
         <button className={`bp-tab ${tab === 'pass' ? 'active' : ''}`} onClick={() => setTab('pass')}>
-          <Gift size={16} /> Pass
+          <Trophy size={15} />
+          <span>Pass</span>
+          <span className="bp-tab-badge">{levelInfo.level}/30</span>
         </button>
       </div>
 
       {tab === 'quetes' && (
         <>
           {progress.chestsToOpen.length > 0 && (
-            <section className="section bp-chests-section">
-              <h3><Package size={18} /> Coffres à ouvrir ({progress.chestsToOpen.length})</h3>
-              <div className="bp-chest-list">
+            <div className="bp-chests">
+              <h3 className="bp-section-title">
+                <Package size={16} /> Coffres ({progress.chestsToOpen.length})
+              </h3>
+              <div className="bp-chest-row">
                 {progress.chestsToOpen.map((chest, i) => (
                   <button
                     key={i}
-                    className="bp-chest"
-                    style={{ borderColor: RARITY_COLORS[chest.rarity] }}
+                    className={`bp-chest ${i === 0 ? 'bp-chest-active' : ''}`}
                     onClick={i === 0 ? openChest : undefined}
                     disabled={i !== 0 || chestOpening}
                   >
-                    <Package size={24} style={{ color: RARITY_COLORS[chest.rarity] }} />
-                    <span style={{ color: RARITY_COLORS[chest.rarity] }}>{RARITY_LABELS[chest.rarity]}</span>
+                    <div className="bp-chest-glow" style={{ background: RARITY_COLORS[chest.rarity] }} />
+                    <Package size={22} style={{ color: RARITY_COLORS[chest.rarity] }} />
+                    <span className="bp-chest-label" style={{ color: RARITY_COLORS[chest.rarity] }}>
+                      {RARITY_LABELS[chest.rarity]}
+                    </span>
                   </button>
                 ))}
               </div>
-            </section>
+            </div>
           )}
 
           {openedCard && (
             <div className="modal-overlay" onClick={() => setOpenedCard(null)}>
-              <div className="card-reveal" onClick={(e) => e.stopPropagation()}>
-                <div className="card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
-                  <span className="card-reveal-emoji">{openedCard.emoji}</span>
-                  <h3 className="card-reveal-name">{getCardDisplayName(openedCard)}</h3>
-                  <span className="card-reveal-rarity" style={{ color: RARITY_COLORS[openedCard.rarity] }}>
+              <div className="bp-card-reveal" onClick={(e) => e.stopPropagation()}>
+                <div className="bp-card-reveal-glow" style={{ background: RARITY_COLORS[openedCard.rarity] }} />
+                <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
+                  <span className="bp-card-reveal-rarity-tag" style={{ background: RARITY_COLORS[openedCard.rarity] }}>
                     {RARITY_LABELS[openedCard.rarity]}
                   </span>
-                  <span className="card-reveal-cat">{openedCard.category}</span>
+                  <span className="bp-card-reveal-emoji">{openedCard.emoji}</span>
+                  <h3 className="bp-card-reveal-name">{getCardDisplayName(openedCard)}</h3>
+                  <span className="bp-card-reveal-cat">{openedCard.category}</span>
                 </div>
-                <button className="primary-btn" onClick={() => setOpenedCard(null)} style={{ marginTop: '1rem' }}>
-                  Fermer
+                <button className="bp-card-reveal-close" onClick={() => setOpenedCard(null)}>
+                  Continuer
                 </button>
               </div>
             </div>
           )}
 
-          <section className="section">
-            <h3><Swords size={18} /> Quêtes de la semaine</h3>
-            <div className="quest-list">
-              {season.quests.map((quest) => {
-                const current = getQuestValue(quest.id);
-                const done = current >= quest.target;
-                const claimed = isQuestClaimed(quest.id);
-                const locked = quest.premiumOnly && !progress.isPremium;
-                const pct = Math.min(100, (current / quest.target) * 100);
+          <h3 className="bp-section-title">
+            <Swords size={16} /> Quêtes de la semaine
+          </h3>
+          <div className="bp-quest-list">
+            {season.quests.map((quest) => {
+              const current = getQuestValue(quest.id);
+              const done = current >= quest.target;
+              const claimed = isQuestClaimed(quest.id);
+              const locked = quest.premiumOnly && !progress.isPremium;
+              const pct = Math.min(100, (current / quest.target) * 100);
 
-                return (
-                  <div key={quest.id} className={`quest-item ${claimed ? 'claimed' : ''} ${locked ? 'locked' : ''}`}>
-                    <div className="quest-info">
-                      <div className="quest-header">
-                        <span className="quest-label">{quest.label}</span>
-                        {quest.premiumOnly && <Star size={12} className="quest-premium-icon" />}
+              return (
+                <div key={quest.id} className={`bp-quest ${claimed ? 'bp-quest-claimed' : ''} ${locked ? 'bp-quest-locked' : ''} ${done && !claimed ? 'bp-quest-ready' : ''}`}>
+                  <div className="bp-quest-accent" style={{ background: claimed ? 'var(--accent-green)' : done ? 'var(--accent)' : locked ? 'var(--border)' : 'var(--accent)' }} />
+                  <div className="bp-quest-body">
+                    <div className="bp-quest-top">
+                      <div className="bp-quest-title-row">
+                        <span className="bp-quest-label">{quest.label}</span>
+                        {quest.premiumOnly && <Star size={11} className="bp-quest-star" />}
                       </div>
-                      <span className="quest-desc">{quest.description}</span>
-                      <div className="quest-bar">
-                        <div className="quest-bar-fill" style={{ width: `${pct}%` }} />
+                      <div className="bp-quest-reward">
+                        {locked ? (
+                          <Lock size={14} />
+                        ) : claimed ? (
+                          <span className="bp-quest-done-badge"><Check size={12} /></span>
+                        ) : done ? (
+                          <button className="bp-quest-claim" onClick={() => claimQuest(quest.id)}>
+                            +{XP_PER_QUEST} XP
+                          </button>
+                        ) : (
+                          <span className="bp-quest-xp-tag">+{XP_PER_QUEST}</span>
+                        )}
                       </div>
-                      <span className="quest-progress-text">
+                    </div>
+                    <span className="bp-quest-desc">{quest.description}</span>
+                    <div className="bp-quest-progress">
+                      <div className="bp-quest-bar">
+                        <div className="bp-quest-bar-fill" style={{ width: `${pct}%`, background: claimed ? 'var(--accent-green)' : done ? 'var(--accent)' : 'var(--accent)' }} />
+                      </div>
+                      <span className="bp-quest-count">
                         {quest.type === 'duration'
-                          ? `${Math.floor(current / 60)} / ${Math.floor(quest.target / 60)} min`
-                          : `${current} / ${quest.target}`}
+                          ? `${Math.floor(current / 60)}/${Math.floor(quest.target / 60)} min`
+                          : `${current}/${quest.target}`}
                       </span>
                     </div>
-                    <div className="quest-action">
-                      {locked ? (
-                        <Lock size={16} />
-                      ) : claimed ? (
-                        <Check size={16} className="quest-check" />
-                      ) : done ? (
-                        <button className="quest-claim-btn" onClick={() => claimQuest(quest.id)}>
-                          <Gift size={14} /> +{XP_PER_QUEST}
-                        </button>
-                      ) : (
-                        <span className="quest-xp">+{XP_PER_QUEST}</span>
-                      )}
-                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </section>
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
 
       {tab === 'pass' && (
         <>
-          <div className="bp-level-card">
-            <div className="bp-level-top">
-              <span className="bp-level-badge">Niveau {levelInfo.level}</span>
-              <span className="bp-xp-text">{levelInfo.currentLevelXp} / {levelInfo.xpForNext} XP</span>
-            </div>
-            <div className="bp-xp-bar">
-              <div className="bp-xp-fill" style={{ width: `${progressPct}%` }} />
-            </div>
-          </div>
+          <div className="bp-track-timeline">
+            {season.passLevels.map((lvl) => {
+              const reached = levelInfo.level >= lvl.level;
+              const isCurrent = levelInfo.level === lvl.level - 1;
+              const hasReward = lvl.freeChest || lvl.premiumChest;
 
-          <section className="section">
-            <h3>Récompenses</h3>
-            <div className="bp-track">
-              {season.passLevels.map((lvl) => {
-                const reached = levelInfo.level >= lvl.level;
-                return (
-                  <div key={lvl.level} className={`bp-track-item ${reached ? 'reached' : ''}`}>
-                    <span className="bp-track-level">{lvl.level}</span>
-                    <div className="bp-track-rewards">
-                      {lvl.freeChest && (
-                        <div className="bp-track-reward free" style={{ borderColor: RARITY_COLORS[lvl.freeChest] }}>
-                          <Package size={14} style={{ color: RARITY_COLORS[lvl.freeChest] }} />
-                          <span className="bp-track-reward-label">{RARITY_LABELS[lvl.freeChest]}</span>
-                        </div>
-                      )}
-                      {lvl.premiumChest && (
-                        <div className="bp-track-reward premium" style={{ borderColor: RARITY_COLORS[lvl.premiumChest] }}>
-                          <Star size={10} />
-                          <Package size={14} style={{ color: RARITY_COLORS[lvl.premiumChest] }} />
-                        </div>
-                      )}
-                      {!lvl.freeChest && !lvl.premiumChest && <span className="bp-track-empty">—</span>}
-                    </div>
+              return (
+                <div key={lvl.level} className={`bp-track-node ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''}`}>
+                  <div className="bp-track-line-segment">
+                    <div className="bp-track-line-fill" style={{ height: reached ? '100%' : isCurrent ? `${progressPct}%` : '0%' }} />
                   </div>
-                );
-              })}
-            </div>
-          </section>
+                  <div className="bp-track-dot">
+                    {reached ? <Check size={12} /> : <span>{lvl.level}</span>}
+                  </div>
+                  <div className="bp-track-node-content">
+                    <span className="bp-track-node-level">Niveau {lvl.level}</span>
+                    {hasReward ? (
+                      <div className="bp-track-node-rewards">
+                        {lvl.freeChest && (
+                          <div className="bp-track-chest" style={{ borderColor: RARITY_COLORS[lvl.freeChest] }}>
+                            <Package size={13} style={{ color: RARITY_COLORS[lvl.freeChest] }} />
+                            <span style={{ color: RARITY_COLORS[lvl.freeChest] }}>{RARITY_LABELS[lvl.freeChest]}</span>
+                          </div>
+                        )}
+                        {lvl.premiumChest && (
+                          <div className="bp-track-chest bp-track-chest-premium" style={{ borderColor: RARITY_COLORS[lvl.premiumChest] }}>
+                            <Star size={10} style={{ color: '#ffd700' }} />
+                            <Package size={13} style={{ color: RARITY_COLORS[lvl.premiumChest] }} />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="bp-track-node-empty">-</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
 
