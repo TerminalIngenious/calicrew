@@ -14,7 +14,7 @@ import {
 import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, TrendingUp, Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown } from 'lucide-react';
+import { Dumbbell, TrendingUp, Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight } from 'lucide-react';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
@@ -35,6 +35,7 @@ export default function Group() {
   const [loading, setLoading] = useState(true);
   const [pendingNames, setPendingNames] = useState<Map<string, string>>(new Map());
   const [showGroupPicker, setShowGroupPicker] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
 
   const loadGroups = useCallback(async () => {
     if (!user) return;
@@ -222,6 +223,21 @@ export default function Group() {
     } catch (err) {
       console.error(err);
       alert('Erreur lors du refus');
+    }
+  }
+
+  async function transferChef(newChefUid: string) {
+    if (!selectedGroup) return;
+    const name = leaderboard.find((e) => e.uid === newChefUid)?.displayName || 'ce membre';
+    if (!confirm(`Transférer le rôle de chef à ${name} ?`)) return;
+    try {
+      await updateDoc(doc(db, 'groups', selectedGroup.id), {
+        createdBy: newChefUid,
+      });
+      await loadGroups();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors du transfert');
     }
   }
 
@@ -507,6 +523,35 @@ export default function Group() {
                 </div>
               ))}
             </div>
+          </section>
+
+          <section className="section members-section">
+            <button className="members-toggle" onClick={() => setShowMembers(!showMembers)}>
+              <h3><Users size={16} /> Membres ({selectedGroup.memberIds.length})</h3>
+              <ChevronDown size={16} className={showMembers ? 'rotated' : ''} />
+            </button>
+            {showMembers && (
+              <div className="members-list">
+                {leaderboard.map((entry) => (
+                  <div key={entry.uid} className="member-item">
+                    <div className="member-info-row">
+                      <span className="member-name-label">
+                        {entry.displayName}
+                        {entry.uid === user!.uid ? ' (toi)' : ''}
+                      </span>
+                      {entry.uid === selectedGroup.createdBy && (
+                        <span className="chef-badge"><Crown size={12} /> Chef</span>
+                      )}
+                    </div>
+                    {isCreator && entry.uid !== user!.uid && (
+                      <button className="transfer-btn" onClick={() => transferChef(entry.uid)}>
+                        <Crown size={14} /> <ArrowRight size={12} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {groups.length > 0 && (
