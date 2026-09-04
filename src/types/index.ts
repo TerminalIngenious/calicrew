@@ -49,6 +49,7 @@ export interface Group {
   code: string;
   createdBy: string;
   memberIds: string[];
+  pendingIds: string[];
   createdAt: number;
 }
 

@@ -9,11 +9,12 @@ import {
   updateDoc,
   doc,
   arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, TrendingUp, Users, Copy, Trophy, Medal, Search, Clock, Zap, Target } from 'lucide-react';
+import { Dumbbell, TrendingUp, Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown } from 'lucide-react';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
@@ -30,9 +31,10 @@ export default function Group() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GroupType[]>([]);
   const [searching, setSearching] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('reps');
   const [loading, setLoading] = useState(true);
+  const [pendingNames, setPendingNames] = useState<Map<string, string>>(new Map());
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
 
   const loadGroups = useCallback(async () => {
     if (!user) return;
@@ -48,6 +50,9 @@ export default function Group() {
         const current = selectedGroup ? g.find((gr) => gr.id === selectedGroup.id) || g[0] : g[0];
         setSelectedGroup(current);
         await loadLeaderboard(current);
+        if (current.pendingIds?.length > 0 && current.createdBy === user.uid) {
+          await loadPendingNames(current.pendingIds);
+        }
       }
     } catch (err) {
       console.error('Erreur chargement groupes:', err);
@@ -59,6 +64,18 @@ export default function Group() {
   useEffect(() => {
     loadGroups();
   }, [loadGroups]);
+
+  async function loadPendingNames(pendingIds: string[]) {
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const names = new Map<string, string>();
+    usersSnap.docs.forEach((d) => {
+      const data = d.data();
+      if (data.uid && pendingIds.includes(data.uid)) {
+        names.set(data.uid, data.displayName || 'Inconnu');
+      }
+    });
+    setPendingNames(names);
+  }
 
   async function loadLeaderboard(group: GroupType) {
     const [usersSnap, ...sessionSnaps] = await Promise.all([
@@ -75,8 +92,7 @@ export default function Group() {
     });
 
     const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
-      const sessions = sessionSnaps[i].docs
-        .map((d) => d.data() as Session);
+      const sessions = sessionSnaps[i].docs.map((d) => d.data() as Session);
 
       const totalReps = sessions.reduce(
         (sum, s) =>
@@ -135,6 +151,7 @@ export default function Group() {
         code,
         createdBy: user!.uid,
         memberIds: [user!.uid],
+        pendingIds: [],
         createdAt: Date.now(),
       });
       setShowCreate(false);
@@ -150,7 +167,6 @@ export default function Group() {
     if (!searchQuery.trim()) return;
     setSearching(true);
     try {
-      // Recherche par nom (case insensitive côté client)
       const allGroupsSnap = await getDocs(collection(db, 'groups'));
       const results = allGroupsSnap.docs
         .map((d) => ({ id: d.id, ...d.data() } as GroupType))
@@ -166,25 +182,47 @@ export default function Group() {
     }
   }
 
-  async function joinGroup(groupId: string) {
+  async function requestJoin(groupId: string) {
     try {
       await updateDoc(doc(db, 'groups', groupId), {
-        memberIds: arrayUnion(user!.uid),
+        pendingIds: arrayUnion(user!.uid),
       });
-      setShowJoin(false);
-      setSearchQuery('');
-      setSearchResults([]);
-      await loadGroups();
+      setSearchResults((prev) =>
+        prev.map((g) =>
+          g.id === groupId ? { ...g, pendingIds: [...(g.pendingIds || []), user!.uid] } : g
+        )
+      );
     } catch (err) {
       console.error(err);
-      alert('Erreur lors de la jonction au groupe');
+      alert('Erreur lors de la demande');
     }
   }
 
-  function copyCode(code: string) {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  async function acceptMember(uid: string) {
+    if (!selectedGroup) return;
+    try {
+      await updateDoc(doc(db, 'groups', selectedGroup.id), {
+        memberIds: arrayUnion(uid),
+        pendingIds: arrayRemove(uid),
+      });
+      await loadGroups();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de l\'acceptation');
+    }
+  }
+
+  async function rejectMember(uid: string) {
+    if (!selectedGroup) return;
+    try {
+      await updateDoc(doc(db, 'groups', selectedGroup.id), {
+        pendingIds: arrayRemove(uid),
+      });
+      await loadGroups();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors du refus');
+    }
   }
 
   function getRankIcon(index: number) {
@@ -240,8 +278,16 @@ export default function Group() {
     return awards;
   }
 
+  function getRequestStatus(group: GroupType): 'none' | 'pending' | 'member' {
+    if (group.memberIds.includes(user!.uid)) return 'member';
+    if (group.pendingIds?.includes(user!.uid)) return 'pending';
+    return 'none';
+  }
+
   const sortedLeaderboard = getSortedLeaderboard();
   const awards = getWeeklyAwards();
+  const isCreator = selectedGroup?.createdBy === user?.uid;
+  const pendingCount = selectedGroup?.pendingIds?.length || 0;
 
   return (
     <div className="page">
@@ -304,19 +350,26 @@ export default function Group() {
           </div>
           {searchResults.length > 0 && (
             <div className="search-results">
-              {searchResults.map((g) => (
-                <div key={g.id} className="search-result-item">
-                  <div>
-                    <span className="search-result-name">{g.name}</span>
-                    <span className="search-result-members">
-                      {g.memberIds.length} membre{g.memberIds.length > 1 ? 's' : ''}
-                    </span>
+              {searchResults.map((g) => {
+                const status = getRequestStatus(g);
+                return (
+                  <div key={g.id} className="search-result-item">
+                    <div>
+                      <span className="search-result-name">{g.name}</span>
+                      <span className="search-result-members">
+                        {g.memberIds.length} membre{g.memberIds.length > 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    {status === 'none' ? (
+                      <button className="primary-btn small" onClick={() => requestJoin(g.id)}>
+                        <UserPlus size={14} /> Demander
+                      </button>
+                    ) : status === 'pending' ? (
+                      <span className="pending-badge">En attente</span>
+                    ) : null}
                   </div>
-                  <button className="primary-btn small" onClick={() => joinGroup(g.id)}>
-                    Rejoindre
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           {searchResults.length === 0 && searchQuery && !searching && (
@@ -333,15 +386,40 @@ export default function Group() {
       {selectedGroup && (
         <>
           <div className="group-info">
-            <h2>{selectedGroup.name}</h2>
-            <div className="invite-code" onClick={() => copyCode(selectedGroup.code)}>
-              <span>Code : {selectedGroup.code}</span>
-              <Copy size={16} />
-              {copied && <span className="copied-toast">Copié !</span>}
-            </div>
+            {groups.length > 1 ? (
+              <div className="group-picker" onClick={() => setShowGroupPicker(!showGroupPicker)}>
+                <h2>{selectedGroup.name}</h2>
+                <ChevronDown size={18} />
+              </div>
+            ) : (
+              <h2>{selectedGroup.name}</h2>
+            )}
+
+            {showGroupPicker && (
+              <div className="group-picker-dropdown">
+                {groups.map((g) => (
+                  <button
+                    key={g.id}
+                    className={`group-picker-item ${g.id === selectedGroup.id ? 'active' : ''}`}
+                    onClick={async () => {
+                      setSelectedGroup(g);
+                      setShowGroupPicker(false);
+                      await loadLeaderboard(g);
+                      if (g.pendingIds?.length > 0 && g.createdBy === user!.uid) {
+                        await loadPendingNames(g.pendingIds);
+                      }
+                    }}
+                  >
+                    {g.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <span className="member-count">
               {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
             </span>
+
             {awards.length > 0 && (
               <div className="awards-section-inline">
                 {awards.map((award, i) => (
@@ -356,6 +434,30 @@ export default function Group() {
               </div>
             )}
           </div>
+
+          {isCreator && pendingCount > 0 && (
+            <section className="section pending-section">
+              <h3>
+                <UserPlus size={18} />
+                Demandes en attente ({pendingCount})
+              </h3>
+              <div className="pending-list">
+                {(selectedGroup.pendingIds || []).map((uid) => (
+                  <div key={uid} className="pending-item">
+                    <span className="pending-name">{pendingNames.get(uid) || 'Chargement...'}</span>
+                    <div className="pending-actions">
+                      <button className="accept-btn" onClick={() => acceptMember(uid)}>
+                        <UserCheck size={16} />
+                      </button>
+                      <button className="reject-btn" onClick={() => rejectMember(uid)}>
+                        <UserX size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section className="section">
             <div className="leaderboard-header">
