@@ -14,7 +14,7 @@ import {
 import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, TrendingUp, Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight } from 'lucide-react';
+import { Dumbbell, TrendingUp, Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut } from 'lucide-react';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
@@ -34,7 +34,6 @@ export default function Group() {
   const [sortMode, setSortMode] = useState<SortMode>('reps');
   const [loading, setLoading] = useState(true);
   const [pendingNames, setPendingNames] = useState<Map<string, string>>(new Map());
-  const [showGroupPicker, setShowGroupPicker] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
 
   const loadGroups = useCallback(async () => {
@@ -145,6 +144,10 @@ export default function Group() {
 
   async function createGroup() {
     if (!groupName.trim()) return;
+    if (groups.length > 0) {
+      alert('Tu es déjà dans un groupe. Quitte-le avant d\'en créer un autre.');
+      return;
+    }
     try {
       const code = Math.random().toString(36).substring(2, 8).toUpperCase();
       await addDoc(collection(db, 'groups'), {
@@ -184,6 +187,10 @@ export default function Group() {
   }
 
   async function requestJoin(groupId: string) {
+    if (groups.length > 0) {
+      alert('Tu es déjà dans un groupe. Quitte-le avant d\'en rejoindre un autre.');
+      return;
+    }
     try {
       await updateDoc(doc(db, 'groups', groupId), {
         pendingIds: arrayUnion(user!.uid),
@@ -238,6 +245,31 @@ export default function Group() {
     } catch (err) {
       console.error(err);
       alert('Erreur lors du transfert');
+    }
+  }
+
+  async function leaveGroup() {
+    if (!selectedGroup) return;
+    if (isCreator && selectedGroup.memberIds.length > 1) {
+      alert('Tu es le chef du groupe. Transfère le rôle à un autre membre avant de quitter.');
+      return;
+    }
+    if (!confirm('Quitter ce groupe ?')) return;
+    try {
+      if (isCreator && selectedGroup.memberIds.length === 1) {
+        const { deleteDoc } = await import('firebase/firestore');
+        await deleteDoc(doc(db, 'groups', selectedGroup.id));
+      } else {
+        await updateDoc(doc(db, 'groups', selectedGroup.id), {
+          memberIds: arrayRemove(user!.uid),
+        });
+      }
+      setSelectedGroup(null);
+      setLeaderboard([]);
+      await loadGroups();
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de la sortie du groupe');
     }
   }
 
@@ -402,36 +434,7 @@ export default function Group() {
       {selectedGroup && (
         <>
           <div className="group-info">
-            {groups.length > 1 ? (
-              <div className="group-picker" onClick={() => setShowGroupPicker(!showGroupPicker)}>
-                <h2>{selectedGroup.name}</h2>
-                <ChevronDown size={18} />
-              </div>
-            ) : (
-              <h2>{selectedGroup.name}</h2>
-            )}
-
-            {showGroupPicker && (
-              <div className="group-picker-dropdown">
-                {groups.map((g) => (
-                  <button
-                    key={g.id}
-                    className={`group-picker-item ${g.id === selectedGroup.id ? 'active' : ''}`}
-                    onClick={async () => {
-                      setSelectedGroup(g);
-                      setShowGroupPicker(false);
-                      await loadLeaderboard(g);
-                      if (g.pendingIds?.length > 0 && g.createdBy === user!.uid) {
-                        await loadPendingNames(g.pendingIds);
-                      }
-                    }}
-                  >
-                    {g.name}
-                  </button>
-                ))}
-              </div>
-            )}
-
+            <h2>{selectedGroup.name}</h2>
             <span className="member-count">
               {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
             </span>
@@ -554,20 +557,11 @@ export default function Group() {
             )}
           </section>
 
-          {groups.length > 0 && (
-            <div className="group-actions" style={{ marginTop: '1rem' }}>
-              {!showCreate && (
-                <button className="secondary-btn small" onClick={() => setShowCreate(true)}>
-                  + Nouveau groupe
-                </button>
-              )}
-              {!showJoin && (
-                <button className="secondary-btn small" onClick={() => setShowJoin(true)}>
-                  Rejoindre un autre
-                </button>
-              )}
-            </div>
-          )}
+          <div className="group-actions" style={{ marginTop: '1rem', justifyContent: 'center' }}>
+            <button className="leave-btn" onClick={leaveGroup}>
+              <LogOut size={14} /> Quitter le groupe
+            </button>
+          </div>
         </>
       )}
 
