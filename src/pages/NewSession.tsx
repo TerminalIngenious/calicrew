@@ -19,6 +19,7 @@ export default function NewSession() {
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [newExName, setNewExName] = useState('');
   const [newExCategory, setNewExCategory] = useState<Exercise['category']>('push');
+  const [newExWeighted, setNewExWeighted] = useState(false);
   const [showAmrap, setShowAmrap] = useState(false);
   const [amrapMinutes, setAmrapMinutes] = useState(20);
 
@@ -40,6 +41,7 @@ export default function NewSession() {
         name: newExName.trim(),
         category: newExCategory,
         isCustom: true,
+        canBeWeighted: newExWeighted,
         userId: user.uid,
       });
       const newEx: Exercise = {
@@ -47,9 +49,11 @@ export default function NewSession() {
         name: newExName.trim(),
         category: newExCategory,
         isCustom: true,
+        canBeWeighted: newExWeighted,
       };
       setCustomExercises((prev) => [...prev, newEx]);
       setNewExName('');
+      setNewExWeighted(false);
       setShowAddExercise(false);
     } catch (err) {
       console.error('Erreur ajout exercice:', err);
@@ -257,6 +261,13 @@ export default function NewSession() {
                       {label}
                     </button>
                   ))}
+                </div>
+                <div className="weighted-toggle" style={{ marginTop: '0.75rem' }} onClick={() => setNewExWeighted(!newExWeighted)}>
+                  <Weight size={16} />
+                  <span>Peut être lesté</span>
+                  <div className={`toggle ${newExWeighted ? 'active' : ''}`}>
+                    <div className="toggle-knob" />
+                  </div>
                 </div>
               </div>
               <div className="modal-actions">
