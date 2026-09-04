@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getWeeklyQuests } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getBaseCards, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
@@ -30,6 +30,7 @@ export default function BattlePass() {
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
 
   const season = getCurrentSeason();
+  const weeklyQuests = getWeeklyQuests();
 
   const loadProgress = useCallback(async () => {
     if (!user) return;
@@ -53,7 +54,7 @@ export default function BattlePass() {
   const weekSessions = sessions.filter((s) => s.createdAt >= weekStart && s.completed);
 
   function getQuestValue(questId: string): number {
-    const quest = season?.quests.find((q) => q.id === questId);
+    const quest = weeklyQuests.find((q) => q.id === questId);
     if (!quest) return 0;
     switch (quest.type) {
       case 'sessions':
@@ -85,7 +86,7 @@ export default function BattlePass() {
 
   async function claimQuest(questId: string) {
     if (!user || !season) return;
-    const quest = season.quests.find((q) => q.id === questId);
+    const quest = weeklyQuests.find((q) => q.id === questId);
     if (!quest) return;
     if (getQuestValue(questId) < quest.target) return;
     if (isQuestClaimed(questId)) return;
@@ -162,8 +163,8 @@ export default function BattlePass() {
   const timeLeft = getSeasonTimeLeft(season);
   const levelInfo = getLevelFromXp(progress.passXp, season.passLevels);
   const progressPct = levelInfo.xpForNext > 0 ? (levelInfo.currentLevelXp / levelInfo.xpForNext) * 100 : 100;
-  const totalQuestsDone = season.quests.filter((q) => isQuestClaimed(q.id)).length;
-  const totalQuestsAvailable = season.quests.length;
+  const totalQuestsDone = weeklyQuests.filter((q) => isQuestClaimed(q.id)).length;
+  const totalQuestsAvailable = weeklyQuests.length;
 
   return (
     <div className="page bp-page">
@@ -257,7 +258,7 @@ export default function BattlePass() {
             <Swords size={16} /> Quêtes de la semaine
           </h3>
           <div className="bp-quest-list">
-            {season.quests.map((quest) => {
+            {weeklyQuests.map((quest) => {
               const current = getQuestValue(quest.id);
               const done = current >= quest.target;
               const claimed = isQuestClaimed(quest.id);
