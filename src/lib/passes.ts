@@ -36,7 +36,7 @@ export const SEASONS: Season[] = [
   {
     id: 'pass-1',
     name: 'Saison 1',
-    theme: 'Personnes Problématiques',
+    theme: 'Casier Judiciaire',
     startDate: PASS1_START,
     endDate: PASS1_START + NINETY_DAYS,
     passLevels: buildLevels(),
