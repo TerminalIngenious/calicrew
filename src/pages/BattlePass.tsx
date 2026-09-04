@@ -27,6 +27,7 @@ export default function BattlePass() {
   const [loading, setLoading] = useState(true);
   const [openedCard, setOpenedCard] = useState<Card | null>(null);
   const [chestOpening, setChestOpening] = useState(false);
+  const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
 
   const season = getCurrentSeason();
 
@@ -59,18 +60,18 @@ export default function BattlePass() {
         return weekSessions.length;
       case 'reps':
         return weekSessions.reduce(
-          (sum, s) => sum + s.exercises.reduce(
-            (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
+          (sum, s) => sum + (s.exercises || []).reduce(
+            (eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
           ), 0
         );
       case 'duration':
         return weekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
       case 'exercises':
-        return new Set(weekSessions.flatMap((s) => s.exercises.map((e) => e.exerciseId))).size;
+        return new Set(weekSessions.flatMap((s) => (s.exercises || []).map((e) => e.exerciseId))).size;
       case 'sets':
         return weekSessions.reduce(
-          (sum, s) => sum + s.exercises.reduce(
-            (eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0
+          (sum, s) => sum + (s.exercises || []).reduce(
+            (eSum, ex) => eSum + (ex.sets || []).filter((set) => set.completed).length, 0
           ), 0
         );
       case 'amrap':
@@ -161,8 +162,6 @@ export default function BattlePass() {
       </div>
     );
   }
-
-  const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
 
   const timeLeft = getSeasonTimeLeft(season);
   const levelInfo = getLevelFromXp(progress.passXp, season.passLevels);
