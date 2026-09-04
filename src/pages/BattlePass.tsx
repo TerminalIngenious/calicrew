@@ -217,18 +217,16 @@ export default function BattlePass() {
                 <Package size={16} /> Coffres ({progress.chestsToOpen.length})
               </h3>
               <div className="bp-chest-row">
-                {progress.chestsToOpen.map((chest, i) => (
+                {progress.chestsToOpen.map((_chest, i) => (
                   <button
                     key={i}
                     className={`bp-chest ${i === 0 ? 'bp-chest-active' : ''}`}
                     onClick={i === 0 ? openChest : undefined}
                     disabled={i !== 0 || chestOpening}
                   >
-                    <div className="bp-chest-glow" style={{ background: RARITY_COLORS[chest.rarity] }} />
-                    <Package size={22} style={{ color: RARITY_COLORS[chest.rarity] }} />
-                    <span className="bp-chest-label" style={{ color: RARITY_COLORS[chest.rarity] }}>
-                      {RARITY_LABELS[chest.rarity]}
-                    </span>
+                    <div className="bp-chest-glow" style={{ background: 'var(--accent)' }} />
+                    <Package size={22} style={{ color: 'var(--accent)' }} />
+                    <span className="bp-chest-label">Ouvrir</span>
                   </button>
                 ))}
               </div>
@@ -319,14 +317,10 @@ export default function BattlePass() {
                   <span className="bp-track-lvl-num">{reached ? <Check size={12} /> : lvl.level}</span>
                 </div>
                 <div className="bp-track-col-reward">
-                  {lvl.freeChest ? (
-                    <div className="bp-track-chest" style={{ borderColor: RARITY_COLORS[lvl.freeChest] }}>
-                      <Package size={14} style={{ color: RARITY_COLORS[lvl.freeChest] }} />
-                      <span style={{ color: RARITY_COLORS[lvl.freeChest] }}>{RARITY_LABELS[lvl.freeChest]}</span>
-                    </div>
-                  ) : (
-                    <span className="bp-track-empty">—</span>
-                  )}
+                  <div className="bp-track-chest">
+                    <Package size={14} />
+                    <span>Coffre</span>
+                  </div>
                 </div>
               </div>
             );

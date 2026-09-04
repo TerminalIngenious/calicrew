@@ -101,15 +101,11 @@ export function getWeeklyQuests(): Quest[] {
 function buildLevels(): PassLevel[] {
   const levels: PassLevel[] = [];
   for (let i = 1; i <= 30; i++) {
-    const lvl: PassLevel = { level: i, xpRequired: i >= 25 ? 400 : 200 };
-    if (i % 2 === 0) lvl.freeChest = i <= 8 ? 'commune' : i <= 16 ? 'rare' : i <= 24 ? 'epique' : 'legendaire';
-    if (i % 3 === 0 && !lvl.freeChest) lvl.freeChest = i <= 10 ? 'commune' : i <= 20 ? 'rare' : 'epique';
-    if (i === 10) lvl.freeChest = 'epique';
-    if (i === 15) lvl.freeChest = 'legendaire';
-    if (i === 20) lvl.freeChest = 'legendaire';
-    if (i === 25) lvl.freeChest = 'historique';
-    if (i === 30) lvl.freeChest = 'historique';
-    levels.push(lvl);
+    levels.push({
+      level: i,
+      xpRequired: i >= 25 ? 400 : 200,
+      freeChest: 'commune',
+    });
   }
   return levels;
 }
