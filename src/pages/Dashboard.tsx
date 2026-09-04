@@ -62,6 +62,10 @@ export default function Dashboard() {
         </div>
       </header>
 
+      <div className="update-banner">
+        Mise à jour en cours ces prochains jours — de nouvelles fonctionnalités arrivent bientôt !
+      </div>
+
       {loading ? (
         <div className="page loading"><Loader /></div>
       ) : (
