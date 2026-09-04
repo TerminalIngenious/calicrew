@@ -87,7 +87,7 @@ export interface Quest {
   description: string;
   target: number;
   type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap';
-  premiumOnly?: boolean;
+  xp: number;
 }
 
 export interface PassLevel {

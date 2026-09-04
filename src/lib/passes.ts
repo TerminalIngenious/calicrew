@@ -1,14 +1,20 @@
 import type { Season, PassLevel, Quest } from '../types';
 
 const PASS1_QUESTS: Quest[] = [
-  { id: 'p1q1', label: 'Régulier', description: 'Fais 3 séances cette semaine', target: 3, type: 'sessions' },
-  { id: 'p1q2', label: 'Bosseur', description: 'Fais 500 reps cette semaine', target: 500, type: 'reps' },
-  { id: 'p1q3', label: 'Endurant', description: 'Entraîne-toi 60 min au total', target: 3600, type: 'duration' },
-  { id: 'p1q4', label: 'Touche-à-tout', description: 'Fais 5 exercices différents', target: 5, type: 'exercises' },
-  { id: 'p1q5', label: 'Machine', description: 'Complète 30 séries', target: 30, type: 'sets' },
-  { id: 'p1q6', label: 'Cindy Master', description: 'Fais 1 AMRAP cette semaine', target: 1, type: 'amrap' },
-  { id: 'p1q7', label: 'No Rest Day', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions' },
-  { id: 'p1q8', label: 'Monstre', description: 'Fais 1000 reps cette semaine', target: 1000, type: 'reps' },
+  // Faciles — 50 XP
+  { id: 'p1q1', label: 'Échauffement', description: 'Fais 1 séance cette semaine', target: 1, type: 'sessions', xp: 50 },
+  { id: 'p1q2', label: 'Starter', description: 'Fais 100 reps cette semaine', target: 100, type: 'reps', xp: 50 },
+  // Moyennes — 100 XP
+  { id: 'p1q3', label: 'Régulier', description: 'Fais 3 séances cette semaine', target: 3, type: 'sessions', xp: 100 },
+  { id: 'p1q4', label: 'Touche-à-tout', description: 'Fais 5 exercices différents', target: 5, type: 'exercises', xp: 100 },
+  { id: 'p1q5', label: 'Endurant', description: 'Entraîne-toi 45 min au total', target: 2700, type: 'duration', xp: 100 },
+  // Difficiles — 200 XP
+  { id: 'p1q6', label: 'Machine', description: 'Complète 40 séries', target: 40, type: 'sets', xp: 200 },
+  { id: 'p1q7', label: 'No Rest Day', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions', xp: 200 },
+  { id: 'p1q8', label: 'Bosseur', description: 'Fais 500 reps cette semaine', target: 500, type: 'reps', xp: 200 },
+  // Extrêmes — 350 XP
+  { id: 'p1q9', label: 'Monstre', description: 'Fais 1000 reps cette semaine', target: 1000, type: 'reps', xp: 350 },
+  { id: 'p1q10', label: 'Marathonien', description: 'Entraîne-toi 2h au total', target: 7200, type: 'duration', xp: 350 },
 ];
 
 function buildLevels(): PassLevel[] {
@@ -43,7 +49,6 @@ export const SEASONS: Season[] = [
   },
 ];
 
-export const XP_PER_QUEST = 100;
 
 export function getCurrentSeason(): Season | null {
   const now = Date.now();

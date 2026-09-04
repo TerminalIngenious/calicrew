@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, XP_PER_QUEST, getWeekStart } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getBaseCards, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
@@ -90,7 +90,7 @@ export default function BattlePass() {
     if (getQuestValue(questId) < quest.target) return;
     if (isQuestClaimed(questId)) return;
 
-    const newXp = progress.passXp + XP_PER_QUEST;
+    const newXp = progress.passXp + quest.xp;
     const oldLevel = getLevelFromXp(progress.passXp, season.passLevels);
     const newLevelInfo = getLevelFromXp(newXp, season.passLevels);
 
@@ -276,10 +276,10 @@ export default function BattlePass() {
                           <span className="bp-quest-done-badge"><Check size={12} /></span>
                         ) : done ? (
                           <button className="bp-quest-claim" onClick={() => claimQuest(quest.id)}>
-                            +{XP_PER_QUEST} XP
+                            +{quest.xp} XP
                           </button>
                         ) : (
-                          <span className="bp-quest-xp-tag">+{XP_PER_QUEST}</span>
+                          <span className="bp-quest-xp-tag">+{quest.xp}</span>
                         )}
                       </div>
                     </div>
