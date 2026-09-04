@@ -331,8 +331,7 @@ export default function NewSession() {
                   </button>
                 </div>
               </div>
-              {config.exercise.canBeWeighted !== false && (
-                <div className="config-row weighted-row">
+              <div className="config-row weighted-row">
                   <div className="weighted-toggle" onClick={() => {
                     setExerciseConfigs((prev) =>
                       prev.map((c, idx) => idx === i ? { ...c, weighted: !c.weighted } : c)
@@ -364,7 +363,6 @@ export default function NewSession() {
                     </div>
                   )}
                 </div>
-              )}
               <div className="config-result">
                 → {repsPerSet} reps / série{config.weighted ? ` • ${config.weight} kg` : ''}
               </div>
