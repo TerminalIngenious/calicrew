@@ -63,7 +63,7 @@ export default function Dashboard() {
       </header>
 
       <div className="update-banner">
-        Mise à jour en cours ces prochains jours — de nouvelles fonctionnalités arrivent bientôt !
+        Grosse mise à jour dans les prochains jours — on va voir qui fait vraiment ses séances et qui raconte sa vie 👀
       </div>
 
       {loading ? (
