@@ -1936,6 +1936,35 @@ body {
   font-weight: 500;
 }
 
+/* Maintenance */
+.maintenance-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg);
+}
+
+.maintenance-img {
+  width: 220px;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.maintenance-screen h1 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.maintenance-screen p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 /* Coming soon */
 .coming-soon {
   display: flex;

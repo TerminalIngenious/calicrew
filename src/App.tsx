@@ -13,6 +13,18 @@ import Profile from './pages/Profile';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 
+const MAINTENANCE = true;
+
+function MaintenanceScreen() {
+  return (
+    <div className="maintenance-screen">
+      <img src="/maintenance.JPG" alt="" className="maintenance-img" />
+      <h1>App en maintenance</h1>
+      <p>Revenez plus tard, on bosse dessus...</p>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="page loading"><Loader /></div>;
@@ -21,6 +33,8 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 function App() {
+  if (MAINTENANCE) return <MaintenanceScreen />;
+
   return (
     <BrowserRouter>
       <AuthProvider>
