@@ -7,6 +7,9 @@ import NewSession from './pages/NewSession';
 import LiveSession from './pages/LiveSession';
 import Progress from './pages/Progress';
 import Group from './pages/Group';
+import BattlePass from './pages/BattlePass';
+import Collection from './pages/Collection';
+import Profile from './pages/Profile';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 
@@ -29,6 +32,10 @@ function App() {
           <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
           <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
           <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
+          <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
+          <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Routes>
         </SessionsProvider>
       </AuthProvider>

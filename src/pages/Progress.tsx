@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useUserSessions } from '../contexts/SessionsContext';
-import { useNavigate } from 'react-router-dom';
-import { Dumbbell, TrendingUp, Users } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 import {
   LineChart,
   Line,
@@ -16,7 +15,6 @@ import { fr } from 'date-fns/locale';
 import Loader from '../components/Loader';
 
 export default function Progress() {
-  const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
   const [selectedExercise, setSelectedExercise] = useState<string>('all');
 
@@ -142,17 +140,7 @@ export default function Progress() {
         </>
       )}
 
-      <nav className="bottom-nav">
-        <button className="nav-btn" onClick={() => navigate('/')}>
-          <Dumbbell size={22} /> <span>Accueil</span>
-        </button>
-        <button className="nav-btn active" onClick={() => navigate('/progress')}>
-          <TrendingUp size={22} /> <span>Progression</span>
-        </button>
-        <button className="nav-btn" onClick={() => navigate('/group')}>
-          <Users size={22} /> <span>Groupe</span>
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

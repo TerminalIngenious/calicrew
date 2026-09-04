@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, TrendingUp, Users, Dumbbell, LogOut, RefreshCw } from 'lucide-react';
+import { Plus, LogOut, RefreshCw } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -141,17 +142,7 @@ export default function Dashboard() {
         </>
       )}
 
-      <nav className="bottom-nav">
-        <button className="nav-btn active" onClick={() => navigate('/')}>
-          <Dumbbell size={22} /> <span>Accueil</span>
-        </button>
-        <button className="nav-btn" onClick={() => navigate('/progress')}>
-          <TrendingUp size={22} /> <span>Progression</span>
-        </button>
-        <button className="nav-btn" onClick={() => navigate('/group')}>
-          <Users size={22} /> <span>Groupe</span>
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

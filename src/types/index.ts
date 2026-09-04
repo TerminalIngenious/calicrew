@@ -59,6 +59,42 @@ export interface LeaderboardEntry {
   totalReps: number;
   totalSets: number;
   sessionsCount: number;
-  totalDuration: number; // secondes
-  exerciseVariety: number; // nombre d'exercices différents
+  totalDuration: number;
+  exerciseVariety: number;
+}
+
+export type CardRarity = 'historique' | 'legendaire' | 'epique' | 'rare' | 'commune';
+
+export interface Card {
+  id: string;
+  name: string;
+  emoji: string;
+  rarity: CardRarity;
+  category: string;
+}
+
+export interface Quest {
+  id: string;
+  label: string;
+  description: string;
+  target: number;
+  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap';
+  premiumOnly?: boolean;
+}
+
+export interface BattlePassLevel {
+  level: number;
+  xpRequired: number;
+  freeReward?: { type: 'chest'; rarity: CardRarity } | { type: 'xpBoost' };
+  premiumReward?: { type: 'chest'; rarity: CardRarity } | { type: 'xpBoost' };
+}
+
+export interface UserProgress {
+  passLevel: number;
+  passXp: number;
+  isPremium: boolean;
+  ownedCardIds: string[];
+  questProgress: Record<string, number>;
+  questsClaimedAt: number;
+  chestsToOpen: CardRarity[];
 }

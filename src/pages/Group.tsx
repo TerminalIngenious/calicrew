@@ -14,7 +14,8 @@ import {
 import { db } from '../lib/firebase';
 import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, TrendingUp, Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut } from 'lucide-react';
+import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut } from 'lucide-react';
+import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
@@ -509,7 +510,7 @@ export default function Group() {
                   className={`leaderboard-row ${entry.uid === user!.uid ? 'me' : ''}`}
                 >
                   <div className="rank">{getRankIcon(i)}</div>
-                  <div className="leaderboard-info">
+                  <div className="leaderboard-info" onClick={() => navigate(`/profile/${entry.uid}`)} style={{ cursor: 'pointer' }}>
                     <span className="leaderboard-name">
                       {entry.displayName}
                       {entry.uid === user!.uid ? ' (toi)' : ''}
@@ -565,17 +566,7 @@ export default function Group() {
         </>
       )}
 
-      <nav className="bottom-nav">
-        <button className="nav-btn" onClick={() => navigate('/')}>
-          <Dumbbell size={22} /> <span>Accueil</span>
-        </button>
-        <button className="nav-btn" onClick={() => navigate('/progress')}>
-          <TrendingUp size={22} /> <span>Progression</span>
-        </button>
-        <button className="nav-btn active" onClick={() => navigate('/group')}>
-          <Users size={22} /> <span>Groupe</span>
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 }
