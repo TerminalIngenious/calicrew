@@ -14,6 +14,7 @@ import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 
 const MAINTENANCE = true;
+const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
 
 function MaintenanceScreen() {
   return (
@@ -29,12 +30,11 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="page loading"><Loader /></div>;
   if (!user) return <Navigate to="/login" />;
+  if (MAINTENANCE && !ADMIN_UIDS.includes(user.uid)) return <MaintenanceScreen />;
   return <>{children}</>;
 }
 
 function App() {
-  if (MAINTENANCE) return <MaintenanceScreen />;
-
   return (
     <BrowserRouter>
       <AuthProvider>
