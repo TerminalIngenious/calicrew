@@ -2352,6 +2352,23 @@ body {
   margin-top: 0.1rem;
 }
 
+.collection-card-count {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.3rem;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+.collection-card {
+  position: relative;
+}
+
 /* Profile page */
 .profile-header-card {
   background: var(--bg-card);

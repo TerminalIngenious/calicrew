@@ -63,15 +63,23 @@ export interface LeaderboardEntry {
   exerciseVariety: number;
 }
 
+// ── Cards ──
+
 export type CardRarity = 'historique' | 'legendaire' | 'epique' | 'rare' | 'commune';
 
 export interface Card {
   id: string;
   name: string;
+  subtitle?: string;
   emoji: string;
   rarity: CardRarity;
   category: string;
+  set: 'base' | string;
+  premiumOnly?: boolean;
+  baseCardId?: string;
 }
+
+// ── Season / Pass ──
 
 export interface Quest {
   id: string;
@@ -82,19 +90,56 @@ export interface Quest {
   premiumOnly?: boolean;
 }
 
-export interface BattlePassLevel {
+export interface PassLevel {
   level: number;
   xpRequired: number;
-  freeReward?: { type: 'chest'; rarity: CardRarity } | { type: 'xpBoost' };
-  premiumReward?: { type: 'chest'; rarity: CardRarity } | { type: 'xpBoost' };
+  freeChest?: CardRarity;
+  premiumChest?: CardRarity;
 }
 
+export interface Season {
+  id: string;
+  name: string;
+  theme: string;
+  startDate: number;
+  endDate: number;
+  passLevels: PassLevel[];
+  quests: Quest[];
+}
+
+// ── Achievements ──
+
+export interface Achievement {
+  id: string;
+  label: string;
+  description: string;
+  emoji: string;
+  target: number;
+  type: 'totalSessions' | 'totalReps' | 'totalDuration' | 'totalAmrap' | 'exerciseVariety' | 'totalSets';
+  reward: 'oldPassChest' | 'guaranteedEpique' | 'guaranteedLegendaire';
+}
+
+// ── Trades ──
+
+export interface TradeOffer {
+  id: string;
+  fromUid: string;
+  toUid: string;
+  offeredCardId: string;
+  requestedCardId: string;
+  groupId: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: number;
+}
+
+// ── User Progress ──
+
 export interface UserProgress {
-  passLevel: number;
   passXp: number;
   isPremium: boolean;
-  ownedCardIds: string[];
-  questProgress: Record<string, number>;
-  questsClaimedAt: number;
-  chestsToOpen: CardRarity[];
+  ownedCards: Record<string, number>;
+  questsClaimed: Record<string, number>;
+  chestsToOpen: { rarity: CardRarity; pool: 'current' | 'old' }[];
+  achievementsClaimed: string[];
+  currentSeasonId: string;
 }

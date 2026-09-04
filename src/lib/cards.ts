@@ -1,66 +1,109 @@
 import type { Card, CardRarity } from '../types';
 
-export const ALL_CARDS: Card[] = [
-  // HISTORIQUE (5)
-  { id: 'h1', name: 'Bruce Lee', emoji: '🐉', rarity: 'historique', category: 'Arts martiaux' },
-  { id: 'h2', name: 'Léonidas', emoji: '⚔️', rarity: 'historique', category: 'Guerrier' },
-  { id: 'h3', name: 'Héraclès', emoji: '🏛️', rarity: 'historique', category: 'Mythologie' },
-  { id: 'h4', name: 'Muhammad Ali', emoji: '🥊', rarity: 'historique', category: 'Boxe' },
-  { id: 'h5', name: 'Miyamoto Musashi', emoji: '🗡️', rarity: 'historique', category: 'Samouraï' },
+// ── Set de base (toujours disponible) ──
 
-  // LÉGENDAIRE (8)
-  { id: 'l1', name: 'Hannibal for King', emoji: '👑', rarity: 'legendaire', category: 'Calisthenics' },
-  { id: 'l2', name: 'Chris Heria', emoji: '🔥', rarity: 'legendaire', category: 'Calisthenics' },
-  { id: 'l3', name: 'Frank Medrano', emoji: '💪', rarity: 'legendaire', category: 'Calisthenics' },
-  { id: 'l4', name: 'Cristiano Ronaldo', emoji: '⚽', rarity: 'legendaire', category: 'Football' },
-  { id: 'l5', name: 'Mike Tyson', emoji: '🥊', rarity: 'legendaire', category: 'Boxe' },
-  { id: 'l6', name: 'Zinédine Zidane', emoji: '🇫🇷', rarity: 'legendaire', category: 'Football' },
-  { id: 'l7', name: 'Kylian Mbappé', emoji: '⚡', rarity: 'legendaire', category: 'Football' },
-  { id: 'l8', name: 'Arnold Schwarzenegger', emoji: '🏋️', rarity: 'legendaire', category: 'Bodybuilding' },
-
-  // ÉPIQUE (10)
-  { id: 'e1', name: 'Andrea Larosa', emoji: '🤸', rarity: 'epique', category: 'Calisthenics' },
-  { id: 'e2', name: 'Dejan Stipke', emoji: '🦾', rarity: 'epique', category: 'Calisthenics' },
-  { id: 'e3', name: 'Viktor Kamenov', emoji: '🏆', rarity: 'epique', category: 'Calisthenics' },
-  { id: 'e4', name: 'LeBron James', emoji: '🏀', rarity: 'epique', category: 'Basketball' },
-  { id: 'e5', name: 'Conor McGregor', emoji: '🤜', rarity: 'epique', category: 'MMA' },
-  { id: 'e6', name: 'Usain Bolt', emoji: '🏃', rarity: 'epique', category: 'Athlétisme' },
-  { id: 'e7', name: 'Teddy Riner', emoji: '🥋', rarity: 'epique', category: 'Judo' },
-  { id: 'e8', name: 'Tony Jaa', emoji: '🦵', rarity: 'epique', category: 'Arts martiaux' },
-  { id: 'e9', name: 'Neymar Jr', emoji: '🎩', rarity: 'epique', category: 'Football' },
-  { id: 'e10', name: 'Michael Jordan', emoji: '🐐', rarity: 'epique', category: 'Basketball' },
-
-  // RARE (12)
-  { id: 'r1', name: 'Daniels Laizans', emoji: '🇱🇻', rarity: 'rare', category: 'Calisthenics' },
-  { id: 'r2', name: 'Osvaldo Lugones', emoji: '🇦🇷', rarity: 'rare', category: 'Calisthenics' },
-  { id: 'r3', name: 'Simonster', emoji: '🎯', rarity: 'rare', category: 'Calisthenics' },
-  { id: 'r4', name: 'FitnessFAQs', emoji: '📚', rarity: 'rare', category: 'Calisthenics' },
-  { id: 'r5', name: 'Tibo InShape', emoji: '🇫🇷', rarity: 'rare', category: 'Fitness' },
-  { id: 'r6', name: 'Antoine Griezmann', emoji: '⭐', rarity: 'rare', category: 'Football' },
-  { id: 'r7', name: 'Paul Pogba', emoji: '🕺', rarity: 'rare', category: 'Football' },
-  { id: 'r8', name: 'Novak Djokovic', emoji: '🎾', rarity: 'rare', category: 'Tennis' },
-  { id: 'r9', name: 'Rafael Nadal', emoji: '🐂', rarity: 'rare', category: 'Tennis' },
-  { id: 'r10', name: 'Karim Benzema', emoji: '🔱', rarity: 'rare', category: 'Football' },
-  { id: 'r11', name: 'Giannis Antetokounmpo', emoji: '🦌', rarity: 'rare', category: 'Basketball' },
-  { id: 'r12', name: 'Francis Ngannou', emoji: '🇨🇲', rarity: 'rare', category: 'MMA' },
-
-  // COMMUNE (15)
-  { id: 'c1', name: 'Calisthenicmovement', emoji: '📐', rarity: 'commune', category: 'Calisthenics' },
-  { id: 'c2', name: 'Austin Dunham', emoji: '🎬', rarity: 'commune', category: 'Calisthenics' },
-  { id: 'c3', name: 'Browney', emoji: '🧪', rarity: 'commune', category: 'Calisthenics' },
-  { id: 'c4', name: 'Gabo Saturno', emoji: '🌐', rarity: 'commune', category: 'Calisthenics' },
-  { id: 'c5', name: 'Red Delta Project', emoji: '🔺', rarity: 'commune', category: 'Calisthenics' },
-  { id: 'c6', name: 'Minus the Gym', emoji: '🏠', rarity: 'commune', category: 'Calisthenics' },
-  { id: 'c7', name: 'Tom Merrick', emoji: '🧘', rarity: 'commune', category: 'Mobilité' },
-  { id: 'c8', name: 'Hampton Liu', emoji: '🏋️', rarity: 'commune', category: 'Fitness' },
-  { id: 'c9', name: 'Athlean-X', emoji: '🔬', rarity: 'commune', category: 'Fitness' },
-  { id: 'c10', name: 'David Goggins', emoji: '🪖', rarity: 'commune', category: 'Endurance' },
-  { id: 'c11', name: 'Ross Edgley', emoji: '🏊', rarity: 'commune', category: 'Endurance' },
-  { id: 'c12', name: 'Eddie Hall', emoji: '🐘', rarity: 'commune', category: 'Strongman' },
-  { id: 'c13', name: 'Larry Wheels', emoji: '🔩', rarity: 'commune', category: 'Powerlifting' },
-  { id: 'c14', name: 'Jujimufu', emoji: '🤡', rarity: 'commune', category: 'Tricking' },
-  { id: 'c15', name: 'Jeff Cavaliere', emoji: '🩺', rarity: 'commune', category: 'Fitness' },
+const BASE_CARDS: Card[] = [
+  // Calisthenics
+  { id: 'b1', name: 'Hannibal for King', emoji: '👑', rarity: 'legendaire', category: 'Calisthenics', set: 'base' },
+  { id: 'b2', name: 'Chris Heria', emoji: '🔥', rarity: 'epique', category: 'Calisthenics', set: 'base' },
+  { id: 'b3', name: 'Frank Medrano', emoji: '💪', rarity: 'epique', category: 'Calisthenics', set: 'base' },
+  { id: 'b4', name: 'Andrea Larosa', emoji: '🤸', rarity: 'rare', category: 'Calisthenics', set: 'base' },
+  { id: 'b5', name: 'Dejan Stipke', emoji: '🦾', rarity: 'rare', category: 'Calisthenics', set: 'base' },
+  { id: 'b6', name: 'FitnessFAQs', emoji: '📚', rarity: 'rare', category: 'Calisthenics', set: 'base' },
+  { id: 'b7', name: 'Browney', emoji: '🧪', rarity: 'commune', category: 'Calisthenics', set: 'base' },
+  { id: 'b8', name: 'Austin Dunham', emoji: '🎬', rarity: 'commune', category: 'Calisthenics', set: 'base' },
+  { id: 'b9', name: 'Gabo Saturno', emoji: '🌐', rarity: 'commune', category: 'Calisthenics', set: 'base' },
+  { id: 'b10', name: 'Calisthenicmovement', emoji: '📐', rarity: 'commune', category: 'Calisthenics', set: 'base' },
+  // Sport
+  { id: 'b11', name: 'Cristiano Ronaldo', emoji: '⚽', rarity: 'legendaire', category: 'Football', set: 'base' },
+  { id: 'b12', name: 'Kylian Mbappé', emoji: '⚡', rarity: 'epique', category: 'Football', set: 'base' },
+  { id: 'b13', name: 'LeBron James', emoji: '🏀', rarity: 'epique', category: 'Basketball', set: 'base' },
+  { id: 'b14', name: 'Usain Bolt', emoji: '🏃', rarity: 'rare', category: 'Athlétisme', set: 'base' },
+  { id: 'b15', name: 'Teddy Riner', emoji: '🥋', rarity: 'rare', category: 'Judo', set: 'base' },
+  { id: 'b16', name: 'David Goggins', emoji: '🪖', rarity: 'rare', category: 'Endurance', set: 'base' },
+  { id: 'b17', name: 'Tibo InShape', emoji: '🇫🇷', rarity: 'commune', category: 'Fitness', set: 'base' },
+  { id: 'b18', name: 'Jujimufu', emoji: '🤡', rarity: 'commune', category: 'Tricking', set: 'base' },
+  // Légendes
+  { id: 'b19', name: 'Bruce Lee', emoji: '🐉', rarity: 'historique', category: 'Arts martiaux', set: 'base' },
+  { id: 'b20', name: 'Muhammad Ali', emoji: '🥊', rarity: 'historique', category: 'Boxe', set: 'base' },
+  { id: 'b21', name: 'Arnold Schwarzenegger', emoji: '🏋️', rarity: 'legendaire', category: 'Bodybuilding', set: 'base' },
+  { id: 'b22', name: 'Mike Tyson', emoji: '🥊', rarity: 'epique', category: 'Boxe', set: 'base' },
+  { id: 'b23', name: 'Michael Jordan', emoji: '🐐', rarity: 'legendaire', category: 'Basketball', set: 'base' },
+  { id: 'b24', name: 'Zinédine Zidane', emoji: '🇫🇷', rarity: 'epique', category: 'Football', set: 'base' },
+  { id: 'b25', name: 'Conor McGregor', emoji: '🤜', rarity: 'rare', category: 'MMA', set: 'base' },
 ];
+
+// ── Pass 1 : Personnes Problématiques ──
+
+const PASS1_CARDS: Card[] = [
+  // Macron + variantes
+  { id: 'p1-macron', name: 'Macron', emoji: '🇫🇷', rarity: 'commune', category: 'Politique', set: 'pass-1' },
+  { id: 'p1-macron-forsure', name: 'Macron', subtitle: 'For Sure', emoji: '🎤', rarity: 'rare', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron' },
+  { id: 'p1-macron-jetski', name: 'Macron', subtitle: 'Jet-Ski', emoji: '🚤', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron' },
+  { id: 'p1-macron-gilet', name: 'Macron', subtitle: 'Gilet Jaune', emoji: '🟡', rarity: 'legendaire', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron', premiumOnly: true },
+
+  // Trump + variantes
+  { id: 'p1-trump', name: 'Trump', emoji: '🍊', rarity: 'commune', category: 'Politique', set: 'pass-1' },
+  { id: 'p1-trump-covfefe', name: 'Trump', subtitle: 'Covfefe', emoji: '☕', rarity: 'rare', category: 'Politique', set: 'pass-1', baseCardId: 'p1-trump' },
+  { id: 'p1-trump-wall', name: 'Trump', subtitle: 'The Wall', emoji: '🧱', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-trump' },
+
+  // Elon Musk + variantes
+  { id: 'p1-elon', name: 'Elon Musk', emoji: '🚀', rarity: 'rare', category: 'Tech', set: 'pass-1' },
+  { id: 'p1-elon-x', name: 'Elon Musk', subtitle: 'X Æ A-12', emoji: '🤖', rarity: 'epique', category: 'Tech', set: 'pass-1', baseCardId: 'p1-elon' },
+  { id: 'p1-elon-mars', name: 'Elon Musk', subtitle: 'To Mars', emoji: '🪐', rarity: 'legendaire', category: 'Tech', set: 'pass-1', baseCardId: 'p1-elon', premiumOnly: true },
+
+  // Kanye + variantes
+  { id: 'p1-kanye', name: 'Kanye West', emoji: '🎵', rarity: 'rare', category: 'Musique', set: 'pass-1' },
+  { id: 'p1-kanye-ye', name: 'Kanye West', subtitle: 'Ye', emoji: '⛷️', rarity: 'epique', category: 'Musique', set: 'pass-1', baseCardId: 'p1-kanye' },
+  { id: 'p1-kanye-god', name: 'Kanye West', subtitle: 'God Mode', emoji: '😇', rarity: 'legendaire', category: 'Musique', set: 'pass-1', baseCardId: 'p1-kanye' },
+
+  // Poutine + variantes
+  { id: 'p1-poutine', name: 'Poutine', emoji: '🐻', rarity: 'rare', category: 'Politique', set: 'pass-1' },
+  { id: 'p1-poutine-tsar', name: 'Poutine', subtitle: 'Tsar', emoji: '👑', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-poutine' },
+  { id: 'p1-poutine-shirt', name: 'Poutine', subtitle: 'Shirtless', emoji: '🐴', rarity: 'historique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-poutine', premiumOnly: true },
+
+  // Diddy + variante
+  { id: 'p1-diddy', name: 'Diddy', emoji: '🕺', rarity: 'rare', category: 'Musique', set: 'pass-1' },
+  { id: 'p1-diddy-freak', name: 'Diddy', subtitle: 'Freak Off', emoji: '🔒', rarity: 'legendaire', category: 'Musique', set: 'pass-1', baseCardId: 'p1-diddy' },
+
+  // Andrew Tate + variante
+  { id: 'p1-tate', name: 'Andrew Tate', emoji: '🚗', rarity: 'commune', category: 'Internet', set: 'pass-1' },
+  { id: 'p1-tate-topg', name: 'Andrew Tate', subtitle: 'Top G', emoji: '💎', rarity: 'rare', category: 'Internet', set: 'pass-1', baseCardId: 'p1-tate' },
+
+  // Balkany + variante
+  { id: 'p1-balkany', name: 'Balkany', emoji: '💰', rarity: 'commune', category: 'Politique', set: 'pass-1' },
+  { id: 'p1-balkany-fisc', name: 'Balkany', subtitle: 'Évasion Fiscale', emoji: '🏝️', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-balkany' },
+
+  // Hanouna + variante
+  { id: 'p1-hanouna', name: 'Hanouna', emoji: '📺', rarity: 'commune', category: 'TV', set: 'pass-1' },
+  { id: 'p1-hanouna-tpmp', name: 'Hanouna', subtitle: 'TPMP', emoji: '🎪', rarity: 'rare', category: 'TV', set: 'pass-1', baseCardId: 'p1-hanouna' },
+
+  // Kim Jong-un + variante
+  { id: 'p1-kim', name: 'Kim Jong-un', emoji: '🚀', rarity: 'rare', category: 'Politique', set: 'pass-1' },
+  { id: 'p1-kim-rocket', name: 'Kim Jong-un', subtitle: 'Rocket Man', emoji: '🎆', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-kim' },
+];
+
+// ── Tout ──
+
+export const ALL_CARDS: Card[] = [...BASE_CARDS, ...PASS1_CARDS];
+
+export function getCardsBySet(setId: string): Card[] {
+  return ALL_CARDS.filter((c) => c.set === setId);
+}
+
+export function getBaseCards(): Card[] {
+  return BASE_CARDS;
+}
+
+export function getCardVariants(baseCardId: string): Card[] {
+  return ALL_CARDS.filter((c) => c.baseCardId === baseCardId);
+}
+
+export function getCardDisplayName(card: Card): string {
+  return card.subtitle ? `${card.name} — ${card.subtitle}` : card.name;
+}
+
+// ── Raretés ──
 
 export const RARITY_ORDER: CardRarity[] = ['historique', 'legendaire', 'epique', 'rare', 'commune'];
 
@@ -80,30 +123,30 @@ export const RARITY_COLORS: Record<CardRarity, string> = {
   commune: '#6b7280',
 };
 
+// ── Drop ──
+
 const RARITY_WEIGHTS: Record<CardRarity, number> = {
-  commune: 50,
-  rare: 28,
-  epique: 14,
-  legendaire: 6,
+  commune: 45,
+  rare: 30,
+  epique: 16,
+  legendaire: 7,
   historique: 2,
 };
 
-export function rollCardFromChest(chestRarity: CardRarity, ownedIds: string[]): Card | null {
-  const rarityIndex = RARITY_ORDER.indexOf(chestRarity);
-  const eligibleRarities = RARITY_ORDER.slice(0, rarityIndex + 1);
+export function rollCard(
+  pool: Card[],
+  _ownedCards: Record<string, number>,
+  isPremium: boolean,
+): Card | null {
+  const available = pool.filter((c) => {
+    if (c.premiumOnly && !isPremium) return false;
+    return true;
+  });
 
-  const availableCards = ALL_CARDS.filter(
-    (c) => eligibleRarities.includes(c.rarity) && !ownedIds.includes(c.id)
-  );
-
-  if (availableCards.length === 0) {
-    const anyAvailable = ALL_CARDS.filter((c) => !ownedIds.includes(c.id));
-    if (anyAvailable.length === 0) return null;
-    return anyAvailable[Math.floor(Math.random() * anyAvailable.length)];
-  }
+  if (available.length === 0) return null;
 
   const weighted: Card[] = [];
-  for (const card of availableCards) {
+  for (const card of available) {
     const w = RARITY_WEIGHTS[card.rarity] || 1;
     for (let i = 0; i < w; i++) weighted.push(card);
   }

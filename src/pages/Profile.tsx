@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ALL_CARDS, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS } from '../lib/cards';
+import { ALL_CARDS, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Session } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Clock, Zap, Dumbbell } from 'lucide-react';
@@ -20,7 +20,7 @@ export default function Profile() {
   const targetUid = uid || user?.uid;
 
   const [displayName, setDisplayName] = useState('');
-  const [ownedIds, setOwnedIds] = useState<string[]>([]);
+  const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +45,8 @@ export default function Profile() {
 
     const progressSnap = await getDoc(doc(db, 'userProgress', targetUid));
     if (progressSnap.exists()) {
-      setOwnedIds((progressSnap.data() as UserProgress).ownedCardIds || []);
+      const data = progressSnap.data() as UserProgress;
+      setOwnedCards(data.ownedCards || {});
     }
 
     setLoading(false);
@@ -77,7 +78,8 @@ export default function Profile() {
     return `${m} min`;
   }
 
-  const ownedCards = ALL_CARDS.filter((c) => ownedIds.includes(c.id));
+  const ownedCardIds = Object.keys(ownedCards).filter((id) => ownedCards[id] > 0);
+  const uniqueCards = ALL_CARDS.filter((c) => ownedCardIds.includes(c.id));
 
   if (loading) return <div className="page loading"><Loader /></div>;
 
@@ -98,7 +100,7 @@ export default function Profile() {
           {(displayName || '?')[0].toUpperCase()}
         </div>
         <h2 className="profile-name">{displayName}</h2>
-        <span className="profile-cards-count">{ownedIds.length}/{ALL_CARDS.length} cartes</span>
+        <span className="profile-cards-count">{uniqueCards.length}/{ALL_CARDS.length} cartes</span>
       </div>
 
       <section className="section">
@@ -141,13 +143,13 @@ export default function Profile() {
       </section>
 
       <section className="section">
-        <h3>Cartes ({ownedCards.length})</h3>
-        {ownedCards.length === 0 ? (
+        <h3>Cartes ({uniqueCards.length})</h3>
+        {uniqueCards.length === 0 ? (
           <p className="empty">Aucune carte pour le moment</p>
         ) : (
           <div className="card-grid">
             {RARITY_ORDER.flatMap((rarity) =>
-              ownedCards
+              uniqueCards
                 .filter((c) => c.rarity === rarity)
                 .map((card) => (
                   <div
@@ -156,10 +158,13 @@ export default function Profile() {
                     style={{ '--card-color': RARITY_COLORS[card.rarity] } as React.CSSProperties}
                   >
                     <span className="collection-card-emoji">{card.emoji}</span>
-                    <span className="collection-card-name">{card.name}</span>
+                    <span className="collection-card-name">{getCardDisplayName(card)}</span>
                     <span className="collection-card-rarity" style={{ color: RARITY_COLORS[card.rarity] }}>
                       {RARITY_LABELS[card.rarity]}
                     </span>
+                    {ownedCards[card.id] > 1 && (
+                      <span className="collection-card-count">x{ownedCards[card.id]}</span>
+                    )}
                   </div>
                 ))
             )}
