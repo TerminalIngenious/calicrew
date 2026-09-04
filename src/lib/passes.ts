@@ -28,8 +28,8 @@ function buildLevels(): PassLevel[] {
   return levels;
 }
 
-// Pass 1 commence le 1er octobre 2026, dure 90 jours
-const PASS1_START = new Date(2026, 9, 1).getTime();
+// Pass 1 commence le 1er septembre 2026, dure 90 jours
+const PASS1_START = new Date(2026, 8, 1).getTime();
 const NINETY_DAYS = 90 * 24 * 60 * 60 * 1000;
 
 export const SEASONS: Season[] = [

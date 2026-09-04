@@ -2000,6 +2000,40 @@ body {
 }
 
 /* Battle Pass */
+.bp-season-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bp-season-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.bp-season-top h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.bp-season-theme {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.bp-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
 .bp-level-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -2318,6 +2352,23 @@ body {
 }
 
 /* Collection page */
+.collection-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.collection-rarity-section {
+  margin-bottom: 0.5rem;
+}
+
 .collection-count {
   font-size: 0.85rem;
   color: var(--text-muted);
