@@ -126,11 +126,11 @@ export const RARITY_COLORS: Record<CardRarity, string> = {
 // ── Drop ──
 
 const RARITY_WEIGHTS: Record<CardRarity, number> = {
-  commune: 45,
-  rare: 30,
-  epique: 16,
-  legendaire: 7,
-  historique: 2,
+  commune: 50,
+  rare: 34,
+  epique: 12,
+  legendaire: 3,
+  historique: 1,
 };
 
 export function rollCard(

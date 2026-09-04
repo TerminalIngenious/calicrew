@@ -9,11 +9,11 @@ import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
 const DROP_RATES = [
-  { rarity: 'commune' as const, pct: '45%' },
-  { rarity: 'rare' as const, pct: '30%' },
-  { rarity: 'epique' as const, pct: '16%' },
-  { rarity: 'legendaire' as const, pct: '7%' },
-  { rarity: 'historique' as const, pct: '2%' },
+  { rarity: 'commune' as const, pct: '50%' },
+  { rarity: 'rare' as const, pct: '34%' },
+  { rarity: 'epique' as const, pct: '12%' },
+  { rarity: 'legendaire' as const, pct: '3%' },
+  { rarity: 'historique' as const, pct: '1%' },
 ];
 
 export default function Collection() {
