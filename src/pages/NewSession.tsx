@@ -331,7 +331,7 @@ export default function NewSession() {
                   </button>
                 </div>
               </div>
-              {config.exercise.canBeWeighted && (
+              {config.exercise.canBeWeighted !== false && (
                 <div className="config-row weighted-row">
                   <div className="weighted-toggle" onClick={() => {
                     setExerciseConfigs((prev) =>
