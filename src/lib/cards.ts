@@ -40,7 +40,7 @@ const PASS1_CARDS: Card[] = [
   { id: 'p1-macron', name: 'Macron', emoji: '🇫🇷', rarity: 'commune', category: 'Politique', set: 'pass-1' },
   { id: 'p1-macron-forsure', name: 'Macron', subtitle: 'For Sure', emoji: '🎤', rarity: 'rare', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron' },
   { id: 'p1-macron-jetski', name: 'Macron', subtitle: 'Jet-Ski', emoji: '🚤', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron' },
-  { id: 'p1-macron-gilet', name: 'Macron', subtitle: 'Gilet Jaune', emoji: '🟡', rarity: 'legendaire', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron', premiumOnly: true },
+  { id: 'p1-macron-gilet', name: 'Macron', subtitle: 'Gilet Jaune', emoji: '🟡', rarity: 'legendaire', category: 'Politique', set: 'pass-1', baseCardId: 'p1-macron' },
 
   // Trump + variantes
   { id: 'p1-trump', name: 'Trump', emoji: '🍊', rarity: 'commune', category: 'Politique', set: 'pass-1' },
@@ -50,7 +50,7 @@ const PASS1_CARDS: Card[] = [
   // Elon Musk + variantes
   { id: 'p1-elon', name: 'Elon Musk', emoji: '🚀', rarity: 'rare', category: 'Tech', set: 'pass-1' },
   { id: 'p1-elon-x', name: 'Elon Musk', subtitle: 'X Æ A-12', emoji: '🤖', rarity: 'epique', category: 'Tech', set: 'pass-1', baseCardId: 'p1-elon' },
-  { id: 'p1-elon-mars', name: 'Elon Musk', subtitle: 'To Mars', emoji: '🪐', rarity: 'legendaire', category: 'Tech', set: 'pass-1', baseCardId: 'p1-elon', premiumOnly: true },
+  { id: 'p1-elon-mars', name: 'Elon Musk', subtitle: 'To Mars', emoji: '🪐', rarity: 'legendaire', category: 'Tech', set: 'pass-1', baseCardId: 'p1-elon' },
 
   // Kanye + variantes
   { id: 'p1-kanye', name: 'Kanye West', emoji: '🎵', rarity: 'rare', category: 'Musique', set: 'pass-1' },
@@ -60,7 +60,7 @@ const PASS1_CARDS: Card[] = [
   // Poutine + variantes
   { id: 'p1-poutine', name: 'Poutine', emoji: '🐻', rarity: 'rare', category: 'Politique', set: 'pass-1' },
   { id: 'p1-poutine-tsar', name: 'Poutine', subtitle: 'Tsar', emoji: '👑', rarity: 'epique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-poutine' },
-  { id: 'p1-poutine-shirt', name: 'Poutine', subtitle: 'Shirtless', emoji: '🐴', rarity: 'historique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-poutine', premiumOnly: true },
+  { id: 'p1-poutine-shirt', name: 'Poutine', subtitle: 'Shirtless', emoji: '🐴', rarity: 'historique', category: 'Politique', set: 'pass-1', baseCardId: 'p1-poutine' },
 
   // Diddy + variante
   { id: 'p1-diddy', name: 'Diddy', emoji: '🕺', rarity: 'rare', category: 'Musique', set: 'pass-1' },
@@ -136,14 +136,10 @@ const RARITY_WEIGHTS: Record<CardRarity, number> = {
 export function rollCard(
   pool: Card[],
   _ownedCards: Record<string, number>,
-  isPremium: boolean,
 ): Card | null {
-  const available = pool.filter((c) => {
-    if (c.premiumOnly && !isPremium) return false;
-    return true;
-  });
+  if (pool.length === 0) return null;
 
-  if (available.length === 0) return null;
+  const available = pool;
 
   const weighted: Card[] = [];
   for (const card of available) {

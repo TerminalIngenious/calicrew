@@ -6,23 +6,22 @@ const PASS1_QUESTS: Quest[] = [
   { id: 'p1q3', label: 'Endurant', description: 'Entraîne-toi 60 min au total', target: 3600, type: 'duration' },
   { id: 'p1q4', label: 'Touche-à-tout', description: 'Fais 5 exercices différents', target: 5, type: 'exercises' },
   { id: 'p1q5', label: 'Machine', description: 'Complète 30 séries', target: 30, type: 'sets' },
-  { id: 'p1q6', label: 'Cindy Master', description: 'Fais 1 AMRAP cette semaine', target: 1, type: 'amrap', premiumOnly: true },
-  { id: 'p1q7', label: 'No Rest Day', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions', premiumOnly: true },
-  { id: 'p1q8', label: 'Monstre', description: 'Fais 1000 reps cette semaine', target: 1000, type: 'reps', premiumOnly: true },
+  { id: 'p1q6', label: 'Cindy Master', description: 'Fais 1 AMRAP cette semaine', target: 1, type: 'amrap' },
+  { id: 'p1q7', label: 'No Rest Day', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions' },
+  { id: 'p1q8', label: 'Monstre', description: 'Fais 1000 reps cette semaine', target: 1000, type: 'reps' },
 ];
 
 function buildLevels(): PassLevel[] {
   const levels: PassLevel[] = [];
   for (let i = 1; i <= 30; i++) {
     const lvl: PassLevel = { level: i, xpRequired: i * 100 };
-    if (i % 3 === 0) lvl.freeChest = i <= 10 ? 'commune' : i <= 20 ? 'rare' : 'epique';
+    if (i % 2 === 0) lvl.freeChest = i <= 8 ? 'commune' : i <= 16 ? 'rare' : i <= 24 ? 'epique' : 'legendaire';
+    if (i % 3 === 0 && !lvl.freeChest) lvl.freeChest = i <= 10 ? 'commune' : i <= 20 ? 'rare' : 'epique';
     if (i === 10) lvl.freeChest = 'epique';
+    if (i === 15) lvl.freeChest = 'legendaire';
     if (i === 20) lvl.freeChest = 'legendaire';
+    if (i === 25) lvl.freeChest = 'historique';
     if (i === 30) lvl.freeChest = 'historique';
-    if (i % 2 === 0) lvl.premiumChest = i <= 10 ? 'rare' : i <= 20 ? 'epique' : 'legendaire';
-    if (i === 15) lvl.premiumChest = 'legendaire';
-    if (i === 25) lvl.premiumChest = 'historique';
-    if (i === 30) lvl.premiumChest = 'historique';
     levels.push(lvl);
   }
   return levels;

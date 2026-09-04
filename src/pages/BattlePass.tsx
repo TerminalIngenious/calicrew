@@ -6,7 +6,7 @@ import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, XP_PER_QUEST, getWeekStart } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getBaseCards, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card } from '../types';
-import { Swords, Lock, Check, Package, Star, Clock, Trophy, Flame } from 'lucide-react';
+import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -87,7 +87,6 @@ export default function BattlePass() {
     if (!user || !season) return;
     const quest = season.quests.find((q) => q.id === questId);
     if (!quest) return;
-    if (quest.premiumOnly && !progress.isPremium) return;
     if (getQuestValue(questId) < quest.target) return;
     if (isQuestClaimed(questId)) return;
 
@@ -100,9 +99,6 @@ export default function BattlePass() {
       const passLevel = season.passLevels[lvl];
       if (passLevel?.freeChest) {
         newChests.push({ rarity: passLevel.freeChest, pool: 'current' });
-      }
-      if (progress.isPremium && passLevel?.premiumChest) {
-        newChests.push({ rarity: passLevel.premiumChest, pool: 'current' });
       }
     }
 
@@ -127,7 +123,7 @@ export default function BattlePass() {
       ? [...getBaseCards(), ...getCardsBySet(season.id)]
       : getBaseCards();
 
-    const card = rollCard(pool, progress.ownedCards, progress.isPremium);
+    const card = rollCard(pool, progress.ownedCards);
 
     await new Promise((r) => setTimeout(r, 800));
 
@@ -166,8 +162,8 @@ export default function BattlePass() {
   const timeLeft = getSeasonTimeLeft(season);
   const levelInfo = getLevelFromXp(progress.passXp, season.passLevels);
   const progressPct = levelInfo.xpForNext > 0 ? (levelInfo.currentLevelXp / levelInfo.xpForNext) * 100 : 100;
-  const totalQuestsDone = season.quests.filter((q) => !q.premiumOnly || progress.isPremium).filter((q) => isQuestClaimed(q.id)).length;
-  const totalQuestsAvailable = season.quests.filter((q) => !q.premiumOnly || progress.isPremium).length;
+  const totalQuestsDone = season.quests.filter((q) => isQuestClaimed(q.id)).length;
+  const totalQuestsAvailable = season.quests.length;
 
   return (
     <div className="page bp-page">
@@ -177,10 +173,7 @@ export default function BattlePass() {
           <div className="bp-hero-left">
             <span className="bp-hero-season">{season.name}</span>
             <h1 className="bp-hero-title">{season.theme}</h1>
-            {progress.isPremium && (
-              <span className="bp-premium-tag"><Star size={10} /> PREMIUM</span>
-            )}
-          </div>
+              </div>
           <div className="bp-hero-timer">
             <Clock size={14} />
             <div>
@@ -268,22 +261,18 @@ export default function BattlePass() {
               const current = getQuestValue(quest.id);
               const done = current >= quest.target;
               const claimed = isQuestClaimed(quest.id);
-              const locked = quest.premiumOnly && !progress.isPremium;
               const pct = Math.min(100, (current / quest.target) * 100);
 
               return (
-                <div key={quest.id} className={`bp-quest ${claimed ? 'bp-quest-claimed' : ''} ${locked ? 'bp-quest-locked' : ''} ${done && !claimed ? 'bp-quest-ready' : ''}`}>
-                  <div className="bp-quest-accent" style={{ background: claimed ? 'var(--accent-green)' : done ? 'var(--accent)' : locked ? 'var(--border)' : 'var(--accent)' }} />
+                <div key={quest.id} className={`bp-quest ${claimed ? 'bp-quest-claimed' : ''} ${done && !claimed ? 'bp-quest-ready' : ''}`}>
+                  <div className="bp-quest-accent" style={{ background: claimed ? 'var(--accent-green)' : done ? 'var(--accent)' : 'var(--accent)' }} />
                   <div className="bp-quest-body">
                     <div className="bp-quest-top">
                       <div className="bp-quest-title-row">
                         <span className="bp-quest-label">{quest.label}</span>
-                        {quest.premiumOnly && <Star size={11} className="bp-quest-star" />}
                       </div>
                       <div className="bp-quest-reward">
-                        {locked ? (
-                          <Lock size={14} />
-                        ) : claimed ? (
+                        {claimed ? (
                           <span className="bp-quest-done-badge"><Check size={12} /></span>
                         ) : done ? (
                           <button className="bp-quest-claim" onClick={() => claimQuest(quest.id)}>
@@ -317,8 +306,7 @@ export default function BattlePass() {
         <div className="bp-track-table">
           <div className="bp-track-header">
             <div className="bp-track-col-lvl">Niv.</div>
-            <div className="bp-track-col-free">Gratuit</div>
-            <div className="bp-track-col-premium"><Star size={12} /> Premium</div>
+            <div className="bp-track-col-reward">Récompense</div>
           </div>
           {season.passLevels.map((lvl) => {
             const reached = levelInfo.level >= lvl.level;
@@ -329,21 +317,11 @@ export default function BattlePass() {
                 <div className="bp-track-col-lvl">
                   <span className="bp-track-lvl-num">{reached ? <Check size={12} /> : lvl.level}</span>
                 </div>
-                <div className="bp-track-col-free">
+                <div className="bp-track-col-reward">
                   {lvl.freeChest ? (
                     <div className="bp-track-chest" style={{ borderColor: RARITY_COLORS[lvl.freeChest] }}>
                       <Package size={14} style={{ color: RARITY_COLORS[lvl.freeChest] }} />
                       <span style={{ color: RARITY_COLORS[lvl.freeChest] }}>{RARITY_LABELS[lvl.freeChest]}</span>
-                    </div>
-                  ) : (
-                    <span className="bp-track-empty">—</span>
-                  )}
-                </div>
-                <div className="bp-track-col-premium">
-                  {lvl.premiumChest ? (
-                    <div className="bp-track-chest bp-track-chest-gold" style={{ borderColor: RARITY_COLORS[lvl.premiumChest] }}>
-                      <Package size={14} style={{ color: RARITY_COLORS[lvl.premiumChest] }} />
-                      <span style={{ color: RARITY_COLORS[lvl.premiumChest] }}>{RARITY_LABELS[lvl.premiumChest]}</span>
                     </div>
                   ) : (
                     <span className="bp-track-empty">—</span>

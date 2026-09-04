@@ -2508,7 +2508,7 @@ body {
 
 .bp-track-header {
   display: grid;
-  grid-template-columns: 50px 1fr 1fr;
+  grid-template-columns: 50px 1fr;
   background: linear-gradient(135deg, #1a1a35, #1e1e40);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -2527,22 +2527,13 @@ body {
   text-align: center;
 }
 
-.bp-track-header .bp-track-col-free {
+.bp-track-header .bp-track-col-reward {
   color: var(--text-muted);
-}
-
-.bp-track-header .bp-track-col-premium {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  color: #ffd700;
-  background: rgba(255, 215, 0, 0.05);
 }
 
 .bp-track-row {
   display: grid;
-  grid-template-columns: 50px 1fr 1fr;
+  grid-template-columns: 50px 1fr;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   transition: background 0.2s;
 }
@@ -2578,17 +2569,11 @@ body {
   color: var(--accent);
 }
 
-.bp-track-col-free,
-.bp-track-col-premium {
+.bp-track-col-reward {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.4rem 0.35rem;
-}
-
-.bp-track-col-premium {
-  background: rgba(255, 215, 0, 0.02);
-  border-left: 1px solid rgba(255, 215, 0, 0.08);
 }
 
 .bp-track-chest {
