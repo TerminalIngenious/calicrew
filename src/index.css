@@ -2499,138 +2499,118 @@ body {
   color: var(--text-muted);
 }
 
-/* Pass Track Timeline */
-.bp-track-timeline {
-  position: relative;
-  padding-left: 1.5rem;
-}
-
-.bp-track-node {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.35rem 0;
-  min-height: 40px;
-}
-
-.bp-track-line-segment {
-  position: absolute;
-  left: -1.5rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  margin-left: 11px;
-  background: var(--border);
+/* Pass Track Table */
+.bp-track-table {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
-.bp-track-line-fill {
-  width: 100%;
-  background: linear-gradient(180deg, var(--accent), var(--accent-light));
-  transition: height 0.4s ease;
+.bp-track-header {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr;
+  background: linear-gradient(135deg, #1a1a35, #1e1e40);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-.bp-track-node:first-child .bp-track-line-segment {
-  top: 50%;
+.bp-track-header .bp-track-col-lvl,
+.bp-track-header .bp-track-col-free,
+.bp-track-header .bp-track-col-premium {
+  padding: 0.6rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: center;
 }
 
-.bp-track-node:last-child .bp-track-line-segment {
-  bottom: 50%;
+.bp-track-header .bp-track-col-free {
+  color: var(--text-muted);
 }
 
-.bp-track-dot {
-  position: absolute;
-  left: -1.5rem;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--bg-card);
-  border: 2px solid var(--border);
+.bp-track-header .bp-track-col-premium {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  z-index: 1;
-  transition: all 0.3s;
+  gap: 0.25rem;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.05);
 }
 
-.bp-track-node.reached .bp-track-dot {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+.bp-track-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 0.2s;
 }
 
-.bp-track-node.current .bp-track-dot {
-  border-color: var(--accent);
-  color: var(--accent);
-  animation: dotPulse 2s ease-in-out infinite;
+.bp-track-row:last-child {
+  border-bottom: none;
 }
 
-@keyframes dotPulse {
-  0%, 100% { box-shadow: 0 0 0 transparent; }
-  50% { box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15); }
+.bp-track-row.reached {
+  background: rgba(255, 107, 53, 0.04);
 }
 
-.bp-track-node-content {
-  flex: 1;
+.bp-track-row.current {
+  background: rgba(255, 107, 53, 0.08);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.bp-track-col-lvl {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.45rem 0.65rem;
-  transition: border-color 0.2s;
+  justify-content: center;
+  padding: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.bp-track-node.reached .bp-track-node-content {
-  border-color: rgba(255, 107, 53, 0.2);
-  background: linear-gradient(135deg, var(--bg-card), rgba(255, 107, 53, 0.03));
-}
-
-.bp-track-node.current .bp-track-node-content {
-  border-color: rgba(255, 107, 53, 0.3);
-}
-
-.bp-track-node-level {
+.bp-track-lvl-num {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
 }
 
-.bp-track-node.reached .bp-track-node-level {
+.bp-track-row.reached .bp-track-lvl-num {
   color: var(--accent);
 }
 
-.bp-track-node-rewards {
+.bp-track-col-free,
+.bp-track-col-premium {
   display: flex;
-  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.35rem;
+}
+
+.bp-track-col-premium {
+  background: rgba(255, 215, 0, 0.02);
+  border-left: 1px solid rgba(255, 215, 0, 0.08);
 }
 
 .bp-track-chest {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.2rem;
   border: 1px solid;
   border-radius: 6px;
-  padding: 0.15rem 0.35rem;
+  padding: 0.2rem 0.4rem;
   font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
-.bp-track-chest-premium {
+.bp-track-chest-gold {
   background: rgba(255, 215, 0, 0.06);
 }
 
-.bp-track-node-empty {
-  color: var(--border);
-  font-size: 0.75rem;
+.bp-track-empty {
+  color: rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
 }
 
 /* Collection page */

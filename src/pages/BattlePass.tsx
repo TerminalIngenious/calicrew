@@ -314,47 +314,45 @@ export default function BattlePass() {
       )}
 
       {tab === 'pass' && (
-        <>
-          <div className="bp-track-timeline">
-            {season.passLevels.map((lvl) => {
-              const reached = levelInfo.level >= lvl.level;
-              const isCurrent = levelInfo.level === lvl.level - 1;
-              const hasReward = lvl.freeChest || lvl.premiumChest;
-
-              return (
-                <div key={lvl.level} className={`bp-track-node ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''}`}>
-                  <div className="bp-track-line-segment">
-                    <div className="bp-track-line-fill" style={{ height: reached ? '100%' : isCurrent ? `${progressPct}%` : '0%' }} />
-                  </div>
-                  <div className="bp-track-dot">
-                    {reached ? <Check size={12} /> : <span>{lvl.level}</span>}
-                  </div>
-                  <div className="bp-track-node-content">
-                    <span className="bp-track-node-level">Niveau {lvl.level}</span>
-                    {hasReward ? (
-                      <div className="bp-track-node-rewards">
-                        {lvl.freeChest && (
-                          <div className="bp-track-chest" style={{ borderColor: RARITY_COLORS[lvl.freeChest] }}>
-                            <Package size={13} style={{ color: RARITY_COLORS[lvl.freeChest] }} />
-                            <span style={{ color: RARITY_COLORS[lvl.freeChest] }}>{RARITY_LABELS[lvl.freeChest]}</span>
-                          </div>
-                        )}
-                        {lvl.premiumChest && (
-                          <div className="bp-track-chest bp-track-chest-premium" style={{ borderColor: RARITY_COLORS[lvl.premiumChest] }}>
-                            <Star size={10} style={{ color: '#ffd700' }} />
-                            <Package size={13} style={{ color: RARITY_COLORS[lvl.premiumChest] }} />
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="bp-track-node-empty">-</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+        <div className="bp-track-table">
+          <div className="bp-track-header">
+            <div className="bp-track-col-lvl">Niv.</div>
+            <div className="bp-track-col-free">Gratuit</div>
+            <div className="bp-track-col-premium"><Star size={12} /> Premium</div>
           </div>
-        </>
+          {season.passLevels.map((lvl) => {
+            const reached = levelInfo.level >= lvl.level;
+            const isCurrent = levelInfo.level === lvl.level - 1;
+
+            return (
+              <div key={lvl.level} className={`bp-track-row ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''}`}>
+                <div className="bp-track-col-lvl">
+                  <span className="bp-track-lvl-num">{reached ? <Check size={12} /> : lvl.level}</span>
+                </div>
+                <div className="bp-track-col-free">
+                  {lvl.freeChest ? (
+                    <div className="bp-track-chest" style={{ borderColor: RARITY_COLORS[lvl.freeChest] }}>
+                      <Package size={14} style={{ color: RARITY_COLORS[lvl.freeChest] }} />
+                      <span style={{ color: RARITY_COLORS[lvl.freeChest] }}>{RARITY_LABELS[lvl.freeChest]}</span>
+                    </div>
+                  ) : (
+                    <span className="bp-track-empty">—</span>
+                  )}
+                </div>
+                <div className="bp-track-col-premium">
+                  {lvl.premiumChest ? (
+                    <div className="bp-track-chest bp-track-chest-gold" style={{ borderColor: RARITY_COLORS[lvl.premiumChest] }}>
+                      <Package size={14} style={{ color: RARITY_COLORS[lvl.premiumChest] }} />
+                      <span style={{ color: RARITY_COLORS[lvl.premiumChest] }}>{RARITY_LABELS[lvl.premiumChest]}</span>
+                    </div>
+                  ) : (
+                    <span className="bp-track-empty">—</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       <BottomNav />
