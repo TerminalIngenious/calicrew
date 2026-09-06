@@ -111,7 +111,7 @@ function buildLevels(): PassLevel[] {
     levels.push({
       level: i,
       xpRequired: i >= 25 ? 400 : 200,
-      freeChest: i === 30 ? 'epique' : 'commune',
+      freeChest: i === 30 ? 'epique' : i === 15 ? 'rare' : 'commune',
     });
   }
   return levels;

@@ -276,18 +276,26 @@ export default function BattlePass() {
                 <Package size={16} /> Coffres ({progress.chestsToOpen.length})
               </h3>
               <div className="bp-chest-row">
-                {progress.chestsToOpen.map((_chest, i) => (
-                  <button
-                    key={i}
-                    className={`bp-chest ${i === 0 ? 'bp-chest-active' : ''}`}
-                    onClick={i === 0 ? openChest : undefined}
-                    disabled={i !== 0 || chestOpening}
-                  >
-                    <div className="bp-chest-glow" style={{ background: 'var(--accent)' }} />
-                    <Package size={22} style={{ color: 'var(--accent)' }} />
-                    <span className="bp-chest-label">Ouvrir</span>
-                  </button>
-                ))}
+                {progress.chestsToOpen.map((chest, i) => {
+                  const chestColor = chest.rarity === 'epique' ? RARITY_COLORS.epique
+                    : chest.rarity === 'rare' ? RARITY_COLORS.rare
+                    : 'var(--accent)';
+                  const chestLabel = chest.rarity === 'epique' ? 'Épique'
+                    : chest.rarity === 'rare' ? 'Rare'
+                    : 'Ouvrir';
+                  return (
+                    <button
+                      key={i}
+                      className={`bp-chest ${i === 0 ? 'bp-chest-active' : ''}`}
+                      onClick={i === 0 ? openChest : undefined}
+                      disabled={i !== 0 || chestOpening}
+                    >
+                      <div className="bp-chest-glow" style={{ background: chestColor }} />
+                      <Package size={22} style={{ color: chestColor }} />
+                      <span className="bp-chest-label" style={{ color: chestColor }}>{chestLabel}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -354,15 +362,22 @@ export default function BattlePass() {
             const reached = levelInfo.level >= lvl.level;
             const isCurrent = levelInfo.level === lvl.level - 1;
 
+            const lvlChestColor = lvl.freeChest === 'epique' ? RARITY_COLORS.epique
+              : lvl.freeChest === 'rare' ? RARITY_COLORS.rare
+              : undefined;
+            const lvlChestLabel = lvl.freeChest === 'epique' ? 'Coffre Épique'
+              : lvl.freeChest === 'rare' ? 'Coffre Rare'
+              : 'Coffre';
+
             return (
               <div key={lvl.level} className={`bp-track-row ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''}`}>
                 <div className="bp-track-col-lvl">
                   <span className="bp-track-lvl-num">{reached ? <Check size={12} /> : lvl.level}</span>
                 </div>
                 <div className="bp-track-col-reward">
-                  <div className="bp-track-chest">
+                  <div className="bp-track-chest" style={lvlChestColor ? { color: lvlChestColor } : undefined}>
                     <Package size={14} />
-                    <span>Coffre</span>
+                    <span>{lvlChestLabel}</span>
                   </div>
                 </div>
               </div>
