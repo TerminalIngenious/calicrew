@@ -51,16 +51,19 @@ export default function Group() {
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [showCreate, setShowCreate] = useState(false);
-  const [showJoin, setShowJoin] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GroupType[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchLoaded, setSearchLoaded] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('reps');
   const [loading, setLoading] = useState(true);
   const [pendingNames, setPendingNames] = useState<Map<string, string>>(new Map());
   const [showMembers, setShowMembers] = useState(false);
   const [selectedMember, setSelectedMember] = useState<LeaderboardEntry | null>(null);
+  const [showExplore, setShowExplore] = useState(false);
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
+  const [expandedMembers, setExpandedMembers] = useState<Map<string, string[]>>(new Map());
 
   const loadGroups = useCallback(async () => {
     if (!user) return;
@@ -198,23 +201,46 @@ export default function Group() {
     }
   }
 
-  async function searchGroups() {
-    if (!searchQuery.trim()) return;
+  function normalize(str: string): string {
+    return str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  async function loadAllGroups() {
     setSearching(true);
     try {
       const allGroupsSnap = await getDocs(collection(db, 'groups'));
-      const results = allGroupsSnap.docs
-        .map((d) => ({ id: d.id, ...d.data() } as GroupType))
-        .filter((g) =>
-          g.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !g.memberIds.includes(user!.uid)
-        );
-      setSearchResults(results);
+      const all = allGroupsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as GroupType));
+      setSearchResults(all);
+      setSearchLoaded(true);
     } catch (err) {
-      console.error(err);
+      console.error('Erreur chargement groupes:', err);
     } finally {
       setSearching(false);
     }
+  }
+
+  function getFilteredResults() {
+    if (!searchQuery.trim()) return searchResults;
+    const q = normalize(searchQuery);
+    return searchResults.filter((g) => normalize(g.name).includes(q));
+  }
+
+  async function loadGroupMembers(groupId: string, memberIds: string[]) {
+    if (expandedMembers.has(groupId)) return;
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const names: string[] = [];
+    usersSnap.docs.forEach((d) => {
+      const data = d.data();
+      if (data.uid && memberIds.includes(data.uid)) {
+        names.push(data.displayName || 'Inconnu');
+      }
+    });
+    setExpandedMembers((prev) => new Map(prev).set(groupId, names));
+  }
+
+  function openExplore() {
+    setShowExplore(true);
+    if (!searchLoaded) loadAllGroups();
   }
 
   async function requestJoin(groupId: string) {
@@ -372,11 +398,14 @@ export default function Group() {
     <div className="page">
       <header className="page-header">
         <h1>Groupe</h1>
+        <button className="explore-btn" onClick={openExplore}>
+          <Search size={16} /> Explorer
+        </button>
       </header>
 
       {loading ? (
         <div className="page loading"><Loader /></div>
-      ) : groups.length === 0 && !showCreate && !showJoin ? (
+      ) : groups.length === 0 && !showCreate ? (
         <div className="empty-group">
           <Users size={48} />
           <p>Rejoins ou crée un groupe pour te mesurer à tes potes !</p>
@@ -384,7 +413,7 @@ export default function Group() {
             <button className="primary-btn" onClick={() => setShowCreate(true)}>
               Créer un groupe
             </button>
-            <button className="secondary-btn" onClick={() => setShowJoin(true)}>
+            <button className="secondary-btn" onClick={openExplore}>
               Rejoindre
             </button>
           </div>
@@ -411,53 +440,92 @@ export default function Group() {
         </div>
       )}
 
-      {showJoin && (
-        <div className="modal-card">
-          <h3>Rejoindre un groupe</h3>
-          <div className="search-bar">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Rechercher un groupe..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && searchGroups()}
-            />
-            <button className="search-go" onClick={searchGroups} disabled={searching}>
-              {searching ? '...' : 'Chercher'}
-            </button>
-          </div>
-          {searchResults.length > 0 && (
-            <div className="search-results">
-              {searchResults.map((g) => {
-                const status = getRequestStatus(g);
-                return (
-                  <div key={g.id} className="search-result-item">
-                    <div>
-                      <span className="search-result-name">{g.name}</span>
-                      <span className="search-result-members">
-                        {g.memberIds.length} membre{g.memberIds.length > 1 ? 's' : ''}
-                      </span>
-                    </div>
-                    {status === 'none' ? (
-                      <button className="primary-btn small" onClick={() => requestJoin(g.id)}>
-                        <UserPlus size={14} /> Demander
-                      </button>
-                    ) : status === 'pending' ? (
-                      <span className="pending-badge">En attente</span>
-                    ) : null}
-                  </div>
-                );
-              })}
+      {showExplore && (
+        <div className="modal-overlay" onClick={() => { setShowExplore(false); setSearchQuery(''); }}>
+          <div className="explore-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="explore-modal-header">
+              <h3>Explorer les groupes</h3>
+              <button className="member-modal-close" onClick={() => { setShowExplore(false); setSearchQuery(''); }}>
+                <X size={18} />
+              </button>
             </div>
-          )}
-          {searchResults.length === 0 && searchQuery && !searching && (
-            <p className="empty" style={{ padding: '1rem 0' }}>Aucun groupe trouvé</p>
-          )}
-          <div className="modal-actions" style={{ marginTop: '0.75rem' }}>
-            <button className="secondary-btn" onClick={() => { setShowJoin(false); setSearchResults([]); setSearchQuery(''); }}>
-              Annuler
-            </button>
+            <div className="search-bar">
+              <Search size={18} />
+              <input
+                type="text"
+                placeholder="Rechercher un groupe..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {searching ? (
+              <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)' }}>Chargement...</div>
+            ) : (
+              <div className="explore-results">
+                {getFilteredResults().length === 0 ? (
+                  <p className="empty" style={{ padding: '1.5rem 0' }}>Aucun groupe trouvé</p>
+                ) : (
+                  getFilteredResults().map((g) => {
+                    const status = getRequestStatus(g);
+                    const isExpanded = expandedGroupId === g.id;
+                    const memberNames = expandedMembers.get(g.id);
+                    return (
+                      <div key={g.id} className="explore-group-card">
+                        <div
+                          className="explore-group-header"
+                          onClick={() => {
+                            if (isExpanded) {
+                              setExpandedGroupId(null);
+                            } else {
+                              setExpandedGroupId(g.id);
+                              loadGroupMembers(g.id, g.memberIds);
+                            }
+                          }}
+                        >
+                          <div className="explore-group-info">
+                            <span className="explore-group-name">{g.name}</span>
+                            <span className="explore-group-count">
+                              <Users size={12} /> {g.memberIds.length} membre{g.memberIds.length > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <div className="explore-group-actions">
+                            {status === 'member' ? (
+                              <span className="member-badge-tag">Membre</span>
+                            ) : status === 'pending' ? (
+                              <span className="pending-badge">En attente</span>
+                            ) : (
+                              <button className="primary-btn small" onClick={(e) => { e.stopPropagation(); requestJoin(g.id); }}>
+                                <UserPlus size={14} /> Demander
+                              </button>
+                            )}
+                            <ChevronDown size={16} className={isExpanded ? 'rotated' : ''} />
+                          </div>
+                        </div>
+                        {isExpanded && (
+                          <div className="explore-group-members">
+                            {memberNames ? (
+                              memberNames.length > 0 ? (
+                                memberNames.map((name, i) => (
+                                  <div key={i} className="explore-member-item">
+                                    <div className="explore-member-avatar">{name[0].toUpperCase()}</div>
+                                    <span>{name}</span>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="empty" style={{ fontSize: '0.8rem' }}>Aucun membre</p>
+                              )
+                            ) : (
+                              <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Chargement...</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
