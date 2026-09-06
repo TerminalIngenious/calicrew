@@ -1,4 +1,19 @@
+import { useState, useEffect } from 'react';
+
 export default function Loader() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((p) => {
+        if (p >= 95) return 95;
+        const jump = p < 30 ? 8 : p < 60 ? 5 : p < 80 ? 3 : 1;
+        return Math.min(95, p + jump);
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="loader-screen">
       <svg viewBox="0 0 200 200" width="120" height="120" className="loader-svg">
@@ -23,7 +38,12 @@ export default function Loader() {
           <line x1="102" y1="127" x2="115" y2="155" stroke="#ff6b35" strokeWidth="5" strokeLinecap="round" />
         </g>
       </svg>
-      <p className="loader-text">Chargement...</p>
+      <div className="loader-bottom">
+        <span className="loader-pct">{progress}%</span>
+        <div className="loader-bar">
+          <div className="loader-bar-fill" style={{ width: `${progress}%` }} />
+        </div>
+      </div>
     </div>
   );
 }
