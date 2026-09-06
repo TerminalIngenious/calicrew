@@ -142,4 +142,5 @@ export interface UserProgress {
   chestsToOpen: { rarity: CardRarity; pool: 'current' | 'old' }[];
   achievementsClaimed: string[];
   currentSeasonId: string;
+  avatarCardId?: string;
 }

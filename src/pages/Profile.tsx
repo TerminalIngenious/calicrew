@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
-import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
-import type { UserProgress, Session } from '../types';
+import type { UserProgress, Session, Card } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -24,6 +24,8 @@ export default function Profile() {
   const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [avatarCardId, setAvatarCardId] = useState<string | undefined>();
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const load = useCallback(async () => {
     if (!targetUid) return;
@@ -48,6 +50,7 @@ export default function Profile() {
     if (progressSnap.exists()) {
       const data = progressSnap.data() as UserProgress;
       setOwnedCards(data.ownedCards || {});
+      setAvatarCardId(data.avatarCardId);
     }
 
     setLoading(false);
@@ -84,6 +87,16 @@ export default function Profile() {
   const ownedCardIds = Object.keys(ownedCards).filter((id) => ownedCards[id] > 0);
   const uniqueCards = allCards.filter((c) => ownedCardIds.includes(c.id));
 
+  const avatarCard = avatarCardId ? allCards.find((c) => c.id === avatarCardId) : undefined;
+
+  async function selectAvatar(card: Card | null) {
+    if (!targetUid) return;
+    const newId = card?.id || null;
+    await updateDoc(doc(db, 'userProgress', targetUid), { avatarCardId: newId });
+    setAvatarCardId(newId ?? undefined);
+    setShowAvatarPicker(false);
+  }
+
   if (loading) return <div className="page loading"><Loader /></div>;
 
   return (
@@ -99,12 +112,64 @@ export default function Profile() {
       </header>
 
       <div className="profile-header-card">
-        <div className="profile-avatar">
-          {(displayName || '?')[0].toUpperCase()}
+        <div
+          className={`profile-avatar ${avatarCard?.image ? 'has-image' : ''} ${isOwnProfile ? 'editable' : ''}`}
+          onClick={isOwnProfile ? () => setShowAvatarPicker(true) : undefined}
+        >
+          {avatarCard?.image ? (
+            <img src={avatarCard.image} alt={getCardDisplayName(avatarCard)} className="profile-avatar-img" />
+          ) : (
+            (displayName || '?')[0].toUpperCase()
+          )}
+          {isOwnProfile && <span className="profile-avatar-edit">Modifier</span>}
         </div>
         <h2 className="profile-name">{displayName}</h2>
         <span className="profile-cards-count">{uniqueCards.length}/{allCards.length} cartes</span>
       </div>
+
+      {showAvatarPicker && (
+        <div className="avatar-picker-overlay" onClick={() => setShowAvatarPicker(false)}>
+          <div className="avatar-picker" onClick={(e) => e.stopPropagation()}>
+            <div className="avatar-picker-header">
+              <h3>Choisir un avatar</h3>
+              <button className="icon-btn" onClick={() => setShowAvatarPicker(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            {uniqueCards.length === 0 ? (
+              <p className="empty">Débloque des cartes pour les utiliser comme avatar !</p>
+            ) : (
+              <div className="avatar-picker-grid">
+                <div
+                  className={`avatar-picker-item ${!avatarCardId ? 'selected' : ''}`}
+                  onClick={() => selectAvatar(null)}
+                >
+                  <div className="avatar-picker-default">
+                    {(displayName || '?')[0].toUpperCase()}
+                  </div>
+                </div>
+                {RARITY_ORDER.flatMap((rarity) =>
+                  uniqueCards
+                    .filter((c) => c.rarity === rarity)
+                    .map((card) => (
+                      <div
+                        key={card.id}
+                        className={`avatar-picker-item ${avatarCardId === card.id ? 'selected' : ''}`}
+                        onClick={() => selectAvatar(card)}
+                      >
+                        {card.image ? (
+                          <img src={card.image} alt={getCardDisplayName(card)} loading="lazy" />
+                        ) : (
+                          <span className="avatar-picker-emoji">{card.emoji}</span>
+                        )}
+                      </div>
+                    ))
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <section className="section">
         <h3>Records</h3>
