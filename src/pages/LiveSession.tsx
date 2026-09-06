@@ -263,6 +263,45 @@ export default function LiveSession() {
         ) : (
           <div className="recap-exercises">
             {session.exercises.map((ex, exIdx) => {
+              if (ex.exerciseCategory === 'running') {
+                const paceMin = ex.runDistance && ex.runDistance > 0 && ex.runDuration
+                  ? ex.runDuration / 60 / ex.runDistance : 0;
+                const paceM = Math.floor(paceMin);
+                const paceS = Math.round((paceMin - paceM) * 60);
+                return (
+                  <div key={exIdx} className="recap-exercise-card">
+                    <div className="recap-exercise-header">
+                      <div>
+                        <h3>{ex.exerciseName}</h3>
+                      </div>
+                      <span className="recap-exercise-badge done">Complété</span>
+                    </div>
+                    <div className="recap-stats-row" style={{ marginTop: '0.75rem' }}>
+                      <div className="recap-mini-stat">
+                        <span className="recap-mini-value">{ex.runDuration ? Math.floor(ex.runDuration / 60) : 0}</span>
+                        <span>min</span>
+                      </div>
+                      <div className="recap-mini-stat">
+                        <span className="recap-mini-value">{ex.runDistance || 0}</span>
+                        <span>km</span>
+                      </div>
+                      {paceMin > 0 && (
+                        <div className="recap-mini-stat">
+                          <span className="recap-mini-value">{paceM}:{String(paceS).padStart(2, '0')}</span>
+                          <span>min/km</span>
+                        </div>
+                      )}
+                      {(ex.runElevation || 0) > 0 && (
+                        <div className="recap-mini-stat">
+                          <span className="recap-mini-value">{ex.runElevation}</span>
+                          <span>m D+</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
               const exCompletedSets = ex.sets.filter((s) => s.completed).length;
               const exTotalReps = ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0);
               const allDone = exCompletedSets === ex.sets.length;

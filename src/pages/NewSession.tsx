@@ -5,7 +5,7 @@ import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Exercise, ExerciseLog } from '../types';
-import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge } from 'lucide-react';
 
 export default function NewSession() {
   const { user } = useAuth();
@@ -14,6 +14,9 @@ export default function NewSession() {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseConfigs, setExerciseConfigs] = useState<
     { exercise: Exercise; targetSets: number; targetTotal: number; weighted: boolean; weight: number }[]
+  >([]);
+  const [runningConfigs, setRunningConfigs] = useState<
+    { exercise: Exercise; duration: number; distance: number; elevation: number }[]
   >([]);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -97,8 +100,13 @@ export default function NewSession() {
   }
 
   function goToConfig() {
+    const normal = selectedExercises.filter((ex) => ex.category !== 'running');
+    const running = selectedExercises.filter((ex) => ex.category === 'running');
     setExerciseConfigs(
-      selectedExercises.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 5 }))
+      normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 5 }))
+    );
+    setRunningConfigs(
+      running.map((ex) => ({ exercise: ex, duration: 30, distance: 5, elevation: 0 }))
     );
     setStep('config');
   }
@@ -115,7 +123,7 @@ export default function NewSession() {
 
   async function startSession() {
     const now = Date.now();
-    const exercises: ExerciseLog[] = exerciseConfigs.map((c) => {
+    const normalExercises: ExerciseLog[] = exerciseConfigs.map((c) => {
       const repsPerSet = Math.ceil(c.targetTotal / c.targetSets);
       const log: ExerciseLog = {
         exerciseId: c.exercise.id,
@@ -132,17 +140,45 @@ export default function NewSession() {
       return log;
     });
 
-    const docRef = await addDoc(collection(db, 'sessions'), {
-      userId: user!.uid,
-      date: new Date().toISOString().split('T')[0],
-      exercises,
-      completed: false,
-      createdAt: now,
-      startedAt: now,
-      duration: 0,
-    });
+    const runningExercises: ExerciseLog[] = runningConfigs.map((c) => ({
+      exerciseId: c.exercise.id,
+      exerciseName: c.exercise.name,
+      exerciseCategory: 'running',
+      targetSets: 1,
+      targetReps: 1,
+      sets: [{ reps: 1, completed: true }],
+      runDuration: c.duration * 60,
+      runDistance: c.distance,
+      runElevation: c.elevation || 0,
+    }));
 
-    navigate(`/session/${docRef.id}`);
+    const exercises = [...normalExercises, ...runningExercises];
+    const isRunningOnly = exerciseConfigs.length === 0;
+    const totalRunDuration = runningConfigs.reduce((sum, c) => sum + c.duration * 60, 0);
+
+    if (isRunningOnly) {
+      const docRef = await addDoc(collection(db, 'sessions'), {
+        userId: user!.uid,
+        date: new Date().toISOString().split('T')[0],
+        exercises,
+        completed: true,
+        createdAt: now,
+        startedAt: now,
+        duration: totalRunDuration,
+      });
+      navigate(`/session/${docRef.id}`);
+    } else {
+      const docRef = await addDoc(collection(db, 'sessions'), {
+        userId: user!.uid,
+        date: new Date().toISOString().split('T')[0],
+        exercises,
+        completed: false,
+        createdAt: now,
+        startedAt: now,
+        duration: 0,
+      });
+      navigate(`/session/${docRef.id}`);
+    }
   }
 
   const allExercises = getAllExercises();
@@ -291,17 +327,96 @@ export default function NewSession() {
     );
   }
 
+  const isRunningOnly = exerciseConfigs.length === 0 && runningConfigs.length > 0;
+
+  function formatPace(durationMin: number, distanceKm: number): string {
+    if (distanceKm <= 0) return '—';
+    const paceMin = durationMin / distanceKm;
+    const m = Math.floor(paceMin);
+    const s = Math.round((paceMin - m) * 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
   return (
     <div className="page">
       <header className="page-header">
         <button className="icon-btn" onClick={() => setStep('select')}>
           <ArrowLeft size={20} />
         </button>
-        <h1>Objectifs</h1>
+        <h1>{isRunningOnly ? 'Log running' : 'Objectifs'}</h1>
         <div />
       </header>
 
       <div className="config-list">
+        {runningConfigs.map((config, i) => (
+          <div key={config.exercise.id} className="config-card running-config">
+            <h3>{config.exercise.name}</h3>
+            <div className="running-form">
+              <div className="running-field">
+                <div className="running-field-label">
+                  <Timer size={16} />
+                  <span>Temps</span>
+                </div>
+                <div className="stepper">
+                  <button onClick={() => setRunningConfigs((prev) =>
+                    prev.map((c, idx) => idx === i ? { ...c, duration: Math.max(1, c.duration - 5) } : c)
+                  )}>
+                    <Minus size={16} />
+                  </button>
+                  <span>{config.duration} min</span>
+                  <button onClick={() => setRunningConfigs((prev) =>
+                    prev.map((c, idx) => idx === i ? { ...c, duration: c.duration + 5 } : c)
+                  )}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="running-field">
+                <div className="running-field-label">
+                  <Route size={16} />
+                  <span>Distance</span>
+                </div>
+                <div className="stepper">
+                  <button onClick={() => setRunningConfigs((prev) =>
+                    prev.map((c, idx) => idx === i ? { ...c, distance: Math.max(0, +(c.distance - 0.5).toFixed(1)) } : c)
+                  )}>
+                    <Minus size={16} />
+                  </button>
+                  <span>{config.distance} km</span>
+                  <button onClick={() => setRunningConfigs((prev) =>
+                    prev.map((c, idx) => idx === i ? { ...c, distance: +(c.distance + 0.5).toFixed(1) } : c)
+                  )}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="running-field">
+                <div className="running-field-label">
+                  <Mountain size={16} />
+                  <span>Dénivelé</span>
+                </div>
+                <div className="stepper">
+                  <button onClick={() => setRunningConfigs((prev) =>
+                    prev.map((c, idx) => idx === i ? { ...c, elevation: Math.max(0, c.elevation - 10) } : c)
+                  )}>
+                    <Minus size={16} />
+                  </button>
+                  <span>{config.elevation} m</span>
+                  <button onClick={() => setRunningConfigs((prev) =>
+                    prev.map((c, idx) => idx === i ? { ...c, elevation: c.elevation + 10 } : c)
+                  )}>
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+              <div className="running-pace">
+                <Gauge size={16} />
+                <span>Allure : {formatPace(config.duration, config.distance)} min/km</span>
+              </div>
+            </div>
+          </div>
+        ))}
+
         {exerciseConfigs.map((config, i) => {
           const repsPerSet = Math.ceil(config.targetTotal / config.targetSets);
           return (
@@ -372,7 +487,7 @@ export default function NewSession() {
       </div>
 
       <button className="primary-btn floating-btn" onClick={startSession}>
-        Lancer la séance
+        {isRunningOnly ? 'Enregistrer' : 'Lancer la séance'}
       </button>
     </div>
   );

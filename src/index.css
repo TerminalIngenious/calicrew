@@ -836,6 +836,48 @@ body {
   font-size: 0.95rem;
 }
 
+/* Running config form */
+.running-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.running-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.running-field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.running-field-label svg {
+  color: var(--accent);
+}
+
+.running-pace {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.running-pace svg {
+  flex-shrink: 0;
+}
+
 /* Session timer */
 .session-timer {
   display: flex;

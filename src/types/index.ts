@@ -20,6 +20,9 @@ export interface ExerciseLog {
   sets: SetLog[];
   weighted?: boolean;
   weight?: number;
+  runDuration?: number;
+  runDistance?: number;
+  runElevation?: number;
 }
 
 export interface Session {
