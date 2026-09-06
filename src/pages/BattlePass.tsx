@@ -129,7 +129,7 @@ export default function BattlePass() {
 
     const chest = progress.chestsToOpen[0];
     const pool = getCardsBySet(chest.pool === 'current' ? season.id : chest.pool);
-    const card = rollCard(pool, progress.ownedCards);
+    const card = rollCard(pool, progress.ownedCards, chest.rarity === 'commune' ? undefined : chest.rarity);
 
     await new Promise((r) => setTimeout(r, 1200));
     setChestPhase('burst');

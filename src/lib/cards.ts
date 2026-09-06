@@ -120,11 +120,17 @@ const RARITY_WEIGHTS: Record<CardRarity, number> = {
 export function rollCard(
   pool: Card[],
   _ownedCards: Record<string, number>,
+  minRarity?: CardRarity,
 ): Card | null {
-  if (pool.length === 0) return null;
+  let filtered = pool;
+  if (minRarity) {
+    const minIndex = RARITY_ORDER.indexOf(minRarity);
+    filtered = pool.filter((c) => RARITY_ORDER.indexOf(c.rarity) <= minIndex);
+  }
+  if (filtered.length === 0) return null;
 
   const weighted: Card[] = [];
-  for (const card of pool) {
+  for (const card of filtered) {
     const w = RARITY_WEIGHTS[card.rarity] || 1;
     for (let i = 0; i < w; i++) weighted.push(card);
   }
