@@ -131,3 +131,11 @@ export function rollCard(
 
   return weighted[Math.floor(Math.random() * weighted.length)];
 }
+
+export function getCardById(cardId: string): Card | undefined {
+  for (const cards of Object.values(CARD_SETS)) {
+    const found = cards.find((c) => c.id === cardId);
+    if (found) return found;
+  }
+  return undefined;
+}

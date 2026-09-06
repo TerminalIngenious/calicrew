@@ -8,16 +8,17 @@ import {
   getDoc,
   addDoc,
   updateDoc,
+  deleteDoc,
   doc,
   arrayUnion,
   arrayRemove,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet } from '../lib/cards';
+import { getCardsBySet, getCardById, getCardDisplayName, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
-import type { Group as GroupType, LeaderboardEntry, Session, UserProgress } from '../types';
+import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell } from 'lucide-react';
+import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -64,6 +65,18 @@ export default function Group() {
   const [showExplore, setShowExplore] = useState(false);
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const [expandedMembers, setExpandedMembers] = useState<Map<string, string[]>>(new Map());
+
+  // Trade states
+  const [showTrades, setShowTrades] = useState(false);
+  const [trades, setTrades] = useState<TradeOffer[]>([]);
+  const [showNewTrade, setShowNewTrade] = useState(false);
+  const [tradeStep, setTradeStep] = useState<'member' | 'myCard' | 'theirCard' | 'confirm'>('member');
+  const [tradeTargetUid, setTradeTargetUid] = useState('');
+  const [tradeTargetName, setTradeTargetName] = useState('');
+  const [tradeOfferedCard, setTradeOfferedCard] = useState<string>('');
+  const [tradeRequestedCard, setTradeRequestedCard] = useState<string>('');
+  const [myOwnedCards, setMyOwnedCards] = useState<Record<string, number>>({});
+  const [targetOwnedCards, setTargetOwnedCards] = useState<Record<string, number>>({});
 
   const loadGroups = useCallback(async () => {
     if (!user) return;
@@ -383,6 +396,92 @@ export default function Group() {
     return awards;
   }
 
+  async function loadTrades() {
+    if (!selectedGroup || !user) return;
+    const tradesSnap = await getDocs(query(collection(db, 'trades'), where('groupId', '==', selectedGroup.id)));
+    const all = tradesSnap.docs
+      .map((d) => ({ id: d.id, ...d.data() } as TradeOffer))
+      .filter((t) => t.status === 'pending' && (t.fromUid === user.uid || t.toUid === user.uid));
+    setTrades(all);
+  }
+
+  async function startNewTrade() {
+    if (!user) return;
+    const progressSnap = await getDoc(doc(db, 'userProgress', user.uid));
+    setMyOwnedCards(progressSnap.exists() ? (progressSnap.data() as UserProgress).ownedCards || {} : {});
+    setTradeStep('member');
+    setTradeTargetUid('');
+    setTradeOfferedCard('');
+    setTradeRequestedCard('');
+    setTargetOwnedCards({});
+    setShowNewTrade(true);
+  }
+
+  async function selectTradeTarget(uid: string, name: string) {
+    setTradeTargetUid(uid);
+    setTradeTargetName(name);
+    const progressSnap = await getDoc(doc(db, 'userProgress', uid));
+    setTargetOwnedCards(progressSnap.exists() ? (progressSnap.data() as UserProgress).ownedCards || {} : {});
+    setTradeStep('myCard');
+  }
+
+  async function sendTradeOffer() {
+    if (!user || !selectedGroup || !tradeOfferedCard || !tradeRequestedCard) return;
+    await addDoc(collection(db, 'trades'), {
+      fromUid: user.uid,
+      toUid: tradeTargetUid,
+      offeredCardId: tradeOfferedCard,
+      requestedCardId: tradeRequestedCard,
+      groupId: selectedGroup.id,
+      status: 'pending',
+      createdAt: Date.now(),
+    });
+    setShowNewTrade(false);
+    await loadTrades();
+  }
+
+  async function acceptTrade(trade: TradeOffer) {
+    if (!user) return;
+    const fromProgressSnap = await getDoc(doc(db, 'userProgress', trade.fromUid));
+    const toProgressSnap = await getDoc(doc(db, 'userProgress', trade.toUid));
+    if (!fromProgressSnap.exists() || !toProgressSnap.exists()) return;
+
+    const fromCards = { ...(fromProgressSnap.data() as UserProgress).ownedCards };
+    const toCards = { ...(toProgressSnap.data() as UserProgress).ownedCards };
+
+    if ((fromCards[trade.offeredCardId] || 0) < 1 || (toCards[trade.requestedCardId] || 0) < 1) {
+      alert('Une des cartes n\'est plus disponible.');
+      return;
+    }
+
+    fromCards[trade.offeredCardId] = (fromCards[trade.offeredCardId] || 0) - 1;
+    fromCards[trade.requestedCardId] = (fromCards[trade.requestedCardId] || 0) + 1;
+    toCards[trade.requestedCardId] = (toCards[trade.requestedCardId] || 0) - 1;
+    toCards[trade.offeredCardId] = (toCards[trade.offeredCardId] || 0) + 1;
+
+    await updateDoc(doc(db, 'userProgress', trade.fromUid), { ownedCards: fromCards });
+    await updateDoc(doc(db, 'userProgress', trade.toUid), { ownedCards: toCards });
+    await updateDoc(doc(db, 'trades', trade.id), { status: 'accepted' });
+    await loadTrades();
+  }
+
+  async function rejectTrade(trade: TradeOffer) {
+    await updateDoc(doc(db, 'trades', trade.id), { status: 'rejected' });
+    await loadTrades();
+  }
+
+  async function cancelTrade(trade: TradeOffer) {
+    await deleteDoc(doc(db, 'trades', trade.id));
+    await loadTrades();
+  }
+
+  function getOwnedCardList(ownedCards: Record<string, number>): { card: Card; count: number }[] {
+    return Object.entries(ownedCards)
+      .filter(([, count]) => count > 0)
+      .map(([id, count]) => ({ card: getCardById(id), count }))
+      .filter((e): e is { card: Card; count: number } => e.card !== undefined);
+  }
+
   function getRequestStatus(group: GroupType): 'none' | 'pending' | 'member' {
     if (group.memberIds.includes(user!.uid)) return 'member';
     if (group.pendingIds?.includes(user!.uid)) return 'pending';
@@ -660,12 +759,210 @@ export default function Group() {
             )}
           </section>
 
+          <section className="section">
+            <button className="members-toggle" onClick={() => { setShowTrades(!showTrades); if (!showTrades) loadTrades(); }}>
+              <h3><ArrowLeftRight size={16} /> Échanges</h3>
+              <ChevronDown size={16} className={showTrades ? 'rotated' : ''} />
+            </button>
+            {showTrades && (
+              <div className="trades-section">
+                <button className="primary-btn small" style={{ marginBottom: '0.75rem' }} onClick={startNewTrade}>
+                  Proposer un échange
+                </button>
+
+                {trades.filter((t) => t.toUid === user!.uid).length > 0 && (
+                  <div className="trades-list">
+                    <span className="trades-list-label">Offres reçues</span>
+                    {trades.filter((t) => t.toUid === user!.uid).map((trade) => {
+                      const offeredCard = getCardById(trade.offeredCardId);
+                      const requestedCard = getCardById(trade.requestedCardId);
+                      const fromName = leaderboard.find((e) => e.uid === trade.fromUid)?.displayName || 'Inconnu';
+                      return (
+                        <div key={trade.id} className="trade-card">
+                          <div className="trade-card-header">
+                            <span className="trade-from">{fromName} propose</span>
+                          </div>
+                          <div className="trade-cards-row">
+                            <div className="trade-card-item" style={{ borderColor: offeredCard ? RARITY_COLORS[offeredCard.rarity] : 'var(--border)' }}>
+                              {offeredCard?.image && <img src={offeredCard.image} alt="" className="trade-card-img" />}
+                              <span className="trade-card-name">{offeredCard ? getCardDisplayName(offeredCard) : '?'}</span>
+                            </div>
+                            <ArrowLeftRight size={16} className="trade-arrow" />
+                            <div className="trade-card-item" style={{ borderColor: requestedCard ? RARITY_COLORS[requestedCard.rarity] : 'var(--border)' }}>
+                              {requestedCard?.image && <img src={requestedCard.image} alt="" className="trade-card-img" />}
+                              <span className="trade-card-name">{requestedCard ? getCardDisplayName(requestedCard) : '?'}</span>
+                            </div>
+                          </div>
+                          <div className="trade-actions">
+                            <button className="accept-btn" onClick={() => acceptTrade(trade)}>
+                              <Check size={14} /> Accepter
+                            </button>
+                            <button className="reject-btn" onClick={() => rejectTrade(trade)}>
+                              <X size={14} /> Refuser
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {trades.filter((t) => t.fromUid === user!.uid).length > 0 && (
+                  <div className="trades-list">
+                    <span className="trades-list-label">Offres envoyées</span>
+                    {trades.filter((t) => t.fromUid === user!.uid).map((trade) => {
+                      const offeredCard = getCardById(trade.offeredCardId);
+                      const requestedCard = getCardById(trade.requestedCardId);
+                      const toName = leaderboard.find((e) => e.uid === trade.toUid)?.displayName || 'Inconnu';
+                      return (
+                        <div key={trade.id} className="trade-card">
+                          <div className="trade-card-header">
+                            <span className="trade-from">À {toName}</span>
+                            <span className="pending-badge">En attente</span>
+                          </div>
+                          <div className="trade-cards-row">
+                            <div className="trade-card-item" style={{ borderColor: offeredCard ? RARITY_COLORS[offeredCard.rarity] : 'var(--border)' }}>
+                              {offeredCard?.image && <img src={offeredCard.image} alt="" className="trade-card-img" />}
+                              <span className="trade-card-name">{offeredCard ? getCardDisplayName(offeredCard) : '?'}</span>
+                            </div>
+                            <ArrowLeftRight size={16} className="trade-arrow" />
+                            <div className="trade-card-item" style={{ borderColor: requestedCard ? RARITY_COLORS[requestedCard.rarity] : 'var(--border)' }}>
+                              {requestedCard?.image && <img src={requestedCard.image} alt="" className="trade-card-img" />}
+                              <span className="trade-card-name">{requestedCard ? getCardDisplayName(requestedCard) : '?'}</span>
+                            </div>
+                          </div>
+                          <button className="secondary-btn small" onClick={() => cancelTrade(trade)}>
+                            Annuler
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {trades.length === 0 && (
+                  <p className="empty" style={{ fontSize: '0.85rem' }}>Aucun échange en cours</p>
+                )}
+              </div>
+            )}
+          </section>
+
           <div className="group-actions" style={{ marginTop: '1rem', justifyContent: 'center' }}>
             <button className="leave-btn" onClick={leaveGroup}>
               <LogOut size={14} /> Quitter le groupe
             </button>
           </div>
         </>
+      )}
+
+      {showNewTrade && (
+        <div className="modal-overlay" onClick={() => setShowNewTrade(false)}>
+          <div className="explore-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="explore-modal-header">
+              <h3>
+                {tradeStep === 'member' && 'Choisir un membre'}
+                {tradeStep === 'myCard' && 'Ta carte à offrir'}
+                {tradeStep === 'theirCard' && `Carte de ${tradeTargetName}`}
+                {tradeStep === 'confirm' && 'Confirmer l\'échange'}
+              </h3>
+              <button className="member-modal-close" onClick={() => setShowNewTrade(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="explore-results" style={{ padding: '1rem 1.25rem 1.5rem' }}>
+              {tradeStep === 'member' && leaderboard
+                .filter((e) => e.uid !== user!.uid)
+                .map((entry) => (
+                  <div key={entry.uid} className="trade-member-item" onClick={() => selectTradeTarget(entry.uid, entry.displayName)}>
+                    <MemberAvatar entry={entry} />
+                    <span>{entry.displayName}</span>
+                    <ArrowRight size={16} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+                  </div>
+                ))
+              }
+
+              {tradeStep === 'myCard' && (
+                <>
+                  <button className="trade-back-btn" onClick={() => setTradeStep('member')}>
+                    ← Retour
+                  </button>
+                  <div className="trade-card-grid">
+                    {getOwnedCardList(myOwnedCards).map(({ card, count }) => (
+                      <div
+                        key={card.id}
+                        className={`trade-card-pick ${tradeOfferedCard === card.id ? 'selected' : ''}`}
+                        style={{ borderColor: RARITY_COLORS[card.rarity] }}
+                        onClick={() => { setTradeOfferedCard(card.id); setTradeStep('theirCard'); }}
+                      >
+                        {card.image && <img src={card.image} alt="" className="trade-card-pick-img" />}
+                        <span className="trade-card-pick-name">{card.name}</span>
+                        {count > 1 && <span className="trade-card-pick-count">×{count}</span>}
+                      </div>
+                    ))}
+                    {getOwnedCardList(myOwnedCards).length === 0 && (
+                      <p className="empty">Tu n'as aucune carte</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {tradeStep === 'theirCard' && (
+                <>
+                  <button className="trade-back-btn" onClick={() => setTradeStep('myCard')}>
+                    ← Retour
+                  </button>
+                  <div className="trade-card-grid">
+                    {getOwnedCardList(targetOwnedCards).map(({ card, count }) => (
+                      <div
+                        key={card.id}
+                        className={`trade-card-pick ${tradeRequestedCard === card.id ? 'selected' : ''}`}
+                        style={{ borderColor: RARITY_COLORS[card.rarity] }}
+                        onClick={() => { setTradeRequestedCard(card.id); setTradeStep('confirm'); }}
+                      >
+                        {card.image && <img src={card.image} alt="" className="trade-card-pick-img" />}
+                        <span className="trade-card-pick-name">{card.name}</span>
+                        {count > 1 && <span className="trade-card-pick-count">×{count}</span>}
+                      </div>
+                    ))}
+                    {getOwnedCardList(targetOwnedCards).length === 0 && (
+                      <p className="empty">Ce membre n'a aucune carte</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {tradeStep === 'confirm' && (() => {
+                const offered = getCardById(tradeOfferedCard);
+                const requested = getCardById(tradeRequestedCard);
+                return (
+                  <div className="trade-confirm">
+                    <button className="trade-back-btn" onClick={() => setTradeStep('theirCard')}>
+                      ← Retour
+                    </button>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                      Tu proposes à <strong>{tradeTargetName}</strong> :
+                    </p>
+                    <div className="trade-cards-row" style={{ justifyContent: 'center' }}>
+                      <div className="trade-card-item" style={{ borderColor: offered ? RARITY_COLORS[offered.rarity] : 'var(--border)' }}>
+                        {offered?.image && <img src={offered.image} alt="" className="trade-card-img" />}
+                        <span className="trade-card-name">{offered ? getCardDisplayName(offered) : '?'}</span>
+                      </div>
+                      <ArrowLeftRight size={18} className="trade-arrow" />
+                      <div className="trade-card-item" style={{ borderColor: requested ? RARITY_COLORS[requested.rarity] : 'var(--border)' }}>
+                        {requested?.image && <img src={requested.image} alt="" className="trade-card-img" />}
+                        <span className="trade-card-name">{requested ? getCardDisplayName(requested) : '?'}</span>
+                      </div>
+                    </div>
+                    <button className="primary-btn" style={{ marginTop: '1.25rem' }} onClick={sendTradeOffer}>
+                      Envoyer l'offre
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
       )}
 
       {selectedMember && (
