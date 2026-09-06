@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LogOut, RefreshCw, Bell, X, ChevronRight } from 'lucide-react';
+import { Plus, LogOut, Bell, X, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -30,8 +30,7 @@ const UPDATES = [
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { sessions, loading, refresh } = useUserSessions();
-  const [refreshing, setRefreshing] = useState(false);
+  const { sessions, loading } = useUserSessions();
   const [showUpdates, setShowUpdates] = useState(false);
   const [expandedUpdate, setExpandedUpdate] = useState<string | null>(null);
 
@@ -60,12 +59,6 @@ export default function Dashboard() {
     return { totalSessions: sessions.length, totalReps, thisWeek };
   }, [sessions]);
 
-  async function handleRefresh() {
-    setRefreshing(true);
-    await refresh();
-    setRefreshing(false);
-  }
-
   function getSessionCategories(s: Session): string {
     const cats = [...new Set(s.exercises.map((e) => e.exerciseCategory || '').filter(Boolean))];
     if (cats.length === 0) {
@@ -84,9 +77,6 @@ export default function Dashboard() {
           <button className="icon-btn notif-btn" onClick={openUpdates}>
             <Bell size={18} />
             {hasUnread && <span className="notif-dot" />}
-          </button>
-          <button className={`icon-btn ${refreshing ? 'spinning' : ''}`} onClick={handleRefresh}>
-            <RefreshCw size={18} />
           </button>
           <button className="icon-btn" onClick={() => signOut()}>
             <LogOut size={20} />
