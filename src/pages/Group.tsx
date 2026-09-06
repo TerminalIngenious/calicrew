@@ -5,6 +5,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   doc,
@@ -12,13 +13,36 @@ import {
   arrayRemove,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import type { Group as GroupType, LeaderboardEntry, Session } from '../types';
+import { getCardsBySet } from '../lib/cards';
+import { getCurrentSeason } from '../lib/passes';
+import type { Group as GroupType, LeaderboardEntry, Session, UserProgress } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
+
+const season = getCurrentSeason();
+const cardMap = new Map(
+  (season ? getCardsBySet(season.id) : []).map((c) => [c.id, c])
+);
+
+function MemberAvatar({ entry }: { entry: LeaderboardEntry }) {
+  const card = entry.avatarCardId ? cardMap.get(entry.avatarCardId) : undefined;
+  if (card?.image) {
+    return (
+      <div className="leaderboard-avatar has-image">
+        <img src={card.image} alt="" className="profile-avatar-img" />
+      </div>
+    );
+  }
+  return (
+    <div className="leaderboard-avatar">
+      {(entry.displayName || '?')[0].toUpperCase()}
+    </div>
+  );
+}
 
 export default function Group() {
   const { user } = useAuth();
@@ -79,11 +103,12 @@ export default function Group() {
   }
 
   async function loadLeaderboard(group: GroupType) {
-    const [usersSnap, ...sessionSnaps] = await Promise.all([
+    const [usersSnap, ...rest] = await Promise.all([
       getDocs(collection(db, 'users')),
-      ...group.memberIds.map((memberId) =>
-        getDocs(query(collection(db, 'sessions'), where('userId', '==', memberId)))
-      ),
+      ...group.memberIds.flatMap((memberId) => [
+        getDocs(query(collection(db, 'sessions'), where('userId', '==', memberId))),
+        getDoc(doc(db, 'userProgress', memberId)),
+      ]),
     ]);
 
     const userMap = new Map<string, string>();
@@ -93,7 +118,10 @@ export default function Group() {
     });
 
     const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
-      const sessions = sessionSnaps[i].docs.map((d) => d.data() as Session);
+      const sessionSnap = rest[i * 2] as Awaited<ReturnType<typeof getDocs>>;
+      const progressSnap = rest[i * 2 + 1] as Awaited<ReturnType<typeof getDoc>>;
+      const sessions = sessionSnap.docs.map((d) => d.data() as Session);
+      const progress = progressSnap.exists() ? (progressSnap.data() as UserProgress) : null;
 
       const totalReps = sessions.reduce(
         (sum, s) =>
@@ -121,6 +149,7 @@ export default function Group() {
         sessionsCount: sessions.length,
         totalDuration,
         exerciseVariety: exerciseIds.size,
+        avatarCardId: progress?.avatarCardId,
       };
     });
 
@@ -510,6 +539,7 @@ export default function Group() {
                   className={`leaderboard-row ${entry.uid === user!.uid ? 'me' : ''}`}
                 >
                   <div className="rank">{getRankIcon(i)}</div>
+                  <MemberAvatar entry={entry} />
                   <div className="leaderboard-info" onClick={() => navigate(`/profile/${entry.uid}`)} style={{ cursor: 'pointer' }}>
                     <span className="leaderboard-name">
                       {entry.displayName}
@@ -538,6 +568,7 @@ export default function Group() {
               <div className="members-list">
                 {leaderboard.map((entry) => (
                   <div key={entry.uid} className="member-item">
+                    <MemberAvatar entry={entry} />
                     <div className="member-info-row">
                       <span className="member-name-label">
                         {entry.displayName}

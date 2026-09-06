@@ -765,6 +765,37 @@ body {
   color: var(--accent-bronze);
 }
 
+.leaderboard-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.leaderboard-avatar.has-image {
+  background: none;
+}
+
+.leaderboard-avatar .profile-avatar-img {
+  width: 160%;
+  height: 160%;
+  object-fit: cover;
+  object-position: center 15%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .leaderboard-info {
   flex: 1;
 }
@@ -1867,8 +1898,12 @@ body {
 .member-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.6rem;
   padding: 0.6rem 1rem;
+}
+
+.member-item .member-info-row {
+  flex: 1;
 }
 
 .member-item + .member-item {

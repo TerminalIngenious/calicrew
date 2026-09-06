@@ -61,6 +61,7 @@ export interface LeaderboardEntry {
   sessionsCount: number;
   totalDuration: number;
   exerciseVariety: number;
+  avatarCardId?: string;
 }
 
 // ── Cards ──
