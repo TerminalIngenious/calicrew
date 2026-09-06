@@ -3212,3 +3212,97 @@ body {
   font-size: 0.85rem;
   color: var(--text-muted);
 }
+
+/* ── Season Splash ── */
+.season-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.season-splash.show {
+  opacity: 1;
+}
+
+.season-splash.exit {
+  opacity: 0;
+}
+
+.season-splash-content {
+  text-align: center;
+  transform: scale(0.85);
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+}
+
+.season-splash.show .season-splash-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.season-splash.exit .season-splash-content {
+  transform: scale(1.1);
+  opacity: 0;
+}
+
+.season-splash-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.75rem;
+  animation: splashSlideUp 0.8s 0.3s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-splash-theme {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #fff 0%, #ff6b35 50%, #ff4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: splashSlideUp 0.8s 0.5s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-splash-line {
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  margin: 1.2rem auto;
+  animation: splashLineExpand 0.6s 1s both ease-out;
+}
+
+.season-splash-sub {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.35);
+  animation: splashSlideUp 0.6s 1.2s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes splashSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashLineExpand {
+  from { width: 0; }
+  to { width: 120px; }
+}

@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SessionsProvider } from './contexts/SessionsContext';
+import { useState, useEffect } from 'react';
+import { getCurrentSeason } from './lib/passes';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewSession from './pages/NewSession';
@@ -26,6 +28,31 @@ function MaintenanceScreen() {
   );
 }
 
+function SeasonSplash({ onDone }: { onDone: () => void }) {
+  const season = getCurrentSeason();
+  const [phase, setPhase] = useState<'enter' | 'show' | 'exit'>('enter');
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase('show'), 100);
+    const t2 = setTimeout(() => setPhase('exit'), 3000);
+    const t3 = setTimeout(onDone, 3800);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [onDone]);
+
+  if (!season) { onDone(); return null; }
+
+  return (
+    <div className={`season-splash ${phase}`} onClick={onDone}>
+      <div className="season-splash-content">
+        <div className="season-splash-label">{season.name}</div>
+        <div className="season-splash-theme">{season.theme}</div>
+        <div className="season-splash-line" />
+        <div className="season-splash-sub">CaliCrew</div>
+      </div>
+    </div>
+  );
+}
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="page loading"><Loader /></div>;
@@ -34,23 +61,48 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function AppContent() {
+  const { user, loading } = useAuth();
+  const [showSplash, setShowSplash] = useState(false);
+  const [splashDone, setSplashDone] = useState(() => !!sessionStorage.getItem('splash-shown'));
+
+  useEffect(() => {
+    if (!loading && user && !splashDone) {
+      setShowSplash(true);
+    }
+  }, [loading, user, splashDone]);
+
+  function handleSplashDone() {
+    setShowSplash(false);
+    setSplashDone(true);
+    sessionStorage.setItem('splash-shown', '1');
+  }
+
+  return (
+    <>
+      {showSplash && <SeasonSplash onDone={handleSplashDone} />}
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
+        <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
+        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+        <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
+        <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
+        <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      </Routes>
+    </>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <SessionsProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
-          <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
-          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-          <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
-          <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
-          <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        </Routes>
+          <AppContent />
         </SessionsProvider>
       </AuthProvider>
     </BrowserRouter>
