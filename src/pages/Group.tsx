@@ -17,7 +17,7 @@ import { getCardsBySet } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import type { Group as GroupType, LeaderboardEntry, Session, UserProgress } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut } from 'lucide-react';
+import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -60,6 +60,7 @@ export default function Group() {
   const [loading, setLoading] = useState(true);
   const [pendingNames, setPendingNames] = useState<Map<string, string>>(new Map());
   const [showMembers, setShowMembers] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<LeaderboardEntry | null>(null);
 
   const loadGroups = useCallback(async () => {
     if (!user) return;
@@ -537,10 +538,12 @@ export default function Group() {
                 <div
                   key={entry.uid}
                   className={`leaderboard-row ${entry.uid === user!.uid ? 'me' : ''}`}
+                  onClick={() => setSelectedMember(entry)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="rank">{getRankIcon(i)}</div>
                   <MemberAvatar entry={entry} />
-                  <div className="leaderboard-info" onClick={() => navigate(`/profile/${entry.uid}`)} style={{ cursor: 'pointer' }}>
+                  <div className="leaderboard-info">
                     <span className="leaderboard-name">
                       {entry.displayName}
                       {entry.uid === user!.uid ? ' (toi)' : ''}
@@ -567,7 +570,7 @@ export default function Group() {
             {showMembers && (
               <div className="members-list">
                 {leaderboard.map((entry) => (
-                  <div key={entry.uid} className="member-item">
+                  <div key={entry.uid} className="member-item" onClick={() => setSelectedMember(entry)} style={{ cursor: 'pointer' }}>
                     <MemberAvatar entry={entry} />
                     <div className="member-info-row">
                       <span className="member-name-label">
@@ -595,6 +598,58 @@ export default function Group() {
             </button>
           </div>
         </>
+      )}
+
+      {selectedMember && (
+        <div className="modal-overlay" onClick={() => setSelectedMember(null)}>
+          <div className="member-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="member-modal-close" onClick={() => setSelectedMember(null)}>
+              <X size={18} />
+            </button>
+            <div className="member-modal-header">
+              <div className="member-modal-avatar">
+                <MemberAvatar entry={selectedMember} />
+              </div>
+              <h3>{selectedMember.displayName}</h3>
+            </div>
+            <div className="member-modal-stats">
+              <div className="member-modal-stat">
+                <Trophy size={16} className="gold" />
+                <div>
+                  <span className="member-modal-stat-value">{selectedMember.sessionsCount}</span>
+                  <span className="member-modal-stat-label">Séances</span>
+                </div>
+              </div>
+              <div className="member-modal-stat">
+                <Zap size={16} style={{ color: 'var(--accent)' }} />
+                <div>
+                  <span className="member-modal-stat-value">{selectedMember.totalReps}</span>
+                  <span className="member-modal-stat-label">Reps</span>
+                </div>
+              </div>
+              <div className="member-modal-stat">
+                <Clock size={16} style={{ color: 'var(--accent-green)' }} />
+                <div>
+                  <span className="member-modal-stat-value">{Math.floor(selectedMember.totalDuration / 60)}min</span>
+                  <span className="member-modal-stat-label">Temps</span>
+                </div>
+              </div>
+              <div className="member-modal-stat">
+                <Dumbbell size={16} style={{ color: 'var(--accent-light)' }} />
+                <div>
+                  <span className="member-modal-stat-value">{selectedMember.totalSets}</span>
+                  <span className="member-modal-stat-label">Séries</span>
+                </div>
+              </div>
+            </div>
+            <button
+              className="member-modal-view-btn"
+              onClick={() => { setSelectedMember(null); navigate(`/profile/${selectedMember.uid}`); }}
+            >
+              Voir le profil complet
+            </button>
+          </div>
+        </div>
       )}
 
       <BottomNav />

@@ -1057,6 +1057,92 @@ body {
   width: 100%;
 }
 
+/* Member modal */
+.member-modal {
+  background: var(--card);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 340px;
+  position: relative;
+}
+
+.member-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.member-modal-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.member-modal-avatar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.member-modal-avatar .leaderboard-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 1.3rem;
+}
+
+.member-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.member-modal-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.member-modal-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+}
+
+.member-modal-stat div {
+  display: flex;
+  flex-direction: column;
+}
+
+.member-modal-stat-value {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.member-modal-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.member-modal-view-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 /* Session categories */
 .session-categories {
   font-weight: 400;
