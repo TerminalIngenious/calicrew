@@ -22,6 +22,7 @@ export default function Collection() {
   const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
   const season = getCurrentSeason();
   const cards: Card[] = season ? getCardsBySet(season.id) : [];
@@ -83,6 +84,19 @@ export default function Collection() {
         </div>
       )}
 
+      {selectedCard && (
+        <div className="modal-overlay" onClick={() => setSelectedCard(null)}>
+          <div className="collection-card-detail" onClick={(e) => e.stopPropagation()}>
+            {selectedCard.image && (
+              <img src={selectedCard.image} alt={getCardDisplayName(selectedCard)} className="collection-detail-img" />
+            )}
+            <button className="bp-card-reveal-close" onClick={() => setSelectedCard(null)}>
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="collection-summary">
         <Layers size={20} />
         <span>{ownedCount} / {cards.length} cartes</span>
@@ -98,21 +112,29 @@ export default function Collection() {
             <h3 className="collection-rarity-header" style={{ color: RARITY_COLORS[rarity] }}>
               {RARITY_LABELS[rarity]} ({ownedInRarity}/{rarityCards.length})
             </h3>
-            <div className="card-grid">
+            <div className="card-grid card-grid-images">
               {rarityCards.map((card) => {
                 const owned = (ownedCards[card.id] || 0) > 0;
                 const count = ownedCards[card.id] || 0;
                 return (
                   <div
                     key={card.id}
-                    className={`collection-card ${owned ? 'owned' : 'locked'}`}
-                    style={{ '--card-color': RARITY_COLORS[card.rarity] } as React.CSSProperties}
+                    className={`collection-card-img ${owned ? 'owned' : 'locked'}`}
+                    onClick={owned ? () => setSelectedCard(card) : undefined}
                   >
-                    <span className="collection-card-emoji">{card.emoji}</span>
-                    <span className="collection-card-name">{getCardDisplayName(card)}</span>
-                    <span className="collection-card-rarity" style={{ color: owned ? RARITY_COLORS[card.rarity] : undefined }}>
-                      {RARITY_LABELS[card.rarity]}
-                    </span>
+                    {card.image ? (
+                      <img
+                        src={card.image}
+                        alt={getCardDisplayName(card)}
+                        className="collection-card-thumb"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="collection-card-emoji-fallback">
+                        <span>{card.emoji}</span>
+                      </div>
+                    )}
+                    {!owned && <div className="collection-card-lock-overlay" />}
                     {count > 1 && <span className="collection-card-count">x{count}</span>}
                   </div>
                 );

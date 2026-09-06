@@ -232,14 +232,18 @@ export default function BattlePass() {
         <div className="modal-overlay" onClick={() => setOpenedCard(null)}>
           <div className="bp-card-reveal" onClick={(e) => e.stopPropagation()}>
             <div className="bp-card-reveal-glow" style={{ background: RARITY_COLORS[openedCard.rarity] }} />
-            <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
-              <span className="bp-card-reveal-rarity-tag" style={{ background: RARITY_COLORS[openedCard.rarity] }}>
-                {RARITY_LABELS[openedCard.rarity]}
-              </span>
-              <span className="bp-card-reveal-emoji">{openedCard.emoji}</span>
-              <h3 className="bp-card-reveal-name">{getCardDisplayName(openedCard)}</h3>
-              <span className="bp-card-reveal-cat">{openedCard.category}</span>
-            </div>
+            {openedCard.image ? (
+              <img src={openedCard.image} alt={getCardDisplayName(openedCard)} className="collection-detail-img" />
+            ) : (
+              <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
+                <span className="bp-card-reveal-rarity-tag" style={{ background: RARITY_COLORS[openedCard.rarity] }}>
+                  {RARITY_LABELS[openedCard.rarity]}
+                </span>
+                <span className="bp-card-reveal-emoji">{openedCard.emoji}</span>
+                <h3 className="bp-card-reveal-name">{getCardDisplayName(openedCard)}</h3>
+                <span className="bp-card-reveal-cat">{openedCard.category}</span>
+              </div>
+            )}
             <button className="bp-card-reveal-close" onClick={() => setOpenedCard(null)}>
               Continuer
             </button>

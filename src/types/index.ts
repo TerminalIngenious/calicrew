@@ -72,6 +72,7 @@ export interface Card {
   name: string;
   subtitle?: string;
   emoji: string;
+  image?: string;
   rarity: CardRarity;
   category: string;
   set: string;
