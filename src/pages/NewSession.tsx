@@ -357,18 +357,18 @@ export default function NewSession() {
                   <Timer size={16} />
                   <span>Temps</span>
                 </div>
-                <div className="stepper">
-                  <button onClick={() => setRunningConfigs((prev) =>
-                    prev.map((c, idx) => idx === i ? { ...c, duration: Math.max(1, c.duration - 5) } : c)
-                  )}>
-                    <Minus size={16} />
-                  </button>
-                  <span>{config.duration} min</span>
-                  <button onClick={() => setRunningConfigs((prev) =>
-                    prev.map((c, idx) => idx === i ? { ...c, duration: c.duration + 5 } : c)
-                  )}>
-                    <Plus size={16} />
-                  </button>
+                <div className="running-input-group">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    className="running-input"
+                    value={config.duration || ''}
+                    placeholder="0"
+                    onChange={(e) => setRunningConfigs((prev) =>
+                      prev.map((c, idx) => idx === i ? { ...c, duration: Math.max(0, parseFloat(e.target.value) || 0) } : c)
+                    )}
+                  />
+                  <span className="running-input-unit">min</span>
                 </div>
               </div>
               <div className="running-field">
@@ -376,18 +376,19 @@ export default function NewSession() {
                   <Route size={16} />
                   <span>Distance</span>
                 </div>
-                <div className="stepper">
-                  <button onClick={() => setRunningConfigs((prev) =>
-                    prev.map((c, idx) => idx === i ? { ...c, distance: Math.max(0, +(c.distance - 0.5).toFixed(1)) } : c)
-                  )}>
-                    <Minus size={16} />
-                  </button>
-                  <span>{config.distance} km</span>
-                  <button onClick={() => setRunningConfigs((prev) =>
-                    prev.map((c, idx) => idx === i ? { ...c, distance: +(c.distance + 0.5).toFixed(1) } : c)
-                  )}>
-                    <Plus size={16} />
-                  </button>
+                <div className="running-input-group">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.1"
+                    className="running-input"
+                    value={config.distance || ''}
+                    placeholder="0"
+                    onChange={(e) => setRunningConfigs((prev) =>
+                      prev.map((c, idx) => idx === i ? { ...c, distance: Math.max(0, parseFloat(e.target.value) || 0) } : c)
+                    )}
+                  />
+                  <span className="running-input-unit">km</span>
                 </div>
               </div>
               <div className="running-field">
@@ -395,18 +396,18 @@ export default function NewSession() {
                   <Mountain size={16} />
                   <span>Dénivelé</span>
                 </div>
-                <div className="stepper">
-                  <button onClick={() => setRunningConfigs((prev) =>
-                    prev.map((c, idx) => idx === i ? { ...c, elevation: Math.max(0, c.elevation - 10) } : c)
-                  )}>
-                    <Minus size={16} />
-                  </button>
-                  <span>{config.elevation} m</span>
-                  <button onClick={() => setRunningConfigs((prev) =>
-                    prev.map((c, idx) => idx === i ? { ...c, elevation: c.elevation + 10 } : c)
-                  )}>
-                    <Plus size={16} />
-                  </button>
+                <div className="running-input-group">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    className="running-input"
+                    value={config.elevation || ''}
+                    placeholder="0"
+                    onChange={(e) => setRunningConfigs((prev) =>
+                      prev.map((c, idx) => idx === i ? { ...c, elevation: Math.max(0, parseInt(e.target.value) || 0) } : c)
+                    )}
+                  />
+                  <span className="running-input-unit">m</span>
                 </div>
               </div>
               <div className="running-pace">

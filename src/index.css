@@ -861,6 +861,41 @@ body {
   color: var(--accent);
 }
 
+.running-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 0.75rem;
+}
+
+.running-input {
+  width: 70px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.6rem 0;
+  outline: none;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+
+.running-input::-webkit-outer-spin-button,
+.running-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.running-input-unit {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 .running-pace {
   display: flex;
   align-items: center;
