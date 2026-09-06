@@ -169,6 +169,17 @@ export default function BattlePass() {
     );
   }
 
+  function getQuestTimeLeft(): string {
+    const weekStart = getWeekStart();
+    const nextReset = weekStart + 7 * 24 * 60 * 60 * 1000;
+    const remaining = Math.max(0, nextReset - Date.now());
+    const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    if (days > 0) return `${days}j ${hours}h`;
+    if (hours > 0) return `${hours}h`;
+    return '< 1h';
+  }
+
   const timeLeft = getSeasonTimeLeft(season);
   const levelInfo = getLevelFromXp(progress.passXp, season.passLevels);
   const progressPct = levelInfo.xpForNext > 0 ? (levelInfo.currentLevelXp / levelInfo.xpForNext) * 100 : 100;
@@ -281,9 +292,12 @@ export default function BattlePass() {
             </div>
           )}
 
-          <h3 className="bp-section-title">
-            <Swords size={16} /> Quêtes de la semaine
-          </h3>
+          <div className="bp-section-title-row">
+            <h3 className="bp-section-title">
+              <Swords size={16} /> Quêtes de la semaine
+            </h3>
+            <span className="bp-quest-timer"><Clock size={13} /> {getQuestTimeLeft()}</span>
+          </div>
           <div className="bp-quest-list">
             {weeklyQuests.map((quest) => {
               const current = getQuestValue(quest.id);

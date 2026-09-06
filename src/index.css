@@ -2530,6 +2530,17 @@ body {
 }
 
 /* Section title */
+.bp-section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.bp-section-title-row .bp-section-title {
+  margin-bottom: 0;
+}
+
 .bp-section-title {
   display: flex;
   align-items: center;
@@ -2538,6 +2549,14 @@ body {
   font-weight: 700;
   margin-bottom: 0.65rem;
   color: var(--text);
+}
+
+.bp-quest-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 /* Chests */
