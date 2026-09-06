@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ALL_CARDS, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCardsBySet, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCurrentSeason } from '../lib/passes';
 import type { UserProgress, Session } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Clock, Zap, Dumbbell } from 'lucide-react';
@@ -78,8 +79,10 @@ export default function Profile() {
     return `${m} min`;
   }
 
+  const season = getCurrentSeason();
+  const allCards = season ? getCardsBySet(season.id) : [];
   const ownedCardIds = Object.keys(ownedCards).filter((id) => ownedCards[id] > 0);
-  const uniqueCards = ALL_CARDS.filter((c) => ownedCardIds.includes(c.id));
+  const uniqueCards = allCards.filter((c) => ownedCardIds.includes(c.id));
 
   if (loading) return <div className="page loading"><Loader /></div>;
 
@@ -100,7 +103,7 @@ export default function Profile() {
           {(displayName || '?')[0].toUpperCase()}
         </div>
         <h2 className="profile-name">{displayName}</h2>
-        <span className="profile-cards-count">{uniqueCards.length}/{ALL_CARDS.length} cartes</span>
+        <span className="profile-cards-count">{uniqueCards.length}/{allCards.length} cartes</span>
       </div>
 
       <section className="section">

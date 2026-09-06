@@ -4,7 +4,7 @@ import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getWeeklyQuests } from '../lib/passes';
-import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getBaseCards, getCardDisplayName } from '../lib/cards';
+import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -27,6 +27,7 @@ export default function BattlePass() {
   const [loading, setLoading] = useState(true);
   const [openedCard, setOpenedCard] = useState<Card | null>(null);
   const [chestOpening, setChestOpening] = useState(false);
+  const [chestPhase, setChestPhase] = useState<'idle' | 'shake' | 'burst' | 'reveal'>('idle');
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
 
   const season = getCurrentSeason();
@@ -118,15 +119,15 @@ export default function BattlePass() {
   async function openChest() {
     if (progress.chestsToOpen.length === 0 || !user || !season) return;
     setChestOpening(true);
+    setChestPhase('shake');
 
     const chest = progress.chestsToOpen[0];
-    const pool = chest.pool === 'current'
-      ? [...getBaseCards(), ...getCardsBySet(season.id)]
-      : getBaseCards();
-
+    const pool = getCardsBySet(chest.pool === 'current' ? season.id : chest.pool);
     const card = rollCard(pool, progress.ownedCards);
 
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 1200));
+    setChestPhase('burst');
+    await new Promise((r) => setTimeout(r, 600));
 
     const newChests = progress.chestsToOpen.slice(1);
     if (card) {
@@ -135,6 +136,7 @@ export default function BattlePass() {
       const updated: UserProgress = { ...progress, chestsToOpen: newChests, ownedCards: newOwned };
       setProgress(updated);
       await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
+      setChestPhase('reveal');
       setOpenedCard(card);
     } else {
       const updated: UserProgress = { ...progress, chestsToOpen: newChests };
@@ -142,6 +144,7 @@ export default function BattlePass() {
       await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
     }
     setChestOpening(false);
+    setChestPhase('idle');
   }
 
   if (loading) return <div className="page loading"><Loader /></div>;
@@ -209,6 +212,41 @@ export default function BattlePass() {
         </button>
       </div>
 
+      {chestOpening && (
+        <div className="modal-overlay chest-opening-overlay">
+          <div className={`chest-opening-box ${chestPhase}`}>
+            <div className="chest-particles">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <span key={i} className="chest-particle" style={{ '--i': i } as React.CSSProperties} />
+              ))}
+            </div>
+            <div className="chest-icon-wrap">
+              <Package size={64} />
+            </div>
+            {chestPhase === 'shake' && <p className="chest-opening-text">Ouverture...</p>}
+          </div>
+        </div>
+      )}
+
+      {openedCard && (
+        <div className="modal-overlay" onClick={() => setOpenedCard(null)}>
+          <div className="bp-card-reveal" onClick={(e) => e.stopPropagation()}>
+            <div className="bp-card-reveal-glow" style={{ background: RARITY_COLORS[openedCard.rarity] }} />
+            <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
+              <span className="bp-card-reveal-rarity-tag" style={{ background: RARITY_COLORS[openedCard.rarity] }}>
+                {RARITY_LABELS[openedCard.rarity]}
+              </span>
+              <span className="bp-card-reveal-emoji">{openedCard.emoji}</span>
+              <h3 className="bp-card-reveal-name">{getCardDisplayName(openedCard)}</h3>
+              <span className="bp-card-reveal-cat">{openedCard.category}</span>
+            </div>
+            <button className="bp-card-reveal-close" onClick={() => setOpenedCard(null)}>
+              Continuer
+            </button>
+          </div>
+        </div>
+      )}
+
       {tab === 'quetes' && (
         <>
           {progress.chestsToOpen.length > 0 && (
@@ -229,25 +267,6 @@ export default function BattlePass() {
                     <span className="bp-chest-label">Ouvrir</span>
                   </button>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {openedCard && (
-            <div className="modal-overlay" onClick={() => setOpenedCard(null)}>
-              <div className="bp-card-reveal" onClick={(e) => e.stopPropagation()}>
-                <div className="bp-card-reveal-glow" style={{ background: RARITY_COLORS[openedCard.rarity] }} />
-                <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
-                  <span className="bp-card-reveal-rarity-tag" style={{ background: RARITY_COLORS[openedCard.rarity] }}>
-                    {RARITY_LABELS[openedCard.rarity]}
-                  </span>
-                  <span className="bp-card-reveal-emoji">{openedCard.emoji}</span>
-                  <h3 className="bp-card-reveal-name">{getCardDisplayName(openedCard)}</h3>
-                  <span className="bp-card-reveal-cat">{openedCard.category}</span>
-                </div>
-                <button className="bp-card-reveal-close" onClick={() => setOpenedCard(null)}>
-                  Continuer
-                </button>
               </div>
             </div>
           )}

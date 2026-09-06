@@ -74,8 +74,7 @@ export interface Card {
   emoji: string;
   rarity: CardRarity;
   category: string;
-  set: 'base' | string;
-  premiumOnly?: boolean;
+  set: string;
   baseCardId?: string;
 }
 

@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ALL_CARDS, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
-import type { UserProgress } from '../types';
+import { getCardsBySet, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCurrentSeason } from '../lib/passes';
+import type { UserProgress, Card } from '../types';
 import { Layers, Info, X } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
@@ -22,6 +23,9 @@ export default function Collection() {
   const [loading, setLoading] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
 
+  const season = getCurrentSeason();
+  const cards: Card[] = season ? getCardsBySet(season.id) : [];
+
   const load = useCallback(async () => {
     if (!user) return;
     const snap = await getDoc(doc(db, 'userProgress', user.uid));
@@ -38,12 +42,12 @@ export default function Collection() {
 
   if (loading) return <div className="page loading"><Loader /></div>;
 
-  const ownedCount = ALL_CARDS.filter((c) => (ownedCards[c.id] || 0) > 0).length;
+  const ownedCount = cards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
 
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Collection</h1>
+        <h1>{season ? season.theme : 'Collection'}</h1>
         <button className="info-btn" onClick={() => setShowInfo(true)}>
           <Info size={18} />
         </button>
@@ -81,21 +85,21 @@ export default function Collection() {
 
       <div className="collection-summary">
         <Layers size={20} />
-        <span>{ownedCount} / {ALL_CARDS.length} cartes</span>
+        <span>{ownedCount} / {cards.length} cartes</span>
       </div>
 
       {RARITY_ORDER.map((rarity) => {
-        const cards = ALL_CARDS.filter((c) => c.rarity === rarity);
-        if (cards.length === 0) return null;
-        const ownedInRarity = cards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
+        const rarityCards = cards.filter((c) => c.rarity === rarity);
+        if (rarityCards.length === 0) return null;
+        const ownedInRarity = rarityCards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
 
         return (
           <section key={rarity} className="section collection-rarity-section">
             <h3 className="collection-rarity-header" style={{ color: RARITY_COLORS[rarity] }}>
-              {RARITY_LABELS[rarity]} ({ownedInRarity}/{cards.length})
+              {RARITY_LABELS[rarity]} ({ownedInRarity}/{rarityCards.length})
             </h3>
             <div className="card-grid">
-              {cards.map((card) => {
+              {rarityCards.map((card) => {
                 const owned = (ownedCards[card.id] || 0) > 0;
                 const count = ownedCards[card.id] || 0;
                 return (
