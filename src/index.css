@@ -2928,9 +2928,11 @@ body {
 .collection-card-lock-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(3px);
   border-radius: var(--radius-sm);
+}
+
+.collection-card-img.locked .collection-card-thumb {
+  filter: grayscale(1) brightness(0.5);
 }
 
 .collection-card-img .collection-card-count {
