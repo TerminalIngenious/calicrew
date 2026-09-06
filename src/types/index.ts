@@ -1,7 +1,7 @@
 export interface Exercise {
   id: string;
   name: string;
-  category: 'push' | 'pull' | 'legs' | 'core' | 'skill';
+  category: 'push' | 'pull' | 'legs' | 'core' | 'skill' | 'running';
   isCustom?: boolean;
   canBeWeighted?: boolean;
 }
@@ -87,7 +87,7 @@ export interface Quest {
   label: string;
   description: string;
   target: number;
-  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap';
+  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap' | 'running_sessions' | 'running_duration';
   xp: number;
 }
 

@@ -21,6 +21,12 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'front-lever', name: 'Front lever', category: 'skill', canBeWeighted: true },
   { id: 'back-lever', name: 'Back lever', category: 'skill', canBeWeighted: true },
   { id: 'human-flag', name: 'Human flag', category: 'skill', canBeWeighted: true },
+  { id: 'running', name: 'Course', category: 'running' },
+  { id: 'sprint', name: 'Sprint', category: 'running' },
+  { id: 'interval-run', name: 'Fractionné', category: 'running' },
+  { id: 'hill-run', name: 'Course en côte', category: 'running' },
+  { id: 'tempo-run', name: 'Tempo run', category: 'running' },
+  { id: 'fast-walk', name: 'Marche rapide', category: 'running' },
 ];
 
 export const CATEGORY_LABELS: Record<Exercise['category'], string> = {
@@ -29,4 +35,5 @@ export const CATEGORY_LABELS: Record<Exercise['category'], string> = {
   legs: 'Jambes',
   core: 'Abdos',
   skill: 'Skills',
+  running: 'Running',
 };

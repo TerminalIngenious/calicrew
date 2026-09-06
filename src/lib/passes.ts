@@ -18,6 +18,8 @@ const EASY_QUESTS: QuestTemplate[] = [
   { label: 'Curieux', description: 'Fais 3 exercices différents', target: 3, type: 'exercises', xp: 50 },
   { label: 'Mise en jambes', description: 'Fais 2 séances cette semaine', target: 2, type: 'sessions', xp: 50 },
   { label: 'Reps tranquilles', description: 'Fais 150 reps cette semaine', target: 150, type: 'reps', xp: 50 },
+  { label: 'Footing', description: 'Fais 1 séance running cette semaine', target: 1, type: 'running_sessions', xp: 50 },
+  { label: 'Petit jogging', description: 'Cours 15 min au total', target: 900, type: 'running_duration', xp: 50 },
 ];
 
 const MEDIUM_QUESTS: QuestTemplate[] = [
@@ -29,6 +31,8 @@ const MEDIUM_QUESTS: QuestTemplate[] = [
   { label: 'Assidu', description: 'Fais 4 séances cette semaine', target: 4, type: 'sessions', xp: 100 },
   { label: 'Polyvalent', description: 'Fais 7 exercices différents', target: 7, type: 'exercises', xp: 100 },
   { label: 'Tiens bon', description: 'Entraîne-toi 1h au total', target: 3600, type: 'duration', xp: 100 },
+  { label: 'Coureur', description: 'Fais 2 séances running cette semaine', target: 2, type: 'running_sessions', xp: 100 },
+  { label: 'Cardio', description: 'Cours 30 min au total', target: 1800, type: 'running_duration', xp: 100 },
 ];
 
 const HARD_QUESTS: QuestTemplate[] = [
@@ -39,6 +43,8 @@ const HARD_QUESTS: QuestTemplate[] = [
   { label: 'Soldat', description: 'Complète 50 séries', target: 50, type: 'sets', xp: 200 },
   { label: 'Explorateur', description: 'Fais 10 exercices différents', target: 10, type: 'exercises', xp: 200 },
   { label: 'Bulldozer', description: 'Fais 700 reps cette semaine', target: 700, type: 'reps', xp: 200 },
+  { label: 'Runner', description: 'Fais 3 séances running cette semaine', target: 3, type: 'running_sessions', xp: 200 },
+  { label: 'Longue distance', description: 'Cours 1h au total', target: 3600, type: 'running_duration', xp: 200 },
 ];
 
 const EXTREME_QUESTS: QuestTemplate[] = [
@@ -48,6 +54,8 @@ const EXTREME_QUESTS: QuestTemplate[] = [
   { label: 'Obsédé', description: 'Fais 6 séances cette semaine', target: 6, type: 'sessions', xp: 350 },
   { label: 'Titan', description: 'Fais 1500 reps cette semaine', target: 1500, type: 'reps', xp: 350 },
   { label: 'Ironman', description: 'Entraîne-toi 3h au total', target: 10800, type: 'duration', xp: 350 },
+  { label: 'Ultra runner', description: 'Fais 5 séances running cette semaine', target: 5, type: 'running_sessions', xp: 350 },
+  { label: 'Marathonien runner', description: 'Cours 2h au total', target: 7200, type: 'running_duration', xp: 350 },
 ];
 
 function seededRandom(seed: number): () => number {

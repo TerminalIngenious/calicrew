@@ -78,6 +78,12 @@ export default function BattlePass() {
         );
       case 'amrap':
         return weekSessions.filter((s) => s.mode === 'amrap').length;
+      case 'running_sessions':
+        return weekSessions.filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running')).length;
+      case 'running_duration':
+        return weekSessions
+          .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
+          .reduce((sum, s) => sum + (s.duration || 0), 0);
     }
   }
 
@@ -311,7 +317,7 @@ export default function BattlePass() {
                         <div className="bp-quest-bar-fill" style={{ width: `${pct}%`, background: claimed ? 'var(--accent-green)' : done ? 'var(--accent)' : 'var(--accent)' }} />
                       </div>
                       <span className="bp-quest-count">
-                        {quest.type === 'duration'
+                        {quest.type === 'duration' || quest.type === 'running_duration'
                           ? `${Math.floor(current / 60)}/${Math.floor(quest.target / 60)} min`
                           : `${current}/${quest.target}`}
                       </span>
