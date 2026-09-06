@@ -77,10 +77,9 @@ function pickN<T>(arr: T[], n: number, rng: () => number): T[] {
 }
 
 function getWeekNumber(): number {
-  const now = new Date();
-  const start = new Date(2026, 0, 1);
-  const diff = now.getTime() - start.getTime();
-  return Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
+  const monday = getWeekStart();
+  const ref = new Date(2026, 0, 5).getTime(); // premier lundi de 2026
+  return Math.floor((monday - ref) / (7 * 24 * 60 * 60 * 1000));
 }
 
 export function getWeeklyQuests(): Quest[] {
@@ -164,8 +163,9 @@ export function getLevelFromXp(totalXp: number, levels: PassLevel[]): { level: n
 
 export function getWeekStart(): number {
   const now = new Date();
-  const day = now.getDay();
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0, 0);
+  const shifted = new Date(now.getTime() - 10 * 60 * 60 * 1000);
+  const day = shifted.getDay();
+  const diff = shifted.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(shifted.getFullYear(), shifted.getMonth(), diff, 10, 0, 0, 0);
   return monday.getTime();
 }
