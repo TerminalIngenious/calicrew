@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCardsBySet, RARITY_ORDER, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import type { UserProgress, Session } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -150,21 +150,20 @@ export default function Profile() {
         {uniqueCards.length === 0 ? (
           <p className="empty">Aucune carte pour le moment</p>
         ) : (
-          <div className="card-grid">
+          <div className="card-grid card-grid-images">
             {RARITY_ORDER.flatMap((rarity) =>
               uniqueCards
                 .filter((c) => c.rarity === rarity)
                 .map((card) => (
                   <div
                     key={card.id}
-                    className="collection-card owned"
-                    style={{ '--card-color': RARITY_COLORS[card.rarity] } as React.CSSProperties}
+                    className="collection-card-img owned"
                   >
-                    <span className="collection-card-emoji">{card.emoji}</span>
-                    <span className="collection-card-name">{getCardDisplayName(card)}</span>
-                    <span className="collection-card-rarity" style={{ color: RARITY_COLORS[card.rarity] }}>
-                      {RARITY_LABELS[card.rarity]}
-                    </span>
+                    {card.image ? (
+                      <img src={card.image} alt={getCardDisplayName(card)} className="collection-card-thumb" loading="lazy" />
+                    ) : (
+                      <div className="collection-card-emoji-fallback"><span>{card.emoji}</span></div>
+                    )}
                     {ownedCards[card.id] > 1 && (
                       <span className="collection-card-count">x{ownedCards[card.id]}</span>
                     )}
