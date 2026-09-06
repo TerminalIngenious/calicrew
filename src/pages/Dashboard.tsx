@@ -3,18 +3,45 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LogOut, RefreshCw } from 'lucide-react';
+import { Plus, LogOut, RefreshCw, Bell, X, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
 import Loader from '../components/Loader';
 
+const UPDATES = [
+  {
+    id: 'update-2026-09-06',
+    date: '6 septembre 2026',
+    title: 'Running & Échanges de cartes',
+    summary: 'Nouvelle catégorie Running et système d\'échange entre membres.',
+    details: `Nouvelle catégorie Running avec 6 exercices dédiés (Course, Sprint, Fractionné, Course en côte, Tempo run, Marche rapide). Un formulaire spécifique permet de saisir le temps, la distance, le dénivelé et calcule automatiquement l'allure en min/km.\n\nSystème d'échange de cartes entre membres d'un même groupe : propose une de tes cartes contre celle d'un autre joueur, il accepte ou refuse.\n\nNouvelles quêtes running qui s'ajoutent au pool existant. Les quêtes se régénèrent le lundi à 10h avec un timer visible dans le pass.\n\nCoffres spéciaux : coffre Rare garanti au niveau 15, coffre Épique garanti au niveau 30, avec des couleurs distinctes dans le pass.`,
+  },
+  {
+    id: 'update-2026-09-05',
+    date: '5 septembre 2026',
+    title: 'Groupes & Profils',
+    summary: 'Photos de profil personnalisables, explorer les groupes et splash de saison.',
+    details: `Photo de profil personnalisable avec les personnages des cartes débloquées, visible dans le classement et la liste des membres du groupe.\n\nNouvelle fonctionnalité "Explorer les groupes" : une barre de recherche accessible en permanence pour voir tous les groupes et leurs membres.\n\nModal de prévisualisation quand tu cliques sur un membre du groupe avec ses stats et un bouton vers son profil complet.\n\nAnimation d'intro splash pour la Saison 1 : Casier Judiciaire à l'ouverture de l'app.\n\nRecherche de groupes améliorée avec gestion des accents.`,
+  },
+];
+
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { sessions, loading, refresh } = useUserSessions();
   const [refreshing, setRefreshing] = useState(false);
+  const [showUpdates, setShowUpdates] = useState(false);
+  const [expandedUpdate, setExpandedUpdate] = useState<string | null>(null);
+
+  const lastSeenUpdate = localStorage.getItem('calicrew-last-seen-update');
+  const hasUnread = lastSeenUpdate !== UPDATES[0]?.id;
+
+  function openUpdates() {
+    setShowUpdates(true);
+    localStorage.setItem('calicrew-last-seen-update', UPDATES[0]?.id || '');
+  }
 
   const recentSessions = useMemo(() => sessions.slice(0, 5), [sessions]);
 
@@ -54,6 +81,10 @@ export default function Dashboard() {
           <h1>Salut {user?.displayName}</h1>
         </div>
         <div style={{ display: 'flex', gap: '0.25rem' }}>
+          <button className="icon-btn notif-btn" onClick={openUpdates}>
+            <Bell size={18} />
+            {hasUnread && <span className="notif-dot" />}
+          </button>
           <button className={`icon-btn ${refreshing ? 'spinning' : ''}`} onClick={handleRefresh}>
             <RefreshCw size={18} />
           </button>
@@ -62,10 +93,6 @@ export default function Dashboard() {
           </button>
         </div>
       </header>
-
-      <div className="update-banner">
-        Grosse mise à jour dans les prochains jours — on va voir qui fait vraiment ses séances et qui raconte sa vie 👀
-      </div>
 
       {loading ? (
         <div className="page loading"><Loader /></div>
@@ -140,6 +167,45 @@ export default function Dashboard() {
             )}
           </section>
         </>
+      )}
+
+      {showUpdates && (
+        <div className="modal-overlay" onClick={() => setShowUpdates(false)}>
+          <div className="updates-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="updates-modal-header">
+              <h3>Nouveautés</h3>
+              <button className="member-modal-close" onClick={() => setShowUpdates(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="updates-list">
+              {UPDATES.map((update) => {
+                const isExpanded = expandedUpdate === update.id;
+                return (
+                  <div key={update.id} className="update-card" onClick={() => setExpandedUpdate(isExpanded ? null : update.id)}>
+                    <div className="update-card-header">
+                      <div>
+                        <span className="update-card-title">{update.title}</span>
+                        <span className="update-card-date">{update.date}</span>
+                      </div>
+                      <ChevronRight size={16} className={`update-chevron ${isExpanded ? 'rotated-90' : ''}`} />
+                    </div>
+                    {!isExpanded && (
+                      <p className="update-card-summary">{update.summary}</p>
+                    )}
+                    {isExpanded && (
+                      <div className="update-card-details">
+                        {update.details.split('\n\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       <BottomNav />
