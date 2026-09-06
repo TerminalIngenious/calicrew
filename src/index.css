@@ -2044,6 +2044,7 @@ body {
   margin: -1rem -1rem 1rem -1rem;
   padding: 1.25rem 1rem 1rem;
   overflow: hidden;
+  max-height: 200px;
 }
 
 .bp-hero-bg {
