@@ -1,4 +1,4 @@
-import type { Season, PassLevel, Quest } from '../types';
+import type { Season, PassLevel, Quest, SportType } from '../types';
 
 // ── Pool de quêtes — on pioche dedans chaque semaine ──
 
@@ -82,19 +82,28 @@ function getWeekNumber(): number {
   return Math.floor((monday - ref) / (7 * 24 * 60 * 60 * 1000));
 }
 
-export function getWeeklyQuests(): Quest[] {
+const RUNNING_TYPES: Quest['type'][] = ['running_sessions', 'running_duration'];
+const STRENGTH_TYPES: Quest['type'][] = ['sessions', 'reps', 'duration', 'exercises', 'sets', 'amrap'];
+
+function filterBySport(pool: QuestTemplate[], sport: SportType): QuestTemplate[] {
+  if (sport === 'mixte') return pool;
+  if (sport === 'running') return pool.filter((q) => RUNNING_TYPES.includes(q.type) || q.type === 'sessions' || q.type === 'duration');
+  return pool.filter((q) => STRENGTH_TYPES.includes(q.type));
+}
+
+export function getWeeklyQuests(sport: SportType = 'mixte'): Quest[] {
   const week = getWeekNumber();
   const rng = seededRandom(week * 7919);
 
-  const easy = pickN(EASY_QUESTS, 2, rng);
-  const medium = pickN(MEDIUM_QUESTS, 3, rng);
-  const hard = pickN(HARD_QUESTS, 3, rng);
-  const extreme = pickN(EXTREME_QUESTS, 2, rng);
+  const easy = pickN(filterBySport(EASY_QUESTS, sport), 2, rng);
+  const medium = pickN(filterBySport(MEDIUM_QUESTS, sport), 3, rng);
+  const hard = pickN(filterBySport(HARD_QUESTS, sport), 3, rng);
+  const extreme = pickN(filterBySport(EXTREME_QUESTS, sport), 2, rng);
 
   const all = [...easy, ...medium, ...hard, ...extreme];
 
   return all.map((q, i) => ({
-    id: `w${week}-q${i}`,
+    id: `w${week}-q${i}-${sport}`,
     label: q.label,
     description: q.description,
     target: q.target,

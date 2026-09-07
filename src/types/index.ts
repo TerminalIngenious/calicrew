@@ -67,6 +67,10 @@ export interface LeaderboardEntry {
   avatarCardId?: string;
 }
 
+// ── Sport types ──
+
+export type SportType = 'calisthenics' | 'musculation' | 'running' | 'mixte';
+
 // ── Cards ──
 
 export type CardRarity = 'historique' | 'legendaire' | 'epique' | 'rare' | 'commune';
@@ -147,4 +151,5 @@ export interface UserProgress {
   achievementsClaimed: string[];
   currentSeasonId: string;
   avatarCardId?: string;
+  sportType?: SportType;
 }

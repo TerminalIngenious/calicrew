@@ -5,8 +5,8 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getWeeklyQuests } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
-import type { UserProgress, Card } from '../types';
-import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
+import type { UserProgress, Card, SportType } from '../types';
+import { Swords, Check, Package, Clock, Trophy, Flame, ChevronDown } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -29,9 +29,26 @@ export default function BattlePass() {
   const [chestOpening, setChestOpening] = useState(false);
   const [chestPhase, setChestPhase] = useState<'idle' | 'shake' | 'burst' | 'reveal'>('idle');
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
+  const [showSportPicker, setShowSportPicker] = useState(false);
 
   const season = getCurrentSeason();
-  const weeklyQuests = getWeeklyQuests();
+  const sportType: SportType = progress.sportType || 'mixte';
+  const weeklyQuests = getWeeklyQuests(sportType);
+
+  const SPORT_LABELS: Record<SportType, { label: string; emoji: string }> = {
+    calisthenics: { label: 'Calisthenics', emoji: '🏋️' },
+    musculation: { label: 'Musculation', emoji: '💪' },
+    running: { label: 'Running', emoji: '🏃' },
+    mixte: { label: 'Mixte', emoji: '⚡' },
+  };
+
+  async function changeSportType(newType: SportType) {
+    if (!user) return;
+    const updated = { ...progress, sportType: newType };
+    setProgress(updated);
+    setShowSportPicker(false);
+    await updateDoc(doc(db, 'userProgress', user.uid), { sportType: newType });
+  }
 
   const loadProgress = useCallback(async () => {
     if (!user) return;
@@ -299,6 +316,27 @@ export default function BattlePass() {
               </div>
             </div>
           )}
+
+          <div className="bp-sport-picker-row">
+            <button className="bp-sport-btn" onClick={() => setShowSportPicker(!showSportPicker)}>
+              <span>{SPORT_LABELS[sportType].emoji} {SPORT_LABELS[sportType].label}</span>
+              <ChevronDown size={14} />
+            </button>
+            {showSportPicker && (
+              <div className="bp-sport-dropdown">
+                {(Object.keys(SPORT_LABELS) as SportType[]).map((type) => (
+                  <button
+                    key={type}
+                    className={`bp-sport-option ${type === sportType ? 'active' : ''}`}
+                    onClick={() => changeSportType(type)}
+                  >
+                    <span>{SPORT_LABELS[type].emoji}</span>
+                    <span>{SPORT_LABELS[type].label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="bp-section-title-row">
             <h3 className="bp-section-title">

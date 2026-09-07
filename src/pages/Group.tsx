@@ -134,10 +134,16 @@ export default function Group() {
       if (data.uid) userMap.set(data.uid, data.displayName || 'Inconnu');
     });
 
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthStartMs = monthStart.getTime();
+
     const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
       const sessionSnap = rest[i * 2] as Awaited<ReturnType<typeof getDocs>>;
       const progressSnap = rest[i * 2 + 1] as Awaited<ReturnType<typeof getDoc>>;
-      const sessions = sessionSnap.docs.map((d) => d.data() as Session);
+      const allSessions = sessionSnap.docs.map((d) => d.data() as Session);
+      const sessions = allSessions.filter((s) => s.createdAt >= monthStartMs);
       const progress = progressSnap.exists() ? (progressSnap.data() as UserProgress) : null;
 
       const totalReps = sessions.reduce(
@@ -374,7 +380,20 @@ export default function Group() {
     }
   }
 
-  function getWeeklyAwards() {
+  function getMonthResetLabel(): string {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
+    const diff = nextMonth.getTime() - now.getTime();
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    if (days > 0) return `${days}j ${hours}h`;
+    return `${hours}h`;
+  }
+
+  const MONTH_NAMES = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  const currentMonthName = MONTH_NAMES[new Date().getMonth()];
+
+  function getMonthlyAwards() {
     if (leaderboard.length === 0) return [];
     const awards: { label: string; icon: React.ReactNode; winner: string }[] = [];
 
@@ -489,7 +508,7 @@ export default function Group() {
   }
 
   const sortedLeaderboard = getSortedLeaderboard();
-  const awards = getWeeklyAwards();
+  const awards = getMonthlyAwards();
   const isCreator = selectedGroup?.createdBy === user?.uid;
   const pendingCount = selectedGroup?.pendingIds?.length || 0;
 
@@ -678,7 +697,10 @@ export default function Group() {
 
           <section className="section">
             <div className="leaderboard-header">
-              <h3>Classement</h3>
+              <div className="bp-section-title-row">
+                <h3>Classement — {currentMonthName}</h3>
+                <span className="bp-quest-timer">Reset dans {getMonthResetLabel()}</span>
+              </div>
               <div className="sort-tabs">
                 <button
                   className={`sort-tab ${sortMode === 'reps' ? 'active' : ''}`}
