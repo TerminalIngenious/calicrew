@@ -2885,10 +2885,9 @@ body {
 .bp-sport-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   padding: 0.55rem 0.75rem;
   border: none;
-  background: transparent;
+  background: var(--card);
   color: var(--text);
   font-size: 0.82rem;
   font-weight: 500;
@@ -2897,12 +2896,12 @@ body {
   transition: background 0.15s;
 }
 
-.bp-sport-option:active,
-.bp-sport-option.active {
+.bp-sport-option:active {
   background: var(--hover);
 }
 
 .bp-sport-option.active {
+  background: var(--hover);
   font-weight: 700;
   color: var(--accent);
 }

@@ -35,11 +35,11 @@ export default function BattlePass() {
   const sportType: SportType = progress.sportType || 'mixte';
   const weeklyQuests = getWeeklyQuests(sportType);
 
-  const SPORT_LABELS: Record<SportType, { label: string; emoji: string }> = {
-    calisthenics: { label: 'Calisthenics', emoji: '🏋️' },
-    musculation: { label: 'Musculation', emoji: '💪' },
-    running: { label: 'Running', emoji: '🏃' },
-    mixte: { label: 'Mixte', emoji: '⚡' },
+  const SPORT_LABELS: Record<SportType, string> = {
+    calisthenics: 'Calisthenics',
+    musculation: 'Musculation',
+    running: 'Running',
+    mixte: 'Mixte',
   };
 
   async function changeSportType(newType: SportType) {
@@ -319,7 +319,7 @@ export default function BattlePass() {
 
           <div className="bp-sport-picker-row">
             <button className="bp-sport-btn" onClick={() => setShowSportPicker(!showSportPicker)}>
-              <span>{SPORT_LABELS[sportType].emoji} {SPORT_LABELS[sportType].label}</span>
+              <span>{SPORT_LABELS[sportType]}</span>
               <ChevronDown size={14} />
             </button>
             {showSportPicker && (
@@ -330,8 +330,7 @@ export default function BattlePass() {
                     className={`bp-sport-option ${type === sportType ? 'active' : ''}`}
                     onClick={() => changeSportType(type)}
                   >
-                    <span>{SPORT_LABELS[type].emoji}</span>
-                    <span>{SPORT_LABELS[type].label}</span>
+                    {SPORT_LABELS[type]}
                   </button>
                 ))}
               </div>
