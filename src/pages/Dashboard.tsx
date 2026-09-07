@@ -8,6 +8,7 @@ import BottomNav from '../components/BottomNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
+import { getWeekStart } from '../lib/passes';
 import Loader from '../components/Loader';
 
 const UPDATES = [
@@ -45,9 +46,9 @@ export default function Dashboard() {
   const recentSessions = useMemo(() => sessions.slice(0, 5), [sessions]);
 
   const stats = useMemo(() => {
-    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const thisWeek = sessions.filter((s) => s.createdAt > weekAgo).length;
-    const totalReps = sessions.reduce(
+    const weekStart = getWeekStart();
+    const weekSessions = sessions.filter((s) => s.createdAt >= weekStart && s.completed);
+    const weekReps = weekSessions.reduce(
       (sum, s) =>
         sum +
         s.exercises.reduce(
@@ -56,7 +57,7 @@ export default function Dashboard() {
         ),
       0
     );
-    return { totalSessions: sessions.length, totalReps, thisWeek };
+    return { weekSessions: weekSessions.length, weekReps };
   }, [sessions]);
 
   function getSessionCategories(s: Session): string {
@@ -90,16 +91,12 @@ export default function Dashboard() {
         <>
           <div className="stats-grid">
             <div className="stat-card">
-              <span className="stat-value">{stats.totalSessions}</span>
+              <span className="stat-value">{stats.weekSessions}</span>
               <span className="stat-label">Séances</span>
             </div>
             <div className="stat-card">
-              <span className="stat-value">{stats.totalReps}</span>
-              <span className="stat-label">Reps totales</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">{stats.thisWeek}</span>
-              <span className="stat-label">Cette semaine</span>
+              <span className="stat-value">{stats.weekReps}</span>
+              <span className="stat-label">Reps</span>
             </div>
           </div>
 
