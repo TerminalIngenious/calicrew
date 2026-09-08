@@ -67,10 +67,6 @@ export interface LeaderboardEntry {
   avatarCardId?: string;
 }
 
-// ── Sport types ──
-
-export type SportType = 'calisthenics' | 'musculation' | 'running' | 'mixte';
-
 // ── Cards ──
 
 export type CardRarity = 'historique' | 'legendaire' | 'epique' | 'rare' | 'commune';
@@ -94,8 +90,10 @@ export interface Quest {
   label: string;
   description: string;
   target: number;
-  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap' | 'running_sessions' | 'running_duration';
+  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap' | 'running_sessions' | 'running_duration' | 'exercise_reps' | 'exercise_duration';
   xp: number;
+  exerciseId?: string;
+  exerciseName?: string;
 }
 
 export interface PassLevel {
@@ -151,5 +149,4 @@ export interface UserProgress {
   achievementsClaimed: string[];
   currentSeasonId: string;
   avatarCardId?: string;
-  sportType?: SportType;
 }

@@ -1,115 +1,157 @@
-import type { Season, PassLevel, Quest, SportType } from '../types';
+import type { Season, PassLevel, Quest, Session } from '../types';
 
-// ── Pool de quêtes — on pioche dedans chaque semaine ──
+// ── Quêtes personnalisées basées sur l'activité ──
 
-interface QuestTemplate {
-  label: string;
-  description: string;
-  target: number;
-  type: Quest['type'];
-  xp: number;
+const BOOST = 1.6;
+
+function xpForTarget(target: number): number {
+  if (target < 50) return 50;
+  if (target < 200) return 100;
+  if (target < 500) return 200;
+  return 350;
 }
 
-const EASY_QUESTS: QuestTemplate[] = [
-  { label: 'Échauffement', description: 'Fais 1 séance cette semaine', target: 1, type: 'sessions', xp: 50 },
-  { label: 'Starter', description: 'Fais 100 reps cette semaine', target: 100, type: 'reps', xp: 50 },
-  { label: 'Petit tour', description: 'Entraîne-toi 15 min au total', target: 900, type: 'duration', xp: 50 },
-  { label: 'Première série', description: 'Complète 10 séries', target: 10, type: 'sets', xp: 50 },
-  { label: 'Curieux', description: 'Fais 3 exercices différents', target: 3, type: 'exercises', xp: 50 },
-  { label: 'Mise en jambes', description: 'Fais 2 séances cette semaine', target: 2, type: 'sessions', xp: 50 },
-  { label: 'Reps tranquilles', description: 'Fais 150 reps cette semaine', target: 150, type: 'reps', xp: 50 },
-  { label: 'Footing', description: 'Fais 1 séance running cette semaine', target: 1, type: 'running_sessions', xp: 50 },
-  { label: 'Petit jogging', description: 'Cours 15 min au total', target: 900, type: 'running_duration', xp: 50 },
-];
-
-const MEDIUM_QUESTS: QuestTemplate[] = [
-  { label: 'Régulier', description: 'Fais 3 séances cette semaine', target: 3, type: 'sessions', xp: 100 },
-  { label: 'Touche-à-tout', description: 'Fais 5 exercices différents', target: 5, type: 'exercises', xp: 100 },
-  { label: 'Endurant', description: 'Entraîne-toi 45 min au total', target: 2700, type: 'duration', xp: 100 },
-  { label: 'Sérieux', description: 'Complète 25 séries', target: 25, type: 'sets', xp: 100 },
-  { label: 'Cadencé', description: 'Fais 300 reps cette semaine', target: 300, type: 'reps', xp: 100 },
-  { label: 'Assidu', description: 'Fais 4 séances cette semaine', target: 4, type: 'sessions', xp: 100 },
-  { label: 'Polyvalent', description: 'Fais 7 exercices différents', target: 7, type: 'exercises', xp: 100 },
-  { label: 'Tiens bon', description: 'Entraîne-toi 1h au total', target: 3600, type: 'duration', xp: 100 },
-  { label: 'Coureur', description: 'Fais 2 séances running cette semaine', target: 2, type: 'running_sessions', xp: 100 },
-  { label: 'Cardio', description: 'Cours 30 min au total', target: 1800, type: 'running_duration', xp: 100 },
-];
-
-const HARD_QUESTS: QuestTemplate[] = [
-  { label: 'Machine', description: 'Complète 40 séries', target: 40, type: 'sets', xp: 200 },
-  { label: 'No Rest Day', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions', xp: 200 },
-  { label: 'Bosseur', description: 'Fais 500 reps cette semaine', target: 500, type: 'reps', xp: 200 },
-  { label: 'Acharné', description: 'Entraîne-toi 1h30 au total', target: 5400, type: 'duration', xp: 200 },
-  { label: 'Soldat', description: 'Complète 50 séries', target: 50, type: 'sets', xp: 200 },
-  { label: 'Explorateur', description: 'Fais 10 exercices différents', target: 10, type: 'exercises', xp: 200 },
-  { label: 'Bulldozer', description: 'Fais 700 reps cette semaine', target: 700, type: 'reps', xp: 200 },
-  { label: 'Runner', description: 'Fais 3 séances running cette semaine', target: 3, type: 'running_sessions', xp: 200 },
-  { label: 'Longue distance', description: 'Cours 1h au total', target: 3600, type: 'running_duration', xp: 200 },
-];
-
-const EXTREME_QUESTS: QuestTemplate[] = [
-  { label: 'Monstre', description: 'Fais 1000 reps cette semaine', target: 1000, type: 'reps', xp: 350 },
-  { label: 'Marathonien', description: 'Entraîne-toi 2h au total', target: 7200, type: 'duration', xp: 350 },
-  { label: 'Inhumain', description: 'Complète 70 séries', target: 70, type: 'sets', xp: 350 },
-  { label: 'Obsédé', description: 'Fais 6 séances cette semaine', target: 6, type: 'sessions', xp: 350 },
-  { label: 'Titan', description: 'Fais 1500 reps cette semaine', target: 1500, type: 'reps', xp: 350 },
-  { label: 'Ironman', description: 'Entraîne-toi 3h au total', target: 10800, type: 'duration', xp: 350 },
-  { label: 'Ultra runner', description: 'Fais 5 séances running cette semaine', target: 5, type: 'running_sessions', xp: 350 },
-  { label: 'Marathonien runner', description: 'Cours 2h au total', target: 7200, type: 'running_duration', xp: 350 },
-];
-
-function seededRandom(seed: number): () => number {
-  let s = seed;
-  return () => {
-    s = (s * 1664525 + 1013904223) & 0x7fffffff;
-    return s / 0x7fffffff;
-  };
+function roundTarget(n: number): number {
+  if (n < 20) return Math.ceil(n / 5) * 5;
+  if (n < 100) return Math.ceil(n / 10) * 10;
+  return Math.ceil(n / 25) * 25;
 }
 
-function pickN<T>(arr: T[], n: number, rng: () => number): T[] {
-  const copy = [...arr];
-  const result: T[] = [];
-  for (let i = 0; i < n && copy.length > 0; i++) {
-    const idx = Math.floor(rng() * copy.length);
-    result.push(copy.splice(idx, 1)[0]);
+function formatMin(seconds: number): string {
+  const m = Math.round(seconds / 60);
+  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 > 0 ? String(m % 60).padStart(2, '0') : ''}`;
+  return `${m} min`;
+}
+
+interface ExoStat {
+  exerciseId: string;
+  exerciseName: string;
+  category: string;
+  totalReps: number;
+  totalDuration: number;
+}
+
+function analyzeLastWeek(prevSessions: Session[]): ExoStat[] {
+  const map = new Map<string, ExoStat>();
+  for (const s of prevSessions) {
+    for (const ex of s.exercises) {
+      const id = ex.exerciseId;
+      const existing = map.get(id) || { exerciseId: id, exerciseName: ex.exerciseName, category: ex.exerciseCategory || '', totalReps: 0, totalDuration: 0 };
+      existing.totalReps += ex.sets.reduce((sum, set) => sum + (set.completed ? set.reps : 0), 0);
+      existing.totalDuration += ex.runDuration || 0;
+      map.set(id, existing);
+    }
   }
-  return result;
+  return [...map.values()];
 }
 
 function getWeekNumber(): number {
   const monday = getWeekStart();
-  const ref = new Date(2026, 0, 5).getTime(); // premier lundi de 2026
+  const ref = new Date(2026, 0, 5).getTime();
   return Math.floor((monday - ref) / (7 * 24 * 60 * 60 * 1000));
 }
 
-const RUNNING_TYPES: Quest['type'][] = ['running_sessions', 'running_duration'];
-const STRENGTH_TYPES: Quest['type'][] = ['sessions', 'reps', 'duration', 'exercises', 'sets', 'amrap'];
+const STARTER_QUESTS: Quest[] = [
+  { id: '', label: 'Première séance', description: 'Fais 1 séance cette semaine', target: 1, type: 'sessions', xp: 50 },
+  { id: '', label: 'En route', description: 'Fais 2 séances cette semaine', target: 2, type: 'sessions', xp: 100 },
+  { id: '', label: 'Starter', description: 'Fais 50 reps cette semaine', target: 50, type: 'reps', xp: 50 },
+  { id: '', label: 'Petit tour', description: 'Entraîne-toi 15 min au total', target: 900, type: 'duration', xp: 50 },
+  { id: '', label: 'Curieux', description: 'Fais 3 exercices différents', target: 3, type: 'exercises', xp: 75 },
+  { id: '', label: 'Première série', description: 'Complète 10 séries', target: 10, type: 'sets', xp: 50 },
+];
 
-function filterBySport(pool: QuestTemplate[], sport: SportType): QuestTemplate[] {
-  if (sport === 'mixte') return pool;
-  if (sport === 'running') return pool.filter((q) => RUNNING_TYPES.includes(q.type) || q.type === 'sessions' || q.type === 'duration');
-  return pool.filter((q) => STRENGTH_TYPES.includes(q.type));
-}
-
-export function getWeeklyQuests(sport: SportType = 'mixte'): Quest[] {
+export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
   const week = getWeekNumber();
-  const rng = seededRandom(week * 7919);
+  const quests: Quest[] = [];
 
-  const easy = pickN(filterBySport(EASY_QUESTS, sport), 2, rng);
-  const medium = pickN(filterBySport(MEDIUM_QUESTS, sport), 3, rng);
-  const hard = pickN(filterBySport(HARD_QUESTS, sport), 3, rng);
-  const extreme = pickN(filterBySport(EXTREME_QUESTS, sport), 2, rng);
+  if (prevWeekSessions.length === 0) {
+    return STARTER_QUESTS.map((q, i) => ({ ...q, id: `w${week}-starter-${i}` }));
+  }
 
-  const all = [...easy, ...medium, ...hard, ...extreme];
+  const stats = analyzeLastWeek(prevWeekSessions);
 
-  return all.map((q, i) => ({
-    id: `w${week}-q${i}-${sport}`,
-    label: q.label,
-    description: q.description,
-    target: q.target,
-    type: q.type,
-    xp: q.xp,
-  }));
+  const strengthExos = stats.filter((s) => s.category !== 'running' && s.totalReps > 0).sort((a, b) => b.totalReps - a.totalReps);
+  const runningExos = stats.filter((s) => s.category === 'running' && s.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration);
+
+  for (const exo of strengthExos.slice(0, 4)) {
+    const target = roundTarget(Math.ceil(exo.totalReps * BOOST));
+    quests.push({
+      id: `w${week}-exo-${exo.exerciseId}`,
+      label: exo.exerciseName,
+      description: `Fais ${target} ${exo.exerciseName.toLowerCase()}`,
+      target,
+      type: 'exercise_reps',
+      xp: xpForTarget(target),
+      exerciseId: exo.exerciseId,
+      exerciseName: exo.exerciseName,
+    });
+  }
+
+  for (const exo of runningExos.slice(0, 2)) {
+    const target = roundTarget(Math.ceil(exo.totalDuration * BOOST));
+    quests.push({
+      id: `w${week}-exo-${exo.exerciseId}`,
+      label: exo.exerciseName,
+      description: `Cours ${formatMin(target)} de ${exo.exerciseName.toLowerCase()}`,
+      target,
+      type: 'exercise_duration',
+      xp: xpForTarget(Math.round(target / 60)),
+      exerciseId: exo.exerciseId,
+      exerciseName: exo.exerciseName,
+    });
+  }
+
+  const totalSessions = prevWeekSessions.length;
+  const sessionTarget = Math.max(totalSessions, Math.ceil(totalSessions * BOOST));
+  quests.push({
+    id: `w${week}-sessions`,
+    label: 'Régularité',
+    description: `Fais ${sessionTarget} séances cette semaine`,
+    target: sessionTarget,
+    type: 'sessions',
+    xp: xpForTarget(sessionTarget * 30),
+  });
+
+  const totalDuration = prevWeekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+  if (totalDuration > 0) {
+    const durTarget = roundTarget(Math.ceil(totalDuration * BOOST));
+    quests.push({
+      id: `w${week}-duration`,
+      label: 'Endurance',
+      description: `Entraîne-toi ${formatMin(durTarget)} au total`,
+      target: durTarget,
+      type: 'duration',
+      xp: xpForTarget(Math.round(durTarget / 60)),
+    });
+  }
+
+  const totalReps = stats.reduce((sum, s) => sum + s.totalReps, 0);
+  if (totalReps > 0) {
+    const repsTarget = roundTarget(Math.ceil(totalReps * BOOST));
+    quests.push({
+      id: `w${week}-reps`,
+      label: 'Volume',
+      description: `Fais ${repsTarget} reps au total`,
+      target: repsTarget,
+      type: 'reps',
+      xp: xpForTarget(repsTarget),
+    });
+  }
+
+  const exerciseVariety = stats.length;
+  if (exerciseVariety >= 2) {
+    const varTarget = Math.ceil(exerciseVariety * BOOST);
+    quests.push({
+      id: `w${week}-variety`,
+      label: 'Polyvalent',
+      description: `Fais ${varTarget} exercices différents`,
+      target: varTarget,
+      type: 'exercises',
+      xp: 100,
+    });
+  }
+
+  return quests;
 }
 
 // ── Levels ──

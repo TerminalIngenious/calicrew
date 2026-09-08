@@ -1,12 +1,12 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getWeeklyQuests } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, generateWeeklyQuests } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
-import type { UserProgress, Card, SportType } from '../types';
-import { Swords, Check, Package, Clock, Trophy, Flame, ChevronDown } from 'lucide-react';
+import type { UserProgress, Card } from '../types';
+import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -29,26 +29,20 @@ export default function BattlePass() {
   const [chestOpening, setChestOpening] = useState(false);
   const [chestPhase, setChestPhase] = useState<'idle' | 'shake' | 'burst' | 'reveal'>('idle');
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
-  const [showSportPicker, setShowSportPicker] = useState(false);
 
   const season = getCurrentSeason();
-  const sportType: SportType = progress.sportType || 'mixte';
-  const weeklyQuests = getWeeklyQuests(sportType);
 
-  const SPORT_LABELS: Record<SportType, string> = {
-    calisthenics: 'Calisthenics',
-    musculation: 'Musculation',
-    running: 'Running',
-    mixte: 'Mixte',
-  };
-
-  async function changeSportType(newType: SportType) {
-    if (!user) return;
-    const updated = { ...progress, sportType: newType };
-    setProgress(updated);
-    setShowSportPicker(false);
-    await updateDoc(doc(db, 'userProgress', user.uid), { sportType: newType });
-  }
+  const weekStart = getWeekStart();
+  const prevWeekStart = weekStart - 7 * 24 * 60 * 60 * 1000;
+  const prevWeekSessions = useMemo(
+    () => sessions.filter((s) => s.createdAt >= prevWeekStart && s.createdAt < weekStart && s.completed),
+    [sessions, prevWeekStart, weekStart]
+  );
+  const weeklyQuests = useMemo(() => generateWeeklyQuests(prevWeekSessions), [prevWeekSessions]);
+  const weekSessions = useMemo(
+    () => sessions.filter((s) => s.createdAt >= weekStart && s.completed),
+    [sessions, weekStart]
+  );
 
   const loadProgress = useCallback(async () => {
     if (!user) return;
@@ -67,9 +61,6 @@ export default function BattlePass() {
   useEffect(() => {
     loadProgress();
   }, [loadProgress]);
-
-  const weekStart = getWeekStart();
-  const weekSessions = sessions.filter((s) => s.createdAt >= weekStart && s.completed);
 
   function getQuestValue(questId: string): number {
     const quest = weeklyQuests.find((q) => q.id === questId);
@@ -101,6 +92,20 @@ export default function BattlePass() {
         return weekSessions
           .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
           .reduce((sum, s) => sum + (s.duration || 0), 0);
+      case 'exercise_reps':
+        return weekSessions.reduce(
+          (sum, s) => sum + (s.exercises || [])
+            .filter((ex) => ex.exerciseId === quest.exerciseId)
+            .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0),
+          0
+        );
+      case 'exercise_duration':
+        return weekSessions.reduce(
+          (sum, s) => sum + (s.exercises || [])
+            .filter((ex) => ex.exerciseId === quest.exerciseId)
+            .reduce((eSum, ex) => eSum + (ex.runDuration || 0), 0),
+          0
+        );
     }
   }
 
@@ -317,26 +322,6 @@ export default function BattlePass() {
             </div>
           )}
 
-          <div className="bp-sport-picker-row">
-            <button className="bp-sport-btn" onClick={() => setShowSportPicker(!showSportPicker)}>
-              <span>{SPORT_LABELS[sportType]}</span>
-              <ChevronDown size={14} />
-            </button>
-            {showSportPicker && (
-              <div className="bp-sport-dropdown">
-                {(Object.keys(SPORT_LABELS) as SportType[]).map((type) => (
-                  <button
-                    key={type}
-                    className={`bp-sport-option ${type === sportType ? 'active' : ''}`}
-                    onClick={() => changeSportType(type)}
-                  >
-                    {SPORT_LABELS[type]}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           <div className="bp-section-title-row">
             <h3 className="bp-section-title">
               <Swords size={16} /> Quêtes de la semaine
@@ -376,7 +361,7 @@ export default function BattlePass() {
                         <div className="bp-quest-bar-fill" style={{ width: `${pct}%`, background: claimed ? 'var(--accent-green)' : done ? 'var(--accent)' : 'var(--accent)' }} />
                       </div>
                       <span className="bp-quest-count">
-                        {quest.type === 'duration' || quest.type === 'running_duration'
+                        {quest.type === 'duration' || quest.type === 'running_duration' || quest.type === 'exercise_duration'
                           ? `${Math.floor(current / 60)}/${Math.floor(quest.target / 60)} min`
                           : `${current}/${quest.target}`}
                       </span>
