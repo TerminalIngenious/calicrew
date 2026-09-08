@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -20,8 +21,10 @@ function formatTime(seconds: number): string {
 export default function LiveSession() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { refresh } = useUserSessions();
   const [session, setSession] = useState<Session | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<number>(0);
+  const [showDelete, setShowDelete] = useState(false);
 
   // Chrono session
   const [elapsed, setElapsed] = useState(0);
@@ -151,6 +154,13 @@ export default function LiveSession() {
     const newRounds = amrapRounds - 1;
     setAmrapRounds(newRounds);
     await updateDoc(doc(db, 'sessions', id), { amrapRounds: newRounds });
+  }
+
+  async function deleteSession() {
+    if (!id) return;
+    await deleteDoc(doc(db, 'sessions', id));
+    await refresh();
+    navigate('/');
   }
 
   async function finishSession() {
@@ -339,9 +349,33 @@ export default function LiveSession() {
           </div>
         )}
 
-        <button className="primary-btn" style={{ marginTop: '1rem' }} onClick={() => navigate('/')}>
-          Retour à l'accueil
-        </button>
+        <div className="recap-actions">
+          <button className="primary-btn" onClick={() => navigate('/')}>
+            Retour à l'accueil
+          </button>
+          <button className="delete-session-btn" onClick={() => setShowDelete(true)}>
+            <Trash2 size={16} /> Supprimer la séance
+          </button>
+        </div>
+
+        {showDelete && (
+          <div className="modal-overlay" onClick={() => setShowDelete(false)}>
+            <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+              <h3>Supprimer cette séance ?</h3>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Elle sera retirée de tes stats, du classement et des quêtes.
+              </p>
+              <div className="modal-actions">
+                <button className="secondary-btn" onClick={() => setShowDelete(false)}>
+                  Annuler
+                </button>
+                <button className="primary-btn" style={{ flex: 1, background: '#ef4444' }} onClick={deleteSession}>
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

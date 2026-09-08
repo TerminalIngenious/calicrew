@@ -1949,6 +1949,21 @@ body {
   margin-top: 1.25rem;
 }
 
+.delete-session-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  color: #ef4444;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* Add exercise */
 .add-exercise-btn {
   display: flex;
