@@ -13,6 +13,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-09-08',
+    date: '8 septembre 2026',
+    title: 'Quêtes intelligentes & améliorations',
+    summary: 'Quêtes personnalisées, classement mensuel, suppression de séances et plus.',
+    details: `Quêtes personnalisées : les quêtes de la semaine sont maintenant générées automatiquement en fonction de tes exercices de la semaine précédente. Plus tu progresses, plus les objectifs augmentent (+60%). Si tu n'as pas d'historique, des quêtes starter t'accueillent.\n\nClassement mensuel : le classement du groupe se réinitialise le 1er de chaque mois avec un timer de countdown.\n\nStats du dashboard alignées sur le reset des quêtes (lundi 10h).\n\nSuppression de séances : tu peux maintenant supprimer une séance depuis la page récap. Elle disparaît de tes stats, du classement et des quêtes.\n\nCartes cliquables partout : toutes les cartes (même non débloquées) sont cliquables dans la Collection et le Profil avec une vue détaillée.\n\nLesté / Poids : le toggle "Lesté" est remplacé par un stepper simple pour ajuster le poids directement.`,
+  },
+  {
     id: 'update-2026-09-06',
     date: '6 septembre 2026',
     title: 'Running & Échanges de cartes',
