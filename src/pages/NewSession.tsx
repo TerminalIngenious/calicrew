@@ -103,7 +103,7 @@ export default function NewSession() {
     const normal = selectedExercises.filter((ex) => ex.category !== 'running');
     const running = selectedExercises.filter((ex) => ex.category === 'running');
     setExerciseConfigs(
-      normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 5 }))
+      normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 0 }))
     );
     setRunningConfigs(
       running.map((ex) => ({ exercise: ex, duration: 30, distance: 5, elevation: 0 }))
@@ -447,40 +447,28 @@ export default function NewSession() {
                   </button>
                 </div>
               </div>
-              <div className="config-row weighted-row">
-                  <div className="weighted-toggle" onClick={() => {
+              <div className="config-row">
+                <span>Lesté / Poids</span>
+                <div className="stepper">
+                  <button onClick={() => {
                     setExerciseConfigs((prev) =>
-                      prev.map((c, idx) => idx === i ? { ...c, weighted: !c.weighted } : c)
+                      prev.map((c, idx) => idx === i ? { ...c, weight: Math.max(0, c.weight - 0.5), weighted: Math.max(0, c.weight - 0.5) > 0 } : c)
                     );
                   }}>
-                    <Weight size={16} />
-                    <span>Lesté</span>
-                    <div className={`toggle ${config.weighted ? 'active' : ''}`}>
-                      <div className="toggle-knob" />
-                    </div>
-                  </div>
-                  {config.weighted && (
-                    <div className="stepper">
-                      <button onClick={() => {
-                        setExerciseConfigs((prev) =>
-                          prev.map((c, idx) => idx === i ? { ...c, weight: Math.max(0.5, c.weight - 0.5) } : c)
-                        );
-                      }}>
-                        <Minus size={16} />
-                      </button>
-                      <span>{config.weight} kg</span>
-                      <button onClick={() => {
-                        setExerciseConfigs((prev) =>
-                          prev.map((c, idx) => idx === i ? { ...c, weight: c.weight + 0.5 } : c)
-                        );
-                      }}>
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                  )}
+                    <Minus size={16} />
+                  </button>
+                  <span>{config.weight > 0 ? `${config.weight} kg` : '—'}</span>
+                  <button onClick={() => {
+                    setExerciseConfigs((prev) =>
+                      prev.map((c, idx) => idx === i ? { ...c, weight: c.weight + 0.5, weighted: true } : c)
+                    );
+                  }}>
+                    <Plus size={16} />
+                  </button>
                 </div>
+              </div>
               <div className="config-result">
-                → {repsPerSet} reps / série{config.weighted ? ` • ${config.weight} kg` : ''}
+                → {repsPerSet} reps / série{config.weight > 0 ? ` • ${config.weight} kg` : ''}
               </div>
             </div>
           );
