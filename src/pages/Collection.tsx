@@ -8,6 +8,7 @@ import type { UserProgress, Card } from '../types';
 import { Layers, Info, X } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
+import CardDetailModal from '../components/CardDetailModal';
 
 const DROP_RATES = [
   { rarity: 'commune' as const, pct: '50%' },
@@ -85,16 +86,12 @@ export default function Collection() {
       )}
 
       {selectedCard && (
-        <div className="modal-overlay" onClick={() => setSelectedCard(null)}>
-          <div className="collection-card-detail" onClick={(e) => e.stopPropagation()}>
-            {selectedCard.image && (
-              <img src={selectedCard.image} alt={getCardDisplayName(selectedCard)} className="collection-detail-img" />
-            )}
-            <button className="bp-card-reveal-close" onClick={() => setSelectedCard(null)}>
-              Fermer
-            </button>
-          </div>
-        </div>
+        <CardDetailModal
+          card={selectedCard}
+          owned={(ownedCards[selectedCard.id] || 0) > 0}
+          count={ownedCards[selectedCard.id] || 0}
+          onClose={() => setSelectedCard(null)}
+        />
       )}
 
       <div className="collection-summary">
@@ -120,7 +117,7 @@ export default function Collection() {
                   <div
                     key={card.id}
                     className={`collection-card-img ${owned ? 'owned' : 'locked'}`}
-                    onClick={owned ? () => setSelectedCard(card) : undefined}
+                    onClick={() => setSelectedCard(card)}
                   >
                     {card.image ? (
                       <img

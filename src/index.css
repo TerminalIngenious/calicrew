@@ -3586,12 +3586,8 @@ body {
   transition: transform 0.2s;
 }
 
-.collection-card-img.owned:active {
+.collection-card-img:active {
   transform: scale(0.96);
-}
-
-.collection-card-img.locked {
-  cursor: default;
 }
 
 .collection-card-img {
@@ -3655,6 +3651,114 @@ body {
   width: 80vw;
   border-radius: 12px;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Card detail modal */
+.card-detail-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1.5rem 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  max-width: 320px;
+  width: 85vw;
+  animation: cardRevealPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.card-detail-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: 2;
+  padding: 0.25rem;
+}
+
+.card-detail-glow {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  opacity: 0.15;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.card-detail-img {
+  max-width: 240px;
+  width: 70vw;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 1;
+}
+
+.card-detail-emoji {
+  font-size: 4rem;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.card-detail-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card-detail-rarity {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.card-detail-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.card-detail-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.card-detail-cat {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.card-detail-locked {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.card-detail-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 /* Profile page */

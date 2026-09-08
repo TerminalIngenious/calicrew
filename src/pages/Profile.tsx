@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
+import CardDetailModal from '../components/CardDetailModal';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [avatarCardId, setAvatarCardId] = useState<string | undefined>();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
   const load = useCallback(async () => {
     if (!targetUid) return;
@@ -223,6 +225,7 @@ export default function Profile() {
                   <div
                     key={card.id}
                     className="collection-card-img owned"
+                    onClick={() => setSelectedCard(card)}
                   >
                     {card.image ? (
                       <img src={card.image} alt={getCardDisplayName(card)} className="collection-card-thumb" loading="lazy" />
@@ -238,6 +241,15 @@ export default function Profile() {
           </div>
         )}
       </section>
+
+      {selectedCard && (
+        <CardDetailModal
+          card={selectedCard}
+          owned
+          count={ownedCards[selectedCard.id] || 0}
+          onClose={() => setSelectedCard(null)}
+        />
+      )}
 
       <BottomNav />
     </div>
