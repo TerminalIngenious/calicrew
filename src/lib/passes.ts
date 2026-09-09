@@ -28,7 +28,9 @@ interface ExoStat {
   exerciseName: string;
   category: string;
   totalReps: number;
+  bestSessionReps: number;
   totalDuration: number;
+  bestSessionDuration: number;
 }
 
 function analyzeLastWeek(prevSessions: Session[]): ExoStat[] {
@@ -36,9 +38,13 @@ function analyzeLastWeek(prevSessions: Session[]): ExoStat[] {
   for (const s of prevSessions) {
     for (const ex of s.exercises) {
       const id = ex.exerciseId;
-      const existing = map.get(id) || { exerciseId: id, exerciseName: ex.exerciseName, category: ex.exerciseCategory || '', totalReps: 0, totalDuration: 0 };
-      existing.totalReps += ex.sets.reduce((sum, set) => sum + (set.completed ? set.reps : 0), 0);
-      existing.totalDuration += ex.runDuration || 0;
+      const existing = map.get(id) || { exerciseId: id, exerciseName: ex.exerciseName, category: ex.exerciseCategory || '', totalReps: 0, bestSessionReps: 0, totalDuration: 0, bestSessionDuration: 0 };
+      const sessionReps = ex.sets.reduce((sum, set) => sum + (set.completed ? set.reps : 0), 0);
+      existing.totalReps += sessionReps;
+      existing.bestSessionReps = Math.max(existing.bestSessionReps, sessionReps);
+      const sessionDur = ex.runDuration || 0;
+      existing.totalDuration += sessionDur;
+      existing.bestSessionDuration = Math.max(existing.bestSessionDuration, sessionDur);
       map.set(id, existing);
     }
   }
@@ -126,16 +132,16 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
 
   // ── Quêtes perso par exercice (top 3 max, plafonds raisonnables) ──
 
-  const strengthExos = stats.filter((s) => s.category !== 'running' && s.totalReps > 0).sort((a, b) => b.totalReps - a.totalReps);
-  const runningExos = stats.filter((s) => s.category === 'running' && s.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration);
+  const strengthExos = stats.filter((s) => s.category !== 'running' && s.bestSessionReps > 0).sort((a, b) => b.bestSessionReps - a.bestSessionReps);
+  const runningExos = stats.filter((s) => s.category === 'running' && s.bestSessionDuration > 0).sort((a, b) => b.bestSessionDuration - a.bestSessionDuration);
 
   for (const exo of strengthExos.slice(0, 3)) {
-    const raw = Math.ceil(exo.totalReps * BOOST);
-    const target = Math.min(300, roundTarget(raw));
+    const raw = Math.ceil(exo.bestSessionReps * BOOST);
+    const target = Math.min(150, roundTarget(raw));
     quests.push({
       id: `w${week}-exo-${exo.exerciseId}`,
       label: exo.exerciseName,
-      description: `Fais ${target} ${exo.exerciseName.toLowerCase()}`,
+      description: `Fais ${target} ${exo.exerciseName.toLowerCase()} en une séance`,
       target,
       type: 'exercise_reps',
       xp: xpForTarget(target),
@@ -145,12 +151,12 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
   }
 
   for (const exo of runningExos.slice(0, 1)) {
-    const raw = Math.ceil(exo.totalDuration * BOOST);
-    const target = Math.min(5400, roundTarget(raw));
+    const raw = Math.ceil(exo.bestSessionDuration * BOOST);
+    const target = Math.min(3600, roundTarget(raw));
     quests.push({
       id: `w${week}-exo-${exo.exerciseId}`,
       label: exo.exerciseName,
-      description: `Cours ${formatMin(target)} de ${exo.exerciseName.toLowerCase()}`,
+      description: `Cours ${formatMin(target)} de ${exo.exerciseName.toLowerCase()} en une séance`,
       target,
       type: 'exercise_duration',
       xp: xpForTarget(Math.round(target / 60)),
