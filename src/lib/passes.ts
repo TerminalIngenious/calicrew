@@ -85,7 +85,65 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
 
   const stats = analyzeLastWeek(prevWeekSessions);
 
-  // ── Quêtes dynamiques ──
+  // ── Quêtes dynamiques (progressent avec le profil) ──
+
+  // Durée : boost doux, plafond 1h30, au-dessus du basique 30min
+  const totalDuration = prevWeekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+  if (totalDuration > 1800) {
+    const durTarget = Math.min(5400, roundTarget(Math.ceil(totalDuration * BOOST)));
+    quests.push({
+      id: `w${week}-duration`,
+      label: 'Endurance',
+      description: `Entraîne-toi ${formatMin(durTarget)} au total`,
+      target: durTarget,
+      type: 'duration',
+      xp: xpForTarget(Math.round(durTarget / 60)),
+    });
+  }
+
+  // Séances : au-dessus du basique 3
+  const totalSessions = prevWeekSessions.length;
+  if (totalSessions > 3) {
+    const sessionTarget = Math.min(7, Math.ceil(totalSessions * BOOST));
+    quests.push({
+      id: `w${week}-sessions`,
+      label: 'Régularité',
+      description: `Fais ${sessionTarget} séances cette semaine`,
+      target: sessionTarget,
+      type: 'sessions',
+      xp: xpForTarget(sessionTarget * 30),
+    });
+  }
+
+  // Séries : au-dessus du basique 15
+  const totalSets = prevWeekSessions.reduce(
+    (sum, s) => sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0), 0
+  );
+  if (totalSets > 15) {
+    const setsTarget = Math.min(80, roundTarget(Math.ceil(totalSets * BOOST)));
+    quests.push({
+      id: `w${week}-sets`,
+      label: 'Séries+',
+      description: `Complète ${setsTarget} séries`,
+      target: setsTarget,
+      type: 'sets',
+      xp: xpForTarget(setsTarget),
+    });
+  }
+
+  // Variété d'exercices
+  const exerciseVariety = stats.length;
+  if (exerciseVariety >= 3) {
+    const varTarget = Math.ceil(exerciseVariety * BOOST);
+    quests.push({
+      id: `w${week}-variety`,
+      label: 'Polyvalent',
+      description: `Fais ${varTarget} exercices différents`,
+      target: varTarget,
+      type: 'exercises',
+      xp: 100,
+    });
+  }
 
   // Reps totales : plafond 600
   const totalReps = stats.reduce((sum, s) => sum + s.totalReps, 0);
