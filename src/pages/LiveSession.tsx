@@ -166,7 +166,7 @@ export default function LiveSession() {
   async function finishSession() {
     if (!session || !id) return;
     const duration = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
-    const updateData: Record<string, unknown> = { completed: true, duration };
+    const updateData: Record<string, unknown> = { completed: true, duration, exercises: session.exercises };
     if (session.mode === 'amrap') updateData.amrapRounds = amrapRounds;
     await updateDoc(doc(db, 'sessions', id), updateData);
     if (timerRef.current) clearInterval(timerRef.current);
