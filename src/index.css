@@ -1877,14 +1877,6 @@ body {
   text-align: center;
 }
 
-.loader-pct {
-  display: block;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-
 .loader-bar {
   width: 100%;
   height: 6px;
@@ -1897,7 +1889,16 @@ body {
   height: 100%;
   background: var(--accent);
   border-radius: 3px;
-  transition: width 0.15s ease;
+}
+
+.loader-bar-indeterminate {
+  width: 40%;
+  animation: loader-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes loader-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
 }
 
 /* Recap session */
