@@ -92,12 +92,21 @@ export default function BattlePass() {
         return weekSessions
           .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
           .reduce((sum, s) => sum + (s.duration || 0), 0);
-      case 'exercise_reps':
-        return Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
+      case 'exercise_reps': {
+        const normalBest = Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
           (s) => (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
             .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0)
         ));
+        const amrapBest = Math.max(0, ...weekSessions.filter((s) => s.mode === 'amrap').map(
+          (s) => {
+            const rounds = s.amrapRounds || 0;
+            const match = (s.exercises || []).find((ex) => ex.exerciseId === quest.exerciseId);
+            return match ? rounds * match.targetReps : 0;
+          }
+        ));
+        return Math.max(normalBest, amrapBest);
+      }
       case 'exercise_duration':
         return Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
           (s) => (s.exercises || [])
