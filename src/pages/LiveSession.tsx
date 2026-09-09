@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -57,10 +57,10 @@ export default function LiveSession() {
 
   // Chrono session en fond
   useEffect(() => {
+    if (session && session.amrapRounds !== undefined) setAmrapRounds(session.amrapRounds);
     if (session && session.startedAt && !session.completed) {
       startTimeRef.current = session.startedAt;
       setElapsed(Math.floor((Date.now() - session.startedAt) / 1000));
-      if (session.amrapRounds !== undefined) setAmrapRounds(session.amrapRounds);
       timerRef.current = setInterval(() => {
         const now = Math.floor((Date.now() - startTimeRef.current) / 1000);
         setElapsed(now);
@@ -176,6 +176,14 @@ export default function LiveSession() {
     setEditing(false);
   }
 
+  async function saveAmrapEdit() {
+    if (!session || !id) return;
+    await updateDoc(doc(db, 'sessions', id), { amrapRounds });
+    setSession({ ...session, amrapRounds });
+    await refresh();
+    setEditing(false);
+  }
+
   async function deleteSession() {
     if (!id) return;
     await deleteDoc(doc(db, 'sessions', id));
@@ -212,7 +220,7 @@ export default function LiveSession() {
     const categories = [...new Set(session.exercises.map((e) => e.exerciseCategory || '').filter(Boolean))];
     const categoryLabel = categories.map((c) => (CATEGORY_LABELS as Record<string, string>)[c] || c).join(', ');
     const isAmrap = session.mode === 'amrap';
-    const displayRounds = session.amrapRounds || amrapRounds;
+    const displayRounds = editing ? amrapRounds : (session.amrapRounds || amrapRounds);
 
     return (
       <div className="page">
@@ -221,11 +229,9 @@ export default function LiveSession() {
             <ArrowLeft size={20} />
           </button>
           <h1>{isAmrap ? 'Récap Cindy' : 'Récap séance'}</h1>
-          {!isAmrap && (
-            <button className="icon-btn" onClick={() => editing ? saveEdits() : setEditing(true)}>
-              {editing ? <Check size={20} /> : <Pencil size={18} />}
-            </button>
-          )}
+          <button className="icon-btn" onClick={() => editing ? (isAmrap ? saveAmrapEdit() : saveEdits()) : setEditing(true)}>
+            {editing ? <Check size={20} /> : <Pencil size={18} />}
+          </button>
         </header>
 
         <div className="recap-header-card">
@@ -276,6 +282,16 @@ export default function LiveSession() {
                 <span className="recap-exercise-sub">5 tractions + 10 pompes + 15 squats</span>
               </div>
             </div>
+            {editing ? (
+              <div className="amrap-edit-rounds" style={{ marginTop: '0.75rem' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Rounds</span>
+                <div className="stepper">
+                  <button onClick={() => setAmrapRounds((r) => Math.max(0, r - 1))}><Minus size={16} /></button>
+                  <span>{amrapRounds}</span>
+                  <button onClick={() => setAmrapRounds((r) => r + 1)}><Plus size={16} /></button>
+                </div>
+              </div>
+            ) : null}
             <div className="recap-stats-row" style={{ marginTop: '0.75rem' }}>
               <div className="recap-mini-stat">
                 <span className="recap-mini-value">{displayRounds * 30}</span>
