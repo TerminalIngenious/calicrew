@@ -35,7 +35,8 @@ interface ExoStat {
 
 function analyzeLastWeek(prevSessions: Session[]): ExoStat[] {
   const map = new Map<string, ExoStat>();
-  for (const s of prevSessions) {
+  const normalSessions = prevSessions.filter((s) => s.mode !== 'amrap');
+  for (const s of normalSessions) {
     for (const ex of s.exercises) {
       const id = ex.exerciseId;
       const existing = map.get(id) || { exerciseId: id, exerciseName: ex.exerciseName, category: ex.exerciseCategory || '', totalReps: 0, bestSessionReps: 0, totalDuration: 0, bestSessionDuration: 0 };

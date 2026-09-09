@@ -93,13 +93,13 @@ export default function BattlePass() {
           .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
           .reduce((sum, s) => sum + (s.duration || 0), 0);
       case 'exercise_reps':
-        return Math.max(0, ...weekSessions.map(
+        return Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
           (s) => (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
             .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0)
         ));
       case 'exercise_duration':
-        return Math.max(0, ...weekSessions.map(
+        return Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
           (s) => (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
             .reduce((eSum, ex) => eSum + (ex.runDuration || 0), 0)
