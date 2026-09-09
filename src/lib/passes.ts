@@ -131,6 +131,20 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
     });
   }
 
+  // ── Quête AMRAP si l'utilisateur en fait ──
+  const amrapSessions = prevWeekSessions.filter((s) => s.mode === 'amrap');
+  if (amrapSessions.length > 0) {
+    const amrapTarget = Math.min(3, Math.max(1, Math.ceil(amrapSessions.length * BOOST)));
+    quests.push({
+      id: `w${week}-amrap`,
+      label: 'Cindy',
+      description: `Fais ${amrapTarget} Cindy cette semaine`,
+      target: amrapTarget,
+      type: 'amrap',
+      xp: 100,
+    });
+  }
+
   // ── Quêtes perso par exercice (top 3 max, plafonds raisonnables) ──
 
   const strengthExos = stats.filter((s) => s.category !== 'running' && s.bestSessionReps > 0).sort((a, b) => b.bestSessionReps - a.bestSessionReps);
