@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -25,6 +25,7 @@ export default function LiveSession() {
   const [session, setSession] = useState<Session | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<number>(0);
   const [showDelete, setShowDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   // Chrono session
   const [elapsed, setElapsed] = useState(0);
@@ -156,6 +157,25 @@ export default function LiveSession() {
     await updateDoc(doc(db, 'sessions', id), { amrapRounds: newRounds });
   }
 
+  function editReps(exIdx: number, setIdx: number, value: number) {
+    if (!session) return;
+    const updated = { ...session, exercises: session.exercises.map((ex, ei) => {
+      if (ei !== exIdx) return ex;
+      return { ...ex, sets: ex.sets.map((s, si) => {
+        if (si !== setIdx) return s;
+        return { reps: value, completed: value > 0 };
+      })};
+    })};
+    setSession(updated);
+  }
+
+  async function saveEdits() {
+    if (!session || !id) return;
+    await updateDoc(doc(db, 'sessions', id), { exercises: session.exercises });
+    await refresh();
+    setEditing(false);
+  }
+
   async function deleteSession() {
     if (!id) return;
     await deleteDoc(doc(db, 'sessions', id));
@@ -201,6 +221,11 @@ export default function LiveSession() {
             <ArrowLeft size={20} />
           </button>
           <h1>{isAmrap ? 'Récap Cindy' : 'Récap séance'}</h1>
+          {!isAmrap && (
+            <button className="icon-btn" onClick={() => editing ? saveEdits() : setEditing(true)}>
+              {editing ? <Check size={20} /> : <Pencil size={18} />}
+            </button>
+          )}
         </header>
 
         <div className="recap-header-card">
@@ -331,10 +356,19 @@ export default function LiveSession() {
                   </div>
                   <div className="recap-sets-grid">
                     {ex.sets.map((set, setIdx) => (
-                      <div key={setIdx} className={`recap-set ${set.completed ? 'completed' : 'missed'}`}>
+                      <div key={setIdx} className={`recap-set ${set.completed ? 'completed' : 'missed'} ${editing ? 'editing' : ''}`}>
                         <span className="recap-set-label">S{setIdx + 1}</span>
-                        <span className="recap-set-reps">{set.completed ? set.reps : '—'}</span>
-                        {set.completed && set.reps >= ex.targetReps && (
+                        {editing ? (
+                          <input
+                            type="number"
+                            className="recap-set-input"
+                            value={set.reps}
+                            onChange={(e) => editReps(exIdx, setIdx, Math.max(0, parseInt(e.target.value) || 0))}
+                          />
+                        ) : (
+                          <span className="recap-set-reps">{set.completed ? set.reps : '—'}</span>
+                        )}
+                        {!editing && set.completed && set.reps >= ex.targetReps && (
                           <Check size={12} className="recap-set-check" />
                         )}
                       </div>

@@ -1955,6 +1955,28 @@ body {
   color: var(--accent-green);
 }
 
+.recap-set.editing {
+  border: 1px solid var(--border);
+}
+
+.recap-set-input {
+  width: 3rem;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+
+.recap-set-input::-webkit-inner-spin-button,
+.recap-set-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .recap-exercise-total {
   font-size: 0.8rem;
   color: var(--text-muted);
