@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
-import type { Exercise, ExerciseLog } from '../types';
-import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge } from 'lucide-react';
+import type { Exercise, ExerciseLog, WeightType, Program } from '../types';
+import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList } from 'lucide-react';
 
 export default function NewSession() {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export default function NewSession() {
   const [step, setStep] = useState<'select' | 'config'>('select');
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseConfigs, setExerciseConfigs] = useState<
-    { exercise: Exercise; targetSets: number; targetTotal: number; weighted: boolean; weight: number }[]
+    { exercise: Exercise; targetSets: number; targetTotal: number; weighted: boolean; weight: number; weightType: WeightType }[]
   >([]);
   const [runningConfigs, setRunningConfigs] = useState<
     { exercise: Exercise; duration: number; distance: number; elevation: number }[]
@@ -25,10 +25,51 @@ export default function NewSession() {
   const [newExWeighted, setNewExWeighted] = useState(false);
   const [showAmrap, setShowAmrap] = useState(false);
   const [amrapMinutes, setAmrapMinutes] = useState(20);
+  const [myPrograms, setMyPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
-    if (user) loadCustomExercises();
+    if (user) {
+      loadCustomExercises();
+      loadPrograms();
+    }
   }, [user]);
+
+  async function loadPrograms() {
+    if (!user) return;
+    const snap = await getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid)));
+    setMyPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+  }
+
+  async function startFromProgram(prog: Program) {
+    if (!user) return;
+    const now = Date.now();
+    const exercises: ExerciseLog[] = prog.exercises.map((ex) => {
+      const log: ExerciseLog = {
+        exerciseId: ex.exerciseId,
+        exerciseName: ex.exerciseName,
+        exerciseCategory: ex.exerciseCategory,
+        targetSets: ex.targetSets,
+        targetReps: ex.targetReps,
+        sets: Array.from({ length: ex.targetSets }, () => ({ reps: 0, completed: false })),
+      };
+      if (ex.weighted && ex.weight) {
+        log.weighted = true;
+        log.weight = ex.weight;
+        log.weightType = ex.weightType;
+      }
+      return log;
+    });
+    const docRef = await addDoc(collection(db, 'sessions'), {
+      userId: user.uid,
+      date: new Date().toISOString().split('T')[0],
+      exercises,
+      completed: false,
+      createdAt: now,
+      startedAt: now,
+      duration: 0,
+    });
+    navigate(`/session/${docRef.id}`);
+  }
 
   async function loadCustomExercises() {
     if (!user) return;
@@ -103,7 +144,7 @@ export default function NewSession() {
     const normal = selectedExercises.filter((ex) => ex.category !== 'running');
     const running = selectedExercises.filter((ex) => ex.category === 'running');
     setExerciseConfigs(
-      normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 0 }))
+      normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 0, weightType: 'body' as WeightType }))
     );
     setRunningConfigs(
       running.map((ex) => ({ exercise: ex, duration: 30, distance: 5, elevation: 0 }))
@@ -136,6 +177,7 @@ export default function NewSession() {
       if (c.weighted) {
         log.weighted = true;
         log.weight = c.weight;
+        log.weightType = c.weightType;
       }
       return log;
     });
@@ -242,6 +284,20 @@ export default function NewSession() {
               </div>
             </div>
           </div>
+        )}
+
+        {myPrograms.length > 0 && (
+          <section className="section">
+            <h3 className="category-title"><ClipboardList size={16} style={{ marginRight: 6 }} />Programmes</h3>
+            <div className="programs-quick-list">
+              {myPrograms.map((prog) => (
+                <button key={prog.id} className="program-quick-card" onClick={() => startFromProgram(prog)}>
+                  <span className="program-quick-name">{prog.name}</span>
+                  <span className="program-quick-info">{prog.exercises.length} exos</span>
+                </button>
+              ))}
+            </div>
+          </section>
         )}
 
         <div className="section-divider">
@@ -448,7 +504,7 @@ export default function NewSession() {
                 </div>
               </div>
               <div className="config-row">
-                <span>Lesté / Poids</span>
+                <span>Poids</span>
                 <div className="stepper">
                   <button onClick={() => {
                     setExerciseConfigs((prev) =>
@@ -467,8 +523,26 @@ export default function NewSession() {
                   </button>
                 </div>
               </div>
+              {config.weight > 0 && (
+                <div className="config-row">
+                  <span>Type</span>
+                  <div className="weight-type-picker">
+                    {([['body', 'Lesté'], ['halteres', 'Haltères'], ['barre', 'Barre']] as [WeightType, string][]).map(([type, label]) => (
+                      <button
+                        key={type}
+                        className={`weight-type-btn ${config.weightType === type ? 'active' : ''}`}
+                        onClick={() => setExerciseConfigs((prev) =>
+                          prev.map((c, idx) => idx === i ? { ...c, weightType: type } : c)
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="config-result">
-                → {repsPerSet} reps / série{config.weight > 0 ? ` • ${config.weight} kg` : ''}
+                → {repsPerSet} reps / série{config.weight > 0 ? ` • ${config.weight} kg ${config.weightType === 'halteres' ? '(haltères)' : config.weightType === 'barre' ? '(barre)' : '(lesté)'}` : ''}
               </div>
             </div>
           );

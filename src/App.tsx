@@ -12,6 +12,7 @@ import Group from './pages/Group';
 import BattlePass from './pages/BattlePass';
 import Collection from './pages/Collection';
 import Profile from './pages/Profile';
+import Programs from './pages/Programs';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 
@@ -64,7 +65,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 function AppContent() {
   const { user, loading } = useAuth();
   const [showSplash, setShowSplash] = useState(false);
-  const [splashDone, setSplashDone] = useState(() => !!sessionStorage.getItem('splash-shown'));
+  const [splashDone, setSplashDone] = useState(() => !!localStorage.getItem('calicrew-splash-seen'));
 
   useEffect(() => {
     if (!loading && user && !splashDone) {
@@ -75,7 +76,7 @@ function AppContent() {
   function handleSplashDone() {
     setShowSplash(false);
     setSplashDone(true);
-    sessionStorage.setItem('splash-shown', '1');
+    localStorage.setItem('calicrew-splash-seen', 'pass-1');
   }
 
   return (
@@ -90,6 +91,7 @@ function AppContent() {
         <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
         <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
         <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
+        <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       </Routes>

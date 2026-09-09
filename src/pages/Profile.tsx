@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
-import { doc, getDoc, getDocs, collection, query, where, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
-import type { UserProgress, Session, Card } from '../types';
+import type { UserProgress, Session, Card, Program } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
@@ -28,6 +28,7 @@ export default function Profile() {
   const [avatarCardId, setAvatarCardId] = useState<string | undefined>();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [programs, setPrograms] = useState<Program[]>([]);
 
   const load = useCallback(async () => {
     if (!targetUid) return;
@@ -54,6 +55,12 @@ export default function Profile() {
       setOwnedCards(data.ownedCards || {});
       setAvatarCardId(data.avatarCardId);
     }
+
+    const progQuery = isOwnProfile
+      ? query(collection(db, 'programs'), where('createdBy', '==', targetUid))
+      : query(collection(db, 'programs'), where('createdBy', '==', targetUid), where('isPublic', '==', true));
+    const progSnap = await getDocs(progQuery);
+    setPrograms(progSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
 
     setLoading(false);
   }, [targetUid, isOwnProfile, user, ownSessions]);
@@ -211,6 +218,51 @@ export default function Profile() {
           </div>
         )}
       </section>
+
+      {programs.length > 0 && (
+        <section className="section">
+          <h3><ClipboardList size={16} style={{ marginRight: 6 }} />Programmes ({programs.length})</h3>
+          <div className="programs-list" style={{ paddingBottom: 0 }}>
+            {programs.map((prog) => (
+              <div key={prog.id} className="program-card">
+                <div className="program-card-header">
+                  <div>
+                    <h3>{prog.name}</h3>
+                    {prog.description && <span className="program-card-desc">{prog.description}</span>}
+                  </div>
+                  {!isOwnProfile && (
+                    <button className="icon-btn" title="Importer" onClick={async () => {
+                      if (!user) return;
+                      await addDoc(collection(db, 'programs'), {
+                        name: prog.name,
+                        description: prog.description || '',
+                        createdBy: user.uid,
+                        creatorName: user.displayName || '',
+                        exercises: prog.exercises,
+                        isPublic: false,
+                        createdAt: Date.now(),
+                      });
+                      alert('Programme importé !');
+                    }}>
+                      <Download size={14} />
+                    </button>
+                  )}
+                </div>
+                <div className="program-card-exercises">
+                  {prog.exercises.map((ex, i) => (
+                    <span key={i} className="program-card-ex">
+                      {ex.exerciseName} {ex.targetSets}×{ex.targetReps}{ex.weighted ? ` ${ex.weight}kg` : ''}
+                    </span>
+                  ))}
+                </div>
+                <div className="program-card-footer">
+                  <span>{prog.exercises.length} exercices</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <h3>Cartes ({uniqueCards.length})</h3>

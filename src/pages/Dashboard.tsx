@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LogOut, Bell, X, ChevronRight } from 'lucide-react';
+import { Plus, LogOut, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -44,6 +44,31 @@ export default function Dashboard() {
 
   const lastSeenUpdate = localStorage.getItem('calicrew-last-seen-update');
   const hasUnread = lastSeenUpdate !== UPDATES[0]?.id;
+
+  const today = new Date().toISOString().split('T')[0];
+  const [creatineTaken, setCreatineTaken] = useState(() => localStorage.getItem('calicrew-creatine') === today);
+  const [creatineStreak, setCreatineStreak] = useState(() => parseInt(localStorage.getItem('calicrew-creatine-streak') || '0'));
+
+  function toggleCreatine() {
+    if (creatineTaken) {
+      localStorage.removeItem('calicrew-creatine');
+      const newStreak = Math.max(0, creatineStreak - 1);
+      localStorage.setItem('calicrew-creatine-streak', String(newStreak));
+      setCreatineStreak(newStreak);
+      setCreatineTaken(false);
+    } else {
+      const lastDate = localStorage.getItem('calicrew-creatine-last');
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const newStreak = lastDate === yesterdayStr ? creatineStreak + 1 : 1;
+      localStorage.setItem('calicrew-creatine', today);
+      localStorage.setItem('calicrew-creatine-last', today);
+      localStorage.setItem('calicrew-creatine-streak', String(newStreak));
+      setCreatineStreak(newStreak);
+      setCreatineTaken(true);
+    }
+  }
 
   function openUpdates() {
     setShowUpdates(true);
@@ -108,9 +133,30 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <button className="primary-btn" onClick={() => navigate('/session/new')}>
-            <Plus size={20} /> Nouvelle séance
-          </button>
+          <div className={`creatine-card ${creatineTaken ? 'taken' : ''}`} onClick={toggleCreatine}>
+            <div className="creatine-left">
+              <Droplets size={18} />
+              <div>
+                <span className="creatine-title">Créatine</span>
+                <span className="creatine-sub">{creatineTaken ? 'Prise aujourd\'hui' : 'Pas encore prise'}</span>
+              </div>
+            </div>
+            <div className="creatine-right">
+              {creatineStreak > 0 && <span className="creatine-streak">{creatineStreak}j</span>}
+              <div className={`creatine-check ${creatineTaken ? 'active' : ''}`}>
+                {creatineTaken && <Droplets size={14} />}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="primary-btn" style={{ flex: 1 }} onClick={() => navigate('/session/new')}>
+              <Plus size={20} /> Nouvelle séance
+            </button>
+            <button className="secondary-btn" style={{ flex: 0 }} onClick={() => navigate('/programs')}>
+              <ClipboardList size={20} />
+            </button>
+          </div>
 
           <section className="section">
             <h2>Dernières séances</h2>

@@ -11,6 +11,8 @@ export interface SetLog {
   completed: boolean;
 }
 
+export type WeightType = 'body' | 'halteres' | 'barre';
+
 export interface ExerciseLog {
   exerciseId: string;
   exerciseName: string;
@@ -20,6 +22,7 @@ export interface ExerciseLog {
   sets: SetLog[];
   weighted?: boolean;
   weight?: number;
+  weightType?: WeightType;
   runDuration?: number;
   runDistance?: number;
   runElevation?: number;
@@ -37,6 +40,30 @@ export interface Session {
   mode?: 'standard' | 'amrap';
   amrapDuration?: number;
   amrapRounds?: number;
+}
+
+// ── Programs ──
+
+export interface ProgramExercise {
+  exerciseId: string;
+  exerciseName: string;
+  exerciseCategory: string;
+  targetSets: number;
+  targetReps: number;
+  weighted?: boolean;
+  weight?: number;
+  weightType?: WeightType;
+}
+
+export interface Program {
+  id: string;
+  name: string;
+  description?: string;
+  createdBy: string;
+  creatorName: string;
+  exercises: ProgramExercise[];
+  isPublic: boolean;
+  createdAt: number;
 }
 
 export interface UserProfile {

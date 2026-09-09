@@ -347,7 +347,7 @@ export default function LiveSession() {
                     <div>
                       <h3>{ex.exerciseName}</h3>
                       <span className="recap-exercise-sub">
-                        Objectif : {ex.targetReps} reps × {ex.sets.length} séries{ex.weighted && ex.weight ? ` • ${ex.weight} kg` : ''}
+                        Objectif : {ex.targetReps} reps × {ex.sets.length} séries{ex.weighted && ex.weight ? ` • ${ex.weight} kg${ex.weightType === 'halteres' ? ' (haltères)' : ex.weightType === 'barre' ? ' (barre)' : ''}` : ''}
                       </span>
                     </div>
                     <span className={`recap-exercise-badge ${allDone ? 'done' : 'partial'}`}>
@@ -585,7 +585,7 @@ export default function LiveSession() {
                 onClick={() => setExpandedExercise(isExpanded ? -1 : exIdx)}
               >
                 <div>
-                  <h3>{ex.exerciseName}{ex.weighted && ex.weight ? ` (${ex.weight} kg)` : ''}</h3>
+                  <h3>{ex.exerciseName}{ex.weighted && ex.weight ? ` (${ex.weight} kg${ex.weightType === 'halteres' ? ' haltères' : ex.weightType === 'barre' ? ' barre' : ''})` : ''}</h3>
                   <span className="exercise-progress-text">
                     {exCompleted}/{exTotal} séries • {remaining > 0 ? `${remaining} restante${remaining > 1 ? 's' : ''}` : 'Terminé ✓'}
                   </span>
