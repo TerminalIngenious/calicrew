@@ -96,6 +96,7 @@ export default function Dashboard() {
         <div className="page loading"><Loader /></div>
       ) : (
         <>
+          <span className="stats-period">Cette semaine</span>
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-value">{stats.weekSessions}</span>

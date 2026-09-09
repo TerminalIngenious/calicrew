@@ -174,7 +174,7 @@ export default function Profile() {
       )}
 
       <section className="section">
-        <h3>Records</h3>
+        <h3>Records <span className="stats-period-inline">all-time</span></h3>
         <div className="profile-stats">
           <div className="profile-stat">
             <Trophy size={18} className="gold" />
