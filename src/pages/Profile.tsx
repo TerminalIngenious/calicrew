@@ -56,11 +56,15 @@ export default function Profile() {
       setAvatarCardId(data.avatarCardId);
     }
 
-    const progQuery = isOwnProfile
-      ? query(collection(db, 'programs'), where('createdBy', '==', targetUid))
-      : query(collection(db, 'programs'), where('createdBy', '==', targetUid), where('isPublic', '==', true));
-    const progSnap = await getDocs(progQuery);
-    setPrograms(progSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+    try {
+      const progQuery = isOwnProfile
+        ? query(collection(db, 'programs'), where('createdBy', '==', targetUid))
+        : query(collection(db, 'programs'), where('createdBy', '==', targetUid), where('isPublic', '==', true));
+      const progSnap = await getDocs(progQuery);
+      setPrograms(progSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+    } catch {
+      setPrograms([]);
+    }
 
     setLoading(false);
   }, [targetUid, isOwnProfile, user, ownSessions]);

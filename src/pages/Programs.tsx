@@ -23,8 +23,12 @@ export default function Programs() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const snap = await getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid)));
-    setPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+    try {
+      const snap = await getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid)));
+      setPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+    } catch {
+      setPrograms([]);
+    }
     setLoading(false);
   }, [user]);
 

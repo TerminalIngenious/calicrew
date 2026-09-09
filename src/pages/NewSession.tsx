@@ -36,8 +36,12 @@ export default function NewSession() {
 
   async function loadPrograms() {
     if (!user) return;
-    const snap = await getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid)));
-    setMyPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+    try {
+      const snap = await getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid)));
+      setMyPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+    } catch {
+      setMyPrograms([]);
+    }
   }
 
   async function startFromProgram(prog: Program) {
