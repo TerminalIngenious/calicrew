@@ -2,7 +2,7 @@ import type { Season, PassLevel, Quest, Session } from '../types';
 
 // ── Quêtes personnalisées basées sur l'activité ──
 
-const BOOST = 1.6;
+const BOOST = 1.2;
 
 function xpForTarget(target: number): number {
   if (target < 50) return 50;
@@ -55,7 +55,7 @@ const STARTER_QUESTS: Quest[] = [
   { id: '', label: 'Première séance', description: 'Fais 1 séance cette semaine', target: 1, type: 'sessions', xp: 50 },
   { id: '', label: 'En route', description: 'Fais 2 séances cette semaine', target: 2, type: 'sessions', xp: 100 },
   { id: '', label: 'Starter', description: 'Fais 50 reps cette semaine', target: 50, type: 'reps', xp: 50 },
-  { id: '', label: 'Petit tour', description: 'Entraîne-toi 15 min au total', target: 900, type: 'duration', xp: 50 },
+  { id: '', label: '30 minutes', description: 'Entraîne-toi 30 min au total', target: 1800, type: 'duration', xp: 75 },
   { id: '', label: 'Curieux', description: 'Fais 3 exercices différents', target: 3, type: 'exercises', xp: 75 },
   { id: '', label: 'Première série', description: 'Complète 10 séries', target: 10, type: 'sets', xp: 50 },
 ];
@@ -70,11 +70,68 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
 
   const stats = analyzeLastWeek(prevWeekSessions);
 
+  // ── Quêtes de base (toujours présentes) ──
+
+  // Durée : min 30 min, boost doux, plafond 1h30
+  const totalDuration = prevWeekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+  const durTarget = Math.min(5400, Math.max(1800, roundTarget(Math.ceil(totalDuration * BOOST))));
+  quests.push({
+    id: `w${week}-duration`,
+    label: 'Endurance',
+    description: `Entraîne-toi ${formatMin(durTarget)} au total`,
+    target: durTarget,
+    type: 'duration',
+    xp: xpForTarget(Math.round(durTarget / 60)),
+  });
+
+  // Séances : min 2, plafond 7
+  const totalSessions = prevWeekSessions.length;
+  const sessionTarget = Math.min(7, Math.max(2, Math.ceil(totalSessions * BOOST)));
+  quests.push({
+    id: `w${week}-sessions`,
+    label: 'Régularité',
+    description: `Fais ${sessionTarget} séances cette semaine`,
+    target: sessionTarget,
+    type: 'sessions',
+    xp: xpForTarget(sessionTarget * 30),
+  });
+
+  // Séries : min 15, plafond 80
+  const totalSets = prevWeekSessions.reduce(
+    (sum, s) => sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0), 0
+  );
+  const setsTarget = Math.min(80, Math.max(15, roundTarget(Math.ceil(totalSets * BOOST))));
+  quests.push({
+    id: `w${week}-sets`,
+    label: 'Séries',
+    description: `Complète ${setsTarget} séries`,
+    target: setsTarget,
+    type: 'sets',
+    xp: xpForTarget(setsTarget),
+  });
+
+  // Reps totales : plafond 600
+  const totalReps = stats.reduce((sum, s) => sum + s.totalReps, 0);
+  if (totalReps > 0) {
+    const repsTarget = Math.min(600, roundTarget(Math.ceil(totalReps * BOOST)));
+    quests.push({
+      id: `w${week}-reps`,
+      label: 'Volume',
+      description: `Fais ${repsTarget} reps au total`,
+      target: repsTarget,
+      type: 'reps',
+      xp: xpForTarget(repsTarget),
+    });
+  }
+
+  // ── Quêtes perso par exercice (top 3 max, plafonds raisonnables) ──
+
   const strengthExos = stats.filter((s) => s.category !== 'running' && s.totalReps > 0).sort((a, b) => b.totalReps - a.totalReps);
   const runningExos = stats.filter((s) => s.category === 'running' && s.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration);
 
-  for (const exo of strengthExos.slice(0, 4)) {
-    const target = roundTarget(Math.ceil(exo.totalReps * BOOST));
+  for (const exo of strengthExos.slice(0, 3)) {
+    const raw = Math.ceil(exo.totalReps * BOOST);
+    const target = Math.min(300, roundTarget(raw));
     quests.push({
       id: `w${week}-exo-${exo.exerciseId}`,
       label: exo.exerciseName,
@@ -87,8 +144,9 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
     });
   }
 
-  for (const exo of runningExos.slice(0, 2)) {
-    const target = roundTarget(Math.ceil(exo.totalDuration * BOOST));
+  for (const exo of runningExos.slice(0, 1)) {
+    const raw = Math.ceil(exo.totalDuration * BOOST);
+    const target = Math.min(5400, roundTarget(raw));
     quests.push({
       id: `w${week}-exo-${exo.exerciseId}`,
       label: exo.exerciseName,
@@ -98,56 +156,6 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
       xp: xpForTarget(Math.round(target / 60)),
       exerciseId: exo.exerciseId,
       exerciseName: exo.exerciseName,
-    });
-  }
-
-  const totalSessions = prevWeekSessions.length;
-  const sessionTarget = Math.max(totalSessions, Math.ceil(totalSessions * BOOST));
-  quests.push({
-    id: `w${week}-sessions`,
-    label: 'Régularité',
-    description: `Fais ${sessionTarget} séances cette semaine`,
-    target: sessionTarget,
-    type: 'sessions',
-    xp: xpForTarget(sessionTarget * 30),
-  });
-
-  const totalDuration = prevWeekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
-  if (totalDuration > 0) {
-    const durTarget = roundTarget(Math.ceil(totalDuration * BOOST));
-    quests.push({
-      id: `w${week}-duration`,
-      label: 'Endurance',
-      description: `Entraîne-toi ${formatMin(durTarget)} au total`,
-      target: durTarget,
-      type: 'duration',
-      xp: xpForTarget(Math.round(durTarget / 60)),
-    });
-  }
-
-  const totalReps = stats.reduce((sum, s) => sum + s.totalReps, 0);
-  if (totalReps > 0) {
-    const repsTarget = roundTarget(Math.ceil(totalReps * BOOST));
-    quests.push({
-      id: `w${week}-reps`,
-      label: 'Volume',
-      description: `Fais ${repsTarget} reps au total`,
-      target: repsTarget,
-      type: 'reps',
-      xp: xpForTarget(repsTarget),
-    });
-  }
-
-  const exerciseVariety = stats.length;
-  if (exerciseVariety >= 2) {
-    const varTarget = Math.ceil(exerciseVariety * BOOST);
-    quests.push({
-      id: `w${week}-variety`,
-      label: 'Polyvalent',
-      description: `Fais ${varTarget} exercices différents`,
-      target: varTarget,
-      type: 'exercises',
-      xp: 100,
     });
   }
 
