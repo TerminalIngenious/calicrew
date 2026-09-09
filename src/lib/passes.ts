@@ -67,9 +67,17 @@ const STARTER_QUESTS: Quest[] = [
   { id: '', label: 'Première série', description: 'Complète 10 séries', target: 10, type: 'sets', xp: 50 },
 ];
 
+function baseQuests(week: number): Quest[] {
+  return [
+    { id: `w${week}-base-sessions`, label: '3 séances', description: 'Fais 3 séances cette semaine', target: 3, type: 'sessions', xp: 75 },
+    { id: `w${week}-base-duration`, label: '30 minutes', description: 'Entraîne-toi 30 min au total', target: 1800, type: 'duration', xp: 75 },
+    { id: `w${week}-base-sets`, label: '15 séries', description: 'Complète 15 séries cette semaine', target: 15, type: 'sets', xp: 50 },
+  ];
+}
+
 export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
   const week = getWeekNumber();
-  const quests: Quest[] = [];
+  const quests: Quest[] = [...baseQuests(week)];
 
   if (prevWeekSessions.length === 0) {
     return STARTER_QUESTS.map((q, i) => ({ ...q, id: `w${week}-starter-${i}` }));
@@ -77,45 +85,7 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
 
   const stats = analyzeLastWeek(prevWeekSessions);
 
-  // ── Quêtes de base (toujours présentes) ──
-
-  // Durée : min 30 min, boost doux, plafond 1h30
-  const totalDuration = prevWeekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
-  const durTarget = Math.min(5400, Math.max(1800, roundTarget(Math.ceil(totalDuration * BOOST))));
-  quests.push({
-    id: `w${week}-duration`,
-    label: 'Endurance',
-    description: `Entraîne-toi ${formatMin(durTarget)} au total`,
-    target: durTarget,
-    type: 'duration',
-    xp: xpForTarget(Math.round(durTarget / 60)),
-  });
-
-  // Séances : min 2, plafond 7
-  const totalSessions = prevWeekSessions.length;
-  const sessionTarget = Math.min(7, Math.max(2, Math.ceil(totalSessions * BOOST)));
-  quests.push({
-    id: `w${week}-sessions`,
-    label: 'Régularité',
-    description: `Fais ${sessionTarget} séances cette semaine`,
-    target: sessionTarget,
-    type: 'sessions',
-    xp: xpForTarget(sessionTarget * 30),
-  });
-
-  // Séries : min 15, plafond 80
-  const totalSets = prevWeekSessions.reduce(
-    (sum, s) => sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0), 0
-  );
-  const setsTarget = Math.min(80, Math.max(15, roundTarget(Math.ceil(totalSets * BOOST))));
-  quests.push({
-    id: `w${week}-sets`,
-    label: 'Séries',
-    description: `Complète ${setsTarget} séries`,
-    target: setsTarget,
-    type: 'sets',
-    xp: xpForTarget(setsTarget),
-  });
+  // ── Quêtes dynamiques ──
 
   // Reps totales : plafond 600
   const totalReps = stats.reduce((sum, s) => sum + s.totalReps, 0);
