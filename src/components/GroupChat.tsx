@@ -4,8 +4,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
-  limit,
   addDoc,
   onSnapshot,
   getDoc,
@@ -79,15 +77,14 @@ export default function GroupChat({ groupId }: Props) {
 
     const q = query(
       collection(db, 'chatMessages'),
-      where('groupId', '==', groupId),
-      orderBy('createdAt', 'desc'),
-      limit(100)
+      where('groupId', '==', groupId)
     );
 
     const unsub = onSnapshot(q, (snap) => {
       const msgs = snap.docs
         .map((d) => ({ id: d.id, ...d.data() } as ChatMessage))
-        .reverse();
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .slice(-100);
       setMessages(msgs);
     });
 
