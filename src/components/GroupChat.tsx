@@ -108,14 +108,15 @@ export default function GroupChat({ groupId }: Props) {
     if (!user || !text.trim() || sending) return;
     setSending(true);
     try {
-      await addDoc(collection(db, 'chatMessages'), {
+      const msgData: Record<string, unknown> = {
         groupId,
         uid: user.uid,
         displayName: user.displayName || 'Inconnu',
-        avatarCardId: avatarCardId || null,
         text: text.trim(),
         createdAt: Date.now(),
-      });
+      };
+      if (avatarCardId) msgData.avatarCardId = avatarCardId;
+      await addDoc(collection(db, 'chatMessages'), msgData);
       setText('');
     } catch (err) {
       console.error('Erreur envoi message:', err);
