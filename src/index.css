@@ -39,7 +39,10 @@ body {
 /* Page layout */
 .page {
   padding: 1rem;
-  padding-bottom: 5rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+  padding-right: calc(1rem + env(safe-area-inset-right, 0px));
   min-height: 100dvh;
 }
 
@@ -339,6 +342,7 @@ body {
   display: flex;
   justify-content: space-around;
   padding: 0.5rem 0;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
   z-index: 20;
 }
 
