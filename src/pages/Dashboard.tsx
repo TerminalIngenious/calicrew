@@ -13,11 +13,18 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-09-09',
+    date: '9 septembre 2026',
+    title: 'Programmes, créatine & quêtes v2',
+    summary: 'Programmes d\'entraînement, suivi créatine, quêtes rééquilibrées et plus.',
+    details: `Programmes d'entraînement : crée tes propres programmes avec tes exercices, séries, reps et poids. Partage-les en public pour que les autres puissent les importer. Lance une séance directement depuis un programme sauvegardé.\n\nSuivi créatine : un tracker quotidien sur le dashboard avec compteur de streak. Coche chaque jour pour suivre ta prise.\n\nTypes de poids : en plus du lesté, choisis entre haltères et barre lors de la configuration d'un exercice.\n\nQuêtes rééquilibrées : boost réduit (x1.2 au lieu de x1.6), plafonds sur tous les objectifs, quêtes de base fixes chaque semaine (3 séances, 30 min, 15 séries). Les quêtes d'exercices sont maintenant par séance ("fais 55 tractions en une séance") et pas sur la semaine entière.\n\nQuête Cindy : si tu fais des AMRAP, une quête Cindy apparaît (max 2/semaine). Les reps du Cindy comptent aussi dans les quêtes d'exercices (pompes, tractions, squats).\n\nSéances AMRAP modifiables : tu peux corriger le nombre de rounds après avoir terminé un Cindy.\n\nSéances Cindy exclues des quêtes d'exercices : les AMRAP ne gonflent plus les objectifs des quêtes perso.\n\nSplash screen : l'animation de saison ne s'affiche plus qu'une seule fois.\n\nChargement amélioré : la barre de chargement ne bloque plus à 95%.`,
+  },
+  {
     id: 'update-2026-09-08',
     date: '8 septembre 2026',
     title: 'Quêtes intelligentes & améliorations',
     summary: 'Quêtes personnalisées, classement mensuel, suppression de séances et plus.',
-    details: `Quêtes personnalisées : les quêtes de la semaine sont maintenant générées automatiquement en fonction de tes exercices de la semaine précédente. Plus tu progresses, plus les objectifs augmentent (+60%). Si tu n'as pas d'historique, des quêtes starter t'accueillent.\n\nClassement mensuel : le classement du groupe se réinitialise le 1er de chaque mois avec un timer de countdown.\n\nStats du dashboard alignées sur le reset des quêtes (lundi 10h).\n\nSuppression de séances : tu peux maintenant supprimer une séance depuis la page récap. Elle disparaît de tes stats, du classement et des quêtes.\n\nCartes cliquables partout : toutes les cartes (même non débloquées) sont cliquables dans la Collection et le Profil avec une vue détaillée.\n\nLesté / Poids : le toggle "Lesté" est remplacé par un stepper simple pour ajuster le poids directement.`,
+    details: `Quêtes personnalisées : les quêtes de la semaine sont maintenant générées automatiquement en fonction de tes exercices de la semaine précédente. Plus tu progresses, plus les objectifs augmentent.\n\nClassement mensuel : le classement du groupe se réinitialise le 1er de chaque mois avec un timer de countdown.\n\nStats du dashboard alignées sur le reset des quêtes (lundi 10h).\n\nSuppression de séances : tu peux maintenant supprimer une séance depuis la page récap. Elle disparaît de tes stats, du classement et des quêtes.\n\nModification de séances : corrige tes reps après avoir terminé une séance avec le bouton édition.\n\nCartes cliquables partout : toutes les cartes (même non débloquées) sont cliquables dans la Collection et le Profil avec une vue détaillée.\n\nLesté / Poids : le toggle "Lesté" est remplacé par un stepper simple pour ajuster le poids directement.`,
   },
   {
     id: 'update-2026-09-06',
