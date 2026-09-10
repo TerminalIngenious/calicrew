@@ -16,15 +16,15 @@ import Programs from './pages/Programs';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 
-const MAINTENANCE = false;
+const MAINTENANCE = true;
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
 
 function MaintenanceScreen() {
   return (
     <div className="maintenance-screen">
-      <img src="/maintenance.JPG" alt="" className="maintenance-img" />
-      <h1>App en maintenance</h1>
-      <p>Revenez plus tard, on bosse dessus...</p>
+      <img src="/cards/s1-trump-wall.png" alt="" className="maintenance-img" />
+      <h1>On construit le mur</h1>
+      <p>L'app revient plus forte que tes tractions. Patience.</p>
     </div>
   );
 }
