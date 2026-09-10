@@ -15,7 +15,7 @@ import { db } from '../lib/firebase';
 import { getCardsBySet } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import type { ChatMessage, UserProgress } from '../types';
-import { Send, MessageCircle, ChevronDown } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 const season = getCurrentSeason();
 const cardMap = new Map(
@@ -60,7 +60,6 @@ export default function GroupChat({ groupId }: Props) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
-  const [expanded, setExpanded] = useState(false);
   const [sending, setSending] = useState(false);
   const [avatarCardId, setAvatarCardId] = useState<string | undefined>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -76,7 +75,7 @@ export default function GroupChat({ groupId }: Props) {
   }, [user]);
 
   useEffect(() => {
-    if (!expanded || !groupId) return;
+    if (!groupId) return;
 
     const q = query(
       collection(db, 'chatMessages'),
@@ -93,17 +92,17 @@ export default function GroupChat({ groupId }: Props) {
     });
 
     return unsub;
-  }, [expanded, groupId]);
+  }, [groupId]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
-    if (expanded && messages.length > 0) {
+    if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [messages, expanded, scrollToBottom]);
+  }, [messages, scrollToBottom]);
 
   async function sendMessage() {
     if (!user || !text.trim() || sending) return;
@@ -132,58 +131,49 @@ export default function GroupChat({ groupId }: Props) {
   }
 
   return (
-    <section className="section">
-      <button className="members-toggle" onClick={() => setExpanded(!expanded)}>
-        <h3><MessageCircle size={16} /> Chat</h3>
-        <ChevronDown size={16} className={expanded ? 'rotated' : ''} />
-      </button>
-
-      {expanded && (
-        <div className="chat-container">
-          <div className="chat-body" ref={chatBodyRef}>
-            {messages.length === 0 ? (
-              <p className="chat-empty">Aucun message. Lance la conversation !</p>
-            ) : (
-              messages.map((msg) => {
-                const isMe = msg.uid === user?.uid;
-                return (
-                  <div key={msg.id} className={`chat-msg ${isMe ? 'me' : ''}`}>
-                    {!isMe && (
-                      <ChatAvatar displayName={msg.displayName} avatarCardId={msg.avatarCardId} />
-                    )}
-                    <div className="chat-msg-content">
-                      {!isMe && <span className="chat-msg-name">{msg.displayName}</span>}
-                      <div className={`chat-bubble ${isMe ? 'mine' : ''}`}>
-                        {msg.text}
-                      </div>
-                      <span className="chat-msg-time">{formatChatTime(msg.createdAt)}</span>
-                    </div>
+    <div className="chat-container">
+      <div className="chat-body" ref={chatBodyRef}>
+        {messages.length === 0 ? (
+          <p className="chat-empty">Aucun message. Lance la conversation !</p>
+        ) : (
+          messages.map((msg) => {
+            const isMe = msg.uid === user?.uid;
+            return (
+              <div key={msg.id} className={`chat-msg ${isMe ? 'me' : ''}`}>
+                {!isMe && (
+                  <ChatAvatar displayName={msg.displayName} avatarCardId={msg.avatarCardId} />
+                )}
+                <div className="chat-msg-content">
+                  {!isMe && <span className="chat-msg-name">{msg.displayName}</span>}
+                  <div className={`chat-bubble ${isMe ? 'mine' : ''}`}>
+                    {msg.text}
                   </div>
-                );
-              })
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+                  <span className="chat-msg-time">{formatChatTime(msg.createdAt)}</span>
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={messagesEndRef} />
+      </div>
 
-          <div className="chat-input-row">
-            <input
-              className="chat-input"
-              placeholder="Ton message..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              maxLength={500}
-            />
-            <button
-              className="chat-send-btn"
-              onClick={sendMessage}
-              disabled={!text.trim() || sending}
-            >
-              <Send size={18} />
-            </button>
-          </div>
-        </div>
-      )}
-    </section>
+      <div className="chat-input-row">
+        <input
+          className="chat-input"
+          placeholder="Ton message..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          maxLength={500}
+        />
+        <button
+          className="chat-send-btn"
+          onClick={sendMessage}
+          disabled={!text.trim() || sending}
+        >
+          <Send size={18} />
+        </button>
+      </div>
+    </div>
   );
 }

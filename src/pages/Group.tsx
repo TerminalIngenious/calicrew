@@ -18,7 +18,7 @@ import { getCardsBySet, getCardById, getCardDisplayName, RARITY_COLORS } from '.
 import { getCurrentSeason } from '../lib/passes';
 import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check } from 'lucide-react';
+import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import GroupChat from '../components/GroupChat';
 import Loader from '../components/Loader';
@@ -66,6 +66,7 @@ export default function Group() {
   const [showExplore, setShowExplore] = useState(false);
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const [expandedMembers, setExpandedMembers] = useState<Map<string, string[]>>(new Map());
+  const [showChat, setShowChat] = useState(false);
 
   // Trade states
   const [showTrades, setShowTrades] = useState(false);
@@ -517,9 +518,16 @@ export default function Group() {
     <div className="page">
       <header className="page-header">
         <h1>Groupe</h1>
-        <button className="explore-btn" onClick={openExplore}>
-          <Search size={16} /> Explorer
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {selectedGroup && (
+            <button className="icon-btn" onClick={() => setShowChat(true)}>
+              <MessageCircle size={20} />
+            </button>
+          )}
+          <button className="explore-btn" onClick={openExplore}>
+            <Search size={16} /> Explorer
+          </button>
+        </div>
       </header>
 
       {loading ? (
@@ -782,8 +790,6 @@ export default function Group() {
             )}
           </section>
 
-          <GroupChat groupId={selectedGroup.id} />
-
           <section className="section">
             <button className="members-toggle" onClick={() => { setShowTrades(!showTrades); if (!showTrades) loadTrades(); }}>
               <h3><ArrowLeftRight size={16} /> Échanges</h3>
@@ -1038,6 +1044,20 @@ export default function Group() {
             >
               Voir le profil complet
             </button>
+          </div>
+        </div>
+      )}
+
+      {showChat && selectedGroup && (
+        <div className="modal-overlay" onClick={() => setShowChat(false)}>
+          <div className="chat-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="chat-modal-header">
+              <h3>Chat — {selectedGroup.name}</h3>
+              <button className="member-modal-close" onClick={() => setShowChat(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <GroupChat groupId={selectedGroup.id} />
           </div>
         </div>
       )}
