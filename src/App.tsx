@@ -16,7 +16,7 @@ import Programs from './pages/Programs';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 
-const MAINTENANCE = true;
+const MAINTENANCE = false;
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
 
 function MaintenanceScreen() {
