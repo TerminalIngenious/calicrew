@@ -4378,6 +4378,15 @@ body {
   font-size: 0.9rem;
 }
 
+.programs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 50vh;
+}
+
 .program-quick-info {
   font-size: 0.8rem;
   color: var(--text-muted);

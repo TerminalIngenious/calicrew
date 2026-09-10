@@ -230,7 +230,12 @@ export default function Programs() {
       </header>
 
       {programs.length === 0 ? (
-        <p className="empty">Aucun programme. Crée ton premier !</p>
+        <div className="programs-empty">
+          <p className="empty">Aucun programme. Crée ton premier !</p>
+          <button className="primary-btn" onClick={() => setCreating(true)}>
+            <Plus size={20} /> Nouveau programme
+          </button>
+        </div>
       ) : (
         <div className="programs-list">
           {programs.map((prog) => (
@@ -260,9 +265,11 @@ export default function Programs() {
         </div>
       )}
 
-      <button className="primary-btn floating-btn" onClick={() => setCreating(true)}>
-        <Plus size={20} /> Nouveau programme
-      </button>
+      {programs.length > 0 && (
+        <button className="primary-btn floating-btn" onClick={() => setCreating(true)}>
+          <Plus size={20} /> Nouveau programme
+        </button>
+      )}
 
       <BottomNav />
     </div>
