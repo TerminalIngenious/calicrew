@@ -152,6 +152,18 @@ export interface Achievement {
   reward: 'oldPassChest' | 'guaranteedEpique' | 'guaranteedLegendaire';
 }
 
+// ── Chat ──
+
+export interface ChatMessage {
+  id: string;
+  groupId: string;
+  uid: string;
+  displayName: string;
+  avatarCardId?: string;
+  text: string;
+  createdAt: number;
+}
+
 // ── Trades ──
 
 export interface TradeOffer {

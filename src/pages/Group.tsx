@@ -20,6 +20,7 @@ import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, Trade
 import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import GroupChat from '../components/GroupChat';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
@@ -780,6 +781,8 @@ export default function Group() {
               </div>
             )}
           </section>
+
+          <GroupChat groupId={selectedGroup.id} />
 
           <section className="section">
             <button className="members-toggle" onClick={() => { setShowTrades(!showTrades); if (!showTrades) loadTrades(); }}>
