@@ -11,6 +11,7 @@ import Loader from '../components/Loader';
 export default function Programs() {
   const { user } = useAuth();
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
 
@@ -24,8 +25,12 @@ export default function Programs() {
   const load = useCallback(async () => {
     if (!user) return;
     try {
-      const snap = await getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid)));
-      setPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+      const [progSnap, exoSnap] = await Promise.all([
+        getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid))),
+        getDocs(query(collection(db, 'customExercises'), where('userId', '==', user.uid))),
+      ]);
+      setPrograms(progSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+      setCustomExercises(exoSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Exercise)));
     } catch {
       setPrograms([]);
     }
@@ -92,7 +97,7 @@ export default function Programs() {
   if (loading) return <div className="page loading"><Loader /></div>;
 
   if (creating) {
-    const allExercises = DEFAULT_EXERCISES.filter((e) => e.category !== 'running');
+    const allExercises = [...DEFAULT_EXERCISES, ...customExercises].filter((e) => e.category !== 'running');
     const categories = [...new Set(allExercises.map((e) => e.category))] as Exercise['category'][];
 
     return (
