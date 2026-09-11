@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
@@ -197,6 +197,15 @@ export default function LiveSession() {
     const updateData: Record<string, unknown> = { completed: true, duration, exercises: session.exercises };
     if (session.mode === 'amrap') updateData.amrapRounds = amrapRounds;
     await updateDoc(doc(db, 'sessions', id), updateData);
+
+    try {
+      await updateDoc(doc(db, 'userProgress', session.userId), {
+        chestsToOpen: arrayUnion({ rarity: 'commune', pool: 'current' }),
+      });
+    } catch {
+      // userProgress might not exist yet
+    }
+
     if (timerRef.current) clearInterval(timerRef.current);
     setFinished(true);
     setShowFinish(false);
