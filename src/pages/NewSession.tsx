@@ -29,6 +29,8 @@ export default function NewSession() {
   const [editExoCategory, setEditExoCategory] = useState<Exercise['category']>('push');
   const [editExoWeighted, setEditExoWeighted] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [editModeCategory, setEditModeCategory] = useState<string | null>(null);
+  const [selectedCustomExo, setSelectedCustomExo] = useState<Exercise | null>(null);
   const [showAmrap, setShowAmrap] = useState(false);
   const [amrapMinutes, setAmrapMinutes] = useState(20);
   const [myPrograms, setMyPrograms] = useState<Program[]>([]);
@@ -356,30 +358,43 @@ export default function NewSession() {
           <span>ou choisis tes exercices</span>
         </div>
 
-        {categories.map((cat) => (
-          <section key={cat} className="section">
-            <h3 className="category-title">{CATEGORY_LABELS[cat]}</h3>
-            <div className="exercise-grid">
-              {allExercises.filter((e) => e.category === cat).map((ex) => (
-                <div key={ex.id} className="exercise-chip-wrap">
+        {categories.map((cat) => {
+          const hasCustom = allExercises.some((e) => e.category === cat && e.isCustom);
+          const isEditMode = editModeCategory === cat;
+          return (
+            <section key={cat} className="section">
+              <div className="category-title-row">
+                <h3 className="category-title">{CATEGORY_LABELS[cat]}</h3>
+                {hasCustom && (
                   <button
-                    className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''}`}
-                    onClick={() => toggleExercise(ex)}
+                    className={`icon-btn edit-cat-btn ${isEditMode ? 'active' : ''}`}
+                    onClick={() => setEditModeCategory(isEditMode ? null : cat)}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                )}
+              </div>
+              <div className="exercise-grid">
+                {allExercises.filter((e) => e.category === cat).map((ex) => (
+                  <button
+                    key={ex.id}
+                    className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''} ${isEditMode && ex.isCustom ? 'edit-mode' : ''}`}
+                    onClick={() => {
+                      if (isEditMode && ex.isCustom) {
+                        setSelectedCustomExo(ex);
+                      } else {
+                        toggleExercise(ex);
+                      }
+                    }}
                   >
                     {ex.name}
-                    {selectedExercises.find((e) => e.id === ex.id) && <Check size={14} />}
+                    {!isEditMode && selectedExercises.find((e) => e.id === ex.id) && <Check size={14} />}
                   </button>
-                  {ex.isCustom && (
-                    <div className="custom-exo-actions">
-                      <button className="custom-exo-btn" onClick={() => openEditExo(ex)}><Pencil size={12} /></button>
-                      <button className="custom-exo-btn delete" onClick={() => deleteCustomExo(ex)}><Trash2 size={12} /></button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
+                ))}
+              </div>
+            </section>
+          );
+        })}
 
         <button className="add-exercise-btn" onClick={() => setShowAddExercise(true)}>
           <Plus size={16} /> Ajouter un exercice
@@ -475,6 +490,22 @@ export default function NewSession() {
                 </button>
                 <button className="primary-btn" onClick={saveEditExo} disabled={!editExoName.trim() || savingEdit}>
                   {savingEdit ? 'Sauvegarde...' : 'Enregistrer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedCustomExo && (
+          <div className="modal-overlay" onClick={() => setSelectedCustomExo(null)}>
+            <div className="modal-card custom-exo-menu" onClick={(e) => e.stopPropagation()}>
+              <h3>{selectedCustomExo.name}</h3>
+              <div className="custom-exo-menu-actions">
+                <button className="secondary-btn" onClick={() => { openEditExo(selectedCustomExo); setSelectedCustomExo(null); }}>
+                  <Pencil size={14} /> Modifier
+                </button>
+                <button className="danger-btn" onClick={() => { deleteCustomExo(selectedCustomExo); setSelectedCustomExo(null); }}>
+                  <Trash2 size={14} /> Supprimer
                 </button>
               </div>
             </div>

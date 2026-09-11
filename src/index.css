@@ -4396,40 +4396,68 @@ body {
   color: var(--text-muted);
 }
 
-/* ── Custom exercise edit/delete ── */
+/* ── Custom exercise edit mode ── */
 
-.exercise-chip-wrap {
-  position: relative;
-}
-
-.custom-exo-actions {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  display: flex;
-  gap: 2px;
-}
-
-.custom-exo-btn {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: none;
-  background: var(--bg-card);
-  color: var(--text-muted);
+.category-title-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
+  gap: 0.5rem;
 }
 
-.custom-exo-btn.delete {
+.edit-cat-btn {
+  padding: 0.25rem;
+  color: var(--text-muted);
+}
+
+.edit-cat-btn.active {
   color: var(--danger);
 }
 
-.custom-exo-btn:active {
-  opacity: 0.7;
+.exercise-chip.edit-mode {
+  border-color: var(--danger);
+  color: var(--danger);
+  animation: pulse-border 1.5s ease infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.custom-exo-menu {
+  text-align: center;
+}
+
+.custom-exo-menu h3 {
+  margin-bottom: 1rem;
+}
+
+.custom-exo-menu-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.custom-exo-menu-actions button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.danger-btn {
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.danger-btn:active {
+  opacity: 0.8;
 }
 
 /* ── Chat ── */
