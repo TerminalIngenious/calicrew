@@ -46,7 +46,10 @@ export default function BattlePass() {
   const weekStart = getWeekStart();
 
   const selection = progress.weeklyQuestSelection;
-  const needsSelection = !selection || selection.weekStart !== weekStart || !selection.locked;
+  const isMonday = Date.now() - weekStart < 24 * 60 * 60 * 1000;
+  const hasValidSelection = selection?.weekStart === weekStart && selection.locked;
+  const needsSelection = !hasValidSelection;
+  const canSelect = isMonday && needsSelection;
   const selectionStep = !selection || selection.weekStart !== weekStart
     ? (selectedSports.length === 0 ? 'sports' : 'quests')
     : selection.locked ? 'done' : 'quests';
@@ -304,7 +307,7 @@ export default function BattlePass() {
         <button className={`bp-tab ${tab === 'quetes' ? 'active' : ''}`} onClick={() => setTab('quetes')}>
           <Swords size={15} />
           <span>Quêtes</span>
-          {!needsSelection && <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>}
+          {hasValidSelection && <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>}
         </button>
         <button className={`bp-tab ${tab === 'pass' ? 'active' : ''}`} onClick={() => setTab('pass')}>
           <Trophy size={15} />
@@ -367,7 +370,17 @@ export default function BattlePass() {
         </div>
       )}
 
-      {tab === 'quetes' && needsSelection && selectionStep === 'sports' && (
+      {tab === 'quetes' && needsSelection && !canSelect && (
+        <div className="quest-selection">
+          <div className="quest-selection-header">
+            <Clock size={24} />
+            <h2>Pas de quêtes cette semaine</h2>
+            <p>Le choix des quêtes se fait chaque lundi à 10h. Reviens lundi !</p>
+          </div>
+        </div>
+      )}
+
+      {tab === 'quetes' && canSelect && selectionStep === 'sports' && (
         <div className="quest-selection">
           <div className="quest-selection-header">
             <Swords size={24} />
@@ -400,7 +413,7 @@ export default function BattlePass() {
         </div>
       )}
 
-      {tab === 'quetes' && needsSelection && selectionStep === 'quests' && (
+      {tab === 'quetes' && canSelect && selectionStep === 'quests' && (
         <div className="quest-selection">
           <div className="quest-selection-header">
             <h2>Choisis tes quêtes</h2>
@@ -468,7 +481,7 @@ export default function BattlePass() {
         </div>
       )}
 
-      {tab === 'quetes' && !needsSelection && (
+      {tab === 'quetes' && hasValidSelection && (
         <>
           {progress.chestsToOpen.length > 0 && (
             <div className="bp-chests">
