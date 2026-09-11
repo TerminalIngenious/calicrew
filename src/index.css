@@ -4396,6 +4396,42 @@ body {
   color: var(--text-muted);
 }
 
+/* ── Custom exercise edit/delete ── */
+
+.exercise-chip-wrap {
+  position: relative;
+}
+
+.custom-exo-actions {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  gap: 2px;
+}
+
+.custom-exo-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.custom-exo-btn.delete {
+  color: var(--danger);
+}
+
+.custom-exo-btn:active {
+  opacity: 0.7;
+}
+
 /* ── Chat ── */
 
 .chat-modal {

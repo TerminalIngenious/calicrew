@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Exercise, ExerciseLog, WeightType, Program } from '../types';
-import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
 
 export default function NewSession() {
   const { user } = useAuth();
@@ -24,6 +24,11 @@ export default function NewSession() {
   const [newExCategory, setNewExCategory] = useState<Exercise['category']>('push');
   const [newExWeighted, setNewExWeighted] = useState(false);
   const [addingExo, setAddingExo] = useState(false);
+  const [editingExo, setEditingExo] = useState<Exercise | null>(null);
+  const [editExoName, setEditExoName] = useState('');
+  const [editExoCategory, setEditExoCategory] = useState<Exercise['category']>('push');
+  const [editExoWeighted, setEditExoWeighted] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
   const [showAmrap, setShowAmrap] = useState(false);
   const [amrapMinutes, setAmrapMinutes] = useState(20);
   const [myPrograms, setMyPrograms] = useState<Program[]>([]);
@@ -110,6 +115,46 @@ export default function NewSession() {
       alert('Erreur lors de l\'ajout. Vérifie les règles Firestore.');
     }
     setAddingExo(false);
+  }
+
+  function openEditExo(ex: Exercise) {
+    setEditingExo(ex);
+    setEditExoName(ex.name);
+    setEditExoCategory(ex.category);
+    setEditExoWeighted(ex.canBeWeighted || false);
+  }
+
+  async function saveEditExo() {
+    if (!editingExo || !editExoName.trim() || savingEdit) return;
+    setSavingEdit(true);
+    try {
+      await updateDoc(doc(db, 'customExercises', editingExo.id), {
+        name: editExoName.trim(),
+        category: editExoCategory,
+        canBeWeighted: editExoWeighted,
+      });
+      setCustomExercises((prev) =>
+        prev.map((e) => e.id === editingExo.id
+          ? { ...e, name: editExoName.trim(), category: editExoCategory, canBeWeighted: editExoWeighted }
+          : e
+        )
+      );
+      setEditingExo(null);
+    } catch (err) {
+      console.error('Erreur modification exercice:', err);
+    }
+    setSavingEdit(false);
+  }
+
+  async function deleteCustomExo(ex: Exercise) {
+    if (!confirm(`Supprimer "${ex.name}" ?`)) return;
+    try {
+      await deleteDoc(doc(db, 'customExercises', ex.id));
+      setCustomExercises((prev) => prev.filter((e) => e.id !== ex.id));
+      setSelectedExercises((prev) => prev.filter((e) => e.id !== ex.id));
+    } catch (err) {
+      console.error('Erreur suppression exercice:', err);
+    }
   }
 
   async function startAmrap() {
@@ -316,14 +361,21 @@ export default function NewSession() {
             <h3 className="category-title">{CATEGORY_LABELS[cat]}</h3>
             <div className="exercise-grid">
               {allExercises.filter((e) => e.category === cat).map((ex) => (
-                <button
-                  key={ex.id}
-                  className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''}`}
-                  onClick={() => toggleExercise(ex)}
-                >
-                  {ex.name}
-                  {selectedExercises.find((e) => e.id === ex.id) && <Check size={14} />}
-                </button>
+                <div key={ex.id} className="exercise-chip-wrap">
+                  <button
+                    className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''}`}
+                    onClick={() => toggleExercise(ex)}
+                  >
+                    {ex.name}
+                    {selectedExercises.find((e) => e.id === ex.id) && <Check size={14} />}
+                  </button>
+                  {ex.isCustom && (
+                    <div className="custom-exo-actions">
+                      <button className="custom-exo-btn" onClick={() => openEditExo(ex)}><Pencil size={12} /></button>
+                      <button className="custom-exo-btn delete" onClick={() => deleteCustomExo(ex)}><Trash2 size={12} /></button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </section>
@@ -375,6 +427,54 @@ export default function NewSession() {
                 </button>
                 <button className="primary-btn" onClick={addCustomExercise} disabled={!newExName.trim() || addingExo}>
                   {addingExo ? 'Ajout...' : 'Ajouter'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editingExo && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <div className="modal-card-header">
+                <h3>Modifier l'exercice</h3>
+                <button className="icon-btn" onClick={() => setEditingExo(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="add-exercise-form">
+                <input
+                  type="text"
+                  placeholder="Nom de l'exercice"
+                  value={editExoName}
+                  onChange={(e) => setEditExoName(e.target.value)}
+                  autoFocus
+                />
+                <div className="category-picker">
+                  {(Object.entries(CATEGORY_LABELS) as [Exercise['category'], string][]).map(([key, label]) => (
+                    <button
+                      key={key}
+                      className={`category-chip ${editExoCategory === key ? 'active' : ''}`}
+                      onClick={() => setEditExoCategory(key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="weighted-toggle" style={{ marginTop: '0.75rem' }} onClick={() => setEditExoWeighted(!editExoWeighted)}>
+                  <Weight size={16} />
+                  <span>Peut être lesté</span>
+                  <div className={`toggle ${editExoWeighted ? 'active' : ''}`}>
+                    <div className="toggle-knob" />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-actions">
+                <button className="secondary-btn" onClick={() => setEditingExo(null)}>
+                  Annuler
+                </button>
+                <button className="primary-btn" onClick={saveEditExo} disabled={!editExoName.trim() || savingEdit}>
+                  {savingEdit ? 'Sauvegarde...' : 'Enregistrer'}
                 </button>
               </div>
             </div>
