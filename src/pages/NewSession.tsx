@@ -23,6 +23,7 @@ export default function NewSession() {
   const [newExName, setNewExName] = useState('');
   const [newExCategory, setNewExCategory] = useState<Exercise['category']>('push');
   const [newExWeighted, setNewExWeighted] = useState(false);
+  const [addingExo, setAddingExo] = useState(false);
   const [showAmrap, setShowAmrap] = useState(false);
   const [amrapMinutes, setAmrapMinutes] = useState(20);
   const [myPrograms, setMyPrograms] = useState<Program[]>([]);
@@ -83,7 +84,8 @@ export default function NewSession() {
   }
 
   async function addCustomExercise() {
-    if (!newExName.trim() || !user) return;
+    if (!newExName.trim() || !user || addingExo) return;
+    setAddingExo(true);
     try {
       const docRef = await addDoc(collection(db, 'customExercises'), {
         name: newExName.trim(),
@@ -107,6 +109,7 @@ export default function NewSession() {
       console.error('Erreur ajout exercice:', err);
       alert('Erreur lors de l\'ajout. Vérifie les règles Firestore.');
     }
+    setAddingExo(false);
   }
 
   async function startAmrap() {
@@ -370,8 +373,8 @@ export default function NewSession() {
                 <button className="secondary-btn" onClick={() => setShowAddExercise(false)}>
                   Annuler
                 </button>
-                <button className="primary-btn" onClick={addCustomExercise} disabled={!newExName.trim()}>
-                  Ajouter
+                <button className="primary-btn" onClick={addCustomExercise} disabled={!newExName.trim() || addingExo}>
+                  {addingExo ? 'Ajout...' : 'Ajouter'}
                 </button>
               </div>
             </div>
