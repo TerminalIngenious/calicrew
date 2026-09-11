@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getPermanentQuests, generateQuestPool, SPORT_LABELS } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
@@ -56,12 +56,21 @@ export default function BattlePass() {
 
   const permanentQuests = useMemo(() => getPermanentQuests(), []);
 
+  const prevWeekStart = weekStart - 7 * 24 * 60 * 60 * 1000;
+  const prevWeekSessions = useMemo(
+    () => sessions.filter((s) => s.createdAt >= prevWeekStart && s.createdAt < weekStart && s.completed),
+    [sessions, prevWeekStart, weekStart]
+  );
+  const legacyQuests = useMemo(() => generateWeeklyQuests(prevWeekSessions), [prevWeekSessions]);
+
   const activeQuests = useMemo(() => {
-    if (selection?.locked && selection.weekStart === weekStart) {
-      return [...permanentQuests, ...selection.chosenQuests];
+    if (hasValidSelection) {
+      return [...permanentQuests, ...selection!.chosenQuests];
     }
-    return [];
-  }, [selection, weekStart, permanentQuests]);
+    return legacyQuests;
+  }, [hasValidSelection, selection, permanentQuests, legacyQuests]);
+
+  const usingLegacy = !hasValidSelection && !canSelect;
 
   const weekSessions = useMemo(
     () => sessions.filter((s) => s.createdAt >= weekStart && s.completed),
@@ -307,7 +316,7 @@ export default function BattlePass() {
         <button className={`bp-tab ${tab === 'quetes' ? 'active' : ''}`} onClick={() => setTab('quetes')}>
           <Swords size={15} />
           <span>Quêtes</span>
-          {hasValidSelection && <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>}
+          {(hasValidSelection || usingLegacy) && <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>}
         </button>
         <button className={`bp-tab ${tab === 'pass' ? 'active' : ''}`} onClick={() => setTab('pass')}>
           <Trophy size={15} />
@@ -366,16 +375,6 @@ export default function BattlePass() {
                 {saving ? 'Validation...' : 'Valider'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {tab === 'quetes' && needsSelection && !canSelect && (
-        <div className="quest-selection">
-          <div className="quest-selection-header">
-            <Clock size={24} />
-            <h2>Pas de quêtes cette semaine</h2>
-            <p>Le choix des quêtes se fait chaque lundi à 10h. Reviens lundi !</p>
           </div>
         </div>
       )}
@@ -481,7 +480,7 @@ export default function BattlePass() {
         </div>
       )}
 
-      {tab === 'quetes' && hasValidSelection && (
+      {tab === 'quetes' && (hasValidSelection || usingLegacy) && (
         <>
           {progress.chestsToOpen.length > 0 && (
             <div className="bp-chests">
