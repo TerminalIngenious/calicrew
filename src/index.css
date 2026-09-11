@@ -4700,6 +4700,130 @@ body {
   to { transform: translateY(0); }
 }
 
+/* Monthly Rewards Modal */
+.rewards-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 92%;
+  max-width: 380px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: cardRevealPop 0.3s ease;
+}
+
+.rewards-modal-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.rewards-modal-header h2 {
+  font-size: 1.15rem;
+  margin-top: 0.5rem;
+}
+
+.rewards-month-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rewards-ranking {
+  margin-bottom: 1rem;
+}
+
+.rewards-ranking-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.rewards-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+}
+
+.rewards-rank-me {
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+.rewards-rank-pos {
+  width: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.rewards-rank-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rewards-rank-value {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.rewards-rank-chest {
+  display: flex;
+}
+
+.rewards-claim-section {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.rewards-claim-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.rewards-chest-preview {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.rewards-chest-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.rewards-claimed-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  color: var(--accent-green);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rewards-close-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
 .chat-modal-header {
   display: flex;
   align-items: center;

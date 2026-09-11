@@ -16,14 +16,28 @@ import {
 import { db } from '../lib/firebase';
 import { getCardsBySet, getCardById, getCardDisplayName, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
-import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card } from '../types';
+import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card, CardRarity } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle } from 'lucide-react';
+import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import GroupChat from '../components/GroupChat';
 import Loader from '../components/Loader';
 
 type SortMode = 'reps' | 'variety' | 'time';
+
+interface MonthlyRanking {
+  category: 'reps' | 'variety' | 'time';
+  categoryLabel: string;
+  top3: { uid: string; displayName: string; value: string; rank: number; chestRarity: CardRarity }[];
+}
+
+function getLastMonthKey(): string {
+  const now = new Date();
+  const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  return `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}`;
+}
+
+const RANK_CHEST: CardRarity[] = ['legendaire', 'epique', 'rare'];
 
 const season = getCurrentSeason();
 const cardMap = new Map(
@@ -68,6 +82,13 @@ export default function Group() {
   const [expandedMembers, setExpandedMembers] = useState<Map<string, string[]>>(new Map());
   const [showChat, setShowChat] = useState(false);
 
+  // Monthly rewards
+  const [showRewards, setShowRewards] = useState(false);
+  const [monthlyRankings, setMonthlyRankings] = useState<MonthlyRanking[]>([]);
+  const [myRewards, setMyRewards] = useState<CardRarity[]>([]);
+  const [claimingRewards, setClaimingRewards] = useState(false);
+  const [rewardsClaimed, setRewardsClaimed] = useState(false);
+
   // Trade states
   const [showTrades, setShowTrades] = useState(false);
   const [trades, setTrades] = useState<TradeOffer[]>([]);
@@ -94,6 +115,7 @@ export default function Group() {
         const current = selectedGroup ? g.find((gr) => gr.id === selectedGroup.id) || g[0] : g[0];
         setSelectedGroup(current);
         await loadLeaderboard(current);
+        await checkMonthlyRewards(current);
         if (current.pendingIds?.length > 0 && current.createdBy === user.uid) {
           await loadPendingNames(current.pendingIds);
         }
@@ -179,6 +201,127 @@ export default function Group() {
     });
 
     setLeaderboard(entries);
+  }
+
+  async function checkMonthlyRewards(group: GroupType) {
+    if (!user) return;
+    const progressSnap = await getDoc(doc(db, 'userProgress', user.uid));
+    const progress = progressSnap.exists() ? (progressSnap.data() as UserProgress) : null;
+
+    const lastMonthKey = getLastMonthKey();
+    if (progress?.monthlyRewardsClaimed === lastMonthKey) return;
+
+    const now = new Date();
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0).getTime();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
+
+    const [usersSnap, ...rest] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      ...group.memberIds.flatMap((memberId) => [
+        getDocs(query(collection(db, 'sessions'), where('userId', '==', memberId))),
+      ]),
+    ]);
+
+    const userMap = new Map<string, string>();
+    usersSnap.docs.forEach((d) => {
+      const data = d.data();
+      if (data.uid) userMap.set(data.uid, data.displayName || 'Inconnu');
+    });
+
+    const entries: { uid: string; displayName: string; totalReps: number; exerciseVariety: number; totalDuration: number }[] =
+      group.memberIds.map((memberId, i) => {
+        const sessionSnap = rest[i] as Awaited<ReturnType<typeof getDocs>>;
+        const sessions = sessionSnap.docs
+          .map((d) => d.data() as Session)
+          .filter((s) => s.createdAt >= lastMonthStart && s.createdAt < currentMonthStart && s.completed);
+
+        const totalReps = sessions.reduce(
+          (sum, s) => sum + s.exercises.reduce(
+            (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
+          ), 0
+        );
+        const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+        const exerciseVariety = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId))).size;
+
+        return { uid: memberId, displayName: userMap.get(memberId) || 'Inconnu', totalReps, exerciseVariety, totalDuration };
+      });
+
+    const hasActivity = entries.some((e) => e.totalReps > 0 || e.totalDuration > 0);
+    if (!hasActivity) {
+      if (progress) {
+        await updateDoc(doc(db, 'userProgress', user.uid), { monthlyRewardsClaimed: lastMonthKey });
+      }
+      return;
+    }
+
+    const rankings: MonthlyRanking[] = [];
+    const rewards: CardRarity[] = [];
+
+    const byReps = [...entries].filter((e) => e.totalReps > 0).sort((a, b) => b.totalReps - a.totalReps);
+    if (byReps.length > 0) {
+      const top3 = byReps.slice(0, 3).map((e, i) => ({
+        uid: e.uid, displayName: e.displayName, value: `${e.totalReps} reps`, rank: i, chestRarity: RANK_CHEST[i],
+      }));
+      rankings.push({ category: 'reps', categoryLabel: 'Reps', top3 });
+      top3.forEach((t) => { if (t.uid === user.uid) rewards.push(t.chestRarity); });
+    }
+
+    const byVariety = [...entries].filter((e) => e.exerciseVariety > 0).sort((a, b) => b.exerciseVariety - a.exerciseVariety);
+    if (byVariety.length > 0) {
+      const top3 = byVariety.slice(0, 3).map((e, i) => ({
+        uid: e.uid, displayName: e.displayName, value: `${e.exerciseVariety} exos`, rank: i, chestRarity: RANK_CHEST[i],
+      }));
+      rankings.push({ category: 'variety', categoryLabel: 'Variété', top3 });
+      top3.forEach((t) => { if (t.uid === user.uid) rewards.push(t.chestRarity); });
+    }
+
+    const byTime = [...entries].filter((e) => e.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration);
+    if (byTime.length > 0) {
+      const fmtDur = (s: number) => { const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`; };
+      const top3 = byTime.slice(0, 3).map((e, i) => ({
+        uid: e.uid, displayName: e.displayName, value: fmtDur(e.totalDuration), rank: i, chestRarity: RANK_CHEST[i],
+      }));
+      rankings.push({ category: 'time', categoryLabel: 'Temps', top3 });
+      top3.forEach((t) => { if (t.uid === user.uid) rewards.push(t.chestRarity); });
+    }
+
+    if (rankings.length > 0) {
+      setMonthlyRankings(rankings);
+      setMyRewards(rewards);
+      setShowRewards(true);
+    } else if (progress) {
+      await updateDoc(doc(db, 'userProgress', user.uid), { monthlyRewardsClaimed: lastMonthKey });
+    }
+  }
+
+  async function claimMonthlyRewards() {
+    if (!user || claimingRewards) return;
+    setClaimingRewards(true);
+
+    const lastMonthKey = getLastMonthKey();
+    const newChests = myRewards.map((rarity) => ({ rarity, pool: 'current' as const }));
+
+    const progressRef = doc(db, 'userProgress', user.uid);
+    const snap = await getDoc(progressRef);
+    if (snap.exists()) {
+      const current = snap.data() as UserProgress;
+      await updateDoc(progressRef, {
+        chestsToOpen: [...(current.chestsToOpen || []), ...newChests],
+        monthlyRewardsClaimed: lastMonthKey,
+      });
+    }
+
+    setRewardsClaimed(true);
+    setClaimingRewards(false);
+  }
+
+  function closeRewardsModal() {
+    if (myRewards.length === 0 || rewardsClaimed) {
+      setShowRewards(false);
+      if (!rewardsClaimed && user) {
+        updateDoc(doc(db, 'userProgress', user.uid), { monthlyRewardsClaimed: getLastMonthKey() });
+      }
+    }
   }
 
   function getSortedLeaderboard(): LeaderboardEntry[] {
@@ -1044,6 +1187,77 @@ export default function Group() {
             >
               Voir le profil complet
             </button>
+          </div>
+        </div>
+      )}
+
+      {showRewards && (
+        <div className="modal-overlay" onClick={closeRewardsModal}>
+          <div className="rewards-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="rewards-modal-header">
+              <Trophy size={24} className="gold" />
+              <h2>Résultats du mois</h2>
+              <p className="rewards-month-label">
+                {(() => {
+                  const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+                  const now = new Date();
+                  const lastMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+                  return MONTHS[lastMonth];
+                })()}
+              </p>
+            </div>
+
+            {monthlyRankings.map((ranking) => (
+              <div key={ranking.category} className="rewards-ranking">
+                <h4 className="rewards-ranking-title">{ranking.categoryLabel}</h4>
+                {ranking.top3.map((entry) => (
+                  <div key={entry.uid} className={`rewards-rank-row ${entry.uid === user?.uid ? 'rewards-rank-me' : ''}`}>
+                    <div className="rewards-rank-pos">
+                      {entry.rank === 0 ? <Trophy size={16} className="gold" /> :
+                       entry.rank === 1 ? <Medal size={16} className="silver" /> :
+                       <Medal size={16} className="bronze" />}
+                    </div>
+                    <span className="rewards-rank-name">{entry.displayName}</span>
+                    <span className="rewards-rank-value">{entry.value}</span>
+                    <span className="rewards-rank-chest" style={{ color: RARITY_COLORS[entry.chestRarity] }}>
+                      <Package size={14} />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {myRewards.length > 0 && !rewardsClaimed && (
+              <div className="rewards-claim-section">
+                <p className="rewards-claim-text">
+                  Tu as gagné {myRewards.length} coffre{myRewards.length > 1 ? 's' : ''} !
+                </p>
+                <div className="rewards-chest-preview">
+                  {myRewards.map((rarity, i) => (
+                    <div key={i} className="rewards-chest-item" style={{ color: RARITY_COLORS[rarity] }}>
+                      <Package size={22} />
+                      <span>{rarity === 'legendaire' ? 'Légendaire' : rarity === 'epique' ? 'Épique' : 'Rare'}</span>
+                    </div>
+                  ))}
+                </div>
+                <button className="primary-btn" onClick={claimMonthlyRewards} disabled={claimingRewards}>
+                  {claimingRewards ? 'Récupération...' : 'Récupérer'}
+                </button>
+              </div>
+            )}
+
+            {rewardsClaimed && (
+              <div className="rewards-claimed-msg">
+                <Check size={20} />
+                <span>Coffres ajoutés ! Ouvre-les dans le Battle Pass.</span>
+              </div>
+            )}
+
+            {(myRewards.length === 0 || rewardsClaimed) && (
+              <button className="secondary-btn rewards-close-btn" onClick={closeRewardsModal}>
+                Fermer
+              </button>
+            )}
           </div>
         </div>
       )}

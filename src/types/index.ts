@@ -200,4 +200,5 @@ export interface UserProgress {
   currentSeasonId: string;
   avatarCardId?: string;
   weeklyQuestSelection?: WeeklyQuestSelection;
+  monthlyRewardsClaimed?: string;
 }
