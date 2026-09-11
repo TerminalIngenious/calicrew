@@ -177,6 +177,17 @@ export interface TradeOffer {
   createdAt: number;
 }
 
+// ── Weekly Quests ──
+
+export type SportType = 'calisthenics' | 'musculation' | 'running';
+
+export interface WeeklyQuestSelection {
+  weekStart: number;
+  sports: SportType[];
+  chosenQuests: Quest[];
+  locked: boolean;
+}
+
 // ── User Progress ──
 
 export interface UserProgress {
@@ -188,4 +199,5 @@ export interface UserProgress {
   achievementsClaimed: string[];
   currentSeasonId: string;
   avatarCardId?: string;
+  weeklyQuestSelection?: WeeklyQuestSelection;
 }

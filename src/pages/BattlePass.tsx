@@ -3,10 +3,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, generateWeeklyQuests } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getPermanentQuests, generateQuestPool, SPORT_LABELS } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
-import type { UserProgress, Card } from '../types';
-import { Swords, Check, Package, Clock, Trophy, Flame } from 'lucide-react';
+import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection } from '../types';
+import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -20,6 +20,12 @@ const DEFAULT_PROGRESS: UserProgress = {
   currentSeasonId: '',
 };
 
+const SPORT_ICONS: Record<SportType, typeof Dumbbell> = {
+  calisthenics: PersonStanding,
+  musculation: Dumbbell,
+  running: Timer,
+};
+
 export default function BattlePass() {
   const { user } = useAuth();
   const { sessions } = useUserSessions();
@@ -30,15 +36,30 @@ export default function BattlePass() {
   const [chestPhase, setChestPhase] = useState<'idle' | 'shake' | 'burst' | 'reveal'>('idle');
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
 
-  const season = getCurrentSeason();
+  const [selectedSports, setSelectedSports] = useState<SportType[]>([]);
+  const [questPool, setQuestPool] = useState<Quest[]>([]);
+  const [pickedQuestIds, setPickedQuestIds] = useState<Set<string>>(new Set());
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  const season = getCurrentSeason();
   const weekStart = getWeekStart();
-  const prevWeekStart = weekStart - 7 * 24 * 60 * 60 * 1000;
-  const prevWeekSessions = useMemo(
-    () => sessions.filter((s) => s.createdAt >= prevWeekStart && s.createdAt < weekStart && s.completed),
-    [sessions, prevWeekStart, weekStart]
-  );
-  const weeklyQuests = useMemo(() => generateWeeklyQuests(prevWeekSessions), [prevWeekSessions]);
+
+  const selection = progress.weeklyQuestSelection;
+  const needsSelection = !selection || selection.weekStart !== weekStart || !selection.locked;
+  const selectionStep = !selection || selection.weekStart !== weekStart
+    ? (selectedSports.length === 0 ? 'sports' : 'quests')
+    : selection.locked ? 'done' : 'quests';
+
+  const permanentQuests = useMemo(() => getPermanentQuests(), []);
+
+  const activeQuests = useMemo(() => {
+    if (selection?.locked && selection.weekStart === weekStart) {
+      return [...permanentQuests, ...selection.chosenQuests];
+    }
+    return [];
+  }, [selection, weekStart, permanentQuests]);
+
   const weekSessions = useMemo(
     () => sessions.filter((s) => s.createdAt >= weekStart && s.completed),
     [sessions, weekStart]
@@ -62,9 +83,49 @@ export default function BattlePass() {
     loadProgress();
   }, [loadProgress]);
 
-  function getQuestValue(questId: string): number {
-    const quest = weeklyQuests.find((q) => q.id === questId);
-    if (!quest) return 0;
+  function toggleSport(sport: SportType) {
+    setSelectedSports((prev) =>
+      prev.includes(sport) ? prev.filter((s) => s !== sport) : [...prev, sport]
+    );
+  }
+
+  function confirmSports() {
+    if (selectedSports.length === 0) return;
+    const pool = generateQuestPool(selectedSports);
+    setQuestPool(pool);
+    setPickedQuestIds(new Set());
+  }
+
+  function toggleQuest(id: string) {
+    setPickedQuestIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else if (next.size < 10) {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  async function lockQuests() {
+    if (!user || pickedQuestIds.size !== 10) return;
+    setSaving(true);
+    const chosenQuests = questPool.filter((q) => pickedQuestIds.has(q.id));
+    const sel: WeeklyQuestSelection = {
+      weekStart,
+      sports: selectedSports,
+      chosenQuests,
+      locked: true,
+    };
+    const updated: UserProgress = { ...progress, weeklyQuestSelection: sel };
+    setProgress(updated);
+    await updateDoc(doc(db, 'userProgress', user.uid), { weeklyQuestSelection: sel });
+    setSaving(false);
+    setConfirmModal(false);
+  }
+
+  function getQuestValue(quest: Quest): number {
     switch (quest.type) {
       case 'sessions':
         return weekSessions.length;
@@ -93,26 +154,21 @@ export default function BattlePass() {
           .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
           .reduce((sum, s) => sum + (s.duration || 0), 0);
       case 'exercise_reps': {
-        const normalBest = Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
-          (s) => (s.exercises || [])
+        const total = weekSessions.reduce(
+          (sum, s) => sum + (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
-            .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0)
-        ));
-        const amrapBest = Math.max(0, ...weekSessions.filter((s) => s.mode === 'amrap').map(
-          (s) => {
-            const rounds = s.amrapRounds || 0;
-            const match = (s.exercises || []).find((ex) => ex.exerciseId === quest.exerciseId);
-            return match ? rounds * match.targetReps : 0;
-          }
-        ));
-        return Math.max(normalBest, amrapBest);
+            .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0),
+          0
+        );
+        return total;
       }
       case 'exercise_duration':
-        return Math.max(0, ...weekSessions.filter((s) => s.mode !== 'amrap').map(
-          (s) => (s.exercises || [])
+        return weekSessions.reduce(
+          (sum, s) => sum + (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
-            .reduce((eSum, ex) => eSum + (ex.runDuration || 0), 0)
-        ));
+            .reduce((eSum, ex) => eSum + (ex.runDuration || 0), 0),
+          0
+        );
     }
   }
 
@@ -122,9 +178,9 @@ export default function BattlePass() {
 
   async function claimQuest(questId: string) {
     if (!user || !season) return;
-    const quest = weeklyQuests.find((q) => q.id === questId);
+    const quest = activeQuests.find((q) => q.id === questId);
     if (!quest) return;
-    if (getQuestValue(questId) < quest.target) return;
+    if (getQuestValue(quest) < quest.target) return;
     if (isQuestClaimed(questId)) return;
 
     const newXp = progress.passXp + quest.xp;
@@ -199,7 +255,6 @@ export default function BattlePass() {
   }
 
   function getQuestTimeLeft(): string {
-    const weekStart = getWeekStart();
     const nextReset = weekStart + 7 * 24 * 60 * 60 * 1000;
     const remaining = Math.max(0, nextReset - Date.now());
     const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
@@ -212,8 +267,8 @@ export default function BattlePass() {
   const timeLeft = getSeasonTimeLeft(season);
   const levelInfo = getLevelFromXp(progress.passXp, season.passLevels);
   const progressPct = levelInfo.xpForNext > 0 ? (levelInfo.currentLevelXp / levelInfo.xpForNext) * 100 : 100;
-  const totalQuestsDone = weeklyQuests.filter((q) => isQuestClaimed(q.id)).length;
-  const totalQuestsAvailable = weeklyQuests.length;
+  const totalQuestsDone = activeQuests.filter((q) => isQuestClaimed(q.id)).length;
+  const totalQuestsAvailable = activeQuests.length;
 
   return (
     <div className="page bp-page">
@@ -223,7 +278,7 @@ export default function BattlePass() {
           <div className="bp-hero-left">
             <span className="bp-hero-season">{season.name}</span>
             <h1 className="bp-hero-title">{season.theme}</h1>
-              </div>
+          </div>
           <div className="bp-hero-timer">
             <Clock size={14} />
             <div>
@@ -249,7 +304,7 @@ export default function BattlePass() {
         <button className={`bp-tab ${tab === 'quetes' ? 'active' : ''}`} onClick={() => setTab('quetes')}>
           <Swords size={15} />
           <span>Quêtes</span>
-          <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>
+          {!needsSelection && <span className="bp-tab-badge">{totalQuestsDone}/{totalQuestsAvailable}</span>}
         </button>
         <button className={`bp-tab ${tab === 'pass' ? 'active' : ''}`} onClick={() => setTab('pass')}>
           <Trophy size={15} />
@@ -297,7 +352,123 @@ export default function BattlePass() {
         </div>
       )}
 
-      {tab === 'quetes' && (
+      {confirmModal && (
+        <div className="modal-overlay" onClick={() => setConfirmModal(false)}>
+          <div className="quest-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Confirmer tes quêtes</h3>
+            <p>Tu ne pourras plus modifier tes quêtes cette semaine. Continuer ?</p>
+            <div className="quest-confirm-actions">
+              <button className="quest-confirm-cancel" onClick={() => setConfirmModal(false)}>Annuler</button>
+              <button className="quest-confirm-ok" onClick={lockQuests} disabled={saving}>
+                {saving ? 'Validation...' : 'Valider'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'quetes' && needsSelection && selectionStep === 'sports' && (
+        <div className="quest-selection">
+          <div className="quest-selection-header">
+            <Swords size={24} />
+            <h2>Nouvelle semaine</h2>
+            <p>Quels sports tu fais cette semaine ?</p>
+          </div>
+          <div className="sport-chips">
+            {(Object.keys(SPORT_LABELS) as SportType[]).map((sport) => {
+              const Icon = SPORT_ICONS[sport];
+              const active = selectedSports.includes(sport);
+              return (
+                <button
+                  key={sport}
+                  className={`sport-chip ${active ? 'active' : ''}`}
+                  onClick={() => toggleSport(sport)}
+                >
+                  <Icon size={20} />
+                  <span>{SPORT_LABELS[sport]}</span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            className="quest-next-btn"
+            disabled={selectedSports.length === 0}
+            onClick={confirmSports}
+          >
+            Voir les quêtes
+          </button>
+        </div>
+      )}
+
+      {tab === 'quetes' && needsSelection && selectionStep === 'quests' && (
+        <div className="quest-selection">
+          <div className="quest-selection-header">
+            <h2>Choisis tes quêtes</h2>
+            <p>Sélectionne 10 quêtes pour la semaine</p>
+            <span className="quest-pick-counter">{pickedQuestIds.size}/10</span>
+          </div>
+
+          <div className="quest-perm-section">
+            <h4 className="quest-perm-title">Quêtes permanentes</h4>
+            {permanentQuests.map((q) => (
+              <div key={q.id} className="bp-quest quest-perm">
+                <div className="bp-quest-accent" style={{ background: 'var(--accent-green)' }} />
+                <div className="bp-quest-body">
+                  <div className="bp-quest-top">
+                    <span className="bp-quest-label">{q.label}</span>
+                    <span className="bp-quest-xp-tag">+{q.xp}</span>
+                  </div>
+                  <span className="bp-quest-desc">{q.description}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="quest-pool-section">
+            <h4 className="quest-pool-title">Quêtes au choix</h4>
+            {questPool.map((q) => {
+              const picked = pickedQuestIds.has(q.id);
+              return (
+                <button
+                  key={q.id}
+                  className={`bp-quest quest-pickable ${picked ? 'quest-picked' : ''}`}
+                  onClick={() => toggleQuest(q.id)}
+                >
+                  <div className="bp-quest-accent" style={{ background: picked ? 'var(--accent)' : 'var(--bg-card)' }} />
+                  <div className="bp-quest-body">
+                    <div className="bp-quest-top">
+                      <span className="bp-quest-label">{q.label}</span>
+                      <span className="bp-quest-xp-tag">+{q.xp}</span>
+                    </div>
+                    <span className="bp-quest-desc">{q.description}</span>
+                  </div>
+                  <div className={`quest-check ${picked ? 'checked' : ''}`}>
+                    {picked && <Check size={14} />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="quest-pick-footer">
+            <button
+              className="quest-back-btn"
+              onClick={() => { setQuestPool([]); setSelectedSports([]); }}
+            >
+              Retour
+            </button>
+            <button
+              className="quest-next-btn"
+              disabled={pickedQuestIds.size !== 10}
+              onClick={() => setConfirmModal(true)}
+            >
+              Valider ({pickedQuestIds.size}/10)
+            </button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'quetes' && !needsSelection && (
         <>
           {progress.chestsToOpen.length > 0 && (
             <div className="bp-chests">
@@ -336,8 +507,8 @@ export default function BattlePass() {
             <span className="bp-quest-timer"><Clock size={13} /> {getQuestTimeLeft()}</span>
           </div>
           <div className="bp-quest-list">
-            {weeklyQuests.map((quest) => {
-              const current = getQuestValue(quest.id);
+            {activeQuests.map((quest) => {
+              const current = getQuestValue(quest);
               const done = current >= quest.target;
               const claimed = isQuestClaimed(quest.id);
               const pct = Math.min(100, (current / quest.target) * 100);
