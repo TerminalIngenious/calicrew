@@ -1,7 +1,7 @@
 export interface Exercise {
   id: string;
   name: string;
-  category: 'push' | 'pull' | 'legs' | 'core' | 'skill' | 'running';
+  category: 'push' | 'pull' | 'legs' | 'core' | 'skill' | 'running' | 'sportco';
   isCustom?: boolean;
   canBeWeighted?: boolean;
 }

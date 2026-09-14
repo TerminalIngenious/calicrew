@@ -8,6 +8,7 @@ import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
+import { sportCoXp } from '../lib/passes';
 import Loader from '../components/Loader';
 
 function formatTime(seconds: number): string {
@@ -323,6 +324,28 @@ export default function LiveSession() {
         ) : (
           <div className="recap-exercises">
             {session.exercises.map((ex, exIdx) => {
+              if (ex.exerciseCategory === 'sportco') {
+                return (
+                  <div key={exIdx} className="recap-exercise-card">
+                    <div className="recap-exercise-header">
+                      <div>
+                        <h3>{ex.exerciseName}</h3>
+                      </div>
+                      <span className="recap-exercise-badge done">Complété</span>
+                    </div>
+                    <div className="recap-stats-row" style={{ marginTop: '0.75rem' }}>
+                      <div className="recap-mini-stat">
+                        <span className="recap-mini-value">{ex.runDuration ? Math.floor(ex.runDuration / 60) : 0}</span>
+                        <span>min</span>
+                      </div>
+                      <div className="recap-mini-stat">
+                        <span className="recap-mini-value">+{sportCoXp(ex.runDuration || 0)}</span>
+                        <span>XP</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
               if (ex.exerciseCategory === 'running') {
                 const paceMin = ex.runDistance && ex.runDistance > 0 && ex.runDuration
                   ? ex.runDuration / 60 / ex.runDistance : 0;

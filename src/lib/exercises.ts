@@ -47,6 +47,21 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'hill-run', name: 'Course en côte', category: 'running' },
   { id: 'tempo-run', name: 'Tempo run', category: 'running' },
   { id: 'fast-walk', name: 'Marche rapide', category: 'running' },
+  { id: 'football', name: 'Football', category: 'sportco' },
+  { id: 'basketball', name: 'Basketball', category: 'sportco' },
+  { id: 'handball', name: 'Handball', category: 'sportco' },
+  { id: 'volleyball', name: 'Volleyball', category: 'sportco' },
+  { id: 'rugby', name: 'Rugby', category: 'sportco' },
+  { id: 'tennis', name: 'Tennis', category: 'sportco' },
+  { id: 'padel', name: 'Padel', category: 'sportco' },
+  { id: 'badminton', name: 'Badminton', category: 'sportco' },
+  { id: 'ping-pong', name: 'Ping-pong', category: 'sportco' },
+  { id: 'futsal', name: 'Futsal', category: 'sportco' },
+  { id: 'water-polo', name: 'Water-polo', category: 'sportco' },
+  { id: 'hockey', name: 'Hockey', category: 'sportco' },
+  { id: 'ultimate', name: 'Ultimate', category: 'sportco' },
+  { id: 'squash', name: 'Squash', category: 'sportco' },
+  { id: 'autre-sport-co', name: 'Autre sport co', category: 'sportco' },
 ];
 
 export const CATEGORY_LABELS: Record<Exercise['category'], string> = {
@@ -56,4 +71,5 @@ export const CATEGORY_LABELS: Record<Exercise['category'], string> = {
   core: 'Abdos',
   skill: 'Skills',
   running: 'Running',
+  sportco: 'Sport Co',
 };

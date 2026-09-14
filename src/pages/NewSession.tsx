@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, query, where, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
+import { sportCoXp } from '../lib/passes';
 import type { Exercise, ExerciseLog, WeightType, Program } from '../types';
 import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
 
@@ -17,6 +18,9 @@ export default function NewSession() {
   >([]);
   const [runningConfigs, setRunningConfigs] = useState<
     { exercise: Exercise; duration: number; distance: number; elevation: number }[]
+  >([]);
+  const [sportCoConfigs, setSportCoConfigs] = useState<
+    { exercise: Exercise; duration: number }[]
   >([]);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -195,13 +199,17 @@ export default function NewSession() {
   }
 
   function goToConfig() {
-    const normal = selectedExercises.filter((ex) => ex.category !== 'running');
+    const normal = selectedExercises.filter((ex) => ex.category !== 'running' && ex.category !== 'sportco');
     const running = selectedExercises.filter((ex) => ex.category === 'running');
+    const sportCo = selectedExercises.filter((ex) => ex.category === 'sportco');
     setExerciseConfigs(
       normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 0, weightType: 'body' as WeightType }))
     );
     setRunningConfigs(
       running.map((ex) => ({ exercise: ex, duration: 30, distance: 5, elevation: 0 }))
+    );
+    setSportCoConfigs(
+      sportCo.map((ex) => ({ exercise: ex, duration: 60 }))
     );
     setStep('config');
   }
@@ -248,11 +256,36 @@ export default function NewSession() {
       runElevation: c.elevation || 0,
     }));
 
-    const exercises = [...normalExercises, ...runningExercises];
-    const isRunningOnly = exerciseConfigs.length === 0;
-    const totalRunDuration = runningConfigs.reduce((sum, c) => sum + c.duration * 60, 0);
+    const sportCoExercises: ExerciseLog[] = sportCoConfigs.map((c) => ({
+      exerciseId: c.exercise.id,
+      exerciseName: c.exercise.name,
+      exerciseCategory: 'sportco',
+      targetSets: 1,
+      targetReps: 1,
+      sets: [{ reps: 1, completed: true }],
+      runDuration: c.duration * 60,
+    }));
 
-    if (isRunningOnly) {
+    const exercises = [...normalExercises, ...runningExercises, ...sportCoExercises];
+    const isTimeOnly = exerciseConfigs.length === 0;
+    const totalSportCoDuration = sportCoConfigs.reduce((sum, c) => sum + c.duration * 60, 0);
+    const totalRunDuration =
+      runningConfigs.reduce((sum, c) => sum + c.duration * 60, 0) + totalSportCoDuration;
+
+    const xpGained = sportCoXp(totalSportCoDuration);
+    if (xpGained > 0) {
+      try {
+        const ref = doc(db, 'userProgress', user!.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          await updateDoc(ref, { passXp: (snap.data().passXp || 0) + xpGained });
+        }
+      } catch (err) {
+        console.error('Erreur XP sport co:', err);
+      }
+    }
+
+    if (isTimeOnly) {
       const docRef = await addDoc(collection(db, 'sessions'), {
         userId: user!.uid,
         date: new Date().toISOString().split('T')[0],
@@ -521,7 +554,10 @@ export default function NewSession() {
     );
   }
 
-  const isRunningOnly = exerciseConfigs.length === 0 && runningConfigs.length > 0;
+  const isRunningOnly = exerciseConfigs.length === 0 && runningConfigs.length > 0 && sportCoConfigs.length === 0;
+  const isSportCoOnly = exerciseConfigs.length === 0 && runningConfigs.length === 0 && sportCoConfigs.length > 0;
+  const sportCoTotalMin = sportCoConfigs.reduce((sum, c) => sum + c.duration, 0);
+  const sportCoPreviewXp = sportCoXp(sportCoTotalMin * 60);
 
   function formatPace(durationMin: number, distanceKm: number): string {
     if (distanceKm <= 0) return '—';
@@ -537,11 +573,48 @@ export default function NewSession() {
         <button className="icon-btn" onClick={() => setStep('select')}>
           <ArrowLeft size={20} />
         </button>
-        <h1>{isRunningOnly ? 'Log running' : 'Objectifs'}</h1>
+        <h1>{isRunningOnly ? 'Log running' : isSportCoOnly ? 'Log sport co' : 'Objectifs'}</h1>
         <div />
       </header>
 
       <div className="config-list">
+        {sportCoConfigs.map((config, i) => (
+          <div key={config.exercise.id} className="config-card running-config">
+            <h3>{config.exercise.name}</h3>
+            <div className="running-form">
+              <div className="running-field">
+                <div className="running-field-label">
+                  <Timer size={16} />
+                  <span>Temps</span>
+                </div>
+                <div className="running-input-group">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    className="running-input"
+                    value={config.duration || ''}
+                    placeholder="0"
+                    onChange={(e) => setSportCoConfigs((prev) =>
+                      prev.map((c, idx) => idx === i ? { ...c, duration: Math.max(0, parseInt(e.target.value) || 0) } : c)
+                    )}
+                  />
+                  <span className="running-input-unit">min</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {sportCoConfigs.length > 0 && (
+          <div className="sportco-xp-banner">
+            <Zap size={16} />
+            <span>
+              {sportCoPreviewXp} XP gagnés
+              <em>25 XP par tranche de 30 min</em>
+            </span>
+          </div>
+        )}
+
         {runningConfigs.map((config, i) => (
           <div key={config.exercise.id} className="config-card running-config">
             <h3>{config.exercise.name}</h3>

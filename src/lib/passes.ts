@@ -369,6 +369,13 @@ export function getDailyQuest(): Quest {
   return { ...ordered[idx], id: `d${day}-daily` };
 }
 
+// ── Sport Co ──
+
+/** 25 XP par tranche de 30 min complète. */
+export function sportCoXp(seconds: number): number {
+  return Math.floor(seconds / 1800) * 25;
+}
+
 // ── Levels ──
 
 function buildLevels(): PassLevel[] {
