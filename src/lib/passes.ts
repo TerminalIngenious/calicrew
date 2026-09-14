@@ -231,29 +231,93 @@ const RUNNING_POOL: Omit<Quest, 'id'>[] = [
   { label: 'Marche rapide', description: 'Fais 30 min de marche rapide', target: 1800, type: 'exercise_duration', xp: 75, exerciseId: 'fast-walk', exerciseName: 'Marche rapide' },
 ];
 
+// ── Quêtes difficiles (actives à partir du 21 septembre 2026) ──
+
+const HARD_START = new Date(2026, 8, 21, 10, 0, 0, 0).getTime();
+
+const GENERAL_HARD: Omit<Quest, 'id'>[] = [
+  { label: '400 reps', description: 'Fais 400 reps au total', target: 400, type: 'reps', xp: 175 },
+  { label: '600 reps', description: 'Fais 600 reps au total', target: 600, type: 'reps', xp: 225 },
+  { label: '50 séries', description: 'Complète 50 séries', target: 50, type: 'sets', xp: 150 },
+  { label: '70 séries', description: 'Complète 70 séries', target: 70, type: 'sets', xp: 200 },
+  { label: 'Touche-à-tout', description: 'Fais 10 exercices différents', target: 10, type: 'exercises', xp: 150 },
+  { label: '2 heures', description: 'Entraîne-toi 2h au total', target: 7200, type: 'duration', xp: 175 },
+  { label: '3 heures', description: 'Entraîne-toi 3h au total', target: 10800, type: 'duration', xp: 225 },
+  { label: '6 séances', description: 'Fais 6 séances cette semaine', target: 6, type: 'sessions', xp: 175 },
+  { label: '7 séances', description: 'Fais 7 séances cette semaine', target: 7, type: 'sessions', xp: 225 },
+];
+
+const CALISTHENICS_HARD: Omit<Quest, 'id'>[] = [
+  { label: 'Tractions+', description: 'Fais 120 tractions au total', target: 120, type: 'exercise_reps', xp: 200, exerciseId: 'pull-ups', exerciseName: 'Tractions' },
+  { label: 'Dips+', description: 'Fais 150 dips au total', target: 150, type: 'exercise_reps', xp: 200, exerciseId: 'dips', exerciseName: 'Dips' },
+  { label: 'Pompes+', description: 'Fais 250 pompes au total', target: 250, type: 'exercise_reps', xp: 200, exerciseId: 'push-ups', exerciseName: 'Pompes' },
+  { label: 'Muscle-ups+', description: 'Fais 30 muscle-ups au total', target: 30, type: 'exercise_reps', xp: 250, exerciseId: 'muscle-ups', exerciseName: 'Muscle-ups' },
+  { label: 'HSPU+', description: 'Fais 50 HSPU au total', target: 50, type: 'exercise_reps', xp: 225, exerciseId: 'handstand-push-ups', exerciseName: 'HSPU' },
+  { label: 'Pistol squats+', description: 'Fais 60 pistol squats', target: 60, type: 'exercise_reps', xp: 175, exerciseId: 'pistol-squats', exerciseName: 'Pistol squats' },
+  { label: 'Dragon flags+', description: 'Fais 30 dragon flags', target: 30, type: 'exercise_reps', xp: 200, exerciseId: 'dragon-flags', exerciseName: 'Dragon flags' },
+  { label: 'Pompes diamant+', description: 'Fais 100 pompes diamant', target: 100, type: 'exercise_reps', xp: 175, exerciseId: 'diamond-push-ups', exerciseName: 'Pompes diamant' },
+  { label: 'Double Cindy', description: 'Fais 2 AMRAP Cindy cette semaine', target: 2, type: 'amrap', xp: 200 },
+];
+
+const MUSCULATION_HARD: Omit<Quest, 'id'>[] = [
+  { label: 'Développé couché+', description: 'Fais 100 développé couché', target: 100, type: 'exercise_reps', xp: 200, exerciseId: 'developpe-couche', exerciseName: 'Développé couché' },
+  { label: 'Développé incliné+', description: 'Fais 90 développé incliné', target: 90, type: 'exercise_reps', xp: 200, exerciseId: 'developpe-incline', exerciseName: 'Développé incliné' },
+  { label: 'Développé militaire+', description: 'Fais 80 développé militaire', target: 80, type: 'exercise_reps', xp: 200, exerciseId: 'developpe-militaire', exerciseName: 'Développé militaire' },
+  { label: 'Squats+', description: 'Fais 120 squats', target: 120, type: 'exercise_reps', xp: 175, exerciseId: 'squats', exerciseName: 'Squats' },
+  { label: 'Soulevé de terre+', description: 'Fais 70 soulevé de terre', target: 70, type: 'exercise_reps', xp: 225, exerciseId: 'souleve-de-terre', exerciseName: 'Soulevé de terre' },
+  { label: 'Rowing barre+', description: 'Fais 100 rowing barre', target: 100, type: 'exercise_reps', xp: 200, exerciseId: 'rowing-barre', exerciseName: 'Rowing barre' },
+  { label: 'Curl biceps+', description: 'Fais 100 curl biceps', target: 100, type: 'exercise_reps', xp: 175, exerciseId: 'curl-biceps', exerciseName: 'Curl biceps' },
+  { label: 'Hip thrust+', description: 'Fais 90 hip thrust', target: 90, type: 'exercise_reps', xp: 175, exerciseId: 'hip-thrust', exerciseName: 'Hip thrust' },
+  { label: 'Fentes+', description: 'Fais 100 fentes', target: 100, type: 'exercise_reps', xp: 175, exerciseId: 'lunges', exerciseName: 'Fentes' },
+];
+
+const RUNNING_HARD: Omit<Quest, 'id'>[] = [
+  { label: '1h30 de course', description: 'Cours 1h30 au total', target: 5400, type: 'running_duration', xp: 175 },
+  { label: '2h de course', description: 'Cours 2h au total', target: 7200, type: 'running_duration', xp: 200 },
+  { label: '3h de course', description: 'Cours 3h au total', target: 10800, type: 'running_duration', xp: 250 },
+  { label: '4 runs', description: 'Fais 4 séances de running', target: 4, type: 'running_sessions', xp: 150 },
+  { label: '5 runs', description: 'Fais 5 séances de running', target: 5, type: 'running_sessions', xp: 200 },
+  { label: 'Sprint+', description: 'Fais 40 min de sprint', target: 2400, type: 'exercise_duration', xp: 200, exerciseId: 'sprint', exerciseName: 'Sprint' },
+  { label: 'Fractionné+', description: 'Fais 45 min de fractionné', target: 2700, type: 'exercise_duration', xp: 200, exerciseId: 'interval-run', exerciseName: 'Fractionné' },
+  { label: 'Côte+', description: 'Fais 40 min de course en côte', target: 2400, type: 'exercise_duration', xp: 200, exerciseId: 'hill-run', exerciseName: 'Course en côte' },
+  { label: 'Tempo+', description: 'Fais 50 min de tempo run', target: 3000, type: 'exercise_duration', xp: 200, exerciseId: 'tempo-run', exerciseName: 'Tempo run' },
+];
+
 const SPORT_POOLS: Record<SportType, Omit<Quest, 'id'>[]> = {
   calisthenics: CALISTHENICS_POOL,
   musculation: MUSCULATION_POOL,
   running: RUNNING_POOL,
 };
 
+const SPORT_HARD_POOLS: Record<SportType, Omit<Quest, 'id'>[]> = {
+  calisthenics: CALISTHENICS_HARD,
+  musculation: MUSCULATION_HARD,
+  running: RUNNING_HARD,
+};
+
 export function generateQuestPool(sports: SportType[]): Quest[] {
   const week = getWeekNumber();
   const seed = week * 31337;
+  const hard = getWeekStart() >= HARD_START;
+
+  const total = hard ? 26 : 20;
+  const sportTarget = hard ? 18 : 14;
 
   const sportQuests: Omit<Quest, 'id'>[] = [];
-  const perSport = Math.floor(14 / sports.length);
-  const remainder = 14 - perSport * sports.length;
+  const perSport = Math.floor(sportTarget / sports.length);
+  const remainder = sportTarget - perSport * sports.length;
 
   for (let i = 0; i < sports.length; i++) {
-    const pool = seededShuffle(SPORT_POOLS[sports[i]], seed + i);
+    const base = SPORT_POOLS[sports[i]];
+    const full = hard ? [...base, ...SPORT_HARD_POOLS[sports[i]]] : base;
+    const pool = seededShuffle(full, seed + i);
     const count = perSport + (i < remainder ? 1 : 0);
     sportQuests.push(...pool.slice(0, count));
   }
 
-  const generalCount = 20 - sportQuests.length;
-  const generalShuffled = seededShuffle(GENERAL_POOL, seed + 99);
-  const generalQuests = generalShuffled.slice(0, generalCount);
+  const generalCount = total - sportQuests.length;
+  const generalFull = hard ? [...GENERAL_POOL, ...GENERAL_HARD] : GENERAL_POOL;
+  const generalQuests = seededShuffle(generalFull, seed + 99).slice(0, generalCount);
 
   const all = [...sportQuests, ...generalQuests];
   const shuffled = seededShuffle(all, seed + 42);
