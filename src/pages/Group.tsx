@@ -37,7 +37,7 @@ function getLastMonthKey(): string {
   return `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}`;
 }
 
-const RANK_CHEST: CardRarity[] = ['legendaire', 'epique', 'rare'];
+const RANK_CHEST: CardRarity[] = ['epique', 'epique', 'epique'];
 
 const season = getCurrentSeason();
 const cardMap = new Map(
@@ -210,6 +210,12 @@ export default function Group() {
 
     const lastMonthKey = getLastMonthKey();
     if (progress?.monthlyRewardsClaimed === lastMonthKey) return;
+    if (lastMonthKey.endsWith('-08')) {
+      if (progress) {
+        await updateDoc(doc(db, 'userProgress', user.uid), { monthlyRewardsClaimed: lastMonthKey });
+      }
+      return;
+    }
 
     const now = new Date();
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0).getTime();
