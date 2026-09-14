@@ -3893,8 +3893,24 @@ body {
 
 .notif-error {
   margin-top: 0.6rem;
+}
+
+.notif-error p {
+  margin: 0;
   font-size: 0.78rem;
   color: #ff6b6b;
+}
+
+.notif-error code {
+  display: block;
+  margin-top: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(255, 107, 107, 0.08);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  word-break: break-word;
 }
 
 /* ── Sport Co ── */

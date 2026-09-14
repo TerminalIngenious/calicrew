@@ -53,7 +53,11 @@ export async function getPushPrefs(uid: string): Promise<PushPrefs> {
 
 export type EnableResult =
   | { ok: true }
-  | { ok: false; reason: 'unsupported' | 'no-key' | 'blocked' | 'dismissed' | 'error'; detail?: string };
+  | {
+      ok: false;
+      reason: 'unsupported' | 'no-key' | 'blocked' | 'dismissed' | 'rules' | 'error';
+      detail?: string;
+    };
 
 /**
  * Demande la permission, s'abonne au push et enregistre l'abonnement dans Firestore.
@@ -97,7 +101,14 @@ export async function enablePush(uid: string, prefs: PushPrefs): Promise<EnableR
 
     return { ok: true };
   } catch (err) {
-    return { ok: false, reason: 'error', detail: (err as Error).message };
+    const code = (err as { code?: string }).code;
+    const message = (err as Error).message || String(err);
+    // Cause la plus fréquente : les règles Firestore n'autorisent pas encore
+    // la collection pushSubscriptions.
+    if (code === 'permission-denied' || /permission|insufficient/i.test(message)) {
+      return { ok: false, reason: 'rules', detail: message };
+    }
+    return { ok: false, reason: 'error', detail: message };
   }
 }
 

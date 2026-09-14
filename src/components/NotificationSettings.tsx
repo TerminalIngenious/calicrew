@@ -17,6 +17,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   blocked:
     "Les notifications sont bloquées pour CaliCrew. Autorise-les dans les réglages du site, puis réessaie.",
   dismissed: "Tu n'as pas répondu à la demande. Réessaie et choisis « Autoriser ».",
+  rules: "Les règles Firestore n'autorisent pas encore les notifications. Déploie firestore.rules.",
   error: "Erreur lors de l'activation des notifications.",
 };
 
@@ -25,6 +26,7 @@ export default function NotificationSettings({ uid }: { uid: string }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   const supported = isPushSupported();
   const installRequired = needsInstall();
@@ -40,6 +42,7 @@ export default function NotificationSettings({ uid }: { uid: string }) {
     if (busy) return;
     setBusy(true);
     setError(null);
+    setErrorDetail(null);
     const next = { ...prefs, [key]: !prefs[key] };
 
     try {
@@ -48,7 +51,7 @@ export default function NotificationSettings({ uid }: { uid: string }) {
         const result = await enablePush(uid, next);
         if (!result.ok) {
           setError(ERROR_MESSAGES[result.reason]);
-          if (result.detail) console.error('Erreur push:', result.detail);
+          setErrorDetail(result.detail ?? null);
           setBusy(false);
           return;
         }
@@ -61,8 +64,8 @@ export default function NotificationSettings({ uid }: { uid: string }) {
         setPrefs(next);
       }
     } catch (err) {
-      console.error('Erreur notifications:', err);
       setError('Erreur lors de la mise à jour des notifications.');
+      setErrorDetail((err as Error).message ?? null);
     }
     setBusy(false);
   }
@@ -70,6 +73,7 @@ export default function NotificationSettings({ uid }: { uid: string }) {
   function close() {
     setOpen(false);
     setError(null);
+    setErrorDetail(null);
   }
 
   return (
@@ -137,7 +141,12 @@ export default function NotificationSettings({ uid }: { uid: string }) {
               </div>
             )}
 
-            {error && <p className="notif-error">{error}</p>}
+            {error && (
+              <div className="notif-error">
+                <p>{error}</p>
+                {errorDetail && <code>{errorDetail}</code>}
+              </div>
+            )}
           </div>
         </div>
       )}
