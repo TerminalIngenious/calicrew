@@ -51,7 +51,7 @@ export default function BattlePass() {
   const needsSelection = !hasValidSelection;
   const canSelect = isMonday && needsSelection;
   const selectionStep = !selection || selection.weekStart !== weekStart
-    ? (selectedSports.length === 0 ? 'sports' : 'quests')
+    ? (selectedSports.length === 0 || questPool.length === 0 ? 'sports' : 'quests')
     : selection.locked ? 'done' : 'quests';
 
   const permanentQuests = useMemo(() => getPermanentQuests(), []);
