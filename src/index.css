@@ -3747,6 +3747,112 @@ body {
   cursor: pointer;
 }
 
+/* ── Notifications ── */
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notif-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.notif-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.notif-row-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notif-row-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.notif-switch {
+  appearance: none;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notif-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.notif-switch:checked {
+  background: var(--accent);
+}
+
+.notif-switch:checked::after {
+  transform: translateX(18px);
+}
+
+.notif-switch:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.notif-install-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 138, 92, 0.25);
+  background: linear-gradient(135deg, rgba(255, 138, 92, 0.07), transparent);
+  color: var(--accent);
+}
+
+.notif-install-hint span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.notif-install-hint em {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.notif-error {
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  color: #ff6b6b;
+}
+
 /* ── Sport Co ── */
 
 .sportco-xp-banner {
