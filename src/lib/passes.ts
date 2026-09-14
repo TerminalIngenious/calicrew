@@ -264,6 +264,47 @@ export function generateQuestPool(sports: SportType[]): Quest[] {
   }));
 }
 
+// ── Défi quotidien ──
+
+export function getDayStart(): number {
+  const now = new Date();
+  const shifted = new Date(now.getTime() - 10 * 60 * 60 * 1000);
+  const day = new Date(shifted.getFullYear(), shifted.getMonth(), shifted.getDate(), 10, 0, 0, 0);
+  return day.getTime();
+}
+
+function getDayNumber(): number {
+  const ref = new Date(2026, 0, 1, 10, 0, 0, 0).getTime();
+  return Math.floor((getDayStart() - ref) / (24 * 60 * 60 * 1000));
+}
+
+const DAILY_POOL: Omit<Quest, 'id'>[] = [
+  { label: 'Séance du jour', description: 'Fais 1 séance aujourd\'hui', target: 1, type: 'sessions', xp: 25 },
+  { label: '50 reps', description: 'Fais 50 reps aujourd\'hui', target: 50, type: 'reps', xp: 25 },
+  { label: '80 reps', description: 'Fais 80 reps aujourd\'hui', target: 80, type: 'reps', xp: 25 },
+  { label: '100 reps', description: 'Fais 100 reps aujourd\'hui', target: 100, type: 'reps', xp: 25 },
+  { label: '10 séries', description: 'Complète 10 séries aujourd\'hui', target: 10, type: 'sets', xp: 25 },
+  { label: '15 séries', description: 'Complète 15 séries aujourd\'hui', target: 15, type: 'sets', xp: 25 },
+  { label: '20 minutes', description: 'Entraîne-toi 20 min aujourd\'hui', target: 1200, type: 'duration', xp: 25 },
+  { label: '30 minutes', description: 'Entraîne-toi 30 min aujourd\'hui', target: 1800, type: 'duration', xp: 25 },
+  { label: '45 minutes', description: 'Entraîne-toi 45 min aujourd\'hui', target: 2700, type: 'duration', xp: 25 },
+  { label: 'Varié', description: 'Fais 3 exercices différents aujourd\'hui', target: 3, type: 'exercises', xp: 25 },
+  { label: 'Très varié', description: 'Fais 5 exercices différents aujourd\'hui', target: 5, type: 'exercises', xp: 25 },
+  { label: '25 séries', description: 'Complète 25 séries aujourd\'hui', target: 25, type: 'sets', xp: 25 },
+  { label: '150 reps', description: 'Fais 150 reps aujourd\'hui', target: 150, type: 'reps', xp: 25 },
+  { label: '1 heure', description: 'Entraîne-toi 1h aujourd\'hui', target: 3600, type: 'duration', xp: 25 },
+];
+
+export function getDailyQuest(): Quest {
+  const day = getDayNumber();
+  const len = DAILY_POOL.length;
+  const cycle = Math.floor(day / len);
+  const idx = ((day % len) + len) % len;
+  // Une permutation différente à chaque cycle : pas de répétition dans un cycle
+  const ordered = seededShuffle(DAILY_POOL, cycle * 7919 + 1337);
+  return { ...ordered[idx], id: `d${day}-daily` };
+}
+
 // ── Levels ──
 
 function buildLevels(): PassLevel[] {

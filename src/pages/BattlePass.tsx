@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
@@ -44,6 +44,8 @@ export default function BattlePass() {
 
   const season = getCurrentSeason();
   const weekStart = getWeekStart();
+  const dayStart = getDayStart();
+  const dailyQuest = useMemo(() => getDailyQuest(), []);
 
   const selection = progress.weeklyQuestSelection;
   const isMonday = Date.now() - weekStart < 24 * 60 * 60 * 1000;
@@ -75,6 +77,11 @@ export default function BattlePass() {
   const weekSessions = useMemo(
     () => sessions.filter((s) => s.createdAt >= weekStart && s.completed),
     [sessions, weekStart]
+  );
+
+  const daySessions = useMemo(
+    () => sessions.filter((s) => s.createdAt >= dayStart && s.completed),
+    [sessions, dayStart]
   );
 
   const loadProgress = useCallback(async () => {
@@ -137,36 +144,36 @@ export default function BattlePass() {
     setConfirmModal(false);
   }
 
-  function getQuestValue(quest: Quest): number {
+  function getQuestValue(quest: Quest, scope = weekSessions): number {
     switch (quest.type) {
       case 'sessions':
-        return weekSessions.length;
+        return scope.length;
       case 'reps':
-        return weekSessions.reduce(
+        return scope.reduce(
           (sum, s) => sum + (s.exercises || []).reduce(
             (eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
           ), 0
         );
       case 'duration':
-        return weekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+        return scope.reduce((sum, s) => sum + (s.duration || 0), 0);
       case 'exercises':
-        return new Set(weekSessions.flatMap((s) => (s.exercises || []).map((e) => e.exerciseId))).size;
+        return new Set(scope.flatMap((s) => (s.exercises || []).map((e) => e.exerciseId))).size;
       case 'sets':
-        return weekSessions.reduce(
+        return scope.reduce(
           (sum, s) => sum + (s.exercises || []).reduce(
             (eSum, ex) => eSum + (ex.sets || []).filter((set) => set.completed).length, 0
           ), 0
         );
       case 'amrap':
-        return weekSessions.filter((s) => s.mode === 'amrap').length;
+        return scope.filter((s) => s.mode === 'amrap').length;
       case 'running_sessions':
-        return weekSessions.filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running')).length;
+        return scope.filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running')).length;
       case 'running_duration':
-        return weekSessions
+        return scope
           .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
           .reduce((sum, s) => sum + (s.duration || 0), 0);
       case 'exercise_reps': {
-        const total = weekSessions.reduce(
+        const total = scope.reduce(
           (sum, s) => sum + (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
             .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0),
@@ -175,7 +182,7 @@ export default function BattlePass() {
         return total;
       }
       case 'exercise_duration':
-        return weekSessions.reduce(
+        return scope.reduce(
           (sum, s) => sum + (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
             .reduce((eSum, ex) => eSum + (ex.runDuration || 0), 0),
@@ -188,14 +195,13 @@ export default function BattlePass() {
     return (progress.questsClaimed[questId] || 0) >= weekStart;
   }
 
-  async function claimQuest(questId: string) {
-    if (!user || !season) return;
-    const quest = activeQuests.find((q) => q.id === questId);
-    if (!quest) return;
-    if (getQuestValue(quest) < quest.target) return;
-    if (isQuestClaimed(questId)) return;
+  const dailyValue = getQuestValue(dailyQuest, daySessions);
+  const dailyDone = dailyValue >= dailyQuest.target;
+  const dailyClaimed = (progress.questsClaimed[dailyQuest.id] || 0) >= dayStart;
 
-    const newXp = progress.passXp + quest.xp;
+  async function grantXp(questId: string, xp: number) {
+    if (!user || !season) return;
+    const newXp = progress.passXp + xp;
     const oldLevel = getLevelFromXp(progress.passXp, season.passLevels);
     const newLevelInfo = getLevelFromXp(newXp, season.passLevels);
 
@@ -217,6 +223,20 @@ export default function BattlePass() {
 
     setProgress(updated);
     await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
+  }
+
+  async function claimDailyQuest() {
+    if (!dailyDone || dailyClaimed) return;
+    await grantXp(dailyQuest.id, dailyQuest.xp);
+  }
+
+  async function claimQuest(questId: string) {
+    if (!user || !season) return;
+    const quest = activeQuests.find((q) => q.id === questId);
+    if (!quest) return;
+    if (getQuestValue(quest) < quest.target) return;
+    if (isQuestClaimed(questId)) return;
+    await grantXp(questId, quest.xp);
   }
 
   async function openChest() {
@@ -274,6 +294,15 @@ export default function BattlePass() {
     if (days > 0) return `${days}j ${hours}h`;
     if (hours > 0) return `${hours}h`;
     return '< 1h';
+  }
+
+  function getDailyTimeLeft(): string {
+    const nextReset = dayStart + 24 * 60 * 60 * 1000;
+    const remaining = Math.max(0, nextReset - Date.now());
+    const hours = Math.floor(remaining / (60 * 60 * 1000));
+    const mins = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+    if (hours > 0) return `${hours}h${String(mins).padStart(2, '0')}`;
+    return `${mins} min`;
   }
 
   const timeLeft = getSeasonTimeLeft(season);
@@ -476,6 +505,53 @@ export default function BattlePass() {
             >
               Valider ({pickedQuestIds.size}/10)
             </button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'quetes' && (
+        <div className="bp-daily">
+          <div className="bp-section-title-row">
+            <h3 className="bp-section-title">
+              <Flame size={16} /> Défi du jour
+            </h3>
+            <span className="bp-quest-timer"><Clock size={13} /> {getDailyTimeLeft()}</span>
+          </div>
+          <div className={`bp-quest bp-daily-quest ${dailyClaimed ? 'bp-quest-claimed' : ''} ${dailyDone && !dailyClaimed ? 'bp-quest-ready' : ''}`}>
+            <div className="bp-quest-accent" style={{ background: dailyClaimed ? 'var(--accent-green)' : 'var(--accent)' }} />
+            <div className="bp-quest-body">
+              <div className="bp-quest-top">
+                <span className="bp-quest-label">{dailyQuest.label}</span>
+                <div className="bp-quest-reward">
+                  {dailyClaimed ? (
+                    <span className="bp-quest-done-badge"><Check size={12} /></span>
+                  ) : dailyDone ? (
+                    <button className="bp-quest-claim" onClick={claimDailyQuest}>
+                      +{dailyQuest.xp} XP
+                    </button>
+                  ) : (
+                    <span className="bp-quest-xp-tag">+{dailyQuest.xp}</span>
+                  )}
+                </div>
+              </div>
+              <span className="bp-quest-desc">{dailyQuest.description}</span>
+              <div className="bp-quest-progress">
+                <div className="bp-quest-bar">
+                  <div
+                    className="bp-quest-bar-fill"
+                    style={{
+                      width: `${Math.min(100, (dailyValue / dailyQuest.target) * 100)}%`,
+                      background: dailyClaimed ? 'var(--accent-green)' : 'var(--accent)',
+                    }}
+                  />
+                </div>
+                <span className="bp-quest-count">
+                  {dailyQuest.type === 'duration'
+                    ? `${Math.floor(dailyValue / 60)}/${Math.floor(dailyQuest.target / 60)} min`
+                    : `${dailyValue}/${dailyQuest.target}`}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
