@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, BellOff, Smartphone } from 'lucide-react';
+import { Bell, Smartphone, X } from 'lucide-react';
 import {
   isPushSupported,
   needsInstall,
@@ -13,7 +13,7 @@ import {
 
 export default function NotificationSettings({ uid }: { uid: string }) {
   const [prefs, setPrefs] = useState<PushPrefs>(DEFAULT_PUSH_PREFS);
-  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,8 +24,7 @@ export default function NotificationSettings({ uid }: { uid: string }) {
   useEffect(() => {
     getPushPrefs(uid)
       .then(setPrefs)
-      .catch(() => setPrefs(DEFAULT_PUSH_PREFS))
-      .finally(() => setLoading(false));
+      .catch(() => setPrefs(DEFAULT_PUSH_PREFS));
   }, [uid]);
 
   async function toggle(key: keyof PushPrefs) {
@@ -36,7 +35,7 @@ export default function NotificationSettings({ uid }: { uid: string }) {
 
     try {
       if (!enabled) {
-        // Premier activation : demande la permission et crée l'abonnement.
+        // Première activation : demande la permission et crée l'abonnement.
         const result = await enablePush(uid, next);
         if (!result) {
           setError('Permission refusée. Autorise les notifications dans les réglages de ton navigateur.');
@@ -58,60 +57,80 @@ export default function NotificationSettings({ uid }: { uid: string }) {
     setBusy(false);
   }
 
-  if (loading) return null;
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   return (
-    <section className="section">
-      <h3>
-        {enabled ? <Bell size={16} style={{ marginRight: 6 }} /> : <BellOff size={16} style={{ marginRight: 6 }} />}
-        Notifications
-      </h3>
+    <>
+      <button
+        className={`icon-btn notif-bell ${enabled ? 'active' : ''}`}
+        onClick={() => setOpen(true)}
+        aria-label="Notifications"
+      >
+        <Bell size={20} />
+        {enabled && <span className="notif-bell-dot" />}
+      </button>
 
-      {installRequired ? (
-        <div className="notif-install-hint">
-          <Smartphone size={18} />
-          <span>
-            Sur iPhone, installe CaliCrew sur ton écran d'accueil pour activer les notifications.
-            <em>Partager → Sur l'écran d'accueil</em>
-          </span>
-        </div>
-      ) : !supported ? (
-        <p className="empty" style={{ fontSize: '0.85rem' }}>
-          Ton navigateur ne supporte pas les notifications push.
-        </p>
-      ) : (
-        <div className="notif-list">
-          <label className="notif-row">
-            <div className="notif-row-info">
-              <span className="notif-row-label">Rappel créatine</span>
-              <span className="notif-row-desc">Tous les jours à 20h</span>
+      {open && (
+        <div className="modal-overlay" onClick={close}>
+          <div className="notif-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="notif-modal-header">
+              <h3><Bell size={18} /> Notifications</h3>
+              <button className="member-modal-close" onClick={close}>
+                <X size={18} />
+              </button>
             </div>
-            <input
-              type="checkbox"
-              className="notif-switch"
-              checked={prefs.creatine}
-              disabled={busy}
-              onChange={() => toggle('creatine')}
-            />
-          </label>
 
-          <label className="notif-row">
-            <div className="notif-row-info">
-              <span className="notif-row-label">Rappel défi du jour</span>
-              <span className="notif-row-desc">À 17h, seulement si le défi n'est pas validé</span>
-            </div>
-            <input
-              type="checkbox"
-              className="notif-switch"
-              checked={prefs.dailyChallenge}
-              disabled={busy}
-              onChange={() => toggle('dailyChallenge')}
-            />
-          </label>
+            {installRequired ? (
+              <div className="notif-install-hint">
+                <Smartphone size={18} />
+                <span>
+                  Sur iPhone, installe CaliCrew sur ton écran d'accueil pour activer les notifications.
+                  <em>Partager → Sur l'écran d'accueil</em>
+                </span>
+              </div>
+            ) : !supported ? (
+              <p className="empty" style={{ fontSize: '0.85rem' }}>
+                Ton navigateur ne supporte pas les notifications push.
+              </p>
+            ) : (
+              <div className="notif-list">
+                <label className="notif-row">
+                  <div className="notif-row-info">
+                    <span className="notif-row-label">Rappel créatine</span>
+                    <span className="notif-row-desc">Tous les jours à 20h</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="notif-switch"
+                    checked={prefs.creatine}
+                    disabled={busy}
+                    onChange={() => toggle('creatine')}
+                  />
+                </label>
+
+                <label className="notif-row">
+                  <div className="notif-row-info">
+                    <span className="notif-row-label">Rappel défi du jour</span>
+                    <span className="notif-row-desc">À 17h, seulement si le défi n'est pas validé</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="notif-switch"
+                    checked={prefs.dailyChallenge}
+                    disabled={busy}
+                    onChange={() => toggle('dailyChallenge')}
+                  />
+                </label>
+              </div>
+            )}
+
+            {error && <p className="notif-error">{error}</p>}
+          </div>
         </div>
       )}
-
-      {error && <p className="notif-error">{error}</p>}
-    </section>
+    </>
   );
 }

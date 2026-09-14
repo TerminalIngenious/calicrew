@@ -122,7 +122,7 @@ export default function Profile() {
           </button>
         )}
         <h1>{isOwnProfile ? 'Mon profil' : 'Profil'}</h1>
-        <div />
+        {isOwnProfile && user ? <NotificationSettings uid={user.uid} /> : <div />}
       </header>
 
       <div className="profile-header-card">
@@ -298,8 +298,6 @@ export default function Profile() {
           </div>
         )}
       </section>
-
-      {isOwnProfile && user && <NotificationSettings uid={user.uid} />}
 
       {selectedCard && (
         <CardDetailModal
