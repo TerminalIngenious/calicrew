@@ -51,36 +51,54 @@ export async function getPushPrefs(uid: string): Promise<PushPrefs> {
   };
 }
 
+export type EnableResult =
+  | { ok: true }
+  | { ok: false; reason: 'unsupported' | 'no-key' | 'blocked' | 'dismissed' | 'error'; detail?: string };
+
 /**
  * Demande la permission, s'abonne au push et enregistre l'abonnement dans Firestore.
- * Renvoie null si la permission est refusée ou si le push est indisponible.
+ * Le motif d'échec est renvoyé explicitement : les causes sont très différentes
+ * (clé absente côté build, permission bloquée par le navigateur, prompt ignoré).
  */
-export async function enablePush(uid: string, prefs: PushPrefs): Promise<PushPrefs | null> {
-  if (!isPushSupported() || !VAPID_PUBLIC_KEY) return null;
+export async function enablePush(uid: string, prefs: PushPrefs): Promise<EnableResult> {
+  if (!isPushSupported()) return { ok: false, reason: 'unsupported' };
+  if (!VAPID_PUBLIC_KEY) return { ok: false, reason: 'no-key' };
+
+  // Si la permission est déjà bloquée, requestPermission() résout immédiatement
+  // sans afficher de prompt : il faut le dire clairement à l'utilisateur.
+  if (Notification.permission === 'denied') return { ok: false, reason: 'blocked' };
 
   const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return null;
+  if (permission === 'denied') return { ok: false, reason: 'blocked' };
+  if (permission !== 'granted') return { ok: false, reason: 'dismissed' };
 
-  const registration = await navigator.serviceWorker.ready;
-  let sub = await registration.pushManager.getSubscription();
-  if (!sub) {
-    sub = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource;
+
+    let sub = await registration.pushManager.getSubscription();
+    if (sub) {
+      // Un abonnement créé avec une autre clé VAPID reste en place mais
+      // deviendrait inutilisable : on le remplace.
+      await sub.unsubscribe();
+      sub = null;
+    }
+    sub = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+
+    const json = sub.toJSON();
+    await setDoc(doc(db, 'pushSubscriptions', uid), {
+      uid,
+      endpoint: json.endpoint,
+      keys: json.keys,
+      creatine: prefs.creatine,
+      dailyChallenge: prefs.dailyChallenge,
+      updatedAt: Date.now(),
     });
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, reason: 'error', detail: (err as Error).message };
   }
-
-  const json = sub.toJSON();
-  await setDoc(doc(db, 'pushSubscriptions', uid), {
-    uid,
-    endpoint: json.endpoint,
-    keys: json.keys,
-    creatine: prefs.creatine,
-    dailyChallenge: prefs.dailyChallenge,
-    updatedAt: Date.now(),
-  });
-
-  return prefs;
 }
 
 /** Met à jour les préférences sans redemander la permission. */

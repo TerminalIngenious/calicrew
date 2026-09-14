@@ -11,6 +11,15 @@ import {
   type PushPrefs,
 } from '../lib/push';
 
+const ERROR_MESSAGES: Record<string, string> = {
+  unsupported: "Ton navigateur ne supporte pas les notifications push.",
+  'no-key': "Les notifications ne sont pas encore configurées sur le serveur.",
+  blocked:
+    "Les notifications sont bloquées pour CaliCrew. Autorise-les dans les réglages du site, puis réessaie.",
+  dismissed: "Tu n'as pas répondu à la demande. Réessaie et choisis « Autoriser ».",
+  error: "Erreur lors de l'activation des notifications.",
+};
+
 export default function NotificationSettings({ uid }: { uid: string }) {
   const [prefs, setPrefs] = useState<PushPrefs>(DEFAULT_PUSH_PREFS);
   const [open, setOpen] = useState(false);
@@ -37,12 +46,13 @@ export default function NotificationSettings({ uid }: { uid: string }) {
       if (!enabled) {
         // Première activation : demande la permission et crée l'abonnement.
         const result = await enablePush(uid, next);
-        if (!result) {
-          setError('Permission refusée. Autorise les notifications dans les réglages de ton navigateur.');
+        if (!result.ok) {
+          setError(ERROR_MESSAGES[result.reason]);
+          if (result.detail) console.error('Erreur push:', result.detail);
           setBusy(false);
           return;
         }
-        setPrefs(result);
+        setPrefs(next);
       } else if (!next.creatine && !next.dailyChallenge) {
         await disablePush(uid);
         setPrefs(next);

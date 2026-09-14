@@ -3769,6 +3769,7 @@ body {
 }
 
 .notif-modal {
+  position: relative;
   width: 100%;
   max-width: 420px;
   background: var(--bg-card);
