@@ -3749,15 +3749,15 @@ body {
 
 /* ── Notifications ── */
 
-.notif-bell {
+.notif-settings-btn {
   position: relative;
 }
 
-.notif-bell.active {
+.notif-settings-btn.active {
   color: var(--accent);
 }
 
-.notif-bell-dot {
+.notif-settings-dot {
   position: absolute;
   top: 6px;
   right: 6px;

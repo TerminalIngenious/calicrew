@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Smartphone, X } from 'lucide-react';
+import { Settings, Smartphone, X } from 'lucide-react';
 import {
   isPushSupported,
   needsInstall,
@@ -79,19 +79,19 @@ export default function NotificationSettings({ uid }: { uid: string }) {
   return (
     <>
       <button
-        className={`icon-btn notif-bell ${enabled ? 'active' : ''}`}
+        className={`icon-btn notif-settings-btn ${enabled ? 'active' : ''}`}
         onClick={() => setOpen(true)}
-        aria-label="Notifications"
+        aria-label="Réglages des notifications"
       >
-        <Bell size={20} />
-        {enabled && <span className="notif-bell-dot" />}
+        <Settings size={18} />
+        {enabled && <span className="notif-settings-dot" />}
       </button>
 
       {open && (
         <div className="modal-overlay" onClick={close}>
           <div className="notif-modal" onClick={(e) => e.stopPropagation()}>
             <div className="notif-modal-header">
-              <h3><Bell size={18} /> Notifications</h3>
+              <h3><Settings size={18} /> Notifications</h3>
               <button className="member-modal-close" onClick={close}>
                 <X size={18} />
               </button>

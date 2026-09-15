@@ -11,7 +11,6 @@ import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download } f
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
-import NotificationSettings from '../components/NotificationSettings';
 
 export default function Profile() {
   const { user } = useAuth();
@@ -122,7 +121,7 @@ export default function Profile() {
           </button>
         )}
         <h1>{isOwnProfile ? 'Mon profil' : 'Profil'}</h1>
-        {isOwnProfile && user ? <NotificationSettings uid={user.uid} /> : <div />}
+        <div />
       </header>
 
       <div className="profile-header-card">

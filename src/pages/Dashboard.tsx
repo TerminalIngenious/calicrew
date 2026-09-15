@@ -10,6 +10,7 @@ import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
 import Loader from '../components/Loader';
+import NotificationSettings from '../components/NotificationSettings';
 
 const UPDATES = [
   {
@@ -118,6 +119,7 @@ export default function Dashboard() {
             <Bell size={18} />
             {hasUnread && <span className="notif-dot" />}
           </button>
+          {user && <NotificationSettings uid={user.uid} />}
           <button className="icon-btn" onClick={() => signOut()}>
             <LogOut size={20} />
           </button>
