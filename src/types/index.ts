@@ -1,12 +1,18 @@
+/** Unité d'une série : répétitions, ou secondes pour les exercices isométriques. */
+export type SetUnit = 'reps' | 'seconds';
+
 export interface Exercise {
   id: string;
   name: string;
   category: 'push' | 'pull' | 'legs' | 'core' | 'skill' | 'running' | 'sportco';
   isCustom?: boolean;
   canBeWeighted?: boolean;
+  /** Unité proposée par défaut. Absent = 'reps'. */
+  defaultUnit?: SetUnit;
 }
 
 export interface SetLog {
+  /** Nombre de répétitions, ou de secondes si l'exercice est en unité 'seconds'. */
   reps: number;
   completed: boolean;
 }
@@ -20,6 +26,8 @@ export interface ExerciseLog {
   targetSets: number;
   targetReps: number;
   sets: SetLog[];
+  /** Absent = 'reps', pour rester compatible avec les séances existantes. */
+  unit?: SetUnit;
   weighted?: boolean;
   weight?: number;
   weightType?: WeightType;
@@ -50,6 +58,7 @@ export interface ProgramExercise {
   exerciseCategory: string;
   targetSets: number;
   targetReps: number;
+  unit?: SetUnit;
   weighted?: boolean;
   weight?: number;
   weightType?: WeightType;

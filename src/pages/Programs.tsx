@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
-import type { Program, ProgramExercise, Exercise, WeightType } from '../types';
+import type { Program, ProgramExercise, Exercise, WeightType, SetUnit } from '../types';
 import { Plus, Minus, Trash2, ArrowLeft, X, Globe, Lock } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
@@ -41,12 +41,14 @@ export default function Programs() {
 
   function addExercise(ex: Exercise) {
     if (selectedExercises.find((e) => e.exerciseId === ex.id)) return;
+    const unit: SetUnit = ex.defaultUnit === 'seconds' ? 'seconds' : 'reps';
     setSelectedExercises((prev) => [...prev, {
       exerciseId: ex.id,
       exerciseName: ex.name,
       exerciseCategory: ex.category,
       targetSets: 4,
-      targetReps: 10,
+      targetReps: unit === 'seconds' ? 30 : 10,
+      unit,
     }]);
     setShowExPicker(false);
   }
@@ -149,11 +151,27 @@ export default function Programs() {
                 </div>
               </div>
               <div className="config-row">
-                <span>Reps</span>
+                <span>Unité</span>
+                <div className="unit-picker">
+                  {([['reps', 'Reps'], ['seconds', 'Secondes']] as [SetUnit, string][]).map(([u, label]) => (
+                    <button
+                      key={u}
+                      className={`unit-btn ${(ex.unit || 'reps') === u ? 'active' : ''}`}
+                      onClick={() => setSelectedExercises((prev) => prev.map((e, i) =>
+                        i === idx ? { ...e, unit: u, targetReps: u === 'seconds' ? 30 : 10 } : e
+                      ))}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="config-row">
+                <span>{ex.unit === 'seconds' ? 'Secondes / série' : 'Reps'}</span>
                 <div className="stepper">
-                  <button onClick={() => updateExercise(idx, 'targetReps', -1)}><Minus size={14} /></button>
-                  <span>{ex.targetReps}</span>
-                  <button onClick={() => updateExercise(idx, 'targetReps', 1)}><Plus size={14} /></button>
+                  <button onClick={() => updateExercise(idx, 'targetReps', ex.unit === 'seconds' ? -5 : -1)}><Minus size={14} /></button>
+                  <span>{ex.targetReps}{ex.unit === 'seconds' ? ' s' : ''}</span>
+                  <button onClick={() => updateExercise(idx, 'targetReps', ex.unit === 'seconds' ? 5 : 1)}><Plus size={14} /></button>
                 </div>
               </div>
               <div className="config-row">
@@ -259,7 +277,7 @@ export default function Programs() {
               <div className="program-card-exercises">
                 {prog.exercises.map((ex, i) => (
                   <span key={i} className="program-card-ex">
-                    {ex.exerciseName} {ex.targetSets}×{ex.targetReps}{ex.weighted ? ` ${ex.weight}kg` : ''}
+                    {ex.exerciseName} {ex.targetSets}×{ex.targetReps}{ex.unit === 'seconds' ? 's' : ''}{ex.weighted ? ` ${ex.weight}kg` : ''}
                   </span>
                 ))}
               </div>

@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
+import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
 import Loader from '../components/Loader';
 import NotificationSettings from '../components/NotificationSettings';
 
@@ -88,15 +89,7 @@ export default function Dashboard() {
   const stats = useMemo(() => {
     const weekStart = getWeekStart();
     const weekSessions = sessions.filter((s) => s.createdAt >= weekStart && s.completed);
-    const weekReps = weekSessions.reduce(
-      (sum, s) =>
-        sum +
-        s.exercises.reduce(
-          (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
-          0
-        ),
-      0
-    );
+    const weekReps = totalReps(weekSessions);
     return { weekSessions: weekSessions.length, weekReps };
   }, [sessions]);
 
@@ -196,13 +189,8 @@ export default function Dashboard() {
                             )}{' '}
                             séries
                           </span>
-                          <span>
-                            {s.exercises.reduce(
-                              (sum, ex) => sum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
-                              0
-                            )}{' '}
-                            reps
-                          </span>
+                          {sessionReps(s) > 0 && <span>{sessionReps(s)} reps</span>}
+                          {sessionSeconds(s) > 0 && <span>{sessionSeconds(s)} sec</span>}
                         </>
                       )}
                       {s.duration && s.duration > 0 && (

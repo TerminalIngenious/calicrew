@@ -16,6 +16,7 @@ import {
 import { db } from '../lib/firebase';
 import { getCardsBySet, getCardById, getCardDisplayName, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
+import { totalReps as sumReps } from '../lib/stats';
 import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card, CardRarity } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package } from 'lucide-react';
@@ -170,16 +171,7 @@ export default function Group() {
       const sessions = allSessions.filter((s) => s.createdAt >= monthStartMs);
       const progress = progressSnap.exists() ? (progressSnap.data() as UserProgress) : null;
 
-      const totalReps = sessions.reduce(
-        (sum, s) =>
-          sum +
-          s.exercises.reduce(
-            (eSum, ex) =>
-              eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
-            0
-          ),
-        0
-      );
+      const totalReps = sumReps(sessions);
       const totalSets = sessions.reduce(
         (sum, s) =>
           sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0),
@@ -241,11 +233,7 @@ export default function Group() {
           .map((d) => d.data() as Session)
           .filter((s) => s.createdAt >= lastMonthStart && s.createdAt < currentMonthStart && s.completed);
 
-        const totalReps = sessions.reduce(
-          (sum, s) => sum + s.exercises.reduce(
-            (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
-          ), 0
-        );
+        const totalReps = sumReps(sessions);
         const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
         const exerciseVariety = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId))).size;
 

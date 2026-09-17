@@ -1,4 +1,5 @@
 import type { Season, PassLevel, Quest, SportType, Session } from '../types';
+import { exerciseReps, exerciseSeconds } from './stats';
 
 // ── Ancien système de quêtes (fallback) ──
 
@@ -40,10 +41,10 @@ function analyzeLastWeek(prevSessions: Session[]): ExoStat[] {
     for (const ex of s.exercises) {
       const id = ex.exerciseId;
       const existing = map.get(id) || { exerciseId: id, exerciseName: ex.exerciseName, category: ex.exerciseCategory || '', totalReps: 0, bestSessionReps: 0, totalDuration: 0, bestSessionDuration: 0 };
-      const sessionReps = ex.sets.reduce((sum, set) => sum + (set.completed ? set.reps : 0), 0);
+      const sessionReps = exerciseReps(ex);
       existing.totalReps += sessionReps;
       existing.bestSessionReps = Math.max(existing.bestSessionReps, sessionReps);
-      const sessionDur = ex.runDuration || 0;
+      const sessionDur = (ex.runDuration || 0) + exerciseSeconds(ex);
       existing.totalDuration += sessionDur;
       existing.bestSessionDuration = Math.max(existing.bestSessionDuration, sessionDur);
       map.set(id, existing);
@@ -192,7 +193,8 @@ const CALISTHENICS_POOL: Omit<Quest, 'id'>[] = [
   { label: 'Pistol squats', description: 'Fais 20 pistol squats', target: 20, type: 'exercise_reps', xp: 100, exerciseId: 'pistol-squats', exerciseName: 'Pistol squats' },
   { label: 'Relevés de jambes', description: 'Fais 30 relevés de jambes', target: 30, type: 'exercise_reps', xp: 75, exerciseId: 'leg-raises', exerciseName: 'Relevés de jambes' },
   { label: 'Dragon flags', description: 'Fais 10 dragon flags', target: 10, type: 'exercise_reps', xp: 100, exerciseId: 'dragon-flags', exerciseName: 'Dragon flags' },
-  { label: 'L-sit', description: 'Fais 15 L-sit', target: 15, type: 'exercise_reps', xp: 75, exerciseId: 'l-sit', exerciseName: 'L-sit' },
+  { label: 'L-sit', description: 'Tiens 2 min de L-sit au total', target: 120, type: 'exercise_duration', xp: 75, exerciseId: 'l-sit', exerciseName: 'L-sit' },
+  { label: 'Gainage', description: 'Tiens 5 min de gainage au total', target: 300, type: 'exercise_duration', xp: 75, exerciseId: 'gainage', exerciseName: 'Gainage' },
   { label: 'Pike push-ups', description: 'Fais 30 pike push-ups', target: 30, type: 'exercise_reps', xp: 75, exerciseId: 'pike-push-ups', exerciseName: 'Pike push-ups' },
   { label: 'Cindy', description: 'Fais 1 AMRAP Cindy cette semaine', target: 1, type: 'amrap', xp: 100 },
 ];

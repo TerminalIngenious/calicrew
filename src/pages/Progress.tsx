@@ -13,6 +13,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Loader from '../components/Loader';
+import { exerciseReps, exerciseTotal, getUnit, unitLabel } from '../lib/stats';
 
 export default function Progress() {
   const { sessions, loading } = useUserSessions();
@@ -34,9 +35,10 @@ export default function Progress() {
         selectedExercise === 'all'
           ? s.exercises
           : s.exercises.filter((e) => e.exerciseName === selectedExercise);
+      // Sur « tous les exercices » on ne somme que les reps : mélanger des
+      // secondes de gainage à des répétitions ne voudrait rien dire.
       const volume = exercises.reduce(
-        (sum, ex) =>
-          sum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0),
+        (sum, ex) => sum + (selectedExercise === 'all' ? exerciseReps(ex) : exerciseTotal(ex)),
         0
       );
       return {
@@ -44,6 +46,16 @@ export default function Progress() {
         volume,
       };
     });
+  }, [sortedSessions, selectedExercise]);
+
+  // Unité de l'exercice affiché : on regarde la dernière séance qui le contient.
+  const selectedUnit = useMemo(() => {
+    if (selectedExercise === 'all') return 'reps';
+    for (let i = sortedSessions.length - 1; i >= 0; i--) {
+      const ex = sortedSessions[i].exercises.find((e) => e.exerciseName === selectedExercise);
+      if (ex) return getUnit(ex);
+    }
+    return 'reps';
   }, [sortedSessions, selectedExercise]);
 
   const maxRepsData = useMemo(() => {
@@ -89,7 +101,7 @@ export default function Progress() {
           ) : (
             <>
               <section className="section">
-                <h3>Volume total (reps)</h3>
+                <h3>Volume total ({unitLabel(selectedUnit)})</h3>
                 <div className="chart-container">
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={volumeData}>
@@ -113,7 +125,7 @@ export default function Progress() {
 
               {selectedExercise !== 'all' && maxRepsData.length > 0 && (
                 <section className="section">
-                  <h3>Max reps par séance</h3>
+                  <h3>Max {unitLabel(selectedUnit)} par séance</h3>
                   <div className="chart-container">
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={maxRepsData}>

@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
+import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -149,11 +150,7 @@ export default function BattlePass() {
       case 'sessions':
         return scope.length;
       case 'reps':
-        return scope.reduce(
-          (sum, s) => sum + (s.exercises || []).reduce(
-            (eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
-          ), 0
-        );
+        return totalReps(scope);
       case 'duration':
         return scope.reduce((sum, s) => sum + (s.duration || 0), 0);
       case 'exercises':
@@ -172,20 +169,19 @@ export default function BattlePass() {
         return scope
           .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
           .reduce((sum, s) => sum + (s.duration || 0), 0);
-      case 'exercise_reps': {
-        const total = scope.reduce(
-          (sum, s) => sum + (s.exercises || [])
-            .filter((ex) => ex.exerciseId === quest.exerciseId)
-            .reduce((eSum, ex) => eSum + (ex.sets || []).reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0),
-          0
-        );
-        return total;
-      }
-      case 'exercise_duration':
+      case 'exercise_reps':
         return scope.reduce(
           (sum, s) => sum + (s.exercises || [])
             .filter((ex) => ex.exerciseId === quest.exerciseId)
-            .reduce((eSum, ex) => eSum + (ex.runDuration || 0), 0),
+            .reduce((eSum, ex) => eSum + exerciseReps(ex), 0),
+          0
+        );
+      case 'exercise_duration':
+        // Couvre le running (runDuration) et les isométriques comptés en secondes.
+        return scope.reduce(
+          (sum, s) => sum + (s.exercises || [])
+            .filter((ex) => ex.exerciseId === quest.exerciseId)
+            .reduce((eSum, ex) => eSum + (ex.runDuration || 0) + exerciseSeconds(ex), 0),
           0
         );
     }

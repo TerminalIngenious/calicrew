@@ -5,6 +5,7 @@ import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } fro
 import { db } from '../lib/firebase';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
+import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download } from 'lucide-react';
@@ -74,11 +75,7 @@ export default function Profile() {
   }, [load]);
 
   const completedSessions = sessions.filter((s) => s.completed);
-  const totalReps = completedSessions.reduce(
-    (sum, s) => sum + s.exercises.reduce(
-      (eSum, ex) => eSum + ex.sets.reduce((sSum, set) => sSum + (set.completed ? set.reps : 0), 0), 0
-    ), 0
-  );
+  const totalReps = sumReps(completedSessions);
   const totalDuration = completedSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
   const totalSets = completedSessions.reduce(
     (sum, s) => sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0), 0

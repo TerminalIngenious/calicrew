@@ -5,7 +5,7 @@ import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import { sportCoXp } from '../lib/passes';
-import type { Exercise, ExerciseLog, WeightType, Program } from '../types';
+import type { Exercise, ExerciseLog, WeightType, Program, SetUnit } from '../types';
 import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
 
 export default function NewSession() {
@@ -14,7 +14,7 @@ export default function NewSession() {
   const [step, setStep] = useState<'select' | 'config'>('select');
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseConfigs, setExerciseConfigs] = useState<
-    { exercise: Exercise; targetSets: number; targetTotal: number; weighted: boolean; weight: number; weightType: WeightType }[]
+    { exercise: Exercise; targetSets: number; targetTotal: number; unit: SetUnit; weighted: boolean; weight: number; weightType: WeightType }[]
   >([]);
   const [runningConfigs, setRunningConfigs] = useState<
     { exercise: Exercise; duration: number; distance: number; elevation: number }[]
@@ -27,6 +27,7 @@ export default function NewSession() {
   const [newExName, setNewExName] = useState('');
   const [newExCategory, setNewExCategory] = useState<Exercise['category']>('push');
   const [newExWeighted, setNewExWeighted] = useState(false);
+  const [newExUnit, setNewExUnit] = useState<SetUnit>('reps');
   const [addingExo, setAddingExo] = useState(false);
   const [editingExo, setEditingExo] = useState<Exercise | null>(null);
   const [editExoName, setEditExoName] = useState('');
@@ -68,6 +69,7 @@ export default function NewSession() {
         targetReps: ex.targetReps,
         sets: Array.from({ length: ex.targetSets }, () => ({ reps: 0, completed: false })),
       };
+      if (ex.unit === 'seconds') log.unit = 'seconds';
       if (ex.weighted && ex.weight) {
         log.weighted = true;
         log.weight = ex.weight;
@@ -103,6 +105,7 @@ export default function NewSession() {
         category: newExCategory,
         isCustom: true,
         canBeWeighted: newExWeighted,
+        defaultUnit: newExUnit,
         userId: user.uid,
       });
       const newEx: Exercise = {
@@ -111,10 +114,12 @@ export default function NewSession() {
         category: newExCategory,
         isCustom: true,
         canBeWeighted: newExWeighted,
+        defaultUnit: newExUnit,
       };
       setCustomExercises((prev) => [...prev, newEx]);
       setNewExName('');
       setNewExWeighted(false);
+      setNewExUnit('reps');
       setShowAddExercise(false);
     } catch (err) {
       console.error('Erreur ajout exercice:', err);
@@ -203,7 +208,19 @@ export default function NewSession() {
     const running = selectedExercises.filter((ex) => ex.category === 'running');
     const sportCo = selectedExercises.filter((ex) => ex.category === 'sportco');
     setExerciseConfigs(
-      normal.map((ex) => ({ exercise: ex, targetSets: 4, targetTotal: 40, weighted: false, weight: 0, weightType: 'body' as WeightType }))
+      normal.map((ex) => {
+        const unit: SetUnit = ex.defaultUnit === 'seconds' ? 'seconds' : 'reps';
+        return {
+          exercise: ex,
+          targetSets: 4,
+          // 30 s par série pour un isométrique, 40 reps au total sinon.
+          targetTotal: unit === 'seconds' ? 120 : 40,
+          unit,
+          weighted: false,
+          weight: 0,
+          weightType: 'body' as WeightType,
+        };
+      })
     );
     setRunningConfigs(
       running.map((ex) => ({ exercise: ex, duration: 30, distance: 5, elevation: 0 }))
@@ -236,6 +253,7 @@ export default function NewSession() {
         targetReps: repsPerSet,
         sets: Array.from({ length: c.targetSets }, () => ({ reps: 0, completed: false })),
       };
+      if (c.unit === 'seconds') log.unit = 'seconds';
       if (c.weighted) {
         log.weighted = true;
         log.weight = c.weight;
@@ -460,6 +478,20 @@ export default function NewSession() {
                       {label}
                     </button>
                   ))}
+                </div>
+                <div className="config-row" style={{ marginTop: '0.75rem' }}>
+                  <span>Unité</span>
+                  <div className="unit-picker">
+                    {([['reps', 'Reps'], ['seconds', 'Secondes']] as [SetUnit, string][]).map(([u, label]) => (
+                      <button
+                        key={u}
+                        className={`unit-btn ${newExUnit === u ? 'active' : ''}`}
+                        onClick={() => setNewExUnit(u)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="weighted-toggle" style={{ marginTop: '0.75rem' }} onClick={() => setNewExWeighted(!newExWeighted)}>
                   <Weight size={16} />
@@ -691,13 +723,31 @@ export default function NewSession() {
             <div key={config.exercise.id} className="config-card">
               <h3>{config.exercise.name}</h3>
               <div className="config-row">
+                <span>Unité</span>
+                <div className="unit-picker">
+                  {([['reps', 'Reps'], ['seconds', 'Secondes']] as [SetUnit, string][]).map(([u, label]) => (
+                    <button
+                      key={u}
+                      className={`unit-btn ${config.unit === u ? 'active' : ''}`}
+                      onClick={() => setExerciseConfigs((prev) =>
+                        prev.map((c, idx) => idx === i
+                          ? { ...c, unit: u, targetTotal: u === 'seconds' ? 120 : 40 }
+                          : c)
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="config-row">
                 <span>Objectif total</span>
                 <div className="stepper">
-                  <button onClick={() => updateConfig(i, 'targetTotal', -5)}>
+                  <button onClick={() => updateConfig(i, 'targetTotal', config.unit === 'seconds' ? -15 : -5)}>
                     <Minus size={16} />
                   </button>
-                  <span>{config.targetTotal}</span>
-                  <button onClick={() => updateConfig(i, 'targetTotal', 5)}>
+                  <span>{config.targetTotal}{config.unit === 'seconds' ? ' s' : ''}</span>
+                  <button onClick={() => updateConfig(i, 'targetTotal', config.unit === 'seconds' ? 15 : 5)}>
                     <Plus size={16} />
                   </button>
                 </div>
@@ -753,7 +803,7 @@ export default function NewSession() {
                 </div>
               )}
               <div className="config-result">
-                → {repsPerSet} reps / série{config.weight > 0 ? ` • ${config.weight} kg ${config.weightType === 'halteres' ? '(haltères)' : config.weightType === 'barre' ? '(barre)' : '(lesté)'}` : ''}
+                → {repsPerSet} {config.unit === 'seconds' ? 'sec' : 'reps'} / série{config.weight > 0 ? ` • ${config.weight} kg ${config.weightType === 'halteres' ? '(haltères)' : config.weightType === 'barre' ? '(barre)' : '(lesté)'}` : ''}
               </div>
             </div>
           );

@@ -3,12 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useUserSessions } from '../contexts/SessionsContext';
-import type { Session } from '../types';
+import type { Session, SetUnit } from '../types';
 import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
 import { sportCoXp } from '../lib/passes';
+import { sessionReps, getUnit, unitLabel, isTimeBased } from '../lib/stats';
+
+/** Pas d'incrément : 5 s pour un isométrique, 1 rep sinon. */
+function setStep(ex: { unit?: SetUnit }): number {
+  return isTimeBased(ex) ? 5 : 1;
+}
 import Loader from '../components/Loader';
 
 function formatTime(seconds: number): string {
@@ -223,10 +229,7 @@ export default function LiveSession() {
   const displayDuration = session.duration && session.duration > 0 ? session.duration : elapsed;
 
   if (finished) {
-    const totalReps = session.exercises.reduce(
-      (sum, ex) => sum + ex.sets.reduce((s, set) => s + (set.completed ? set.reps : 0), 0),
-      0
-    );
+    const totalReps = sessionReps(session);
     const categories = [...new Set(session.exercises.map((e) => e.exerciseCategory || '').filter(Boolean))];
     const categoryLabel = categories.map((c) => (CATEGORY_LABELS as Record<string, string>)[c] || c).join(', ');
     const isAmrap = session.mode === 'amrap';
@@ -423,7 +426,7 @@ export default function LiveSession() {
                     ))}
                   </div>
                   <div className="recap-exercise-total">
-                    Total : {exTotalReps} reps
+                    Total : {exTotalReps} {unitLabel(getUnit(ex))}
                   </div>
                 </div>
               );
@@ -647,12 +650,14 @@ export default function LiveSession() {
                     <div key={setIdx} className={`set-item ${set.completed ? 'completed' : ''}`}>
                       <div className="set-header">
                         <span className="set-label">Série {setIdx + 1}</span>
-                        <span className="set-target">Obj: {ex.targetReps}</span>
+                        <span className="set-target">
+                          Obj: {ex.targetReps}{isTimeBased(ex) ? ' s' : ''}
+                        </span>
                       </div>
                       <div className="set-controls">
-                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, -1)}>−</button>
-                        <span className="reps-value">{set.reps}</span>
-                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, 1)}>+</button>
+                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, -setStep(ex))}>−</button>
+                        <span className="reps-value">{set.reps}{isTimeBased(ex) ? ' s' : ''}</span>
+                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, setStep(ex))}>+</button>
                       </div>
                       <button
                         className={`validate-btn ${set.completed ? 'done' : ''}`}
