@@ -349,11 +349,14 @@ export default function LiveSession() {
                   </div>
                 );
               }
-              if (ex.exerciseCategory === 'running') {
+              if (ex.exerciseCategory === 'running' || ex.exerciseCategory === 'velo') {
+                const isVelo = ex.exerciseCategory === 'velo';
                 const paceMin = ex.runDistance && ex.runDistance > 0 && ex.runDuration
                   ? ex.runDuration / 60 / ex.runDistance : 0;
                 const paceM = Math.floor(paceMin);
                 const paceS = Math.round((paceMin - paceM) * 60);
+                const speed = ex.runDuration && ex.runDuration > 0
+                  ? (ex.runDistance || 0) / (ex.runDuration / 3600) : 0;
                 return (
                   <div key={exIdx} className="recap-exercise-card">
                     <div className="recap-exercise-header">
@@ -371,11 +374,20 @@ export default function LiveSession() {
                         <span className="recap-mini-value">{ex.runDistance || 0}</span>
                         <span>km</span>
                       </div>
-                      {paceMin > 0 && (
-                        <div className="recap-mini-stat">
-                          <span className="recap-mini-value">{paceM}:{String(paceS).padStart(2, '0')}</span>
-                          <span>min/km</span>
-                        </div>
+                      {isVelo ? (
+                        speed > 0 && (
+                          <div className="recap-mini-stat">
+                            <span className="recap-mini-value">{speed.toFixed(1)}</span>
+                            <span>km/h</span>
+                          </div>
+                        )
+                      ) : (
+                        paceMin > 0 && (
+                          <div className="recap-mini-stat">
+                            <span className="recap-mini-value">{paceM}:{String(paceS).padStart(2, '0')}</span>
+                            <span>min/km</span>
+                          </div>
+                        )
                       )}
                       {(ex.runElevation || 0) > 0 && (
                         <div className="recap-mini-stat">

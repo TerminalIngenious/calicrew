@@ -100,7 +100,7 @@ export default function Programs() {
 
   if (creating) {
     const allExercises = [...DEFAULT_EXERCISES, ...customExercises].filter(
-      (e) => e.category !== 'running' && e.category !== 'sportco'
+      (e) => e.category !== 'running' && e.category !== 'velo' && e.category !== 'sportco'
     );
     const categories = [...new Set(allExercises.map((e) => e.category))] as Exercise['category'][];
 

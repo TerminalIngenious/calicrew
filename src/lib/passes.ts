@@ -116,8 +116,8 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
     quests.push({ id: `w${week}-amrap`, label: 'Cindy', description: `Fais ${amrapTarget} Cindy cette semaine`, target: amrapTarget, type: 'amrap', xp: 100 });
   }
 
-  const strengthExos = stats.filter((s) => s.category !== 'running' && s.bestSessionReps > 0).sort((a, b) => b.bestSessionReps - a.bestSessionReps);
-  const runningExos = stats.filter((s) => s.category === 'running' && s.bestSessionDuration > 0).sort((a, b) => b.bestSessionDuration - a.bestSessionDuration);
+  const strengthExos = stats.filter((s) => s.category !== 'running' && s.category !== 'velo' && s.bestSessionReps > 0).sort((a, b) => b.bestSessionReps - a.bestSessionReps);
+  const enduranceExos = stats.filter((s) => (s.category === 'running' || s.category === 'velo') && s.bestSessionDuration > 0).sort((a, b) => b.bestSessionDuration - a.bestSessionDuration);
 
   for (const exo of strengthExos.slice(0, 3)) {
     const raw = Math.ceil(exo.bestSessionReps * BOOST);
@@ -125,10 +125,11 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
     quests.push({ id: `w${week}-exo-${exo.exerciseId}`, label: exo.exerciseName, description: `Fais ${target} ${exo.exerciseName.toLowerCase()} en une séance`, target, type: 'exercise_reps', xp: xpForTarget(target), exerciseId: exo.exerciseId, exerciseName: exo.exerciseName });
   }
 
-  for (const exo of runningExos.slice(0, 1)) {
+  for (const exo of enduranceExos.slice(0, 1)) {
     const raw = Math.ceil(exo.bestSessionDuration * BOOST);
     const target = Math.min(3600, roundTarget(raw));
-    quests.push({ id: `w${week}-exo-${exo.exerciseId}`, label: exo.exerciseName, description: `Cours ${formatMin(target)} de ${exo.exerciseName.toLowerCase()} en une séance`, target, type: 'exercise_duration', xp: xpForTarget(Math.round(target / 60)), exerciseId: exo.exerciseId, exerciseName: exo.exerciseName });
+    const verb = exo.category === 'velo' ? 'Fais' : 'Cours';
+    quests.push({ id: `w${week}-exo-${exo.exerciseId}`, label: exo.exerciseName, description: `${verb} ${formatMin(target)} de ${exo.exerciseName.toLowerCase()} en une séance`, target, type: 'exercise_duration', xp: xpForTarget(Math.round(target / 60)), exerciseId: exo.exerciseId, exerciseName: exo.exerciseName });
   }
 
   return quests;

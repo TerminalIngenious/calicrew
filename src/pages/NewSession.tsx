@@ -8,6 +8,11 @@ import { sportCoXp } from '../lib/passes';
 import type { Exercise, ExerciseLog, WeightType, Program, SetUnit } from '../types';
 import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
 
+/** Running et vélo partagent le même formulaire temps / distance / dénivelé. */
+function isDistanceBased(category: string): boolean {
+  return category === 'running' || category === 'velo';
+}
+
 export default function NewSession() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -204,8 +209,10 @@ export default function NewSession() {
   }
 
   function goToConfig() {
-    const normal = selectedExercises.filter((ex) => ex.category !== 'running' && ex.category !== 'sportco');
-    const running = selectedExercises.filter((ex) => ex.category === 'running');
+    const normal = selectedExercises.filter(
+      (ex) => !isDistanceBased(ex.category) && ex.category !== 'sportco'
+    );
+    const running = selectedExercises.filter((ex) => isDistanceBased(ex.category));
     const sportCo = selectedExercises.filter((ex) => ex.category === 'sportco');
     setExerciseConfigs(
       normal.map((ex) => {
@@ -265,7 +272,7 @@ export default function NewSession() {
     const runningExercises: ExerciseLog[] = runningConfigs.map((c) => ({
       exerciseId: c.exercise.id,
       exerciseName: c.exercise.name,
-      exerciseCategory: 'running',
+      exerciseCategory: c.exercise.category,
       targetSets: 1,
       targetReps: 1,
       sets: [{ reps: 1, completed: true }],
@@ -587,6 +594,7 @@ export default function NewSession() {
   }
 
   const isRunningOnly = exerciseConfigs.length === 0 && runningConfigs.length > 0 && sportCoConfigs.length === 0;
+  const isVeloOnly = isRunningOnly && runningConfigs.every((c) => c.exercise.category === 'velo');
   const isSportCoOnly = exerciseConfigs.length === 0 && runningConfigs.length === 0 && sportCoConfigs.length > 0;
   const sportCoTotalMin = sportCoConfigs.reduce((sum, c) => sum + c.duration, 0);
   const sportCoPreviewXp = sportCoXp(sportCoTotalMin * 60);
@@ -599,13 +607,18 @@ export default function NewSession() {
     return `${m}:${String(s).padStart(2, '0')}`;
   }
 
+  function formatSpeed(durationMin: number, distanceKm: number): string {
+    if (durationMin <= 0) return '—';
+    return (distanceKm / (durationMin / 60)).toFixed(1);
+  }
+
   return (
     <div className="page">
       <header className="page-header">
         <button className="icon-btn" onClick={() => setStep('select')}>
           <ArrowLeft size={20} />
         </button>
-        <h1>{isRunningOnly ? 'Log running' : isSportCoOnly ? 'Log sport co' : 'Objectifs'}</h1>
+        <h1>{isVeloOnly ? 'Log vélo' : isRunningOnly ? 'Log running' : isSportCoOnly ? 'Log sport co' : 'Objectifs'}</h1>
         <div />
       </header>
 
@@ -711,7 +724,11 @@ export default function NewSession() {
               </div>
               <div className="running-pace">
                 <Gauge size={16} />
-                <span>Allure : {formatPace(config.duration, config.distance)} min/km</span>
+                {config.exercise.category === 'velo' ? (
+                  <span>Vitesse : {formatSpeed(config.duration, config.distance)} km/h</span>
+                ) : (
+                  <span>Allure : {formatPace(config.duration, config.distance)} min/km</span>
+                )}
               </div>
             </div>
           </div>

@@ -4,7 +4,7 @@ export type SetUnit = 'reps' | 'seconds';
 export interface Exercise {
   id: string;
   name: string;
-  category: 'push' | 'pull' | 'legs' | 'core' | 'skill' | 'running' | 'sportco';
+  category: 'push' | 'pull' | 'legs' | 'core' | 'skill' | 'running' | 'velo' | 'sportco';
   isCustom?: boolean;
   canBeWeighted?: boolean;
   /** Unité proposée par défaut. Absent = 'reps'. */
