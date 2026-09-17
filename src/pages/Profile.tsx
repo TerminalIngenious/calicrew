@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, MAX_DISPLAY_NAME } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -8,13 +8,13 @@ import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program } from '../types';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, displayName: myName, updateDisplayName } = useAuth();
   const navigate = useNavigate();
   const { uid } = useParams<{ uid: string }>();
   const { sessions: ownSessions } = useUserSessions();
@@ -30,12 +30,40 @@ export default function Profile() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+
+  function startEditName() {
+    setNameDraft(myName);
+    setNameError(null);
+    setEditingName(true);
+  }
+
+  async function saveName() {
+    if (savingName) return;
+    const trimmed = nameDraft.trim();
+    if (!trimmed) {
+      setNameError('Le pseudo ne peut pas être vide');
+      return;
+    }
+    setSavingName(true);
+    try {
+      await updateDisplayName(trimmed);
+      setDisplayName(trimmed);
+      setEditingName(false);
+    } catch (err) {
+      setNameError((err as Error).message || 'Erreur lors du changement de pseudo');
+    }
+    setSavingName(false);
+  }
 
   const load = useCallback(async () => {
     if (!targetUid) return;
 
     if (isOwnProfile) {
-      setDisplayName(user?.displayName || '');
+      setDisplayName(myName);
       setSessions(ownSessions);
     } else {
       const userSnap = await getDoc(doc(db, 'users', targetUid));
@@ -68,7 +96,7 @@ export default function Profile() {
     }
 
     setLoading(false);
-  }, [targetUid, isOwnProfile, user, ownSessions]);
+  }, [targetUid, isOwnProfile, myName, ownSessions]);
 
   useEffect(() => {
     load();
@@ -133,7 +161,40 @@ export default function Profile() {
           )}
           {isOwnProfile && <span className="profile-avatar-edit">Modifier</span>}
         </div>
-        <h2 className="profile-name">{displayName}</h2>
+        {editingName ? (
+          <div className="profile-name-edit">
+            <input
+              type="text"
+              className="profile-name-input"
+              value={nameDraft}
+              maxLength={MAX_DISPLAY_NAME}
+              autoFocus
+              onChange={(e) => setNameDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveName();
+                if (e.key === 'Escape') setEditingName(false);
+              }}
+            />
+            <div className="profile-name-actions">
+              <button className="secondary-btn small" onClick={() => setEditingName(false)}>
+                Annuler
+              </button>
+              <button className="primary-btn small" onClick={saveName} disabled={savingName}>
+                {savingName ? '...' : 'Enregistrer'}
+              </button>
+            </div>
+            {nameError && <span className="profile-name-error">{nameError}</span>}
+          </div>
+        ) : (
+          <h2 className="profile-name">
+            {displayName}
+            {isOwnProfile && (
+              <button className="profile-name-edit-btn" onClick={startEditName} aria-label="Modifier le pseudo">
+                <Pencil size={14} />
+              </button>
+            )}
+          </h2>
+        )}
         <span className="profile-cards-count">{uniqueCards.length}/{allCards.length} cartes</span>
       </div>
 

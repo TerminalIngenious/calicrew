@@ -9,7 +9,7 @@ import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
 export default function Programs() {
-  const { user } = useAuth();
+  const { user, displayName: myName } = useAuth();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ export default function Programs() {
       name: name.trim(),
       description: description.trim(),
       createdBy: user.uid,
-      creatorName: user.displayName || '',
+      creatorName: myName,
       exercises: selectedExercises,
       isPublic,
       createdAt: Date.now(),

@@ -45,7 +45,7 @@ const UPDATES = [
 ];
 
 export default function Dashboard() {
-  const { user, signOut } = useAuth();
+  const { user, displayName: myName, signOut } = useAuth();
   const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
   const [showUpdates, setShowUpdates] = useState(false);
@@ -105,7 +105,7 @@ export default function Dashboard() {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Salut {user?.displayName}</h1>
+          <h1>Salut {myName}</h1>
         </div>
         <div style={{ display: 'flex', gap: '0.25rem' }}>
           <button className="icon-btn notif-btn" onClick={openUpdates}>

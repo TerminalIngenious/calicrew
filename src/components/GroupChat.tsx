@@ -55,7 +55,7 @@ interface Props {
 }
 
 export default function GroupChat({ groupId }: Props) {
-  const { user } = useAuth();
+  const { user, displayName: myName } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
@@ -108,7 +108,7 @@ export default function GroupChat({ groupId }: Props) {
       const msgData: Record<string, unknown> = {
         groupId,
         uid: user.uid,
-        displayName: user.displayName || 'Inconnu',
+        displayName: myName || 'Inconnu',
         text: text.trim(),
         createdAt: Date.now(),
       };
