@@ -6,6 +6,7 @@ import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
 import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
+import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -245,12 +246,17 @@ export default function BattlePass() {
 
     // La carte est tirée avant l'animation : sa rareté peut dépasser celle
     // garantie par le coffre, et c'est bien elle qui doit colorer la rotation.
-    setSpinRarity(card?.rarity ?? chest.rarity);
+    const rarity = card?.rarity ?? chest.rarity;
+    setSpinRarity(rarity);
+    // Débloque l'audio pendant le geste utilisateur : le son ne part qu'après
+    // la rotation, trop tard pour que les navigateurs l'autorisent encore.
+    primeAudio();
     setChestOpening(true);
     setChestPhase('spin');
 
     await new Promise((r) => setTimeout(r, 1700));
     setChestPhase('burst');
+    playCardExplosion(rarity);
     await new Promise((r) => setTimeout(r, 620));
 
     const newChests = progress.chestsToOpen.slice(1);
