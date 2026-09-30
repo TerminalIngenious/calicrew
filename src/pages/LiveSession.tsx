@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
-import type { Session, SetUnit } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus } from 'lucide-react';
+import type { Session, SetUnit, Exercise, ExerciseLog } from '../types';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CATEGORY_LABELS } from '../lib/exercises';
+import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
 import { sportCoXp } from '../lib/passes';
-import { sessionReps, getUnit, unitLabel, isTimeBased } from '../lib/stats';
+import { sessionReps, getUnit, unitLabel, isTimeBased, setWeight } from '../lib/stats';
 
 /** Pas d'incrément : 5 s pour un isométrique, 1 rep sinon. */
 function setStep(ex: { unit?: SetUnit }): number {
@@ -28,6 +29,7 @@ function formatTime(seconds: number): string {
 export default function LiveSession() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { refresh } = useUserSessions();
   const [session, setSession] = useState<Session | null>(null);
   const [expandedExercise, setExpandedExercise] = useState<number>(0);
@@ -51,6 +53,11 @@ export default function LiveSession() {
   const [amrapTimeUp, setAmrapTimeUp] = useState(false);
 
   // Confirmation terminer
+  const [showAddExercise, setShowAddExercise] = useState(false);
+  const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
+  const [pickedExercise, setPickedExercise] = useState<Exercise | null>(null);
+  const [newExSets, setNewExSets] = useState(4);
+  const [newExTarget, setNewExTarget] = useState(10);
   const [showFinish, setShowFinish] = useState(false);
   const [finished, setFinished] = useState(false);
 
@@ -150,6 +157,67 @@ export default function LiveSession() {
     });
   }
 
+  /** La charge peut évoluer d'une série à l'autre (montée en pyramide, dégressif). */
+  async function adjustSetWeight(exerciseIndex: number, setIndex: number, delta: number) {
+    if (!session || !id) return;
+    const updated = { ...session };
+    const ex = updated.exercises[exerciseIndex];
+    const set = ex.sets[setIndex];
+    set.weight = Math.max(0, Math.round((setWeight(ex, set) + delta) * 2) / 2);
+
+    setSession({ ...updated });
+    await updateDoc(doc(db, 'sessions', id), { exercises: updated.exercises });
+  }
+
+  async function openAddExercise() {
+    setPickedExercise(null);
+    setShowAddExercise(true);
+    if (!user || customExercises.length > 0) return;
+    try {
+      const snap = await getDocs(
+        query(collection(db, 'customExercises'), where('userId', '==', user.uid))
+      );
+      setCustomExercises(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Exercise)));
+    } catch {
+      setCustomExercises([]);
+    }
+  }
+
+  function pickExercise(ex: Exercise) {
+    setPickedExercise(ex);
+    setNewExSets(4);
+    setNewExTarget(ex.defaultUnit === 'seconds' ? 30 : 10);
+  }
+
+  /** Ajoute un exercice oublié au moment de préparer la séance. */
+  async function addExerciseToSession(exercise: Exercise, sets: number, target: number) {
+    if (!session || !id) return;
+    const log: ExerciseLog = {
+      exerciseId: exercise.id,
+      exerciseName: exercise.name,
+      exerciseCategory: exercise.category,
+      targetSets: sets,
+      targetReps: target,
+      sets: Array.from({ length: sets }, () => ({ reps: 0, completed: false })),
+    };
+    if (exercise.defaultUnit === 'seconds') log.unit = 'seconds';
+
+    const exercises = [...session.exercises, log];
+    setSession({ ...session, exercises });
+    setExpandedExercise(exercises.length - 1);
+    setShowAddExercise(false);
+    await updateDoc(doc(db, 'sessions', id), { exercises });
+  }
+
+  /** Retire un exercice ajouté par erreur. */
+  async function removeExerciseFromSession(exerciseIndex: number) {
+    if (!session || !id) return;
+    const exercises = session.exercises.filter((_, i) => i !== exerciseIndex);
+    setSession({ ...session, exercises });
+    setExpandedExercise(-1);
+    await updateDoc(doc(db, 'sessions', id), { exercises });
+  }
+
   async function addAmrapRound() {
     if (!session || !id) return;
     const newRounds = amrapRounds + 1;
@@ -219,6 +287,18 @@ export default function LiveSession() {
   }
 
   if (!session) return <div className="page loading"><Loader /></div>;
+
+  // Running, vélo et sport co ont besoin du formulaire distance/temps : on ne
+  // peut pas les ajouter à une séance en séries/reps déjà lancée.
+  const inSession = new Set(session.exercises.map((e) => e.exerciseId));
+  const addableExercises = [...DEFAULT_EXERCISES, ...customExercises].filter(
+    (e) =>
+      e.category !== 'running' &&
+      e.category !== 'velo' &&
+      e.category !== 'sportco' &&
+      !inSession.has(e.id)
+  );
+  const addableCategories = [...new Set(addableExercises.map((e) => e.category))];
 
   const totalSets = session.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
   const completedSets = session.exercises.reduce(
@@ -656,6 +736,15 @@ export default function LiveSession() {
                 {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </div>
 
+              {isExpanded && exCompleted === 0 && session.exercises.length > 1 && (
+                <button
+                  className="remove-exercise-btn"
+                  onClick={() => removeExerciseFromSession(exIdx)}
+                >
+                  <Trash2 size={13} /> Retirer cet exercice
+                </button>
+              )}
+
               {isExpanded && (
                 <div className="sets-grid">
                   {ex.sets.map((set, setIdx) => (
@@ -670,6 +759,13 @@ export default function LiveSession() {
                         <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, -setStep(ex))}>−</button>
                         <span className="reps-value">{set.reps}{isTimeBased(ex) ? ' s' : ''}</span>
                         <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, setStep(ex))}>+</button>
+                      </div>
+                      <div className="set-weight">
+                        <button className="set-weight-btn" onClick={() => adjustSetWeight(exIdx, setIdx, -0.5)}>−</button>
+                        <span className="set-weight-value">
+                          {setWeight(ex, set) > 0 ? `${setWeight(ex, set)} kg` : '—'}
+                        </span>
+                        <button className="set-weight-btn" onClick={() => adjustSetWeight(exIdx, setIdx, 0.5)}>+</button>
                       </div>
                       <button
                         className={`validate-btn ${set.completed ? 'done' : ''}`}
@@ -686,6 +782,75 @@ export default function LiveSession() {
           );
         })}
       </div>
+
+      <button className="add-exercise-live-btn" onClick={openAddExercise}>
+        <Plus size={16} /> Ajouter un exercice
+      </button>
+
+      {showAddExercise && (
+        <div className="modal-overlay" onClick={() => setShowAddExercise(false)}>
+          <div className="explore-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="explore-modal-header">
+              <h3>{pickedExercise ? pickedExercise.name : 'Ajouter un exercice'}</h3>
+              <button className="member-modal-close" onClick={() => setShowAddExercise(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="explore-results" style={{ padding: '0.5rem 1.25rem 1.5rem' }}>
+              {pickedExercise ? (
+                <>
+                  <button className="trade-back-btn" onClick={() => setPickedExercise(null)}>
+                    ← Retour
+                  </button>
+                  <div className="config-row">
+                    <span>Séries</span>
+                    <div className="stepper">
+                      <button onClick={() => setNewExSets((n) => Math.max(1, n - 1))}><Minus size={16} /></button>
+                      <span>{newExSets}</span>
+                      <button onClick={() => setNewExSets((n) => n + 1)}><Plus size={16} /></button>
+                    </div>
+                  </div>
+                  <div className="config-row">
+                    <span>{pickedExercise.defaultUnit === 'seconds' ? 'Secondes / série' : 'Reps / série'}</span>
+                    <div className="stepper">
+                      <button onClick={() => setNewExTarget((n) => Math.max(1, n - (pickedExercise.defaultUnit === 'seconds' ? 5 : 1)))}><Minus size={16} /></button>
+                      <span>{newExTarget}{pickedExercise.defaultUnit === 'seconds' ? ' s' : ''}</span>
+                      <button onClick={() => setNewExTarget((n) => n + (pickedExercise.defaultUnit === 'seconds' ? 5 : 1))}><Plus size={16} /></button>
+                    </div>
+                  </div>
+                  <button
+                    className="primary-btn"
+                    style={{ marginTop: '1rem', width: '100%' }}
+                    onClick={() => addExerciseToSession(pickedExercise, newExSets, newExTarget)}
+                  >
+                    Ajouter à la séance
+                  </button>
+                </>
+              ) : (
+                addableCategories.map((cat) => (
+                  <div key={cat} className="category-section">
+                    <h3 className="category-title">{CATEGORY_LABELS[cat]}</h3>
+                    <div className="exercise-grid">
+                      {addableExercises
+                        .filter((e) => e.category === cat)
+                        .map((ex) => (
+                          <button
+                            key={ex.id}
+                            className="exercise-chip"
+                            onClick={() => pickExercise(ex)}
+                          >
+                            {ex.name}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <button className="finish-btn floating-btn" onClick={() => setShowFinish(true)}>
         Terminer la séance

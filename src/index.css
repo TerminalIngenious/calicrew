@@ -5477,3 +5477,90 @@ body {
   font-size: 0.68rem;
   color: var(--text-muted);
 }
+
+/* ── Poids par série & ajout d'exercice en séance ── */
+
+.set-weight {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  padding: 0.25rem 0.3rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.set-weight-btn {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.set-weight-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.set-weight-value {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.set-item.completed .set-weight-value {
+  color: var(--accent);
+}
+
+.add-exercise-live-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin: 0.25rem 0 1rem;
+  padding: 0.75rem;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-exercise-live-btn:active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.remove-exercise-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0 0.5rem;
+  padding: 0.3rem 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.remove-exercise-btn:active {
+  color: #ff6b6b;
+}

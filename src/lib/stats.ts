@@ -50,6 +50,15 @@ export function totalSeconds(sessions: Pick<Session, 'exercises'>[]): number {
   return sessions.reduce((sum, s) => sum + sessionSeconds(s), 0);
 }
 
+/**
+ * Charge effective d'une série : celle propre à la série si elle a été ajustée
+ * en cours de séance, sinon celle définie pour l'exercice.
+ */
+export function setWeight(ex: ExerciseLog, set: { weight?: number }): number {
+  if (set.weight !== undefined) return set.weight;
+  return ex.weighted ? ex.weight || 0 : 0;
+}
+
 /** Séries complétées, indépendamment de l'unité. */
 export function sessionSets(session: Pick<Session, 'exercises'>): number {
   return (session.exercises || []).reduce(
@@ -122,19 +131,21 @@ export function computePersonalRecords(sessions: Session[]): PersonalRecord[] {
           if (!pr.bestDistance) pr.date = session.date;
         }
       } else {
-        const best = (ex.sets || []).reduce(
-          (max, set) => (set.completed && set.reps > max ? set.reps : max),
-          0
-        );
-        if (best > pr.bestSet) {
-          pr.bestSet = best;
-          pr.bestSetWeight = ex.weighted ? ex.weight : undefined;
-          pr.unit = getUnit(ex);
-          pr.date = session.date;
-        }
-        if (ex.weighted && (ex.weight || 0) > (pr.maxWeight || 0)) {
-          pr.maxWeight = ex.weight;
-          pr.maxWeightType = ex.weightType;
+        // La charge peut varier d'une série à l'autre : on raisonne série par série.
+        for (const set of ex.sets || []) {
+          if (!set.completed) continue;
+          const weight = setWeight(ex, set);
+
+          if (set.reps > pr.bestSet) {
+            pr.bestSet = set.reps;
+            pr.bestSetWeight = weight > 0 ? weight : undefined;
+            pr.unit = getUnit(ex);
+            pr.date = session.date;
+          }
+          if (weight > (pr.maxWeight || 0)) {
+            pr.maxWeight = weight;
+            pr.maxWeightType = ex.weightType;
+          }
         }
       }
 

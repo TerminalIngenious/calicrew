@@ -15,6 +15,8 @@ export interface SetLog {
   /** Nombre de répétitions, ou de secondes si l'exercice est en unité 'seconds'. */
   reps: number;
   completed: boolean;
+  /** Charge de cette série. Absent = celle de l'exercice, la charge peut varier en cours de séance. */
+  weight?: number;
 }
 
 export type WeightType = 'body' | 'halteres' | 'barre';
