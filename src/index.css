@@ -5664,3 +5664,12 @@ body {
   opacity: 0.3;
   cursor: default;
 }
+
+/* Paliers à coffre garanti : ressortent dans la liste des 100 niveaux */
+.bp-track-row.special {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.bp-track-row.special .bp-track-chest span {
+  font-weight: 700;
+}

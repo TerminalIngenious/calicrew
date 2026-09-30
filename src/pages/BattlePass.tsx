@@ -356,7 +356,7 @@ export default function BattlePass() {
         <button className={`bp-tab ${tab === 'pass' ? 'active' : ''}`} onClick={() => setTab('pass')}>
           <Trophy size={15} />
           <span>Pass</span>
-          <span className="bp-tab-badge">{levelInfo.level}/30</span>
+          <span className="bp-tab-badge">{levelInfo.level}/{season.passLevels.length}</span>
         </button>
       </div>
 
@@ -582,12 +582,9 @@ export default function BattlePass() {
               </h3>
               <div className="bp-chest-row">
                 {progress.chestsToOpen.map((chest, i) => {
-                  const chestColor = chest.rarity === 'epique' ? RARITY_COLORS.epique
-                    : chest.rarity === 'rare' ? RARITY_COLORS.rare
-                    : 'var(--accent)';
-                  const chestLabel = chest.rarity === 'epique' ? 'Épique'
-                    : chest.rarity === 'rare' ? 'Rare'
-                    : 'Ouvrir';
+                  const special = chest.rarity !== 'commune';
+                  const chestColor = special ? RARITY_COLORS[chest.rarity] : 'var(--accent)';
+                  const chestLabel = special ? RARITY_LABELS[chest.rarity] : 'Ouvrir';
                   return (
                     <button
                       key={i}
@@ -667,15 +664,17 @@ export default function BattlePass() {
             const reached = levelInfo.level >= lvl.level;
             const isCurrent = levelInfo.level === lvl.level - 1;
 
-            const lvlChestColor = lvl.freeChest === 'epique' ? RARITY_COLORS.epique
-              : lvl.freeChest === 'rare' ? RARITY_COLORS.rare
-              : undefined;
-            const lvlChestLabel = lvl.freeChest === 'epique' ? 'Coffre Épique'
-              : lvl.freeChest === 'rare' ? 'Coffre Rare'
+            const special = lvl.freeChest && lvl.freeChest !== 'commune';
+            const lvlChestColor = special ? RARITY_COLORS[lvl.freeChest!] : undefined;
+            const lvlChestLabel = special
+              ? `Coffre ${RARITY_LABELS[lvl.freeChest!]}`
               : 'Coffre';
 
             return (
-              <div key={lvl.level} className={`bp-track-row ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''}`}>
+              <div
+                key={lvl.level}
+                className={`bp-track-row ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''} ${special ? 'special' : ''}`}
+              >
                 <div className="bp-track-col-lvl">
                   <span className="bp-track-lvl-num">{reached ? <Check size={12} /> : lvl.level}</span>
                 </div>

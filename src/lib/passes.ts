@@ -1,4 +1,4 @@
-import type { Season, PassLevel, Quest, SportType, Session } from '../types';
+import type { Season, PassLevel, Quest, SportType, Session, CardRarity } from '../types';
 import { exerciseReps, exerciseSeconds } from './stats';
 
 // ── Ancien système de quêtes (fallback) ──
@@ -381,13 +381,52 @@ export function sportCoXp(seconds: number): number {
 
 // ── Levels ──
 
+export const PASS_LEVELS = 100;
+
+/**
+ * Paliers garantis. Tous les autres niveaux donnent un coffre classique.
+ * 17 paliers sur 100 : assez pour jalonner la progression sans dévaluer
+ * les raretés hautes.
+ */
+const SPECIAL_CHESTS: Record<number, CardRarity> = {
+  10: 'rare',
+  20: 'rare',
+  25: 'epique',
+  30: 'rare',
+  40: 'rare',
+  45: 'epique',
+  50: 'legendaire',
+  55: 'rare',
+  60: 'rare',
+  65: 'epique',
+  70: 'rare',
+  75: 'epique',
+  80: 'legendaire',
+  85: 'rare',
+  90: 'epique',
+  95: 'rare',
+  100: 'historique',
+};
+
+/**
+ * Coût d'un niveau. Les 24 premiers gardent leur coût d'origine pour que les
+ * joueurs en cours de pass ne voient pas leur niveau bouger, puis la courbe
+ * monte doucement. Total : environ 24 500 XP pour atteindre le niveau 100.
+ */
+function xpForLevel(level: number): number {
+  if (level <= 24) return 200;
+  if (level <= 50) return 220;
+  if (level <= 75) return 260;
+  return 300;
+}
+
 function buildLevels(): PassLevel[] {
   const levels: PassLevel[] = [];
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= PASS_LEVELS; i++) {
     levels.push({
       level: i,
-      xpRequired: i >= 25 ? 400 : 200,
-      freeChest: i === 30 ? 'epique' : i === 15 ? 'rare' : 'commune',
+      xpRequired: xpForLevel(i),
+      freeChest: SPECIAL_CHESTS[i] || 'commune',
     });
   }
   return levels;
