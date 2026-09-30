@@ -5411,3 +5411,69 @@ body {
   font-weight: 700;
   color: var(--text-muted);
 }
+
+/* ── Records personnels ── */
+
+.pr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.pr-group-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.pr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.4rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.pr-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.pr-row-name {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pr-row-detail {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.pr-row-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.pr-row-number {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.pr-row-unit {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}

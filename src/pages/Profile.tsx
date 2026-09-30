@@ -9,6 +9,7 @@ import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
 import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
 import RankBadgeIcon from '../components/RankBadgeIcon';
+import PersonalRecords from '../components/PersonalRecords';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -285,6 +286,8 @@ export default function Profile() {
           </div>
         )}
       </section>
+
+      <PersonalRecords sessions={sessions} />
 
       {programs.length > 0 && (
         <section className="section">
