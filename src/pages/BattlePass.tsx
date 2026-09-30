@@ -6,7 +6,7 @@ import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
 import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
-import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection } from '../types';
+import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
@@ -34,7 +34,9 @@ export default function BattlePass() {
   const [loading, setLoading] = useState(true);
   const [openedCard, setOpenedCard] = useState<Card | null>(null);
   const [chestOpening, setChestOpening] = useState(false);
-  const [chestPhase, setChestPhase] = useState<'idle' | 'shake' | 'burst' | 'reveal'>('idle');
+  const [chestPhase, setChestPhase] = useState<'idle' | 'spin' | 'burst'>('idle');
+  /** Rareté de la carte tirée : colore la rotation avant même la révélation. */
+  const [spinRarity, setSpinRarity] = useState<CardRarity>('commune');
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
 
   const [selectedSports, setSelectedSports] = useState<SportType[]>([]);
@@ -237,16 +239,19 @@ export default function BattlePass() {
 
   async function openChest() {
     if (progress.chestsToOpen.length === 0 || !user || !season) return;
-    setChestOpening(true);
-    setChestPhase('shake');
-
     const chest = progress.chestsToOpen[0];
     const pool = getCardsBySet(chest.pool === 'current' ? season.id : chest.pool);
     const card = rollCard(pool, progress.ownedCards, chest.rarity === 'commune' ? undefined : chest.rarity);
 
-    await new Promise((r) => setTimeout(r, 1200));
+    // La carte est tirée avant l'animation : sa rareté peut dépasser celle
+    // garantie par le coffre, et c'est bien elle qui doit colorer la rotation.
+    setSpinRarity(card?.rarity ?? chest.rarity);
+    setChestOpening(true);
+    setChestPhase('spin');
+
+    await new Promise((r) => setTimeout(r, 1700));
     setChestPhase('burst');
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 620));
 
     const newChests = progress.chestsToOpen.slice(1);
     if (card) {
@@ -255,7 +260,6 @@ export default function BattlePass() {
       const updated: UserProgress = { ...progress, chestsToOpen: newChests, ownedCards: newOwned };
       setProgress(updated);
       await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
-      setChestPhase('reveal');
       setOpenedCard(card);
     } else {
       const updated: UserProgress = { ...progress, chestsToOpen: newChests };
@@ -352,16 +356,27 @@ export default function BattlePass() {
 
       {chestOpening && (
         <div className="modal-overlay chest-opening-overlay">
-          <div className={`chest-opening-box ${chestPhase}`}>
+          <div
+            className={`chest-opening-box ${chestPhase}`}
+            style={{ '--rarity': RARITY_COLORS[spinRarity] } as React.CSSProperties}
+          >
+            <div className="chest-halo" />
+            <div className="chest-shockwave" />
+            <div className="chest-flash" />
+
             <div className="chest-particles">
-              {Array.from({ length: 12 }).map((_, i) => (
+              {Array.from({ length: 18 }).map((_, i) => (
                 <span key={i} className="chest-particle" style={{ '--i': i } as React.CSSProperties} />
               ))}
             </div>
-            <div className="chest-icon-wrap">
-              <Package size={64} />
+
+            <div className="chest-spin-card">
+              <div className="chest-spin-face">
+                <Package size={46} />
+              </div>
             </div>
-            {chestPhase === 'shake' && <p className="chest-opening-text">Ouverture...</p>}
+
+            {chestPhase === 'spin' && <p className="chest-opening-text">Ouverture...</p>}
           </div>
         </div>
       )}
