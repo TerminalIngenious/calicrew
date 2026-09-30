@@ -186,6 +186,25 @@ export interface TradeOffer {
   createdAt: number;
 }
 
+// ── Badges de classement ──
+
+export type RankCategory = 'reps' | 'variety' | 'time';
+
+export interface RankBadge {
+  /** `${monthKey}-${category}-${rank}` : sert à ne pas attribuer deux fois le même. */
+  id: string;
+  category: RankCategory;
+  /** 0 = 1er, 1 = 2e, 2 = 3e. */
+  rank: number;
+  /** Mois gagné, au format 'YYYY-MM'. */
+  monthKey: string;
+  seasonId: string;
+  /** Figé au moment du gain : une saison passée peut être retirée du code. */
+  seasonName: string;
+  groupName: string;
+  earnedAt: number;
+}
+
 // ── Weekly Quests ──
 
 export type SportType = 'calisthenics' | 'musculation' | 'running';
@@ -210,4 +229,5 @@ export interface UserProgress {
   avatarCardId?: string;
   weeklyQuestSelection?: WeeklyQuestSelection;
   monthlyRewardsClaimed?: string;
+  badges?: RankBadge[];
 }

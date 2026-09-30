@@ -5269,3 +5269,145 @@ body {
   cursor: default;
 }
 
+
+/* ── Badges de classement ── */
+
+.rank-badge {
+  position: relative;
+  width: var(--badge-size);
+  height: var(--badge-size);
+  flex-shrink: 0;
+}
+
+/* Monture métallique : la couleur porte la place du podium. */
+.rank-badge-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(145deg, var(--metal-from) 0%, var(--metal-mid) 45%, var(--metal-to) 100%);
+  filter: drop-shadow(0 3px 10px var(--metal-glow));
+}
+
+/* Cœur coloré : la couleur et l'icône portent le classement. */
+.rank-badge-core {
+  width: 78%;
+  height: 78%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(160deg, var(--cat-from) 0%, var(--cat-to) 100%);
+  color: #fff;
+}
+
+.rank-badge-core svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+.rank-badge-rank {
+  position: absolute;
+  right: -2px;
+  bottom: 2px;
+  min-width: 42%;
+  padding: 1px 0;
+  border-radius: 999px;
+  background: linear-gradient(145deg, var(--metal-from), var(--metal-to));
+  color: #2a2013;
+  font-size: calc(var(--badge-size) * 0.24);
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
+  border: 1.5px solid var(--bg-card);
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.85rem;
+}
+
+.badge-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.4rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  cursor: pointer;
+}
+
+.badge-cell-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.badge-cell-season {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* Détail d'un badge */
+.badge-modal {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.badge-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.badge-modal-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.badge-modal-metal {
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: linear-gradient(145deg, var(--metal-from, #ccc), var(--metal-to, #888));
+  color: #2a2013;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+/* Badges gagnés, affichés dans la modale de fin de mois */
+.rewards-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.rewards-badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}

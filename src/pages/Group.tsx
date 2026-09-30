@@ -17,7 +17,9 @@ import { db } from '../lib/firebase';
 import { getCardsBySet, getCardById, getCardDisplayName, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
-import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card, CardRarity } from '../types';
+import { makeBadgeId, badgeTitle } from '../lib/badges';
+import RankBadgeIcon from '../components/RankBadgeIcon';
+import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeOffer, Card, CardRarity, RankBadge, RankCategory } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -27,7 +29,7 @@ import Loader from '../components/Loader';
 type SortMode = 'reps' | 'variety' | 'time';
 
 interface MonthlyRanking {
-  category: 'reps' | 'variety' | 'time';
+  category: RankCategory;
   categoryLabel: string;
   top3: { uid: string; displayName: string; value: string; rank: number; chestRarity: CardRarity }[];
 }
@@ -87,6 +89,7 @@ export default function Group() {
   const [showRewards, setShowRewards] = useState(false);
   const [monthlyRankings, setMonthlyRankings] = useState<MonthlyRanking[]>([]);
   const [myRewards, setMyRewards] = useState<CardRarity[]>([]);
+  const [myBadges, setMyBadges] = useState<RankBadge[]>([]);
   const [claimingRewards, setClaimingRewards] = useState(false);
   const [rewardsClaimed, setRewardsClaimed] = useState(false);
 
@@ -250,38 +253,61 @@ export default function Group() {
 
     const rankings: MonthlyRanking[] = [];
     const rewards: CardRarity[] = [];
+    const badges: RankBadge[] = [];
+    const ownedBadgeIds = new Set((progress?.badges || []).map((b) => b.id));
 
-    const byReps = [...entries].filter((e) => e.totalReps > 0).sort((a, b) => b.totalReps - a.totalReps);
-    if (byReps.length > 0) {
-      const top3 = byReps.slice(0, 3).map((e, i) => ({
-        uid: e.uid, displayName: e.displayName, value: `${e.totalReps} reps`, rank: i, chestRarity: RANK_CHEST[i],
+    function addRanking(
+      category: RankCategory,
+      categoryLabel: string,
+      sorted: typeof entries,
+      format: (e: (typeof entries)[number]) => string
+    ) {
+      if (sorted.length === 0) return;
+      const top3 = sorted.slice(0, 3).map((e, i) => ({
+        uid: e.uid, displayName: e.displayName, value: format(e), rank: i, chestRarity: RANK_CHEST[i],
       }));
-      rankings.push({ category: 'reps', categoryLabel: 'Reps', top3 });
-      top3.forEach((t) => { if (t.uid === user.uid) rewards.push(t.chestRarity); });
+      rankings.push({ category, categoryLabel, top3 });
+
+      for (const t of top3) {
+        if (t.uid !== user!.uid) continue;
+        rewards.push(t.chestRarity);
+        const id = makeBadgeId(lastMonthKey, category, t.rank);
+        if (ownedBadgeIds.has(id)) continue;
+        badges.push({
+          id,
+          category,
+          rank: t.rank,
+          monthKey: lastMonthKey,
+          seasonId: season?.id || '',
+          seasonName: season?.name || 'Hors saison',
+          groupName: group.name,
+          earnedAt: Date.now(),
+        });
+      }
     }
 
-    const byVariety = [...entries].filter((e) => e.exerciseVariety > 0).sort((a, b) => b.exerciseVariety - a.exerciseVariety);
-    if (byVariety.length > 0) {
-      const top3 = byVariety.slice(0, 3).map((e, i) => ({
-        uid: e.uid, displayName: e.displayName, value: `${e.exerciseVariety} exos`, rank: i, chestRarity: RANK_CHEST[i],
-      }));
-      rankings.push({ category: 'variety', categoryLabel: 'Variété', top3 });
-      top3.forEach((t) => { if (t.uid === user.uid) rewards.push(t.chestRarity); });
-    }
+    const fmtDur = (s: number) => {
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`;
+    };
 
-    const byTime = [...entries].filter((e) => e.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration);
-    if (byTime.length > 0) {
-      const fmtDur = (s: number) => { const h = Math.floor(s / 3600); const m = Math.floor((s % 3600) / 60); return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`; };
-      const top3 = byTime.slice(0, 3).map((e, i) => ({
-        uid: e.uid, displayName: e.displayName, value: fmtDur(e.totalDuration), rank: i, chestRarity: RANK_CHEST[i],
-      }));
-      rankings.push({ category: 'time', categoryLabel: 'Temps', top3 });
-      top3.forEach((t) => { if (t.uid === user.uid) rewards.push(t.chestRarity); });
-    }
+    addRanking('reps', 'Reps',
+      [...entries].filter((e) => e.totalReps > 0).sort((a, b) => b.totalReps - a.totalReps),
+      (e) => `${e.totalReps} reps`);
+
+    addRanking('variety', 'Variété',
+      [...entries].filter((e) => e.exerciseVariety > 0).sort((a, b) => b.exerciseVariety - a.exerciseVariety),
+      (e) => `${e.exerciseVariety} exos`);
+
+    addRanking('time', 'Temps',
+      [...entries].filter((e) => e.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration),
+      (e) => fmtDur(e.totalDuration));
 
     if (rankings.length > 0) {
       setMonthlyRankings(rankings);
       setMyRewards(rewards);
+      setMyBadges(badges);
       setShowRewards(true);
     } else if (progress) {
       await updateDoc(doc(db, 'userProgress', user.uid), { monthlyRewardsClaimed: lastMonthKey });
@@ -299,8 +325,15 @@ export default function Group() {
     const snap = await getDoc(progressRef);
     if (snap.exists()) {
       const current = snap.data() as UserProgress;
+      // Relecture des badges déjà en base : le document a pu changer depuis
+      // l'ouverture de la modale, et un badge ne doit jamais être dupliqué.
+      const existing = current.badges || [];
+      const existingIds = new Set(existing.map((b) => b.id));
+      const toAdd = myBadges.filter((b) => !existingIds.has(b.id));
+
       await updateDoc(progressRef, {
         chestsToOpen: [...(current.chestsToOpen || []), ...newChests],
+        badges: [...existing, ...toAdd],
         monthlyRewardsClaimed: lastMonthKey,
       });
     }
@@ -1234,6 +1267,21 @@ export default function Group() {
                     </div>
                   ))}
                 </div>
+                {myBadges.length > 0 && (
+                  <>
+                    <p className="rewards-claim-text">
+                      Et {myBadges.length} badge{myBadges.length > 1 ? 's' : ''} pour ton profil
+                    </p>
+                    <div className="rewards-badges">
+                      {myBadges.map((badge) => (
+                        <div key={badge.id} className="rewards-badge-item">
+                          <RankBadgeIcon badge={badge} size={64} />
+                          <span>{badgeTitle(badge)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
                 <button className="primary-btn" onClick={claimMonthlyRewards} disabled={claimingRewards}>
                   {claimingRewards ? 'Récupération...' : 'Récupérer'}
                 </button>
