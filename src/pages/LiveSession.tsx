@@ -169,6 +169,37 @@ export default function LiveSession() {
     await updateDoc(doc(db, 'sessions', id), { exercises: updated.exercises });
   }
 
+  /** Ajoute une série, en reprenant la charge de la dernière. */
+  async function addSet(exerciseIndex: number) {
+    if (!session || !id) return;
+    const updated = { ...session };
+    const ex = updated.exercises[exerciseIndex];
+    const last = ex.sets[ex.sets.length - 1];
+
+    ex.sets = [...ex.sets, { reps: 0, completed: false, ...(last ? { weight: setWeight(ex, last) } : {}) }];
+    ex.targetSets = ex.sets.length;
+
+    setSession({ ...updated });
+    await updateDoc(doc(db, 'sessions', id), { exercises: updated.exercises });
+  }
+
+  /**
+   * Retire la dernière série. Refusée si elle est validée : on ne supprime
+   * jamais une performance déjà enregistrée sans que ce soit explicite.
+   */
+  async function removeSet(exerciseIndex: number) {
+    if (!session || !id) return;
+    const updated = { ...session };
+    const ex = updated.exercises[exerciseIndex];
+    if (ex.sets.length <= 1 || ex.sets[ex.sets.length - 1].completed) return;
+
+    ex.sets = ex.sets.slice(0, -1);
+    ex.targetSets = ex.sets.length;
+
+    setSession({ ...updated });
+    await updateDoc(doc(db, 'sessions', id), { exercises: updated.exercises });
+  }
+
   async function openAddExercise() {
     setPickedExercise(null);
     setShowAddExercise(true);
@@ -778,6 +809,28 @@ export default function LiveSession() {
                   ))}
                 </div>
               )}
+
+              {isExpanded && (() => {
+                const lastDone = ex.sets[ex.sets.length - 1]?.completed;
+                return (
+                  <div className="set-count-row">
+                    <span className="set-count-label">Séries</span>
+                    <div className="stepper">
+                      <button
+                        onClick={() => removeSet(exIdx)}
+                        disabled={ex.sets.length <= 1 || lastDone}
+                        title={lastDone ? 'Dévalide la dernière série pour la retirer' : undefined}
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <span>{ex.sets.length}</span>
+                      <button onClick={() => addSet(exIdx)}>
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}

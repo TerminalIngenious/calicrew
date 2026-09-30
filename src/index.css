@@ -5564,3 +5564,25 @@ body {
 .remove-exercise-btn:active {
   color: #ff6b6b;
 }
+
+/* Nombre de séries ajustable en cours de séance */
+.set-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.set-count-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.set-count-row .stepper button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
