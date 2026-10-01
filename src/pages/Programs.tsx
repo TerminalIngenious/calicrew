@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
@@ -10,6 +11,7 @@ import Loader from '../components/Loader';
 
 export default function Programs() {
   const { user, displayName: myName } = useAuth();
+  const navigate = useNavigate();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -251,7 +253,11 @@ export default function Programs() {
   return (
     <div className="page">
       <header className="page-header">
+        <button className="icon-btn" onClick={() => navigate('/')}>
+          <ArrowLeft size={20} />
+        </button>
         <h1>Mes programmes</h1>
+        <div />
       </header>
 
       {programs.length === 0 ? (

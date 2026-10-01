@@ -13,7 +13,9 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Loader from '../components/Loader';
-import { exerciseReps, exerciseTotal, getUnit, unitLabel } from '../lib/stats';
+import PersonalRecords from '../components/PersonalRecords';
+import { Trophy, Zap, Clock, Dumbbell } from 'lucide-react';
+import { exerciseReps, exerciseTotal, getUnit, unitLabel, totalReps, sessionSets } from '../lib/stats';
 
 export default function Progress() {
   const { sessions, loading } = useUserSessions();
@@ -23,6 +25,26 @@ export default function Progress() {
     () => [...sessions].sort((a, b) => a.createdAt - b.createdAt),
     [sessions]
   );
+
+  // Totaux all-time, rapatriés depuis le profil : ils relèvent du suivi, pas
+  // de l'identité, et n'avaient rien à faire à côté de l'avatar.
+  const completed = useMemo(() => sessions.filter((s) => s.completed), [sessions]);
+  const allTimeReps = useMemo(() => totalReps(completed), [completed]);
+  const allTimeDuration = useMemo(
+    () => completed.reduce((sum, s) => sum + (s.duration || 0), 0),
+    [completed]
+  );
+  const allTimeSets = useMemo(
+    () => completed.reduce((sum, s) => sum + sessionSets(s), 0),
+    [completed]
+  );
+
+  function formatDuration(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (h > 0) return `${h}h${String(m).padStart(2, '0')}`;
+    return `${m} min`;
+  }
 
   const exerciseNames = useMemo(
     () => [...new Set(sortedSessions.flatMap((s) => s.exercises.map((e) => e.exerciseName)))],
@@ -82,6 +104,44 @@ export default function Progress() {
         <div className="page loading"><Loader /></div>
       ) : (
         <>
+          <section className="section">
+            <h3>Total <span className="stats-period-inline">all-time</span></h3>
+            <div className="profile-stats">
+              <div className="profile-stat">
+                <Trophy size={18} className="gold" />
+                <div>
+                  <span className="profile-stat-value">{completed.length}</span>
+                  <span className="profile-stat-label">Séances</span>
+                </div>
+              </div>
+              <div className="profile-stat">
+                <Zap size={18} style={{ color: 'var(--accent)' }} />
+                <div>
+                  <span className="profile-stat-value">{allTimeReps}</span>
+                  <span className="profile-stat-label">Reps</span>
+                </div>
+              </div>
+              <div className="profile-stat">
+                <Clock size={18} style={{ color: 'var(--accent-green)' }} />
+                <div>
+                  <span className="profile-stat-value">{formatDuration(allTimeDuration)}</span>
+                  <span className="profile-stat-label">Temps</span>
+                </div>
+              </div>
+              <div className="profile-stat">
+                <Dumbbell size={18} style={{ color: 'var(--accent-light)' }} />
+                <div>
+                  <span className="profile-stat-value">{allTimeSets}</span>
+                  <span className="profile-stat-label">Séries</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <PersonalRecords sessions={sessions} />
+
+          <h3 className="progress-charts-title">Graphiques</h3>
+
           <div className="filter-bar">
             <select
               value={selectedExercise}

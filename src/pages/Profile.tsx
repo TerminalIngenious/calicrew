@@ -11,13 +11,13 @@ import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/bad
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import PersonalRecords from '../components/PersonalRecords';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award, TrendingUp, ChevronRight, LogOut } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
 
 export default function Profile() {
-  const { user, displayName: myName, updateDisplayName } = useAuth();
+  const { user, displayName: myName, updateDisplayName, signOut } = useAuth();
   const navigate = useNavigate();
   const { uid } = useParams<{ uid: string }>();
   const { sessions: ownSessions } = useUserSessions();
@@ -248,6 +248,20 @@ export default function Profile() {
         </div>
       )}
 
+      {isOwnProfile && (
+        <button className="profile-link-card" onClick={() => navigate('/progress')}>
+          <TrendingUp size={18} />
+          <div>
+            <span className="profile-link-title">Ma progression</span>
+            <span className="profile-link-sub">Totaux, records par exercice et graphiques</span>
+          </div>
+          <ChevronRight size={18} />
+        </button>
+      )}
+
+      {/* Sur son propre profil, ces blocs vivent dans l'onglet Progrès. On les
+          garde ici pour les autres joueurs, qui n'y ont pas accès autrement. */}
+      {!isOwnProfile && (
       <section className="section">
         <h3>Records <span className="stats-period-inline">all-time</span></h3>
         <div className="profile-stats">
@@ -286,8 +300,9 @@ export default function Profile() {
           </div>
         )}
       </section>
+      )}
 
-      <PersonalRecords sessions={sessions} />
+      {!isOwnProfile && <PersonalRecords sessions={sessions} />}
 
       {programs.length > 0 && (
         <section className="section">
@@ -375,7 +390,14 @@ export default function Profile() {
       )}
 
       <section className="section">
-        <h3>Cartes ({uniqueCards.length})</h3>
+        <div className="section-head-row">
+          <h3>Cartes ({uniqueCards.length})</h3>
+          {isOwnProfile && (
+            <button className="section-head-link" onClick={() => navigate('/collection')}>
+              Collection <ChevronRight size={14} />
+            </button>
+          )}
+        </div>
         {uniqueCards.length === 0 ? (
           <p className="empty">Aucune carte pour le moment</p>
         ) : (
@@ -411,6 +433,16 @@ export default function Profile() {
           count={ownedCards[selectedCard.id] || 0}
           onClose={() => setSelectedCard(null)}
         />
+      )}
+
+      {/* Déplacée depuis l'en-tête de l'Accueil : une action de compte n'a pas
+          à être accessible en un clic depuis l'écran principal. */}
+      {isOwnProfile && (
+        <div className="group-actions" style={{ marginTop: '1.5rem', justifyContent: 'center' }}>
+          <button className="leave-btn" onClick={() => signOut()}>
+            <LogOut size={14} /> Se déconnecter
+          </button>
+        </div>
       )}
 
       <BottomNav />

@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCardsBySet, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import type { UserProgress, Card } from '../types';
-import { Layers, Info, X } from 'lucide-react';
+import { Layers, Info, X, ArrowLeft } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
@@ -20,6 +21,7 @@ const DROP_RATES = [
 
 export default function Collection() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
@@ -49,6 +51,9 @@ export default function Collection() {
   return (
     <div className="page">
       <header className="page-header">
+        <button className="icon-btn" onClick={() => navigate('/profile')}>
+          <ArrowLeft size={20} />
+        </button>
         <h1>{season ? season.theme : 'Collection'}</h1>
         <button className="info-btn" onClick={() => setShowInfo(true)}>
           <Info size={18} />

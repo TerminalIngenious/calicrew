@@ -5673,3 +5673,97 @@ body {
 .bp-track-row.special .bp-track-chest span {
   font-weight: 700;
 }
+
+/* ── Ergonomie : liens de navigation entre pages ── */
+
+.home-cta {
+  width: 100%;
+}
+
+.home-secondary-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.8rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.87rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.home-secondary-cta span {
+  flex: 1;
+  text-align: left;
+}
+
+.home-secondary-cta:active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.profile-link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.profile-link-card > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-link-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-link-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.section-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.section-head-row h3 {
+  margin: 0;
+}
+
+.section-head-link {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: none;
+  padding: 0.2rem 0;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.progress-charts-title {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 0.95rem;
+}

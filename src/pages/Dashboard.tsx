@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, LogOut, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
+import { Plus, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -45,7 +45,7 @@ const UPDATES = [
 ];
 
 export default function Dashboard() {
-  const { user, displayName: myName, signOut } = useAuth();
+  const { user, displayName: myName } = useAuth();
   const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
   const [showUpdates, setShowUpdates] = useState(false);
@@ -113,9 +113,6 @@ export default function Dashboard() {
             {hasUnread && <span className="notif-dot" />}
           </button>
           {user && <NotificationSettings uid={user.uid} />}
-          <button className="icon-btn" onClick={() => signOut()}>
-            <LogOut size={20} />
-          </button>
         </div>
       </header>
 
@@ -151,14 +148,14 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="primary-btn" style={{ flex: 1 }} onClick={() => navigate('/session/new')}>
-              <Plus size={20} /> Nouvelle séance
-            </button>
-            <button className="secondary-btn" style={{ flex: 0 }} onClick={() => navigate('/programs')}>
-              <ClipboardList size={20} />
-            </button>
-          </div>
+          <button className="primary-btn home-cta" onClick={() => navigate('/session/new')}>
+            <Plus size={20} /> Nouvelle séance
+          </button>
+          <button className="home-secondary-cta" onClick={() => navigate('/programs')}>
+            <ClipboardList size={18} />
+            <span>Partir d'un programme</span>
+            <ChevronRight size={16} />
+          </button>
 
           <section className="section">
             <h2>Dernières séances</h2>
