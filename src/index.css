@@ -5816,3 +5816,38 @@ body {
 .settings-row-danger .settings-row-label {
   color: #ff6b6b;
 }
+
+/* ── Sous-onglets du groupe ── */
+
+.group-tabs {
+  margin-bottom: 1rem;
+}
+
+/* Le badge chef vivait dans la liste Membres, supprimée car elle
+   redoublait le classement : il se lit maintenant sur la ligne du joueur. */
+.leaderboard-crown {
+  margin-left: 0.3rem;
+  color: #ffd700;
+  vertical-align: -1px;
+}
+
+.member-modal-chef-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.65rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: #ffd700;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.member-modal-chef-btn:active {
+  border-color: #ffd700;
+}

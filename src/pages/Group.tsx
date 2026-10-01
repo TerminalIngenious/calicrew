@@ -78,7 +78,6 @@ export default function Group() {
   const [sortMode, setSortMode] = useState<SortMode>('reps');
   const [loading, setLoading] = useState(true);
   const [pendingNames, setPendingNames] = useState<Map<string, string>>(new Map());
-  const [showMembers, setShowMembers] = useState(false);
   const [selectedMember, setSelectedMember] = useState<LeaderboardEntry | null>(null);
   const [showExplore, setShowExplore] = useState(false);
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
@@ -94,7 +93,7 @@ export default function Group() {
   const [rewardsClaimed, setRewardsClaimed] = useState(false);
 
   // Trade states
-  const [showTrades, setShowTrades] = useState(false);
+  const [groupTab, setGroupTab] = useState<'classement' | 'echanges'>('classement');
   const [trades, setTrades] = useState<TradeOffer[]>([]);
   const [showNewTrade, setShowNewTrade] = useState(false);
   const [tradeStep, setTradeStep] = useState<'member' | 'myCard' | 'theirCard' | 'confirm'>('member');
@@ -119,6 +118,7 @@ export default function Group() {
         const current = selectedGroup ? g.find((gr) => gr.id === selectedGroup.id) || g[0] : g[0];
         setSelectedGroup(current);
         await loadLeaderboard(current);
+        await loadTrades(current);
         await checkMonthlyRewards(current);
         if (current.pendingIds?.length > 0 && current.createdBy === user.uid) {
           await loadPendingNames(current.pendingIds);
@@ -587,9 +587,11 @@ export default function Group() {
     return awards;
   }
 
-  async function loadTrades() {
-    if (!selectedGroup || !user) return;
-    const tradesSnap = await getDocs(query(collection(db, 'trades'), where('groupId', '==', selectedGroup.id)));
+  // Le groupe est passé explicitement au chargement initial : l'état n'est pas
+  // encore posé à ce moment-là.
+  async function loadTrades(group: GroupType | null = selectedGroup) {
+    if (!group || !user) return;
+    const tradesSnap = await getDocs(query(collection(db, 'trades'), where('groupId', '==', group.id)));
     const all = tradesSnap.docs
       .map((d) => ({ id: d.id, ...d.data() } as TradeOffer))
       .filter((t) => t.status === 'pending' && (t.fromUid === user.uid || t.toUid === user.uid));
@@ -683,6 +685,8 @@ export default function Group() {
   const awards = getMonthlyAwards();
   const isCreator = selectedGroup?.createdBy === user?.uid;
   const pendingCount = selectedGroup?.pendingIds?.length || 0;
+  // Pastille sur l'onglet Échanges : une offre reçue demande une réponse.
+  const incomingTrades = trades.filter((t) => t.toUid === user?.uid).length;
 
   return (
     <div className="page">
@@ -874,7 +878,26 @@ export default function Group() {
             </section>
           )}
 
-          <section className="section">
+          <div className="bp-tabs group-tabs">
+            <button
+              className={`bp-tab ${groupTab === 'classement' ? 'active' : ''}`}
+              onClick={() => setGroupTab('classement')}
+            >
+              <Trophy size={15} />
+              <span>Classement</span>
+            </button>
+            <button
+              className={`bp-tab ${groupTab === 'echanges' ? 'active' : ''}`}
+              onClick={() => { setGroupTab('echanges'); loadTrades(); }}
+            >
+              <ArrowLeftRight size={15} />
+              <span>Échanges</span>
+              {incomingTrades > 0 && <span className="bp-tab-badge">{incomingTrades}</span>}
+            </button>
+          </div>
+
+          {groupTab === 'classement' && (
+            <section className="section">
             <div className="leaderboard-header">
               <div className="bp-section-title-row">
                 <h3>Classement — {currentMonthName}</h3>
@@ -915,6 +938,9 @@ export default function Group() {
                     <span className="leaderboard-name">
                       {entry.displayName}
                       {entry.uid === user!.uid ? ' (toi)' : ''}
+                      {entry.uid === selectedGroup.createdBy && (
+                        <Crown size={12} className="leaderboard-crown" />
+                      )}
                     </span>
                     <span className="leaderboard-stats">
                       {entry.sessionsCount} séance{entry.sessionsCount > 1 ? 's' : ''} •{' '}
@@ -928,44 +954,11 @@ export default function Group() {
                 </div>
               ))}
             </div>
-          </section>
+            </section>
+          )}
 
-          <section className="section members-section">
-            <button className="members-toggle" onClick={() => setShowMembers(!showMembers)}>
-              <h3><Users size={16} /> Membres ({selectedGroup.memberIds.length})</h3>
-              <ChevronDown size={16} className={showMembers ? 'rotated' : ''} />
-            </button>
-            {showMembers && (
-              <div className="members-list">
-                {leaderboard.map((entry) => (
-                  <div key={entry.uid} className="member-item" onClick={() => setSelectedMember(entry)} style={{ cursor: 'pointer' }}>
-                    <MemberAvatar entry={entry} />
-                    <div className="member-info-row">
-                      <span className="member-name-label">
-                        {entry.displayName}
-                        {entry.uid === user!.uid ? ' (toi)' : ''}
-                      </span>
-                      {entry.uid === selectedGroup.createdBy && (
-                        <span className="chef-badge"><Crown size={12} /> Chef</span>
-                      )}
-                    </div>
-                    {isCreator && entry.uid !== user!.uid && (
-                      <button className="transfer-btn" onClick={() => transferChef(entry.uid)}>
-                        <Crown size={14} /> <ArrowRight size={12} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="section">
-            <button className="members-toggle" onClick={() => { setShowTrades(!showTrades); if (!showTrades) loadTrades(); }}>
-              <h3><ArrowLeftRight size={16} /> Échanges</h3>
-              <ChevronDown size={16} className={showTrades ? 'rotated' : ''} />
-            </button>
-            {showTrades && (
+          {groupTab === 'echanges' && (
+            <section className="section">
               <div className="trades-section">
                 <button className="primary-btn small" style={{ marginBottom: '0.75rem' }} onClick={startNewTrade}>
                   Proposer un échange
@@ -1045,8 +1038,8 @@ export default function Group() {
                   <p className="empty" style={{ fontSize: '0.85rem' }}>Aucun échange en cours</p>
                 )}
               </div>
-            )}
-          </section>
+            </section>
+          )}
 
           <div className="group-actions" style={{ marginTop: '1rem', justifyContent: 'center' }}>
             <button className="leave-btn" onClick={leaveGroup}>
@@ -1214,6 +1207,14 @@ export default function Group() {
             >
               Voir le profil complet
             </button>
+            {isCreator && selectedMember.uid !== user!.uid && (
+              <button
+                className="member-modal-chef-btn"
+                onClick={() => { const uid = selectedMember.uid; setSelectedMember(null); transferChef(uid); }}
+              >
+                <Crown size={14} /> Transférer le rôle de chef
+              </button>
+            )}
           </div>
         </div>
       )}
