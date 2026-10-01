@@ -11,7 +11,6 @@ import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
 import Loader from '../components/Loader';
-import NotificationSettings from '../components/NotificationSettings';
 
 const UPDATES = [
   {
@@ -45,7 +44,7 @@ const UPDATES = [
 ];
 
 export default function Dashboard() {
-  const { user, displayName: myName } = useAuth();
+  const { displayName: myName } = useAuth();
   const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
   const [showUpdates, setShowUpdates] = useState(false);
@@ -112,7 +111,6 @@ export default function Dashboard() {
             <Bell size={18} />
             {hasUnread && <span className="notif-dot" />}
           </button>
-          {user && <NotificationSettings uid={user.uid} />}
         </div>
       </header>
 

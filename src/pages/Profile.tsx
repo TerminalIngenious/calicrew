@@ -10,8 +10,9 @@ import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
 import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import PersonalRecords from '../components/PersonalRecords';
+import NotificationSettings from '../components/NotificationSettings';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award, TrendingUp, ChevronRight, LogOut } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award, TrendingUp, ChevronRight, LogOut, Settings } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
@@ -304,51 +305,6 @@ export default function Profile() {
 
       {!isOwnProfile && <PersonalRecords sessions={sessions} />}
 
-      {programs.length > 0 && (
-        <section className="section">
-          <h3><ClipboardList size={16} style={{ marginRight: 6 }} />Programmes ({programs.length})</h3>
-          <div className="programs-list" style={{ paddingBottom: 0 }}>
-            {programs.map((prog) => (
-              <div key={prog.id} className="program-card">
-                <div className="program-card-header">
-                  <div>
-                    <h3>{prog.name}</h3>
-                    {prog.description && <span className="program-card-desc">{prog.description}</span>}
-                  </div>
-                  {!isOwnProfile && (
-                    <button className="icon-btn" title="Importer" onClick={async () => {
-                      if (!user) return;
-                      await addDoc(collection(db, 'programs'), {
-                        name: prog.name,
-                        description: prog.description || '',
-                        createdBy: user.uid,
-                        creatorName: user.displayName || '',
-                        exercises: prog.exercises,
-                        isPublic: false,
-                        createdAt: Date.now(),
-                      });
-                      alert('Programme importé !');
-                    }}>
-                      <Download size={14} />
-                    </button>
-                  )}
-                </div>
-                <div className="program-card-exercises">
-                  {prog.exercises.map((ex, i) => (
-                    <span key={i} className="program-card-ex">
-                      {ex.exerciseName} {ex.targetSets}×{ex.targetReps}{ex.weighted ? ` ${ex.weight}kg` : ''}
-                    </span>
-                  ))}
-                </div>
-                <div className="program-card-footer">
-                  <span>{prog.exercises.length} exercices</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       {badges.length > 0 && (
         <section className="section">
           <h3><Award size={16} style={{ marginRight: 6 }} />Badges ({badges.length})</h3>
@@ -435,14 +391,66 @@ export default function Profile() {
         />
       )}
 
-      {/* Déplacée depuis l'en-tête de l'Accueil : une action de compte n'a pas
-          à être accessible en un clic depuis l'écran principal. */}
-      {isOwnProfile && (
-        <div className="group-actions" style={{ marginTop: '1.5rem', justifyContent: 'center' }}>
-          <button className="leave-btn" onClick={() => signOut()}>
-            <LogOut size={14} /> Se déconnecter
-          </button>
-        </div>
+      {programs.length > 0 && (
+        <section className="section">
+          <h3><ClipboardList size={16} style={{ marginRight: 6 }} />Programmes ({programs.length})</h3>
+          <div className="programs-list" style={{ paddingBottom: 0 }}>
+            {programs.map((prog) => (
+              <div key={prog.id} className="program-card">
+                <div className="program-card-header">
+                  <div>
+                    <h3>{prog.name}</h3>
+                    {prog.description && <span className="program-card-desc">{prog.description}</span>}
+                  </div>
+                  {!isOwnProfile && (
+                    <button className="icon-btn" title="Importer" onClick={async () => {
+                      if (!user) return;
+                      await addDoc(collection(db, 'programs'), {
+                        name: prog.name,
+                        description: prog.description || '',
+                        createdBy: user.uid,
+                        creatorName: user.displayName || '',
+                        exercises: prog.exercises,
+                        isPublic: false,
+                        createdAt: Date.now(),
+                      });
+                      alert('Programme importé !');
+                    }}>
+                      <Download size={14} />
+                    </button>
+                  )}
+                </div>
+                <div className="program-card-exercises">
+                  {prog.exercises.map((ex, i) => (
+                    <span key={i} className="program-card-ex">
+                      {ex.exerciseName} {ex.targetSets}×{ex.targetReps}{ex.weighted ? ` ${ex.weight}kg` : ''}
+                    </span>
+                  ))}
+                </div>
+                <div className="program-card-footer">
+                  <span>{prog.exercises.length} exercices</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Réglages et déconnexion rapatriés depuis l'en-tête de l'Accueil :
+          ce sont des actions de compte, leur place est ici. */}
+      {isOwnProfile && user && (
+        <section className="section">
+          <h3><Settings size={16} style={{ marginRight: 6 }} />Compte</h3>
+          <div className="settings-list">
+            <NotificationSettings uid={user.uid} variant="row" />
+            <button className="settings-row settings-row-danger" onClick={() => signOut()}>
+              <LogOut size={17} />
+              <div className="settings-row-info">
+                <span className="settings-row-label">Se déconnecter</span>
+              </div>
+            </button>
+          </div>
+        </section>
       )}
 
       <BottomNav />

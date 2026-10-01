@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, Smartphone, X } from 'lucide-react';
+import { Settings, Smartphone, X, Bell, ChevronRight } from 'lucide-react';
 import {
   isPushSupported,
   needsInstall,
@@ -21,7 +21,17 @@ const ERROR_MESSAGES: Record<string, string> = {
   error: "Erreur lors de l'activation des notifications.",
 };
 
-export default function NotificationSettings({ uid }: { uid: string }) {
+/**
+ * `icon` : bouton engrenage compact pour un en-tête.
+ * `row` : ligne pleine largeur, pour une liste de réglages.
+ */
+export default function NotificationSettings({
+  uid,
+  variant = 'icon',
+}: {
+  uid: string;
+  variant?: 'icon' | 'row';
+}) {
   const [prefs, setPrefs] = useState<PushPrefs>(DEFAULT_PUSH_PREFS);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -78,14 +88,31 @@ export default function NotificationSettings({ uid }: { uid: string }) {
 
   return (
     <>
-      <button
-        className={`icon-btn notif-settings-btn ${enabled ? 'active' : ''}`}
-        onClick={() => setOpen(true)}
-        aria-label="Réglages des notifications"
-      >
-        <Settings size={18} />
-        {enabled && <span className="notif-settings-dot" />}
-      </button>
+      {variant === 'row' ? (
+        <button className="settings-row" onClick={() => setOpen(true)}>
+          <Bell size={17} />
+          <div className="settings-row-info">
+            <span className="settings-row-label">Notifications</span>
+            <span className="settings-row-sub">
+              {enabled
+                ? [prefs.creatine && 'créatine', prefs.dailyChallenge && 'défi du jour']
+                    .filter(Boolean)
+                    .join(' • ')
+                : 'Aucun rappel activé'}
+            </span>
+          </div>
+          <ChevronRight size={16} />
+        </button>
+      ) : (
+        <button
+          className={`icon-btn notif-settings-btn ${enabled ? 'active' : ''}`}
+          onClick={() => setOpen(true)}
+          aria-label="Réglages des notifications"
+        >
+          <Settings size={18} />
+          {enabled && <span className="notif-settings-dot" />}
+        </button>
+      )}
 
       {open && (
         <div className="modal-overlay" onClick={close}>
