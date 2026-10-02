@@ -5851,3 +5851,37 @@ body {
 .member-modal-chef-btn:active {
   border-color: #ffd700;
 }
+
+/* ── Octobre Rose ── */
+
+.pink-october {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 29, 114, 0.35);
+  background: rgba(229, 29, 114, 0.1);
+  color: #f2528f;
+}
+
+.pink-october.compact {
+  padding: 0.3rem;
+  border-radius: 50%;
+}
+
+.pink-october-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Dans le bandeau de saison, le fond est déjà coloré */
+.bp-hero-left .pink-october {
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffd4e6;
+}

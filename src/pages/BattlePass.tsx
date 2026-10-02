@@ -10,6 +10,7 @@ import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import PinkOctoberBadge from '../components/PinkOctoberBadge';
 import Loader from '../components/Loader';
 
 const DEFAULT_PROGRESS: UserProgress = {
@@ -325,6 +326,7 @@ export default function BattlePass() {
           <div className="bp-hero-left">
             <span className="bp-hero-season">{season.name}</span>
             <h1 className="bp-hero-title">{season.theme}</h1>
+            <PinkOctoberBadge />
           </div>
           <div className="bp-hero-timer">
             <Clock size={14} />

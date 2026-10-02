@@ -23,6 +23,7 @@ import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, Trade
 import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, ArrowRight, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import PinkOctoberBadge from '../components/PinkOctoberBadge';
 import GroupChat from '../components/GroupChat';
 import Loader from '../components/Loader';
 
@@ -692,6 +693,7 @@ export default function Group() {
     <div className="page">
       <header className="page-header">
         <h1>Groupe</h1>
+        <PinkOctoberBadge compact />
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {selectedGroup && (
             <button className="icon-btn" onClick={() => setShowChat(true)}>
