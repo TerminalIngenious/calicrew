@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
+import PinkRibbon from '../components/PinkRibbon';
+import { getSeasonalTheme } from '../lib/seasonalTheme';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -120,6 +122,18 @@ export default function Dashboard() {
         <div className="page loading"><Loader /></div>
       ) : (
         <>
+          {getSeasonalTheme() === 'pink' && (
+            <div className="pink-awareness">
+              <PinkRibbon size={22} />
+              <div className="pink-awareness-text">
+                <span className="pink-awareness-title">Octobre Rose</span>
+                <span className="pink-awareness-sub">
+                  Mois de sensibilisation au dépistage du cancer du sein.
+                </span>
+              </div>
+            </div>
+          )}
+
           <span className="stats-period">Cette semaine</span>
           <div className="stats-grid">
             <div className="stat-card">

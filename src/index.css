@@ -5852,6 +5852,99 @@ body {
   border-color: #ffd700;
 }
 
+/* ══ Direction artistique Octobre Rose ══
+
+   L'identité de l'app bascule en rose : une seule surcharge de --accent
+   repeint les 93 endroits qui l'utilisent (boutons, barres, surlignages).
+
+   Ce qui ne change PAS, parce que ces couleurs portent du sens :
+   or/argent/bronze du podium, raretés des cartes, vert de validation,
+   rouge de danger. Une DA ne doit jamais rendre une information fausse. */
+
+:root[data-season="pink"] {
+  --accent: #e8447f;
+  --accent-light: #ff7ba8;
+}
+
+:root[data-season="pink"] body {
+  background:
+    radial-gradient(90% 55% at 50% 0%, rgba(232, 68, 127, 0.14) 0%, transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* Décor : lueur haute + rubans qui montent lentement */
+.pink-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pink-decor-glow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  width: 460px;
+  height: 320px;
+  margin-left: -230px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 68, 127, 0.3) 0%, transparent 68%);
+  filter: blur(18px);
+}
+
+.pink-floater {
+  position: absolute;
+  bottom: -40px;
+  color: rgba(255, 123, 168, 0.22);
+  animation-name: pinkFloat;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes pinkFloat {
+  0% { transform: translateY(0) rotate(-8deg); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(-105vh) rotate(8deg); opacity: 0; }
+}
+
+/* Bandeau de sensibilisation, sur l'accueil */
+.pink-awareness {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(232, 68, 127, 0.3);
+  background: linear-gradient(135deg, rgba(232, 68, 127, 0.14), rgba(232, 68, 127, 0.03));
+  color: #ff7ba8;
+}
+
+.pink-awareness-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pink-awareness-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pink-awareness-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pink-floater { animation: none; opacity: 0; }
+}
+
 /* ── Habillages saisonniers ── */
 
 .seasonal-badge {

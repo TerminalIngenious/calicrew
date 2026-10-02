@@ -16,6 +16,7 @@ import Programs from './pages/Programs';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
+import PinkDecor from './components/PinkDecor';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 
 const MAINTENANCE = false;
@@ -81,10 +82,19 @@ function AppContent() {
     localStorage.setItem('calicrew-splash-seen', 'pass-1');
   }
 
+  const season = getSeasonalTheme();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (season) root.dataset.season = season;
+    else delete root.dataset.season;
+  }, [season]);
+
   return (
     <>
       {showSplash && <SeasonSplash onDone={handleSplashDone} />}
-      {getSeasonalTheme() === 'halloween' && <HalloweenDecor />}
+      {season === 'halloween' && <HalloweenDecor />}
+      {season === 'pink' && <PinkDecor />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
