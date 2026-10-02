@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useUserSessions } from '../contexts/SessionsContext';
 import BottomNav from '../components/BottomNav';
-import PinkOctoberBadge from '../components/PinkOctoberBadge';
+import SeasonalBadge from '../components/SeasonalBadge';
 import {
   LineChart,
   Line,
@@ -99,7 +99,7 @@ export default function Progress() {
     <div className="page">
       <header className="page-header">
         <h1>Progression</h1>
-        <PinkOctoberBadge />
+        <SeasonalBadge />
       </header>
 
       {loading ? (

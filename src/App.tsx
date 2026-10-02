@@ -15,6 +15,8 @@ import Profile from './pages/Profile';
 import Programs from './pages/Programs';
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
+import HalloweenDecor from './components/HalloweenDecor';
+import { getSeasonalTheme } from './lib/seasonalTheme';
 
 const MAINTENANCE = false;
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
@@ -82,6 +84,7 @@ function AppContent() {
   return (
     <>
       {showSplash && <SeasonSplash onDone={handleSplashDone} />}
+      {getSeasonalTheme() === 'halloween' && <HalloweenDecor />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

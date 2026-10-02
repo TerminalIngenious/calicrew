@@ -5852,36 +5852,101 @@ body {
   border-color: #ffd700;
 }
 
-/* ── Octobre Rose ── */
+/* ── Habillages saisonniers ── */
 
-.pink-october {
+.seasonal-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
   padding: 0.28rem 0.6rem;
   border-radius: 999px;
-  border: 1px solid rgba(229, 29, 114, 0.35);
-  background: rgba(229, 29, 114, 0.1);
-  color: #f2528f;
+  border: 1px solid currentColor;
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.pink-october.compact {
+.seasonal-badge.compact {
   padding: 0.3rem;
   border-radius: 50%;
 }
 
-.pink-october-label {
+.seasonal-badge-label {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
+.seasonal-pink {
+  color: #f2528f;
+  border-color: rgba(229, 29, 114, 0.35);
+  background: rgba(229, 29, 114, 0.1);
+}
+
+.seasonal-halloween {
+  color: #ff8c26;
+  border-color: rgba(255, 140, 38, 0.35);
+  background: rgba(255, 140, 38, 0.1);
+}
+
 /* Dans le bandeau de saison, le fond est déjà coloré */
-.bp-hero-left .pink-october {
+.bp-hero-left .seasonal-badge {
   margin-top: 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.25);
-  color: #ffd4e6;
+}
+
+.bp-hero-left .seasonal-pink { color: #ffd4e6; }
+.bp-hero-left .seasonal-halloween { color: #ffcf9e; }
+
+/* ── Décor Halloween ── */
+
+.halloween-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.16);
+}
+
+.halloween-web {
+  position: absolute;
+  top: 0;
+  width: 118px;
+  height: 118px;
+}
+
+.halloween-web-left {
+  left: 0;
+}
+
+/* La toile de droite est le miroir de celle de gauche */
+.halloween-web-right {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.halloween-spider {
+  position: absolute;
+  top: 0;
+  left: 38%;
+  width: 20px;
+  color: rgba(255, 255, 255, 0.22);
+  animation: spiderDangle 5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes spiderDangle {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(10px) rotate(3deg); }
+}
+
+/* Le contenu doit rester au-dessus du décor et cliquable */
+.page {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .halloween-spider { animation: none; }
 }

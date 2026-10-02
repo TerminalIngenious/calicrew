@@ -5,7 +5,7 @@ import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
-import PinkOctoberBadge from '../components/PinkOctoberBadge';
+import SeasonalBadge from '../components/SeasonalBadge';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
@@ -106,7 +106,7 @@ export default function Dashboard() {
       <header className="page-header">
         <div>
           <h1>Salut {myName}</h1>
-        <PinkOctoberBadge compact />
+        <SeasonalBadge compact />
         </div>
         <div style={{ display: 'flex', gap: '0.25rem' }}>
           <button className="icon-btn notif-btn" onClick={openUpdates}>
