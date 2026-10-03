@@ -1,4 +1,4 @@
-import type { ExerciseLog, Session, SetUnit, WeightType } from '../types';
+import type { ExerciseLog, Session, SetUnit } from '../types';
 
 /**
  * Les séries en secondes stockent leur valeur dans `SetLog.reps`, comme les
@@ -64,96 +64,5 @@ export function sessionSets(session: Pick<Session, 'exercises'>): number {
   return (session.exercises || []).reduce(
     (sum, ex) => sum + (ex.sets || []).filter((set) => set.completed).length,
     0
-  );
-}
-
-// ── Records personnels (PR) ──
-
-export interface PersonalRecord {
-  exerciseId: string;
-  exerciseName: string;
-  category: string;
-  unit: SetUnit;
-  /** Meilleure série : reps ou secondes selon l'unité. */
-  bestSet: number;
-  /** Charge portée sur cette meilleure série. */
-  bestSetWeight?: number;
-  /** Charge la plus lourde jamais utilisée sur cet exercice. */
-  maxWeight?: number;
-  maxWeightType?: WeightType;
-  /** Running et vélo. */
-  bestDistance?: number;
-  /** Running, vélo et sport co : plus longue sortie. */
-  bestDuration?: number;
-  /** Date du record principal, au format ISO court. */
-  date: string;
-}
-
-function isDistanceBased(category: string): boolean {
-  return category === 'running' || category === 'velo';
-}
-
-/**
- * Meilleure performance par exercice.
- *
- * Les séances AMRAP sont exclues : elles cumulent tous les rounds dans une
- * seule série, ce qui produirait un faux record (un Cindy de 20 rounds
- * apparaîtrait comme 100 tractions d'affilée).
- */
-export function computePersonalRecords(sessions: Session[]): PersonalRecord[] {
-  const map = new Map<string, PersonalRecord>();
-
-  for (const session of sessions) {
-    if (!session.completed || session.mode === 'amrap') continue;
-
-    for (const ex of session.exercises || []) {
-      const id = ex.exerciseId;
-      if (!id) continue;
-
-      const pr = map.get(id) || {
-        exerciseId: id,
-        exerciseName: ex.exerciseName,
-        category: ex.exerciseCategory || '',
-        unit: getUnit(ex),
-        bestSet: 0,
-        date: session.date,
-      };
-
-      if (isDistanceBased(ex.exerciseCategory) || ex.exerciseCategory === 'sportco') {
-        const distance = ex.runDistance || 0;
-        const duration = ex.runDuration || 0;
-        if (distance > (pr.bestDistance || 0)) {
-          pr.bestDistance = distance;
-          pr.date = session.date;
-        }
-        if (duration > (pr.bestDuration || 0)) {
-          pr.bestDuration = duration;
-          if (!pr.bestDistance) pr.date = session.date;
-        }
-      } else {
-        // La charge peut varier d'une série à l'autre : on raisonne série par série.
-        for (const set of ex.sets || []) {
-          if (!set.completed) continue;
-          const weight = setWeight(ex, set);
-
-          if (set.reps > pr.bestSet) {
-            pr.bestSet = set.reps;
-            pr.bestSetWeight = weight > 0 ? weight : undefined;
-            pr.unit = getUnit(ex);
-            pr.date = session.date;
-          }
-          if (weight > (pr.maxWeight || 0)) {
-            pr.maxWeight = weight;
-            pr.maxWeightType = ex.weightType;
-          }
-        }
-      }
-
-      map.set(id, pr);
-    }
-  }
-
-  return [...map.values()].filter(
-    (pr) => pr.bestSet > 0 || (pr.bestDistance || 0) > 0 || (pr.bestDuration || 0) > 0
   );
 }

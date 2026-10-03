@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
@@ -19,6 +20,7 @@ import { Trophy, Zap, Clock, Dumbbell } from 'lucide-react';
 import { exerciseReps, exerciseTotal, getUnit, unitLabel, totalReps, sessionSets } from '../lib/stats';
 
 export default function Progress() {
+  const { user } = useAuth();
   const { sessions, loading } = useUserSessions();
   const [selectedExercise, setSelectedExercise] = useState<string>('all');
 
@@ -140,7 +142,7 @@ export default function Progress() {
             </div>
           </section>
 
-          <PersonalRecords sessions={sessions} />
+          <PersonalRecords uid={user?.uid} editable />
 
           <h3 className="progress-charts-title">Graphiques</h3>
 

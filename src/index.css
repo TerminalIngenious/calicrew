@@ -5565,6 +5565,88 @@ body {
   color: var(--text-muted);
 }
 
+/* ── Saisie des records ── */
+
+.pr-empty {
+  margin: 0.75rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.pr-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.pr-row-actions {
+  display: flex;
+  gap: 0.1rem;
+  margin-left: 0.35rem;
+}
+
+.pr-row-actions .icon-btn {
+  color: var(--text-muted);
+}
+
+/* Le formulaire peut dépasser sur un petit écran : il défile de lui-même. */
+.pr-form {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.pr-field-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.pr-field-label em {
+  font-style: normal;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.75;
+}
+
+.pr-select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+}
+
+.pr-select:focus {
+  border-color: var(--accent);
+}
+
+.pr-unit-picker {
+  margin-bottom: 1rem;
+}
+
+.pr-unit-picker .unit-btn {
+  flex: 1;
+}
+
+.pr-form-error {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+
 /* ── Poids par série & ajout d'exercice en séance ── */
 
 .set-weight {

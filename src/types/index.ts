@@ -218,6 +218,34 @@ export interface WeeklyQuestSelection {
   locked: boolean;
 }
 
+// ── Records personnels ──
+
+/** Unité d'un record. 'kg' sert aux maxis de charge (1RM et compagnie). */
+export type RecordUnit = 'reps' | 'kg' | 'seconds' | 'km';
+
+/**
+ * Record saisi à la main par le joueur. Volontairement déconnecté des séances
+ * loguées : un PR se fait souvent hors de l'app, et c'est le joueur qui sait
+ * ce qui compte comme record pour lui.
+ */
+export interface PersonalRecord {
+  id: string;
+  /** Renseigné quand l'exercice vient du catalogue. */
+  exerciseId?: string;
+  exerciseName: string;
+  /** Catégorie, pour le regroupement. Vide si exercice libre. */
+  category: string;
+  unit: RecordUnit;
+  value: number;
+  /** Charge additionnelle, pour un record en reps ou en temps lesté. */
+  weight?: number;
+  /** Date du record, au format YYYY-MM-DD. Facultative. */
+  date?: string;
+  /** Précision libre : « en 1h50 », « sans élan »… */
+  note?: string;
+  updatedAt: number;
+}
+
 // ── User Progress ──
 
 export interface UserProgress {
@@ -237,4 +265,6 @@ export interface UserProgress {
    * déduit et n'est jamais stocké, pour qu'il ne puisse pas devenir faux.
    */
   creatineDays?: string[];
+  /** Records saisis par le joueur lui-même. */
+  personalRecords?: PersonalRecord[];
 }

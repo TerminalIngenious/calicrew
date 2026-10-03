@@ -304,7 +304,7 @@ export default function Profile() {
       </section>
       )}
 
-      {!isOwnProfile && <PersonalRecords sessions={sessions} />}
+      {!isOwnProfile && <PersonalRecords uid={targetUid} />}
 
       {badges.length > 0 && (
         <section className="section">

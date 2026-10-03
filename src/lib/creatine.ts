@@ -139,15 +139,15 @@ function useToday(): string {
 export function useCreatine(): CreatineState & { toggle: () => void } {
   const { user } = useAuth();
   const today = useToday();
-  const [days, setDays] = useState<string[] | null>(null);
+  // L'état porte l'uid qu'il décrit : à la déconnexion on repart donc de
+  // `null` sans avoir à le remettre à zéro dans l'effet.
+  const [loaded, setLoaded] = useState<{ uid: string; days: string[] } | null>(null);
 
   const uid = user?.uid;
+  const days = loaded && loaded.uid === uid ? loaded.days : null;
 
   useEffect(() => {
-    if (!uid) {
-      setDays(null);
-      return;
-    }
+    if (!uid) return;
 
     const ref = doc(db, 'userProgress', uid);
     let migrated = false;
@@ -163,7 +163,7 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
           migrated = true;
           const legacy = readLegacyDays();
           if (legacy.length > 0) {
-            setDays(legacy);
+            setLoaded({ uid, days: legacy });
             setDoc(ref, { creatineDays: legacy }, { merge: true })
               .then(clearLegacy)
               .catch(() => { /* réessayé au prochain snapshot */ });
@@ -172,13 +172,13 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
           clearLegacy();
         }
 
-        setDays(clean(stored));
+        setLoaded({ uid, days: clean(stored) });
       },
       (err) => {
         // Hors ligne sans cache, ou règles refusées : on retombe sur
         // l'historique local plutôt que d'afficher un streak nul et faux.
         console.error('Lecture créatine impossible:', err);
-        setDays(readLegacyDays());
+        setLoaded({ uid, days: readLegacyDays() });
       }
     );
   }, [uid]);
@@ -189,7 +189,7 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
       ? days.filter((d) => d !== today)
       : clean([...days, today]);
 
-    setDays(next); // l'écriture est mise en file si on est hors ligne
+    setLoaded({ uid, days: next }); // l'écriture est mise en file si hors ligne
     setDoc(doc(db, 'userProgress', uid), { creatineDays: next }, { merge: true }).catch((err) => {
       console.error('Écriture créatine impossible:', err);
     });
