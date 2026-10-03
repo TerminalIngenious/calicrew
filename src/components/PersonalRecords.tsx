@@ -6,7 +6,7 @@ import type { Session, Exercise } from '../types';
 
 /** Ordre d'affichage des catégories, le même que la liste d'exercices. */
 const CATEGORY_ORDER: Exercise['category'][] = [
-  'push', 'pull', 'legs', 'core', 'skill', 'running', 'velo', 'sportco',
+  'push', 'pull', 'legs', 'core', 'skill', 'crossfit', 'running', 'velo', 'sportco',
 ];
 
 function formatDuration(seconds: number): string {
