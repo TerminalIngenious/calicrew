@@ -18,6 +18,62 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-10-03',
+    date: '3 octobre 2026',
+    title: 'CrossFit & créatine synchronisée',
+    summary: 'Nouvelle catégorie CrossFit, suivi créatine synchronisé et compteur corrigé.',
+    details: `Nouvelle catégorie CrossFit avec 31 mouvements : haltérophilie (épaulé, arraché, thruster, push press), gymnastique (pointes aux barres, muscle-up aux anneaux, wall walk, montée de corde) et conditionnement (burpees, wall balls, double unders, kettlebell swing, farmer's walk). Ils fonctionnent en séries, reps et charge comme la muscu : ils comptent dans les classements, dans les quêtes d'exercices et dans tes records. Les mouvements qui se mesurent au temps (marche en ATR, traîneau, rameur, assault bike) se loguent en secondes.\n\nCréatine synchronisée : ton suivi est maintenant le même sur téléphone et sur PC, et il survit à un vidage du cache. Il continue de fonctionner hors ligne.\n\nCompteur de créatine corrigé : le streak se recalcule à partir des jours réellement cochés. Il ne reste plus bloqué sur une ancienne valeur quand tu sautes des jours, décocher annule bien la journée, et la carte change de jour toute seule à minuit. Le streak de la veille reste affiché en gris tant que tu n'as pas pris ta dose du jour.\n\nRappel créatine plus malin : la notification de 20h ne part plus si tu as déjà coché la prise du jour.`,
+  },
+  {
+    id: 'update-2026-10-02',
+    date: '2 octobre 2026',
+    title: 'Octobre Rose & Halloween',
+    summary: 'L\'app passe en rose pour Octobre Rose, et en thème Halloween le 31.',
+    details: `Direction artistique Octobre Rose : pendant tout le mois, l'identité de l'app bascule en rose, avec une lueur en haut d'écran et des rubans qui montent lentement en fond. Les couleurs qui portent une information ne changent pas : l'or, l'argent et le bronze du podium, les raretés des cartes, le vert de validation et le rouge restent identiques.\n\nUn bandeau rappelle que octobre est le mois de sensibilisation au dépistage du cancer du sein.\n\nThème Halloween le 31 octobre : toiles d'araignée dans les coins, araignée suspendue et citrouille remplacent l'habillage rose pour la journée.\n\nLes deux habillages suivent la date et se retirent tout seuls, il n'y a rien à activer.`,
+  },
+  {
+    id: 'update-2026-10-01',
+    date: '1er octobre 2026',
+    title: 'Navigation repensée',
+    summary: 'Cinq onglets clairs, profil réorganisé et sous-onglets dans le groupe.',
+    details: `Navigation repensée : la barre du bas passe à cinq onglets avec un rôle clair chacun — Accueil, Progrès, Pass, Groupe, Profil. La page Progrès, qui existait sans qu'on puisse l'ouvrir, a maintenant son onglet.\n\nProfil réorganisé : tes stats, tes badges, tes records et tes cartes sont regroupés par section au lieu d'être empilés. Une section Compte rassemble le pseudo, les réglages de notifications (l'engrenage) et la déconnexion.\n\nGroupe en sous-onglets : Classement et Échanges sont séparés, la page ne déroule plus tout d'un bloc.`,
+  },
+  {
+    id: 'update-2026-09-30',
+    date: '30 septembre 2026',
+    title: 'Badges, records & pass 100 niveaux',
+    summary: 'Badges de podium, records personnels, séances modifiables et nouvelle ouverture de coffre.',
+    details: `Badges de classement : les 3 premiers de chaque classement mensuel (reps, variété, temps) reçoivent un badge en fin de mois, par exemple TOP 2 Reps saison 1. Chaque classement a sa couleur et chaque place du podium son métal. Les badges s'affichent dans le profil.\n\nRecords personnels : chaque profil liste les PR par exercice — meilleure série, charge maximale, meilleure distance et meilleur temps. Les séances AMRAP sont exclues pour ne pas fausser les records.\n\nSéance modifiable en cours de route : ajoute un exercice que tu avais oublié, change le poids en pleine séance (il peut varier d'une série à l'autre) et ajuste le nombre de séries.\n\nNouvelle ouverture de coffre : la carte tourne dans la couleur de sa rareté, s'arrête sur une explosion, puis apparaît — avec un son dont l'intensité dépend de la rareté.\n\nPass étendu à 100 niveaux : le niveau 100 donne un coffre historique, et des paliers garantissent un coffre rare ou plus, épique ou plus, ou légendaire ou plus. Les 24 premiers niveaux gardent leur coût en XP, personne ne perd un niveau.`,
+  },
+  {
+    id: 'update-2026-09-17',
+    date: '17 septembre 2026',
+    title: 'Reps ou secondes, vélo & pseudo',
+    summary: 'Choix reps/secondes par exercice, catégorie Vélo et pseudo modifiable.',
+    details: `Reps ou secondes : pour chaque exercice tu choisis l'unité. Un gainage ou un L-sit se logue en secondes, et ces secondes ne sont plus comptées comme des reps dans les classements, les quêtes et les records.\n\nNouvelle catégorie Vélo avec 9 exercices (vélo route, VTT, gravel, home trainer, spinning, fractionné et plus). Saisie du temps, de la distance et du dénivelé, avec la vitesse calculée en km/h.\n\nPseudo modifiable : tu peux changer ton pseudo depuis ton profil.`,
+  },
+  {
+    id: 'update-2026-09-14',
+    date: '14 septembre 2026',
+    title: 'Défi du jour, Sport Co & notifications',
+    summary: 'Un défi quotidien, la catégorie Sport Co, les notifications push et plus de quêtes.',
+    details: `Défi quotidien : chaque jour à 10h, un défi identique pour tout le monde, à 25 XP.\n\nNouvelle catégorie Sport Co avec 15 sports collectifs (football, basket, hand, volley, rugby, tennis, padel et plus). Tu indiques simplement la durée : 25 XP par 30 minutes.\n\nNotifications push : active le rappel créatine (20h) et le rappel du défi du jour (17h), qui ne part que si tu ne l'as pas encore validé.\n\nPlus de quêtes au choix : le pool passe à 26 quêtes avec des objectifs plus difficiles. Tu en choisis toujours 10, plus les 2 quêtes de base, soit 12.\n\nRécompenses mensuelles revues : les 3 premiers des 3 classements reçoivent un coffre épique ou mieux. Le mois d'août n'est pas compté.\n\nCorrection : l'écran de choix des quêtes n'apparaît plus vide après avoir sélectionné ses sports.`,
+  },
+  {
+    id: 'update-2026-09-11',
+    date: '11 septembre 2026',
+    title: 'Quêtes au choix & exos de muscu',
+    summary: 'Choisis tes quêtes le lundi, 20 exercices de musculation et un coffre à chaque séance.',
+    details: `Quêtes au choix : le lundi, tu indiques les sports que tu pratiques et tu sélectionnes tes quêtes de la semaine au lieu de les subir.\n\nRécompenses de fin de mois par classement du groupe : le podium de chaque classement est récompensé.\n\n20 exercices de musculation ajoutés : développés couché, incliné, décliné et militaire, curls, rowings, élévations, soulevé de terre, hip thrust et plus.\n\nExercices personnalisés : modifie-les ou supprime-les depuis le crayon de chaque catégorie, et utilise-les dans tes programmes.\n\nUn coffre commune offert à chaque séance terminée.`,
+  },
+  {
+    id: 'update-2026-09-10',
+    date: '10 septembre 2026',
+    title: 'Chat de groupe',
+    summary: 'Chat en temps réel dans chaque groupe et affichage corrigé sur iPhone.',
+    details: `Chat de groupe en temps réel : une icône dans le header du groupe ouvre la discussion, avec les avatars des membres.\n\nAffichage corrigé sur les écrans à encoche : le header, les pages et la barre de navigation respectent les zones sûres de l'iPhone.`,
+  },
+  {
     id: 'update-2026-09-09',
     date: '9 septembre 2026',
     title: 'Programmes, créatine & quêtes v2',
