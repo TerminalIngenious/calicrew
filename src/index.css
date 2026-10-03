@@ -155,6 +155,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   padding: 0.75rem 1rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -162,6 +163,9 @@ body {
   margin-bottom: 1rem;
   cursor: pointer;
   transition: all 0.2s;
+  font: inherit;
+  text-align: left;
+  color: inherit;
 }
 
 .creatine-card.taken {
@@ -203,6 +207,11 @@ body {
   font-size: 0.75rem;
   font-weight: 700;
   color: #3b82f6;
+}
+
+/* Le streak court toujours, mais la prise du jour reste à faire. */
+.creatine-streak.pending {
+  color: var(--text-muted);
 }
 
 .creatine-check {

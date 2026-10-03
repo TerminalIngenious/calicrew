@@ -13,6 +13,7 @@ import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
+import { useCreatine } from '../lib/creatine';
 import Loader from '../components/Loader';
 
 const UPDATES = [
@@ -56,30 +57,7 @@ export default function Dashboard() {
   const lastSeenUpdate = localStorage.getItem('calicrew-last-seen-update');
   const hasUnread = lastSeenUpdate !== UPDATES[0]?.id;
 
-  const today = new Date().toISOString().split('T')[0];
-  const [creatineTaken, setCreatineTaken] = useState(() => localStorage.getItem('calicrew-creatine') === today);
-  const [creatineStreak, setCreatineStreak] = useState(() => parseInt(localStorage.getItem('calicrew-creatine-streak') || '0'));
-
-  function toggleCreatine() {
-    if (creatineTaken) {
-      localStorage.removeItem('calicrew-creatine');
-      const newStreak = Math.max(0, creatineStreak - 1);
-      localStorage.setItem('calicrew-creatine-streak', String(newStreak));
-      setCreatineStreak(newStreak);
-      setCreatineTaken(false);
-    } else {
-      const lastDate = localStorage.getItem('calicrew-creatine-last');
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-      const newStreak = lastDate === yesterdayStr ? creatineStreak + 1 : 1;
-      localStorage.setItem('calicrew-creatine', today);
-      localStorage.setItem('calicrew-creatine-last', today);
-      localStorage.setItem('calicrew-creatine-streak', String(newStreak));
-      setCreatineStreak(newStreak);
-      setCreatineTaken(true);
-    }
-  }
+  const creatine = useCreatine();
 
   function openUpdates() {
     setShowUpdates(true);
@@ -146,21 +124,32 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className={`creatine-card ${creatineTaken ? 'taken' : ''}`} onClick={toggleCreatine}>
+          <button
+            type="button"
+            className={`creatine-card ${creatine.takenToday ? 'taken' : ''}`}
+            onClick={creatine.toggle}
+            aria-pressed={creatine.takenToday}
+          >
             <div className="creatine-left">
               <Droplets size={18} />
               <div>
                 <span className="creatine-title">Créatine</span>
-                <span className="creatine-sub">{creatineTaken ? 'Prise aujourd\'hui' : 'Pas encore prise'}</span>
+                <span className="creatine-sub">
+                  {creatine.takenToday ? 'Prise aujourd\'hui' : 'Pas encore prise aujourd\'hui'}
+                </span>
               </div>
             </div>
             <div className="creatine-right">
-              {creatineStreak > 0 && <span className="creatine-streak">{creatineStreak}j</span>}
-              <div className={`creatine-check ${creatineTaken ? 'active' : ''}`}>
-                {creatineTaken && <Droplets size={14} />}
+              {creatine.streak > 0 && (
+                <span className={`creatine-streak ${creatine.pending ? 'pending' : ''}`}>
+                  {creatine.streak}j
+                </span>
+              )}
+              <div className={`creatine-check ${creatine.takenToday ? 'active' : ''}`}>
+                {creatine.takenToday && <Droplets size={14} />}
               </div>
             </div>
-          </div>
+          </button>
 
           <button className="primary-btn home-cta" onClick={() => navigate('/session/new')}>
             <Plus size={20} /> Nouvelle séance
