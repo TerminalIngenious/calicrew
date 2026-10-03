@@ -91,6 +91,13 @@ export function getDayStart(): number {
   return zonedToEpoch(get('year'), get('month'), get('day'), 10, TZ);
 }
 
+/** Jour courant à Paris, au format YYYY-MM-DD — même clé que le client. */
+export function getDayKey(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
+}
+
 /** Même numérotation que le client, pour reconstruire l'id du défi du jour. */
 export function getDayNumber(): number {
   const ref = zonedToEpoch(2026, 1, 1, 10, TZ);

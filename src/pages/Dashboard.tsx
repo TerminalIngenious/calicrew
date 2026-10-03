@@ -128,6 +128,7 @@ export default function Dashboard() {
             type="button"
             className={`creatine-card ${creatine.takenToday ? 'taken' : ''}`}
             onClick={creatine.toggle}
+            disabled={creatine.loading}
             aria-pressed={creatine.takenToday}
           >
             <div className="creatine-left">
@@ -135,7 +136,11 @@ export default function Dashboard() {
               <div>
                 <span className="creatine-title">Créatine</span>
                 <span className="creatine-sub">
-                  {creatine.takenToday ? 'Prise aujourd\'hui' : 'Pas encore prise aujourd\'hui'}
+                  {creatine.loading
+                    ? 'Chargement…'
+                    : creatine.takenToday
+                      ? 'Prise aujourd\'hui'
+                      : 'Pas encore prise aujourd\'hui'}
                 </span>
               </div>
             </div>

@@ -232,4 +232,9 @@ export interface UserProgress {
   weeklyQuestSelection?: WeeklyQuestSelection;
   monthlyRewardsClaimed?: string;
   badges?: RankBadge[];
+  /**
+   * Jours où la créatine a été prise, au format YYYY-MM-DD. Le streak s'en
+   * déduit et n'est jamais stocké, pour qu'il ne puisse pas devenir faux.
+   */
+  creatineDays?: string[];
 }
