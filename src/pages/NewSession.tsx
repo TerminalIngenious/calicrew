@@ -5,6 +5,9 @@ import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import { sportCoXp } from '../lib/passes';
+import { buildAmrapExercises } from '../lib/amrap';
+import AmrapBuilder from '../components/AmrapBuilder';
+import type { AmrapItem } from '../components/AmrapBuilder';
 import type { Exercise, ExerciseLog, WeightType, Program, SetUnit } from '../types';
 import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
 
@@ -42,7 +45,6 @@ export default function NewSession() {
   const [editModeCategory, setEditModeCategory] = useState<string | null>(null);
   const [selectedCustomExo, setSelectedCustomExo] = useState<Exercise | null>(null);
   const [showAmrap, setShowAmrap] = useState(false);
-  const [amrapMinutes, setAmrapMinutes] = useState(20);
   const [myPrograms, setMyPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
@@ -173,16 +175,13 @@ export default function NewSession() {
     }
   }
 
-  async function startAmrap() {
+  async function startAmrap(name: string, minutes: number, items: AmrapItem[]) {
     if (!user) return;
     const now = Date.now();
-    const exercises: ExerciseLog[] = [
-      { exerciseId: 'pull-ups', exerciseName: 'Tractions', exerciseCategory: 'pull', targetSets: 1, targetReps: 5, sets: [{ reps: 0, completed: false }] },
-      { exerciseId: 'push-ups', exerciseName: 'Pompes', exerciseCategory: 'push', targetSets: 1, targetReps: 10, sets: [{ reps: 0, completed: false }] },
-      { exerciseId: 'squats', exerciseName: 'Squats', exerciseCategory: 'legs', targetSets: 1, targetReps: 15, sets: [{ reps: 0, completed: false }] },
-    ];
+    const exercises = buildAmrapExercises(items);
+    if (exercises.length === 0) return;
 
-    const docRef = await addDoc(collection(db, 'sessions'), {
+    const payload: Record<string, unknown> = {
       userId: user.uid,
       date: new Date().toISOString().split('T')[0],
       exercises,
@@ -191,10 +190,12 @@ export default function NewSession() {
       startedAt: now,
       duration: 0,
       mode: 'amrap',
-      amrapDuration: amrapMinutes * 60,
+      amrapDuration: minutes * 60,
       amrapRounds: 0,
-    });
+    };
+    if (name) payload.amrapName = name;
 
+    const docRef = await addDoc(collection(db, 'sessions'), payload);
     navigate(`/session/${docRef.id}`);
   }
 
@@ -354,8 +355,8 @@ export default function NewSession() {
             <div className="cindy-card-left">
               <Zap size={22} className="cindy-icon" />
               <div>
-                <h3>Cindy (AMRAP)</h3>
-                <span className="cindy-desc">5 tractions • 10 pompes • 15 squats</span>
+                <h3>AMRAP</h3>
+                <span className="cindy-desc">Ton circuit, ton chrono</span>
               </div>
             </div>
             <span className="cindy-badge">WOD</span>
@@ -363,39 +364,7 @@ export default function NewSession() {
         </section>
 
         {showAmrap && (
-          <div className="modal-overlay">
-            <div className="modal-card">
-              <div className="modal-card-header">
-                <h3>Cindy — AMRAP</h3>
-                <button className="icon-btn" onClick={() => setShowAmrap(false)}>
-                  <X size={18} />
-                </button>
-              </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
-                Max de rounds en temps limité :<br />5 tractions + 10 pompes + 15 squats
-              </p>
-              <div className="amrap-time-picker">
-                <button className="time-picker-arrow" onClick={() => setAmrapMinutes((m) => Math.max(1, m - 1))}>
-                  <Minus size={18} />
-                </button>
-                <div className="amrap-time-display">
-                  <Timer size={18} />
-                  <span>{amrapMinutes} min</span>
-                </div>
-                <button className="time-picker-arrow" onClick={() => setAmrapMinutes((m) => Math.min(60, m + 1))}>
-                  <Plus size={18} />
-                </button>
-              </div>
-              <div className="modal-actions" style={{ marginTop: '1rem' }}>
-                <button className="secondary-btn" onClick={() => setShowAmrap(false)}>
-                  Annuler
-                </button>
-                <button className="primary-btn" onClick={startAmrap}>
-                  Lancer
-                </button>
-              </div>
-            </div>
-          </div>
+          <AmrapBuilder onClose={() => setShowAmrap(false)} onStart={startAmrap} />
         )}
 
         {myPrograms.length > 0 && (

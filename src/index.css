@@ -4704,6 +4704,14 @@ body {
   color: var(--text-muted);
 }
 
+/* Le circuit sous le résultat : sans lui, un nombre de tours ne veut rien dire. */
+.profile-record-amrap-circuit {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
 /* ── Season Splash ── */
 .season-splash {
   position: fixed;
@@ -5645,6 +5653,104 @@ body {
   margin: 0 0 1rem;
   font-size: 0.78rem;
   color: var(--danger);
+}
+
+/* ── Constructeur d'AMRAP ── */
+
+.amrap-builder {
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+.amrap-builder-intro {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.amrap-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.amrap-preset-chip {
+  padding: 0.35rem 0.8rem;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.amrap-preset-chip:active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.amrap-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.amrap-item {
+  padding: 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.amrap-item-exercise {
+  margin-bottom: 0.5rem;
+}
+
+.amrap-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.amrap-item-value {
+  width: 4.5rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.6rem;
+  margin: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.amrap-item-value:focus {
+  border-color: var(--accent);
+}
+
+.amrap-item-row .unit-picker {
+  flex: 1;
+}
+
+.amrap-item-row .unit-btn {
+  flex: 1;
+}
+
+.amrap-add-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 /* ── Poids par série & ajout d'exercice en séance ── */

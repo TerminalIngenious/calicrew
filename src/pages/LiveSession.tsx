@@ -9,6 +9,7 @@ import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
+import { amrapTitle, circuitLabel, materializeAmrapSets, repsPerRound, roundTotals } from '../lib/amrap';
 import { sportCoXp } from '../lib/passes';
 import { sessionReps, getUnit, unitLabel, isTimeBased, setWeight } from '../lib/stats';
 
@@ -284,8 +285,9 @@ export default function LiveSession() {
 
   async function saveAmrapEdit() {
     if (!session || !id) return;
-    await updateDoc(doc(db, 'sessions', id), { amrapRounds });
-    setSession({ ...session, amrapRounds });
+    const exercises = materializeAmrapSets(session.exercises, amrapRounds);
+    await updateDoc(doc(db, 'sessions', id), { amrapRounds, exercises });
+    setSession({ ...session, amrapRounds, exercises });
     await refresh();
     setEditing(false);
   }
@@ -300,8 +302,16 @@ export default function LiveSession() {
   async function finishSession() {
     if (!session || !id) return;
     const duration = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
-    const updateData: Record<string, unknown> = { completed: true, duration, exercises: session.exercises };
-    if (session.mode === 'amrap') updateData.amrapRounds = amrapRounds;
+    const isAmrapSession = session.mode === 'amrap';
+    // Un AMRAP ne logue rien pendant l'effort : on matérialise ici les tours
+    // en séries, sinon ses reps ne compteraient ni dans les classements ni
+    // dans les quêtes.
+    const exercises = isAmrapSession
+      ? materializeAmrapSets(session.exercises, amrapRounds)
+      : session.exercises;
+    const updateData: Record<string, unknown> = { completed: true, duration, exercises };
+    if (isAmrapSession) updateData.amrapRounds = amrapRounds;
+    setSession({ ...session, exercises });
     await updateDoc(doc(db, 'sessions', id), updateData);
 
     try {
@@ -352,7 +362,7 @@ export default function LiveSession() {
           <button className="icon-btn" onClick={() => navigate('/')}>
             <ArrowLeft size={20} />
           </button>
-          <h1>{isAmrap ? 'Récap Cindy' : 'Récap séance'}</h1>
+          <h1>Récap {isAmrap ? amrapTitle(session.amrapName) : 'séance'}</h1>
           <button className="icon-btn" onClick={() => editing ? (isAmrap ? saveAmrapEdit() : saveEdits()) : setEditing(true)}>
             {editing ? <Check size={20} /> : <Pencil size={18} />}
           </button>
@@ -403,7 +413,7 @@ export default function LiveSession() {
             <div className="recap-exercise-header">
               <div>
                 <h3>Par round</h3>
-                <span className="recap-exercise-sub">5 tractions + 10 pompes + 15 squats</span>
+                <span className="recap-exercise-sub">{circuitLabel(session.exercises)}</span>
               </div>
             </div>
             {editing ? (
@@ -418,21 +428,15 @@ export default function LiveSession() {
             ) : null}
             <div className="recap-stats-row" style={{ marginTop: '0.75rem' }}>
               <div className="recap-mini-stat">
-                <span className="recap-mini-value">{displayRounds * 30}</span>
+                <span className="recap-mini-value">{displayRounds * repsPerRound(session.exercises)}</span>
                 <span>reps totales</span>
               </div>
-              <div className="recap-mini-stat">
-                <span className="recap-mini-value">{displayRounds * 5}</span>
-                <span>tractions</span>
-              </div>
-              <div className="recap-mini-stat">
-                <span className="recap-mini-value">{displayRounds * 10}</span>
-                <span>pompes</span>
-              </div>
-              <div className="recap-mini-stat">
-                <span className="recap-mini-value">{displayRounds * 15}</span>
-                <span>squats</span>
-              </div>
+              {roundTotals(session.exercises, displayRounds).map((t, i) => (
+                <div key={i} className="recap-mini-stat">
+                  <span className="recap-mini-value">{t.total}</span>
+                  <span>{t.unit === 'sec' ? `s de ${t.name}` : t.name}</span>
+                </div>
+              ))}
             </div>
           </div>
         ) : (
@@ -600,7 +604,7 @@ export default function LiveSession() {
           <button className="icon-btn" onClick={() => navigate('/')}>
             <ArrowLeft size={20} />
           </button>
-          <h1>Cindy</h1>
+          <h1>{amrapTitle(session.amrapName)}</h1>
           <div className="session-timer">
             <Timer size={16} />
             <span>{formatTime(elapsed)}</span>
@@ -629,24 +633,23 @@ export default function LiveSession() {
             </button>
           )}
           <span className="amrap-round-detail">
-            {amrapRounds * 30} reps ({amrapRounds * 5} tractions + {amrapRounds * 10} pompes + {amrapRounds * 15} squats)
+            {amrapRounds * repsPerRound(session.exercises)} reps
+            {amrapRounds > 0 && ` — ${roundTotals(session.exercises, amrapRounds)
+              .map((t) => `${t.total} ${t.unit === 'sec' ? 's de ' : ''}${t.name}`)
+              .join(' + ')}`}
           </span>
         </div>
 
         <div className="amrap-exercises-reminder">
           <h3>1 round =</h3>
-          <div className="amrap-exercise-row">
-            <span className="amrap-ex-reps">5×</span>
-            <span>Tractions</span>
-          </div>
-          <div className="amrap-exercise-row">
-            <span className="amrap-ex-reps">10×</span>
-            <span>Pompes</span>
-          </div>
-          <div className="amrap-exercise-row">
-            <span className="amrap-ex-reps">15×</span>
-            <span>Squats</span>
-          </div>
+          {session.exercises.map((ex, i) => (
+            <div key={`${ex.exerciseId}-${i}`} className="amrap-exercise-row">
+              <span className="amrap-ex-reps">
+                {ex.unit === 'seconds' ? `${ex.targetReps} s` : `${ex.targetReps}×`}
+              </span>
+              <span>{ex.exerciseName}</span>
+            </div>
+          ))}
         </div>
 
         <button className="finish-btn floating-btn" onClick={() => setShowFinish(true)}>
@@ -656,9 +659,9 @@ export default function LiveSession() {
         {showFinish && (
           <div className="modal-overlay">
             <div className="modal-card">
-              <h3>Terminer le Cindy ?</h3>
+              <h3>Terminer {amrapTitle(session.amrapName)} ?</h3>
               <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                {amrapRounds} rounds en {formatTime(elapsed)}
+                {amrapRounds} round{amrapRounds > 1 ? 's' : ''} en {formatTime(elapsed)}
               </p>
               <div className="modal-actions">
                 <button className="secondary-btn" onClick={() => setShowFinish(false)}>

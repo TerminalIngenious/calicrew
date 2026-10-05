@@ -113,7 +113,7 @@ export function generateWeeklyQuests(prevWeekSessions: Session[]): Quest[] {
   const amrapSessions = prevWeekSessions.filter((s) => s.mode === 'amrap');
   if (amrapSessions.length > 0) {
     const amrapTarget = Math.min(2, Math.max(1, Math.ceil(amrapSessions.length * BOOST)));
-    quests.push({ id: `w${week}-amrap`, label: 'Cindy', description: `Fais ${amrapTarget} Cindy cette semaine`, target: amrapTarget, type: 'amrap', xp: 100 });
+    quests.push({ id: `w${week}-amrap`, label: 'AMRAP', description: `Fais ${amrapTarget} AMRAP cette semaine`, target: amrapTarget, type: 'amrap', xp: 100 });
   }
 
   const strengthExos = stats.filter((s) => s.category !== 'running' && s.category !== 'velo' && s.bestSessionReps > 0).sort((a, b) => b.bestSessionReps - a.bestSessionReps);
@@ -197,7 +197,7 @@ const CALISTHENICS_POOL: Omit<Quest, 'id'>[] = [
   { label: 'L-sit', description: 'Tiens 2 min de L-sit au total', target: 120, type: 'exercise_duration', xp: 75, exerciseId: 'l-sit', exerciseName: 'L-sit' },
   { label: 'Gainage', description: 'Tiens 5 min de gainage au total', target: 300, type: 'exercise_duration', xp: 75, exerciseId: 'gainage', exerciseName: 'Gainage' },
   { label: 'Pike push-ups', description: 'Fais 30 pike push-ups', target: 30, type: 'exercise_reps', xp: 75, exerciseId: 'pike-push-ups', exerciseName: 'Pike push-ups' },
-  { label: 'Cindy', description: 'Fais 1 AMRAP Cindy cette semaine', target: 1, type: 'amrap', xp: 100 },
+  { label: 'AMRAP', description: 'Fais 1 AMRAP cette semaine', target: 1, type: 'amrap', xp: 100 },
 ];
 
 const MUSCULATION_POOL: Omit<Quest, 'id'>[] = [
@@ -259,7 +259,7 @@ const CALISTHENICS_HARD: Omit<Quest, 'id'>[] = [
   { label: 'Pistol squats+', description: 'Fais 60 pistol squats', target: 60, type: 'exercise_reps', xp: 175, exerciseId: 'pistol-squats', exerciseName: 'Pistol squats' },
   { label: 'Dragon flags+', description: 'Fais 30 dragon flags', target: 30, type: 'exercise_reps', xp: 200, exerciseId: 'dragon-flags', exerciseName: 'Dragon flags' },
   { label: 'Pompes diamant+', description: 'Fais 100 pompes diamant', target: 100, type: 'exercise_reps', xp: 175, exerciseId: 'diamond-push-ups', exerciseName: 'Pompes diamant' },
-  { label: 'Double Cindy', description: 'Fais 2 AMRAP Cindy cette semaine', target: 2, type: 'amrap', xp: 200 },
+  { label: 'Double AMRAP', description: 'Fais 2 AMRAP cette semaine', target: 2, type: 'amrap', xp: 200 },
 ];
 
 const MUSCULATION_HARD: Omit<Quest, 'id'>[] = [

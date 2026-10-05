@@ -14,9 +14,17 @@ import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
 import { useCreatine } from '../lib/creatine';
+import { amrapTitle } from '../lib/amrap';
 import Loader from '../components/Loader';
 
 const UPDATES = [
+  {
+    id: 'update-2026-10-05',
+    date: '5 octobre 2026',
+    title: 'AMRAP sur mesure',
+    summary: 'Compose ton circuit, choisis ta durée, et les reps comptent enfin.',
+    details: `AMRAP sur mesure : tu n'es plus limité au Cindy. Choisis tes exercices, le nombre de reps (ou de secondes) de chaque, la durée du chrono et un nom, puis enchaîne les rounds. Jusqu'à 8 exercices par circuit.\n\nWOD de référence en un clic : Cindy, Chelsea et Mary remplissent le circuit pour toi, modifiable ensuite.\n\nCircuits en temps : un round peut contenir 30 s de gainage aussi bien que 10 pompes. Les secondes sont comptées comme du temps, jamais comme des reps.\n\nLes reps d'un AMRAP comptent enfin : à la fin de la séance, les rounds réalisés deviennent des séries. 12 rounds de 5 tractions valent 12 séries de 5, donc 60 tractions dans les classements, les quêtes et tes totaux. Avant, un AMRAP comptait pour zéro rep. Les séances AMRAP déjà enregistrées ne sont pas recalculées.\n\nRecords AMRAP par circuit : dans les profils, le meilleur résultat est affiché par circuit et par durée, avec le détail du circuit. Comparer des rounds entre deux circuits différents ne voulait rien dire.`,
+  },
   {
     id: 'update-2026-10-03',
     date: '3 octobre 2026',
@@ -232,7 +240,7 @@ export default function Dashboard() {
                     <div className="session-card-top">
                       <span className="session-date">
                         {format(new Date(s.date), 'd MMM', { locale: fr })}
-                          <span className="session-categories"> • {s.mode === 'amrap' ? 'Cindy AMRAP' : getSessionCategories(s)}</span>
+                          <span className="session-categories"> • {s.mode === 'amrap' ? amrapTitle(s.amrapName) : getSessionCategories(s)}</span>
                       </span>
                       <span className={`session-badge ${s.completed ? 'done' : 'partial'}`}>
                         {s.completed ? 'Terminée' : 'En cours'}

@@ -8,6 +8,7 @@ import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
 import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
+import { bestAmrapsByCircuit } from '../lib/amrap';
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import PersonalRecords from '../components/PersonalRecords';
 import SeasonalBadge from '../components/SeasonalBadge';
@@ -117,9 +118,7 @@ export default function Profile() {
     (sum, s) => sum + s.exercises.reduce((eSum, ex) => eSum + ex.sets.filter((set) => set.completed).length, 0), 0
   );
 
-  const bestAmrap = completedSessions
-    .filter((s) => s.mode === 'amrap')
-    .sort((a, b) => (b.amrapRounds || 0) - (a.amrapRounds || 0))[0];
+  const amrapBests = bestAmrapsByCircuit(completedSessions);
 
   function formatDuration(seconds: number): string {
     const h = Math.floor(seconds / 3600);
@@ -296,11 +295,12 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        {bestAmrap && (
-          <div className="profile-record-amrap">
-            Record AMRAP : <strong>{bestAmrap.amrapRounds} rounds</strong> en {Math.floor((bestAmrap.amrapDuration || 0) / 60)} min
+        {amrapBests.map((best) => (
+          <div key={best.key} className="profile-record-amrap">
+            {best.title} — <strong>{best.rounds} round{best.rounds > 1 ? 's' : ''}</strong> en {best.minutes} min
+            {best.circuit && <span className="profile-record-amrap-circuit">{best.circuit}</span>}
           </div>
-        )}
+        ))}
       </section>
       )}
 

@@ -50,6 +50,11 @@ export interface Session {
   mode?: 'standard' | 'amrap';
   amrapDuration?: number;
   amrapRounds?: number;
+  /**
+   * Nom du WOD. Absent sur les anciennes séances, qui étaient toutes des
+   * Cindy : l'affichage retombe alors sur « AMRAP ».
+   */
+  amrapName?: string;
 }
 
 // ── Programs ──
