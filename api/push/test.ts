@@ -50,10 +50,13 @@ async function run(req: VercelRequest, res: VercelResponse) {
 
   const uid = await verifyIdToken(token);
   if (!uid) {
+    // Pas de `config` ici : l'état de la configuration ne regarde que
+    // l'utilisateur authentifié, pas n'importe quel appelant.
     return res.status(401).json({
-      ok: false, step: 'auth', config, missing,
+      ok: false,
+      step: 'auth',
       error: config.firebaseApiKey
-        ? 'Session expirée. Recharge l\'app et réessaie.'
+        ? "Session expirée. Recharge l'app et réessaie."
         : "VITE_FIREBASE_API_KEY absente côté serveur : impossible de vérifier qui appelle.",
     });
   }
