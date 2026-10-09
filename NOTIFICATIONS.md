@@ -2,10 +2,28 @@
 
 Deux rappels quotidiens, envoyés par des Vercel Cron Jobs :
 
-| Rappel | Heure (Paris, été) | Cron UTC | Condition |
+| Rappel | Heure visée | Cron UTC | Condition |
 |---|---|---|---|
-| Créatine — « Chef, t'as pris ta créatine ?? » | 20h | `0 18 * * *` | abonnement actif |
-| Défi du jour | 17h | `0 15 * * *` | défi du jour non validé |
+| Créatine — « Chef, t'as pris ta créatine ?? » | 20h | `0 19 * * *` | rappel activé |
+| Défi du jour | 17h | `0 16 * * *` | défi du jour non validé |
+
+## Heure d'été, heure d'hiver
+
+Les crons Vercel sont en UTC et ne gèrent pas les fuseaux. Le projet est sur le plan
+**Hobby**, qui limite chaque cron à **un déclenchement par jour** : impossible de le faire
+suivre le changement d'heure automatiquement, ni avec un horaire multiple
+(`0 18,19 * * *`), ni avec un cron horaire filtré côté serveur.
+
+Il faut donc basculer les horaires à la main, deux fois par an :
+
+| Période | `creatine` | `daily-challenge` |
+|---|---|---|
+| Heure d'hiver (dernier dimanche d'octobre → dernier dimanche de mars) | `0 19 * * *` | `0 16 * * *` |
+| Heure d'été (dernier dimanche de mars → dernier dimanche d'octobre) | `0 18 * * *` | `0 15 * * *` |
+
+Réglé pour l'hiver le 9 octobre 2026. **Prochaine bascule : le 28 mars 2027**, vers les
+valeurs d'été. Entre le 9 et le 25 octobre 2026, les rappels arrivent une heure plus tard
+(21h et 18h) — seize jours de décalage assumés plutôt qu'une correction oubliée.
 
 ## Mise en route
 
@@ -94,11 +112,8 @@ ne partent pas alors que tout le reste semble correct.
 - **iOS** : le push ne fonctionne que si la PWA est installée sur l'écran d'accueil
   (iOS 16.4+). Dans un onglet Safari, c'est impossible — l'écran de réglages
   affiche un message d'installation à la place des interrupteurs.
-- **Heure d'hiver** : les crons Vercel sont en UTC sans gestion de fuseau. De fin
-  octobre à fin mars, les rappels arrivent une heure plus tôt (19h et 16h).
-  Corriger en passant les schedules à `0 19 * * *` et `0 16 * * *`.
-- **Plan Vercel** : sur Hobby, les crons sont limités en nombre et l'heure
-  d'exécution n'est garantie qu'à l'heure près.
+- **Plan Vercel** : sur Hobby, deux crons maximum par projet, un déclenchement par jour
+  chacun, et l'heure d'exécution n'est garantie qu'à l'heure près.
 - **Fuseau des utilisateurs** : le numéro du défi du jour est calculé en heure de
   Paris côté serveur et en heure locale côté client. Un utilisateur hors de
   France pourrait recevoir le rappel alors qu'il a validé son défi.

@@ -227,7 +227,7 @@ export default function NotificationSettings({
                 {sync === 'repaired' && (
                   <p className="notif-diag-line warn">
                     <AlertTriangle size={14} />
-                    Ton abonnement avait expiré, il vient d'être rétabli.
+                    La liaison avec ton téléphone avait expiré, elle vient d'être rétablie.
                   </p>
                 )}
                 {sync === 'permission-default' && (
@@ -257,7 +257,7 @@ export default function NotificationSettings({
                 {sync === 'failed' && (
                   <p className="notif-diag-line warn">
                     <AlertTriangle size={14} />
-                    Impossible de vérifier ton abonnement. Désactive puis réactive les rappels.
+                    Impossible de joindre ton téléphone. Désactive puis réactive les rappels.
                   </p>
                 )}
 
