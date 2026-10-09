@@ -1,7 +1,7 @@
 {
   "crons": [
-    { "path": "/api/cron/daily-challenge", "schedule": "0 16 * * *" },
-    { "path": "/api/cron/creatine", "schedule": "0 19 * * *" }
+    { "path": "/api/cron/daily-challenge", "schedule": "0 15 * * *" },
+    { "path": "/api/cron/creatine", "schedule": "0 18 * * *" }
   ],
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/" }

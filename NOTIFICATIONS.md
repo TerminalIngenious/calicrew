@@ -4,8 +4,8 @@ Deux rappels quotidiens, envoyés par des Vercel Cron Jobs :
 
 | Rappel | Heure visée | Cron UTC | Condition |
 |---|---|---|---|
-| Créatine — « Chef, t'as pris ta créatine ?? » | 20h | `0 19 * * *` | rappel activé |
-| Défi du jour | 17h | `0 16 * * *` | défi du jour non validé |
+| Créatine — « Chef, t'as pris ta créatine ?? » | 20h | `0 18 * * *` (été) | rappel activé |
+| Défi du jour | 17h | `0 15 * * *` (été) | défi du jour non validé |
 
 ## Heure d'été, heure d'hiver
 
@@ -21,9 +21,11 @@ Il faut donc basculer les horaires à la main, deux fois par an :
 | Heure d'hiver (dernier dimanche d'octobre → dernier dimanche de mars) | `0 19 * * *` | `0 16 * * *` |
 | Heure d'été (dernier dimanche de mars → dernier dimanche d'octobre) | `0 18 * * *` | `0 15 * * *` |
 
-Réglé pour l'hiver le 9 octobre 2026. **Prochaine bascule : le 28 mars 2027**, vers les
-valeurs d'été. Entre le 9 et le 25 octobre 2026, les rappels arrivent une heure plus tard
-(21h et 18h) — seize jours de décalage assumés plutôt qu'une correction oubliée.
+Actuellement sur les valeurs d'**été**, pour que les rappels tombent à 20h et 17h dès
+aujourd'hui.
+
+**À faire le 25 octobre 2026** : passer aux valeurs d'hiver, sinon les rappels arriveront
+à 19h et 16h. Puis repasser aux valeurs d'été le 28 mars 2027.
 
 ## Mise en route
 
