@@ -20,6 +20,9 @@
   --danger: #ff4757;
   --radius: 12px;
   --radius-sm: 8px;
+  /* Hauteur occupée par la barre de navigation : son padding haut, un
+     .nav-btn (icône + label), son padding bas, et la safe-area de l'iPhone. */
+  --nav-height: calc(4.25rem + env(safe-area-inset-bottom, 0px));
 }
 
 body {
@@ -128,6 +131,20 @@ body {
   transform: translateX(-50%);
   max-width: 440px;
   z-index: 10;
+}
+
+/*
+ * Sur une page qui a aussi la barre de navigation, un bouton flottant à
+ * 1.5rem du bas tombe derrière elle : la barre est opaque et en z-index 20,
+ * donc le bouton était invisible et surtout impossible à cliquer. C'est ce
+ * qui empêchait de créer un deuxième programme.
+ *
+ * Le :has() rend la correction automatique : toute page qui monte la barre
+ * décale ses boutons flottants, sans classe à penser à ajouter.
+ */
+.page:has(.bottom-nav) .floating-btn {
+  bottom: calc(var(--nav-height) + 1rem);
+  z-index: 25;
 }
 
 /* Stats grid */
@@ -5029,7 +5046,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding-bottom: 5rem;
+  /* Barre de navigation + bouton flottant remonté au-dessus d'elle. */
+  padding-bottom: calc(var(--nav-height) + 4rem);
 }
 
 .program-card {
