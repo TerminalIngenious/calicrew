@@ -66,6 +66,26 @@ export default function NotificationSettings({
     return () => { cancelled = true; };
   }, [uid]);
 
+  /**
+   * Redemande l'autorisation sans toucher aux préférences : elles sont déjà
+   * là, c'est seulement l'iPhone qui ne les laisse plus s'afficher.
+   */
+  async function regrant() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    setErrorDetail(null);
+
+    const result = await enablePush(uid, prefs);
+    if (result.ok) {
+      setSync(await syncSubscription(uid, prefs));
+    } else {
+      setError(ERROR_MESSAGES[result.reason]);
+      setErrorDetail(result.detail ?? null);
+    }
+    setBusy(false);
+  }
+
   async function runTest() {
     if (testing) return;
     setTesting(true);
@@ -215,10 +235,28 @@ export default function NotificationSettings({
                     Ton abonnement avait expiré, il vient d'être rétabli.
                   </p>
                 )}
-                {sync === 'no-permission' && (
+                {sync === 'permission-default' && (
+                  <>
+                    <p className="notif-diag-line warn">
+                      <AlertTriangle size={14} />
+                      Tes rappels sont activés mais l'iPhone n'a plus l'autorisation
+                      de les afficher. Ça arrive après une réinstallation de l'app.
+                    </p>
+                    <button
+                      className="primary-btn small notif-test-btn"
+                      onClick={regrant}
+                      disabled={busy}
+                    >
+                      {busy ? 'Demande en cours…' : "Redemander l'autorisation"}
+                    </button>
+                  </>
+                )}
+                {sync === 'permission-denied' && (
                   <p className="notif-diag-line warn">
                     <AlertTriangle size={14} />
-                    La permission a été retirée dans les réglages du navigateur.
+                    Les notifications sont refusées pour CaliCrew. Va dans Réglages
+                    de l'iPhone → Notifications → CaliCrew et autorise-les, puis
+                    rouvre l'app.
                   </p>
                 )}
                 {sync === 'failed' && (

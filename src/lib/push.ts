@@ -155,10 +155,11 @@ export async function disablePush(uid: string): Promise<void> {
 }
 
 export type SyncOutcome =
-  | 'inactive'       // aucun rappel activé, rien à vérifier
-  | 'ok'             // l'abonnement stocké est bien celui du navigateur
-  | 'repaired'       // il avait été révoqué ou avait changé : réenregistré
-  | 'no-permission'  // la permission a été retirée dans les réglages
+  | 'inactive'            // aucun rappel activé, rien à vérifier
+  | 'ok'                  // l'abonnement stocké est bien celui du navigateur
+  | 'repaired'            // il avait été révoqué ou avait changé : réenregistré
+  | 'permission-default'  // jamais accordée ou remise à zéro : on peut redemander
+  | 'permission-denied'   // refusée : seuls les réglages du téléphone peuvent la rendre
   | 'unsupported'
   | 'failed';
 
@@ -175,7 +176,10 @@ export type SyncOutcome =
 export async function syncSubscription(uid: string, prefs: PushPrefs): Promise<SyncOutcome> {
   if (!prefs.creatine && !prefs.dailyChallenge) return 'inactive';
   if (!isPushSupported() || !VAPID_PUBLIC_KEY) return 'unsupported';
-  if (Notification.permission !== 'granted') return 'no-permission';
+  // La distinction compte : « default » se répare par un bouton dans l'app,
+  // « denied » ne se répare que dans les réglages du téléphone.
+  if (Notification.permission === 'denied') return 'permission-denied';
+  if (Notification.permission !== 'granted') return 'permission-default';
 
   try {
     const registration = await readyRegistration();
