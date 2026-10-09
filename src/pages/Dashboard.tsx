@@ -19,6 +19,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-10-10',
+    date: '10 octobre 2026',
+    title: 'Circuit, programmes AMRAP & séance sans coffre',
+    summary: 'Vos retours : défilement des échanges, mode circuit, séance sans récompense, programmes AMRAP.',
+    details: `Séance en circuit : un bouton en haut de la séance bascule entre « Par exercice » et « En circuit ». En circuit, tu fais un tour de tous les exercices avant de recommencer, au lieu de finir un exercice puis de passer au suivant. Rien ne change dans tes données, c'est l'ordre d'affichage — et le choix est retenu pour la séance.\n\nProgrammes AMRAP : à la création d'un programme, tu choisis entre « Séries & reps » et « AMRAP ». Un programme AMRAP enregistre son circuit et sa durée, et le lancer démarre directement une séance AMRAP.\n\nSéance sans coffre : une case au moment de terminer. Pour rattraper un défi juste après une vraie séance, ou faire un essai, sans toucher une récompense de plus. Les reps comptent toujours — c'est la récompense qu'on refuse, pas l'effort.\n\nCorrection : dans les échanges, le sélecteur de cartes faisait défiler la page du dessous au lieu de sa propre liste. Corrigé partout, pas seulement là.`,
+  },
+  {
     id: 'update-2026-10-09d',
     date: '9 octobre 2026',
     title: 'Demander une carte',

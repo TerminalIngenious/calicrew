@@ -4,20 +4,18 @@ import { doc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, query, where
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
-import type { Session, SetUnit, Exercise, ExerciseLog } from '../types';
+import type { Session, Exercise, ExerciseLog } from '../types';
 import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
 import { amrapTitle, circuitLabel, materializeAmrapSets, repsPerRound, roundTotals } from '../lib/amrap';
 import { sportCoXp } from '../lib/passes';
-import { sessionReps, getUnit, unitLabel, isTimeBased, setWeight } from '../lib/stats';
+import { sessionReps, getUnit, unitLabel, setWeight } from '../lib/stats';
 
 /** Pas d'incrément : 5 s pour un isométrique, 1 rep sinon. */
-function setStep(ex: { unit?: SetUnit }): number {
-  return isTimeBased(ex) ? 5 : 1;
-}
 import Loader from '../components/Loader';
+import SetCard from '../components/SetCard';
 
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -54,6 +52,8 @@ export default function LiveSession() {
   const [amrapTimeUp, setAmrapTimeUp] = useState(false);
   /** Coché avant de terminer : la séance ne donnera pas de coffre. */
   const [noReward, setNoReward] = useState(false);
+  /** Ordre d'affichage : exercice par exercice, ou un tour de chaque. */
+  const [layout, setLayout] = useState<'exercise' | 'circuit'>('exercise');
 
   // Confirmation terminer
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -75,6 +75,7 @@ export default function LiveSession() {
   // Chrono session en fond
   useEffect(() => {
     if (session && session.amrapRounds !== undefined) setAmrapRounds(session.amrapRounds);
+    if (session?.layout) setLayout(session.layout);
     if (session && session.startedAt && !session.completed) {
       startTimeRef.current = session.startedAt;
       setElapsed(Math.floor((Date.now() - session.startedAt) / 1000));
@@ -125,6 +126,18 @@ export default function LiveSession() {
     if (restRef.current) clearInterval(restRef.current);
     setRestRunning(false);
     setRestTime(0);
+  }
+
+  /** La préférence est enregistrée : on la retrouve en rouvrant la séance. */
+  async function switchLayout(next: 'exercise' | 'circuit') {
+    if (!session || !id || next === layout) return;
+    setLayout(next);
+    setSession({ ...session, layout: next });
+    try {
+      await updateDoc(doc(db, 'sessions', id), { layout: next });
+    } catch (err) {
+      console.error('Changement de vue non enregistré:', err);
+    }
   }
 
   async function logSet(exerciseIndex: number, setIndex: number) {
@@ -346,6 +359,8 @@ export default function LiveSession() {
   );
   const addableCategories = [...new Set(addableExercises.map((e) => e.category))];
 
+  // Un circuit compte autant de tours que l'exercice qui en a le plus.
+  const circuitRounds = session.exercises.reduce((max, ex) => Math.max(max, ex.sets.length), 0);
   const totalSets = session.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
   const completedSets = session.exercises.reduce(
     (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
@@ -763,6 +778,58 @@ export default function LiveSession() {
         </span>
       </div>
 
+      {session.exercises.length > 1 && (
+        <div className="layout-switch">
+          <button
+            className={`layout-switch-btn ${layout === 'exercise' ? 'active' : ''}`}
+            onClick={() => switchLayout('exercise')}
+          >
+            Par exercice
+          </button>
+          <button
+            className={`layout-switch-btn ${layout === 'circuit' ? 'active' : ''}`}
+            onClick={() => switchLayout('circuit')}
+          >
+            En circuit
+          </button>
+        </div>
+      )}
+
+      {layout === 'circuit' ? (
+        <div className="live-circuit">
+          {Array.from({ length: circuitRounds }, (_, round) => {
+            // Un exercice peut avoir moins de séries que les autres : il sort
+            // simplement du circuit une fois les siennes épuisées.
+            const inRound = session.exercises
+              .map((ex, exIdx) => ({ ex, exIdx, set: ex.sets[round] }))
+              .filter((e) => e.set !== undefined);
+            const done = inRound.every((e) => e.set.completed);
+
+            return (
+              <div key={round} className={`circuit-round ${done ? 'done' : ''}`}>
+                <h3 className="circuit-round-title">
+                  Tour {round + 1}
+                  <span>{inRound.filter((e) => e.set.completed).length}/{inRound.length}</span>
+                </h3>
+                <div className="sets-grid">
+                  {inRound.map(({ ex, exIdx, set }) => (
+                    <SetCard
+                      key={exIdx}
+                      exercise={ex}
+                      set={set}
+                      label={ex.exerciseName}
+                      sublabel={ex.weighted && ex.weight ? `${ex.weight} kg` : undefined}
+                      onAdjustReps={(d) => adjustReps(exIdx, round, d)}
+                      onAdjustWeight={(d) => adjustSetWeight(exIdx, round, d)}
+                      onValidate={() => logSet(exIdx, round)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
       <div className="live-exercises">
         {session.exercises.map((ex, exIdx) => {
           const exCompleted = ex.sets.filter((s) => s.completed).length;
@@ -797,33 +864,15 @@ export default function LiveSession() {
               {isExpanded && (
                 <div className="sets-grid">
                   {ex.sets.map((set, setIdx) => (
-                    <div key={setIdx} className={`set-item ${set.completed ? 'completed' : ''}`}>
-                      <div className="set-header">
-                        <span className="set-label">Série {setIdx + 1}</span>
-                        <span className="set-target">
-                          Obj: {ex.targetReps}{isTimeBased(ex) ? ' s' : ''}
-                        </span>
-                      </div>
-                      <div className="set-controls">
-                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, -setStep(ex))}>−</button>
-                        <span className="reps-value">{set.reps}{isTimeBased(ex) ? ' s' : ''}</span>
-                        <button className="reps-btn" onClick={() => adjustReps(exIdx, setIdx, setStep(ex))}>+</button>
-                      </div>
-                      <div className="set-weight">
-                        <button className="set-weight-btn" onClick={() => adjustSetWeight(exIdx, setIdx, -0.5)}>−</button>
-                        <span className="set-weight-value">
-                          {setWeight(ex, set) > 0 ? `${setWeight(ex, set)} kg` : '—'}
-                        </span>
-                        <button className="set-weight-btn" onClick={() => adjustSetWeight(exIdx, setIdx, 0.5)}>+</button>
-                      </div>
-                      <button
-                        className={`validate-btn ${set.completed ? 'done' : ''}`}
-                        onClick={() => logSet(exIdx, setIdx)}
-                      >
-                        <Check size={16} />
-                        {set.completed ? 'Fait' : 'Valider'}
-                      </button>
-                    </div>
+                    <SetCard
+                      key={setIdx}
+                      exercise={ex}
+                      set={set}
+                      label={`Série ${setIdx + 1}`}
+                      onAdjustReps={(d) => adjustReps(exIdx, setIdx, d)}
+                      onAdjustWeight={(d) => adjustSetWeight(exIdx, setIdx, d)}
+                      onValidate={() => logSet(exIdx, setIdx)}
+                    />
                   ))}
                 </div>
               )}
@@ -853,6 +902,7 @@ export default function LiveSession() {
           );
         })}
       </div>
+      )}
 
       <button className="add-exercise-live-btn" onClick={openAddExercise}>
         <Plus size={16} /> Ajouter un exercice

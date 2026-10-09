@@ -67,6 +67,36 @@ export default function NewSession() {
   async function startFromProgram(prog: Program) {
     if (!user) return;
     const now = Date.now();
+
+    // Un programme AMRAP décrit un circuit : ses exercices deviennent un tour,
+    // et les séries seront matérialisées à la fin, comme tout AMRAP.
+    if (prog.kind === 'amrap') {
+      const circuit = buildAmrapExercises(
+        prog.exercises.map((ex) => ({
+          exerciseId: ex.exerciseId,
+          value: ex.targetReps,
+          unit: ex.unit,
+        }))
+      );
+      if (circuit.length === 0) return;
+
+      const docRef = await addDoc(collection(db, 'sessions'), {
+        userId: user.uid,
+        date: new Date().toISOString().split('T')[0],
+        exercises: circuit,
+        completed: false,
+        createdAt: now,
+        startedAt: now,
+        duration: 0,
+        mode: 'amrap',
+        amrapDuration: (prog.amrapMinutes || 20) * 60,
+        amrapRounds: 0,
+        amrapName: prog.name,
+      });
+      navigate(`/session/${docRef.id}`);
+      return;
+    }
+
     const exercises: ExerciseLog[] = prog.exercises.map((ex) => {
       const log: ExerciseLog = {
         exerciseId: ex.exerciseId,

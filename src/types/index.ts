@@ -61,6 +61,12 @@ export interface Session {
    * la récompense qu'on renonce à toucher deux fois.
    */
   noReward?: boolean;
+  /**
+   * Façon de dérouler la séance. 'circuit' enchaîne un tour de tous les
+   * exercices avant de recommencer, au lieu de finir un exercice puis de
+   * passer au suivant. Les données ne changent pas, seul l'ordre d'affichage.
+   */
+  layout?: 'exercise' | 'circuit';
 }
 
 // ── Programs ──
@@ -80,6 +86,10 @@ export interface ProgramExercise {
 export interface Program {
   id: string;
   name: string;
+  /** Absent = 'standard' : les programmes d'avant sont tous en séries/reps. */
+  kind?: 'standard' | 'amrap';
+  /** Durée du chrono, pour un programme AMRAP. */
+  amrapMinutes?: number;
   description?: string;
   createdBy: string;
   creatorName: string;

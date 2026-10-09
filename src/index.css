@@ -840,6 +840,108 @@ body {
   justify-content: flex-end;
 }
 
+/* Type de programme et repère AMRAP. */
+.program-kind {
+  margin-bottom: 0.75rem;
+}
+
+.layout-switch-btn svg {
+  vertical-align: -2px;
+  margin-right: 0.2rem;
+}
+
+.program-kind-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.program-amrap-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+  padding: 0.15rem 0.45rem;
+  border-radius: 99px;
+  background: rgba(255, 107, 53, 0.14);
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* ── Séance en circuit ── */
+
+.layout-switch {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+  padding: 0.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.layout-switch-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.layout-switch-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.live-circuit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.circuit-round {
+  padding: 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Un tour terminé s'efface pour que l'œil tombe sur le suivant. */
+.circuit-round.done {
+  opacity: 0.55;
+}
+
+.circuit-round-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.circuit-round-title span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* En circuit, c'est le nom de l'exercice qui titre la série. */
+.set-sublabel {
+  display: block;
+  margin-top: 0.1rem;
+  font-style: normal;
+  font-size: 0.66rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
 /* Option « sans coffre » du dialogue de fin de séance. */
 .no-reward-row {
   display: flex;

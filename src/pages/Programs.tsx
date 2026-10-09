@@ -5,7 +5,8 @@ import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } 
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Program, ProgramExercise, Exercise, WeightType, SetUnit } from '../types';
-import { Plus, Minus, Trash2, ArrowLeft, X, Globe, Lock, Pencil } from 'lucide-react';
+import { AMRAP_MAX_MINUTES, AMRAP_MIN_MINUTES } from '../lib/amrap';
+import { Plus, Minus, Trash2, ArrowLeft, X, Globe, Lock, Pencil, Timer, Zap } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -23,6 +24,8 @@ export default function Programs() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [kind, setKind] = useState<'standard' | 'amrap'>('standard');
+  const [amrapMinutes, setAmrapMinutes] = useState(20);
   const [selectedExercises, setSelectedExercises] = useState<ProgramExercise[]>([]);
   const [showExPicker, setShowExPicker] = useState(false);
 
@@ -81,6 +84,8 @@ export default function Programs() {
     setDescription('');
     setSelectedExercises([]);
     setIsPublic(true);
+    setKind('standard');
+    setAmrapMinutes(20);
   }
 
   function startCreate() {
@@ -93,6 +98,8 @@ export default function Programs() {
     setName(program.name);
     setDescription(program.description || '');
     setIsPublic(program.isPublic);
+    setKind(program.kind === 'amrap' ? 'amrap' : 'standard');
+    setAmrapMinutes(program.amrapMinutes || 20);
     // Copie : on ne veut pas muter la liste tant que rien n'est enregistré.
     setSelectedExercises(program.exercises.map((ex) => ({ ...ex })));
     setEditor({ mode: 'edit', program });
@@ -117,6 +124,8 @@ export default function Programs() {
           description: description.trim(),
           exercises: selectedExercises,
           isPublic,
+          kind,
+          amrapMinutes,
         });
       } else {
         await addDoc(collection(db, 'programs'), {
@@ -126,6 +135,8 @@ export default function Programs() {
           creatorName: myName,
           exercises: selectedExercises,
           isPublic,
+          kind,
+          amrapMinutes,
           createdAt: Date.now(),
         });
       }
@@ -181,7 +192,52 @@ export default function Programs() {
             <span>{isPublic ? 'Public — visible par tous' : 'Privé — visible que par toi'}</span>
           </div>
 
-          <h3 className="program-section-title">Exercices ({selectedExercises.length})</h3>
+          <div className="layout-switch program-kind">
+            <button
+              className={`layout-switch-btn ${kind === 'standard' ? 'active' : ''}`}
+              onClick={() => setKind('standard')}
+            >
+              Séries & reps
+            </button>
+            <button
+              className={`layout-switch-btn ${kind === 'amrap' ? 'active' : ''}`}
+              onClick={() => setKind('amrap')}
+            >
+              <Zap size={14} /> AMRAP
+            </button>
+          </div>
+
+          {kind === 'amrap' && (
+            <>
+              <p className="program-kind-hint">
+                Un tour du circuit, répété autant de fois que possible dans le temps imparti.
+              </p>
+              <div className="amrap-time-picker">
+                <button
+                  className="time-picker-arrow"
+                  aria-label="Moins une minute"
+                  onClick={() => setAmrapMinutes((m) => Math.max(AMRAP_MIN_MINUTES, m - 1))}
+                >
+                  <Minus size={18} />
+                </button>
+                <div className="amrap-time-display">
+                  <Timer size={18} />
+                  <span>{amrapMinutes} min</span>
+                </div>
+                <button
+                  className="time-picker-arrow"
+                  aria-label="Plus une minute"
+                  onClick={() => setAmrapMinutes((m) => Math.min(AMRAP_MAX_MINUTES, m + 1))}
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
+            </>
+          )}
+
+          <h3 className="program-section-title">
+            {kind === 'amrap' ? '1 tour =' : 'Exercices'} ({selectedExercises.length})
+          </h3>
 
           {selectedExercises.map((ex, idx) => (
             <div key={idx} className="program-ex-card">
@@ -191,14 +247,16 @@ export default function Programs() {
                   <Trash2 size={14} />
                 </button>
               </div>
-              <div className="config-row">
-                <span>Séries</span>
-                <div className="stepper">
-                  <button onClick={() => updateExercise(idx, 'targetSets', -1)}><Minus size={14} /></button>
-                  <span>{ex.targetSets}</span>
-                  <button onClick={() => updateExercise(idx, 'targetSets', 1)}><Plus size={14} /></button>
+              {kind === 'standard' && (
+                <div className="config-row">
+                  <span>Séries</span>
+                  <div className="stepper">
+                    <button onClick={() => updateExercise(idx, 'targetSets', -1)}><Minus size={14} /></button>
+                    <span>{ex.targetSets}</span>
+                    <button onClick={() => updateExercise(idx, 'targetSets', 1)}><Plus size={14} /></button>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="config-row">
                 <span>Unité</span>
                 <div className="unit-picker">
@@ -216,7 +274,11 @@ export default function Programs() {
                 </div>
               </div>
               <div className="config-row">
-                <span>{ex.unit === 'seconds' ? 'Secondes / série' : 'Reps'}</span>
+                <span>
+                  {kind === 'amrap'
+                    ? ex.unit === 'seconds' ? 'Secondes / tour' : 'Reps / tour'
+                    : ex.unit === 'seconds' ? 'Secondes / série' : 'Reps'}
+                </span>
                 <div className="stepper">
                   <button onClick={() => updateExercise(idx, 'targetReps', ex.unit === 'seconds' ? -5 : -1)}><Minus size={14} /></button>
                   <span>{ex.targetReps}{ex.unit === 'seconds' ? ' s' : ''}</span>
@@ -350,6 +412,11 @@ export default function Programs() {
               <div className="program-card-footer">
                 {prog.isPublic ? <Globe size={12} /> : <Lock size={12} />}
                 <span>{prog.exercises.length} exercices</span>
+                {prog.kind === 'amrap' && (
+                  <span className="program-amrap-tag">
+                    <Zap size={11} /> AMRAP {prog.amrapMinutes || 20} min
+                  </span>
+                )}
               </div>
             </div>
           ))}
