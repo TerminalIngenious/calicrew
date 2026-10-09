@@ -14,17 +14,17 @@ import {
   arrayRemove,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, getCardById, getCardDisplayName, RARITY_COLORS } from '../lib/cards';
+import { getCardsBySet, getCardById, getCardDisplayName, getAllCurrentCards, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
 import { makeBadgeId, badgeTitle } from '../lib/badges';
 import {
-  BID_REFUSAL_MESSAGES, SWAP_REFUSAL_MESSAGES, checkBid, myBid,
-  pendingActionCount, sortListings, swapCards, withBid, withoutBid,
+  BID_REFUSAL_MESSAGES, SWAP_REFUSAL_MESSAGES, canAnswer, checkBid, countOf, listingKind,
+  myBid, pendingActionCount, sortListings, swapCards, tradeCards, withBid, withoutBid,
 } from '../lib/trades';
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import TradeCardPicker from '../components/TradeCardPicker';
-import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeListing, Card, CardRarity, RankBadge, RankCategory } from '../types';
+import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeListing, TradeKind, Card, CardRarity, RankBadge, RankCategory } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -102,8 +102,16 @@ export default function Group() {
   const [groupTab, setGroupTab] = useState<'classement' | 'echanges'>('classement');
   const [listings, setListings] = useState<TradeListing[]>([]);
   const [myOwnedCards, setMyOwnedCards] = useState<Record<string, number>>({});
-  /** Sélecteur de carte : soit pour publier une annonce, soit pour proposer. */
-  const [cardPicker, setCardPicker] = useState<{ mode: 'publish' } | { mode: 'bid'; listing: TradeListing } | null>(null);
+  /**
+   * Sélecteur de carte. Les choix dépendent du cas : ma collection pour une
+   * offre, les cartes qui me manquent pour une recherche, et pour répondre à
+   * la recherche de quelqu'un, sa collection à lui.
+   */
+  const [cardPicker, setCardPicker] = useState<
+    | { mode: 'publish'; kind: TradeKind }
+    | { mode: 'bid'; listing: TradeListing; choices: { card: Card; count: number }[] }
+    | null
+  >(null);
   const [tradeBusy, setTradeBusy] = useState(false);
   const [tradeError, setTradeError] = useState<string | null>(null);
 
@@ -602,26 +610,42 @@ export default function Group() {
     await refreshMyCards();
   }
 
-  async function refreshMyCards() {
-    if (!user) return;
+  async function refreshMyCards(): Promise<Record<string, number>> {
+    if (!user) return {};
     const snap = await getDoc(doc(db, 'userProgress', user.uid));
-    setMyOwnedCards(snap.exists() ? (snap.data() as UserProgress).ownedCards || {} : {});
+    const owned = snap.exists() ? (snap.data() as UserProgress).ownedCards || {} : {};
+    setMyOwnedCards(owned);
+    return owned;
   }
 
-  async function openPublishPicker() {
+  async function openPublishPicker(kind: TradeKind) {
     setTradeError(null);
     await refreshMyCards();
-    setCardPicker({ mode: 'publish' });
+    setCardPicker({ mode: 'publish', kind });
   }
 
+  /**
+   * Pour répondre à une offre on puise dans sa propre collection ; pour
+   * répondre à une recherche, dans celle de l'auteur — puisqu'on choisit ce
+   * qu'on veut en échange de la carte qu'il réclame.
+   */
   async function openBidPicker(listing: TradeListing) {
+    if (!user) return;
     setTradeError(null);
-    await refreshMyCards();
-    setCardPicker({ mode: 'bid', listing });
+    const mine = await refreshMyCards();
+
+    if (listingKind(listing) === 'offre') {
+      setCardPicker({ mode: 'bid', listing, choices: getOwnedCardList(mine) });
+      return;
+    }
+
+    const snap = await getDoc(doc(db, 'userProgress', listing.ownerUid));
+    const theirs = snap.exists() ? (snap.data() as UserProgress).ownedCards || {} : {};
+    setCardPicker({ mode: 'bid', listing, choices: getOwnedCardList(theirs) });
   }
 
-  /** Publie une carte à l'échange, visible par tout le groupe. */
-  async function publishListing(cardId: string) {
+  /** Publie une annonce, visible par tout le groupe. */
+  async function publishListing(cardId: string, kind: TradeKind) {
     if (!user || !selectedGroup || tradeBusy) return;
     setTradeBusy(true);
     try {
@@ -629,6 +653,7 @@ export default function Group() {
         groupId: selectedGroup.id,
         ownerUid: user.uid,
         ownerName: myName,
+        kind,
         cardId,
         bids: [],
         status: 'open',
@@ -707,11 +732,12 @@ export default function Group() {
         return;
       }
 
+      const { ownerGives, bidderGives } = tradeCards(listing, bid.cardId);
       const swap = swapCards(
         (ownerSnap.data() as UserProgress).ownedCards || {},
         (bidderSnap.data() as UserProgress).ownedCards || {},
-        listing.cardId,
-        bid.cardId
+        ownerGives,
+        bidderGives
       );
       if (!swap.ok) {
         setTradeError(SWAP_REFUSAL_MESSAGES[swap.reason]);
@@ -783,15 +809,64 @@ export default function Group() {
   const incomingTrades = pendingActionCount(listings, user?.uid || '');
   const myListings = listings.filter((l) => l.ownerUid === user?.uid);
   const otherListings = listings.filter((l) => l.ownerUid !== user?.uid);
-  // On ne propose pas la carte déjà mise à l'échange : le troc serait nul.
-  const pickerChoices = getOwnedCardList(myOwnedCards).filter(
-    (e) => !cardPicker || cardPicker.mode === 'publish' || e.card.id !== cardPicker.listing.cardId
-  );
+  // Les cartes qui me manquent, pour publier une recherche. Le compte affiché
+  // n'a pas de sens ici puisque je n'en possède aucune.
+  const missingCards = selectedGroup
+    ? getAllCurrentCards(season?.id || '')
+        .filter((c) => countOf(myOwnedCards, c.id) === 0)
+        .map((card) => ({ card, count: 0 }))
+    : [];
+
+  function pickerChoices(): { card: Card; count: number }[] {
+    if (!cardPicker) return [];
+    if (cardPicker.mode === 'publish') {
+      return cardPicker.kind === 'recherche' ? missingCards : getOwnedCardList(myOwnedCards);
+    }
+    // On ne propose pas la carte de l'annonce : le troc serait nul.
+    return cardPicker.choices.filter((e) => e.card.id !== cardPicker.listing.cardId);
+  }
 
   function pickCard(cardId: string) {
     if (!cardPicker) return;
-    if (cardPicker.mode === 'publish') publishListing(cardId);
+    if (cardPicker.mode === 'publish') publishListing(cardId, cardPicker.kind);
     else placeBid(cardPicker.listing, cardId);
+  }
+
+  function pickerTitle(): string {
+    if (!cardPicker) return '';
+    if (cardPicker.mode === 'publish') {
+      return cardPicker.kind === 'recherche'
+        ? 'Quelle carte cherches-tu ?'
+        : "Quelle carte mets-tu à l'échange ?";
+    }
+    return listingKind(cardPicker.listing) === 'recherche'
+      ? 'Que veux-tu en échange ?'
+      : 'Quelle carte proposes-tu ?';
+  }
+
+  function pickerHint(): string | undefined {
+    if (!cardPicker) return undefined;
+    if (cardPicker.mode === 'publish') {
+      return cardPicker.kind === 'recherche'
+        ? "Seules les cartes que tu n'as pas sont proposées. Ceux qui l'ont pourront te dire ce qu'ils veulent en retour."
+        : undefined;
+    }
+    const { listing } = cardPicker;
+    const card = getCardById(listing.cardId);
+    if (!card) return undefined;
+    return listingKind(listing) === 'recherche'
+      ? `${listing.ownerName} cherche ${getCardDisplayName(card)}. Choisis ce que tu veux dans sa collection.`
+      : `${listing.ownerName} met ${getCardDisplayName(card)} à l'échange.`;
+  }
+
+  function pickerEmptyLabel(): string {
+    if (cardPicker?.mode === 'publish' && cardPicker.kind === 'recherche') {
+      return 'Tu as déjà toutes les cartes de la saison.';
+    }
+    if (cardPicker?.mode === 'bid' && listingKind(cardPicker.listing) === 'recherche') {
+      return "Cette personne n'a aucune carte à te proposer en retour.";
+    }
+    return "Tu n'as aucune carte à proposer.";
   }
 
   return (
@@ -1067,12 +1142,17 @@ export default function Group() {
           {groupTab === 'echanges' && (
             <section className="section">
               <div className="trades-section">
-                <button className="primary-btn small trade-publish-btn" onClick={openPublishPicker}>
-                  <ArrowLeftRight size={16} /> Mettre une carte à l'échange
-                </button>
+                <div className="trade-publish-row">
+                  <button className="primary-btn small trade-publish-btn" onClick={() => openPublishPicker('offre')}>
+                    <ArrowLeftRight size={16} /> J'échange une carte
+                  </button>
+                  <button className="secondary-btn small trade-publish-btn" onClick={() => openPublishPicker('recherche')}>
+                    <Search size={16} /> Je cherche une carte
+                  </button>
+                </div>
                 <p className="trade-hint">
-                  Ta carte est proposée à tout le groupe. Chacun propose la sienne,
-                  et tu choisis avec qui échanger.
+                  Dans les deux cas l'annonce part à tout le groupe, chacun répond
+                  avec sa carte, et c'est toi qui choisis avec qui conclure.
                 </p>
 
                 {tradeError && <p className="pr-form-error">{tradeError}</p>}
@@ -1094,6 +1174,9 @@ export default function Group() {
                               <span className="trade-card-name">{card ? getCardDisplayName(card) : '?'}</span>
                             </div>
                             <div className="trade-listing-meta">
+                              <span className={`trade-kind trade-kind-${listingKind(listing)}`}>
+                                {listingKind(listing) === 'recherche' ? 'Je cherche' : "J'échange"}
+                              </span>
                               <span className="trade-listing-count">
                                 {bids.length === 0
                                   ? 'Aucune proposition'
@@ -1168,7 +1251,11 @@ export default function Group() {
                               <span className="trade-card-name">{card ? getCardDisplayName(card) : '?'}</span>
                             </div>
                             <div className="trade-listing-meta">
-                              <span className="trade-bid-name">{listing.ownerName}</span>
+                              <span className={`trade-kind trade-kind-${listingKind(listing)}`}>
+                                {listingKind(listing) === 'recherche'
+                                  ? `${listing.ownerName} cherche`
+                                  : `${listing.ownerName} échange`}
+                              </span>
                               <span className="trade-listing-count">
                                 {(listing.bids || []).length} proposition
                                 {(listing.bids || []).length > 1 ? 's' : ''}
@@ -1198,14 +1285,20 @@ export default function Group() {
                                 </button>
                               </div>
                             </div>
-                          ) : (
+                          ) : canAnswer(listing, myOwnedCards) ? (
                             <button
                               className="secondary-btn small trade-bid-btn"
                               disabled={tradeBusy}
                               onClick={() => openBidPicker(listing)}
                             >
-                              Proposer une carte
+                              {listingKind(listing) === 'recherche'
+                                ? 'Donner cette carte'
+                                : 'Proposer une carte'}
                             </button>
+                          ) : (
+                            <p className="trade-cannot-answer">
+                              Tu n'as pas cette carte.
+                            </p>
                           )}
                         </div>
                       );
@@ -1230,9 +1323,10 @@ export default function Group() {
 
       {cardPicker && (
         <TradeCardPicker
-          listing={cardPicker.mode === 'publish' ? null : cardPicker.listing}
-          wantedCard={cardPicker.mode === 'publish' ? undefined : getCardById(cardPicker.listing.cardId)}
-          cards={pickerChoices}
+          title={pickerTitle()}
+          hint={pickerHint()}
+          emptyLabel={pickerEmptyLabel()}
+          cards={pickerChoices()}
           busy={tradeBusy}
           error={tradeError}
           onPick={pickCard}

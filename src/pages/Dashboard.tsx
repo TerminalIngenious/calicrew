@@ -19,6 +19,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-10-09d',
+    date: '9 octobre 2026',
+    title: 'Demander une carte',
+    summary: 'En plus de proposer une carte, tu peux maintenant en réclamer une qui te manque.',
+    details: `Les échanges marchent désormais dans les deux sens. « J'échange une carte » met une des tiennes à disposition, comme avant. « Je cherche une carte » fait l'inverse : tu choisis une carte que tu n'as pas, et ceux qui l'ont peuvent te répondre.\n\nQuand tu réponds à une recherche, c'est toi qui choisis ce que tu veux en retour, directement dans la collection de la personne. Elle garde le dernier mot et retient la proposition qui l'intéresse.\n\nLe sélecteur ne propose que des cartes qui te manquent quand tu publies une recherche, et le bouton « Donner cette carte » n'apparaît que si tu possèdes vraiment celle qui est demandée.\n\nLes annonces déjà publiées restent des offres, rien à refaire.`,
+  },
+  {
     id: 'update-2026-10-09c',
     date: '9 octobre 2026',
     title: 'Notifications réparables',

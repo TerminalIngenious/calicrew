@@ -8,7 +8,7 @@
  * juste, puisqu'elle déplace des cartes entre deux inventaires.
  */
 
-import type { TradeBid, TradeListing } from '../types';
+import type { TradeBid, TradeKind, TradeListing } from '../types';
 
 export type Owned = Record<string, number>;
 
@@ -25,13 +25,40 @@ export function myBid(listing: TradeListing, uid: string): TradeBid | undefined 
   return (listing.bids || []).find((b) => b.uid === uid);
 }
 
+/** Les annonces d'avant les recherches n'ont pas de `kind` : ce sont des offres. */
+export function listingKind(listing: TradeListing): TradeKind {
+  return listing.kind === 'recherche' ? 'recherche' : 'offre';
+}
+
+/**
+ * Qui donne quoi, une fois la proposition retenue.
+ *
+ * Dans une offre, la carte de l'annonce est celle que l'auteur donne et le
+ * proposant choisit ce qu'il met en face. Dans une recherche c'est l'inverse :
+ * la carte de l'annonce est celle que le proposant devra fournir, et il choisit
+ * ce qu'il veut prendre dans la collection de l'auteur. L'échange est le même,
+ * seul le côté fixé d'avance change.
+ */
+export function tradeCards(
+  listing: TradeListing,
+  bidCardId: string
+): { ownerGives: string; bidderGives: string } {
+  return listingKind(listing) === 'recherche'
+    ? { ownerGives: bidCardId, bidderGives: listing.cardId }
+    : { ownerGives: listing.cardId, bidderGives: bidCardId };
+}
+
 export type BidRefusal =
   | 'own-listing'      // on ne propose pas sur sa propre annonce
   | 'closed'           // annonce déjà conclue ou retirée
   | 'not-owned'        // la carte proposée n'est pas dans l'inventaire
   | 'same-card';       // proposer la carte déjà mise à l'échange ne donne rien
 
-/** Null si la proposition est acceptable, sinon la raison du refus. */
+/**
+ * Null si la proposition est acceptable, sinon la raison du refus. `owned` est
+ * l'inventaire du proposant : c'est toujours lui qu'on vérifie ici, quel que
+ * soit le sens de l'annonce.
+ */
 export function checkBid(
   listing: TradeListing,
   uid: string,
@@ -41,15 +68,21 @@ export function checkBid(
   if (listing.status !== 'open') return 'closed';
   if (listing.ownerUid === uid) return 'own-listing';
   if (cardId === listing.cardId) return 'same-card';
-  if (!owns(owned, cardId)) return 'not-owned';
+  const { bidderGives } = tradeCards(listing, cardId);
+  if (!owns(owned, bidderGives)) return 'not-owned';
   return null;
+}
+
+/** Peut-on seulement répondre à cette recherche ? Il faut posséder la carte. */
+export function canAnswer(listing: TradeListing, owned: Owned | undefined): boolean {
+  return listingKind(listing) === 'offre' || owns(owned, listing.cardId);
 }
 
 export const BID_REFUSAL_MESSAGES: Record<BidRefusal, string> = {
   'own-listing': "C'est ta propre annonce.",
   closed: "Cette annonce n'est plus ouverte.",
   'not-owned': "Tu n'as plus cette carte.",
-  'same-card': "C'est la carte déjà mise à l'échange.",
+  'same-card': "C'est la carte de l'annonce.",
 };
 
 /**

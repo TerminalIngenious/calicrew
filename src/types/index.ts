@@ -182,6 +182,13 @@ export interface ChatMessage {
 
 // ── Trades ──
 
+/**
+ * Sens de l'annonce. Une offre met une carte à disposition, une recherche
+ * réclame une carte qu'on n'a pas — dans les deux cas l'échange final est le
+ * même, c'est le côté connu d'avance qui change.
+ */
+export type TradeKind = 'offre' | 'recherche';
+
 /** Proposition d'un membre sur une annonce. Une seule par personne. */
 export interface TradeBid {
   uid: string;
@@ -203,7 +210,9 @@ export interface TradeListing {
   groupId: string;
   ownerUid: string;
   ownerName: string;
-  /** La carte mise à l'échange par l'auteur. */
+  /** Absent = 'offre' : les annonces d'avant ne pouvaient qu'offrir. */
+  kind?: TradeKind;
+  /** Carte donnée par l'auteur si c'est une offre, réclamée si c'est une recherche. */
   cardId: string;
   bids: TradeBid[];
   status: 'open' | 'completed' | 'cancelled';

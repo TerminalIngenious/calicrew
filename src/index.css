@@ -1718,12 +1718,47 @@ body {
 
 /* ── Annonces d'échange ── */
 
-.trade-publish-btn {
+.trade-publish-row {
   display: flex;
+  gap: 0.5rem;
+}
+
+.trades-section .trade-publish-row .trade-publish-btn {
+  display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  width: 100%;
+  gap: 0.35rem;
+  min-width: 0;
+  /* Ce sont les deux entrées principales de l onglet : la hauteur par defaut
+     des petits boutons (34 px) est trop juste pour une cible au pouce. */
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Le sens de l'annonce doit se lire avant la carte : donner et chercher
+   n'appellent pas la même action. */
+.trade-kind {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trade-kind-offre {
+  color: var(--accent);
+}
+
+.trade-kind-recherche {
+  color: var(--accent-green);
+}
+
+.trade-cannot-answer {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.76rem;
+  color: var(--text-muted);
 }
 
 .trade-hint {
