@@ -1699,6 +1699,131 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Annonces d'échange ── */
+
+.trade-publish-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.trade-hint {
+  margin: 0.6rem 0 1rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.trade-listing {
+  padding: 0.75rem;
+  margin-bottom: 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* La carte à l'échange garde une largeur fixe : c'est le sujet de l'annonce,
+   elle ne doit pas se déformer selon le nom du membre. */
+.trade-listing-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.trade-listing-head .trade-card-item {
+  flex: 0 0 5.5rem;
+}
+
+.trade-listing-meta {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.trade-listing-count {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.trade-bids {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.trade-bid {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.trade-bid .trade-card-item.small {
+  flex: 0 0 4.25rem;
+  border-width: 1px;
+  padding: 0.35rem;
+}
+
+.trade-bid-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.trade-bid-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.trade-bid-info .trade-actions {
+  margin-top: 0;
+}
+
+.trade-bid-btn,
+.trade-my-bid {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.trade-my-bid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.trade-my-bid-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.trade-my-bid .trade-actions {
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+.trade-actions button:disabled {
+  opacity: 0.5;
+}
+
+/* Dans le sélecteur, la bordure porte la rareté : pas d'état « sélectionné »
+   puisqu'un clic valide directement. */
+.trade-card-pick:disabled {
+  opacity: 0.5;
+}
+
 .trade-actions {
   display: flex;
   gap: 0.5rem;

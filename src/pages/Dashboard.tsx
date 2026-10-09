@@ -19,6 +19,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-10-09',
+    date: '9 octobre 2026',
+    title: 'Échanges par annonce',
+    summary: 'Mets une carte à l\'échange pour tout le groupe et choisis la meilleure offre.',
+    details: `Les échanges changent de forme. Avant, il fallait désigner une personne et deviner quelle carte elle possédait. Maintenant tu mets une carte à l'échange et toute ta team la voit.\n\nChacun propose la carte qu'il veut donner en échange. Toi tu vois toutes les propositions côte à côte, avec qui les a faites, et tu choisis celle qui t'intéresse. Les autres propositions restent disponibles si tu changes d'avis, et tu peux en refuser une sans fermer ton annonce.\n\nUne seule proposition par personne : reproposer remplace la précédente, au lieu d'empiler des offres périmées. Tu peux changer ou retirer la tienne à tout moment.\n\nVérification au moment de conclure : les deux inventaires sont relus juste avant l'échange. Si une carte est partie entre-temps dans un autre échange, rien n'est déplacé et tu es prévenu.\n\nLes offres en cours de l'ancien système ne sont pas reprises : si tu avais une offre en attente, republie-la en annonce.`,
+  },
+  {
     id: 'update-2026-10-05',
     date: '5 octobre 2026',
     title: 'AMRAP sur mesure',

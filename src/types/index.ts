@@ -182,15 +182,36 @@ export interface ChatMessage {
 
 // ── Trades ──
 
-export interface TradeOffer {
-  id: string;
-  fromUid: string;
-  toUid: string;
-  offeredCardId: string;
-  requestedCardId: string;
-  groupId: string;
-  status: 'pending' | 'accepted' | 'rejected';
+/** Proposition d'un membre sur une annonce. Une seule par personne. */
+export interface TradeBid {
+  uid: string;
+  /** Figé à la proposition : évite une lecture de profil pour l'affichage. */
+  displayName: string;
+  cardId: string;
   createdAt: number;
+}
+
+/**
+ * Annonce d'échange, ouverte à tout le groupe.
+ *
+ * L'auteur met une carte à l'échange, les autres proposent la leur, et c'est
+ * l'auteur qui tranche. L'ancien système n'autorisait qu'une offre dirigée
+ * vers une seule personne, qu'il fallait deviner.
+ */
+export interface TradeListing {
+  id: string;
+  groupId: string;
+  ownerUid: string;
+  ownerName: string;
+  /** La carte mise à l'échange par l'auteur. */
+  cardId: string;
+  bids: TradeBid[];
+  status: 'open' | 'completed' | 'cancelled';
+  createdAt: number;
+  /** Renseignés à la conclusion, pour l'historique. */
+  acceptedUid?: string;
+  acceptedCardId?: string;
+  completedAt?: number;
 }
 
 // ── Badges de classement ──
