@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, Smartphone, X, Bell, ChevronRight, Send, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Settings, Smartphone, X, Bell, ChevronRight, AlertTriangle } from 'lucide-react';
 import {
   isPushSupported,
   needsInstall,
@@ -8,11 +8,9 @@ import {
   updatePushPrefs,
   disablePush,
   syncSubscription,
-  sendTestNotification,
   DEFAULT_PUSH_PREFS,
   type PushPrefs,
   type SyncOutcome,
-  type TestReport,
 } from '../lib/push';
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -42,12 +40,14 @@ export default function NotificationSettings({
   const [error, setError] = useState<string | null>(null);
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const [sync, setSync] = useState<SyncOutcome | null>(null);
-  const [testing, setTesting] = useState(false);
-  const [test, setTest] = useState<TestReport | null>(null);
 
   const supported = isPushSupported();
   const installRequired = needsInstall();
   const enabled = prefs.creatine || prefs.dailyChallenge;
+  // Seuls ces états demandent quelque chose à l'utilisateur.
+  const needsAttention =
+    sync === 'repaired' || sync === 'permission-default' ||
+    sync === 'permission-denied' || sync === 'failed';
 
   // Les préférences disent « activé » mais l'abonnement du navigateur a pu
   // être révoqué entre-temps : on le vérifie et on le répare au chargement.
@@ -86,13 +86,6 @@ export default function NotificationSettings({
     setBusy(false);
   }
 
-  async function runTest() {
-    if (testing) return;
-    setTesting(true);
-    setTest(null);
-    setTest(await sendTestNotification());
-    setTesting(false);
-  }
 
   async function toggle(key: keyof PushPrefs) {
     if (busy) return;
@@ -227,7 +220,9 @@ export default function NotificationSettings({
               </div>
             )}
 
-            {supported && !installRequired && enabled && (
+            {/* Rien à afficher quand l'abonnement est sain : le bloc ne sert
+                qu'à signaler ce qui demande une action. */}
+            {supported && !installRequired && enabled && needsAttention && (
               <div className="notif-diag">
                 {sync === 'repaired' && (
                   <p className="notif-diag-line warn">
@@ -243,7 +238,7 @@ export default function NotificationSettings({
                       de les afficher. Ça arrive après une réinstallation de l'app.
                     </p>
                     <button
-                      className="primary-btn small notif-test-btn"
+                      className="primary-btn small notif-action-btn"
                       onClick={regrant}
                       disabled={busy}
                     >
@@ -266,32 +261,6 @@ export default function NotificationSettings({
                   </p>
                 )}
 
-                <button className="secondary-btn small notif-test-btn" onClick={runTest} disabled={testing}>
-                  <Send size={14} /> {testing ? 'Envoi…' : 'Envoyer une notification de test'}
-                </button>
-
-                {test && (
-                  <div className={`notif-diag-result ${test.ok ? 'ok' : 'ko'}`}>
-                    {test.ok ? (
-                      <p className="notif-diag-line">
-                        <CheckCircle2 size={14} />
-                        Envoyée. Si rien n'apparaît, vérifie les notifications de CaliCrew
-                        dans les réglages de ton téléphone.
-                      </p>
-                    ) : (
-                      <>
-                        <p className="notif-diag-line warn">
-                          <AlertTriangle size={14} />
-                          {test.step ? `[${test.step}] ` : ''}
-                          {test.error || "L'envoi a échoué."}
-                        </p>
-                        {test.missing && test.missing.length > 0 && (
-                          <code>Config serveur manquante : {test.missing.join(', ')}</code>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 

@@ -53,23 +53,16 @@ Déployer `firestore.rules` (collection `pushSubscriptions` ajoutée).
 
 ## Diagnostic
 
-### Depuis l'app (le plus simple)
+### Depuis l'app
 
-Profil → Notifications → **Envoyer une notification de test**. Le bouton apparaît
-dès qu'un rappel est activé. Il emprunte exactement le chemin des rappels
-automatiques — mêmes clés VAPID, même Admin SDK, même abonnement stocké — donc
-il valide toute la chaîne sauf le déclenchement par le cron.
+Profil → Notifications. Un bandeau orange n'apparaît que si quelque chose demande
+une action : abonnement rétabli, autorisation iOS à redemander, ou vérification
+impossible. Rien ne s'affiche quand tout va bien.
 
-Ce qu'il peut répondre :
-
-| Message | Cause |
-|---|---|
-| « Envoyée » | la chaîne fonctionne ; si rien n'apparaît, le blocage est dans les réglages du téléphone |
-| « Config serveur manquante : … » | la ou les variables d'environnement citées ne sont pas renseignées sur Vercel |
-| « Aucun abonnement enregistré » | le navigateur n'est pas abonné ; désactiver puis réactiver les rappels |
-| « refusé par le service push » | l'abonnement a expiré ; il est supprimé automatiquement, réactiver les rappels |
-
-L'endpoint ne renvoie jamais la valeur d'un secret, seulement sa présence.
+Un bouton « Envoyer une notification de test » a existé, avec l'endpoint
+`/api/push/test` : il parcourait toute la chaîne et nommait l'étape fautive. Retiré
+le 9 octobre 2026 une fois les notifications en service. À restaurer depuis
+l'historique git si un diagnostic redevient nécessaire.
 
 ### En ligne de commande
 

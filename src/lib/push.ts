@@ -1,5 +1,5 @@
 import { doc, setDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { db } from './firebase';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -195,59 +195,4 @@ export async function syncSubscription(uid: string, prefs: PushPrefs): Promise<S
     console.error('Synchronisation de l\'abonnement push impossible:', err);
     return 'failed';
   }
-}
-
-export interface TestReport {
-  ok: boolean;
-  step?: string;
-  error?: string;
-  missing?: string[];
-  pushService?: string;
-}
-
-/**
- * Déclenche une notification de test côté serveur. Elle emprunte exactement le
- * chemin des rappels automatiques, donc elle valide tout sauf le déclenchement
- * par le cron lui-même.
- */
-export async function sendTestNotification(): Promise<TestReport> {
-  const user = auth.currentUser;
-  if (!user) return { ok: false, step: 'session', error: 'Non connecté.' };
-
-  // Chaque étape est isolée : un échec de jeton et une réponse illisible ne se
-  // diagnostiquent pas au même endroit, et un message brut de JSON.parse ne
-  // disait ni l'un ni l'autre.
-  let token: string;
-  try {
-    token = await user.getIdToken();
-  } catch (err) {
-    return { ok: false, step: 'jeton', error: `Jeton illisible : ${(err as Error).message}` };
-  }
-
-  let res: Response;
-  try {
-    res = await fetch('/api/push/test', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-      cache: 'no-store',
-    });
-  } catch (err) {
-    return { ok: false, step: 'réseau', error: `Appel impossible : ${(err as Error).message}` };
-  }
-
-  const raw = await res.text();
-  let body: TestReport;
-  try {
-    body = JSON.parse(raw) as TestReport;
-  } catch {
-    // On montre ce qui est réellement arrivé : sans ça on ne peut pas savoir
-    // si c'est une page d'erreur, une réponse vide, ou autre chose.
-    return {
-      ok: false,
-      step: 'réponse',
-      error: `Réponse illisible (HTTP ${res.status}) : ${raw.slice(0, 160) || '(corps vide)'}`,
-    };
-  }
-
-  return { ...body, ok: res.ok && body.ok !== false };
 }
