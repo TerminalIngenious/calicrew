@@ -1,13 +1,30 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { NetworkFirst } from 'workbox-strategies';
+import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
 declare const self: ServiceWorkerGlobalScope;
 
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
+
+// Les cartes ne sont pas précachées : elles sont immuables et trop lourdes
+// pour être rechargées à chaque déploiement. Première consultation = mise en
+// cache, ensuite elles sortent du cache et fonctionnent hors ligne.
+registerRoute(
+  ({ url, request }) => request.destination === 'image' && url.pathname.startsWith('/cards/'),
+  new CacheFirst({
+    cacheName: 'card-images',
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 400,
+        maxAgeSeconds: 60 * 60 * 24 * 90,
+        purgeOnQuotaError: true,
+      }),
+    ],
+  })
+);
 
 registerRoute(
   ({ url }) => url.origin === 'https://firestore.googleapis.com',
@@ -17,8 +34,14 @@ registerRoute(
   })
 );
 
-self.skipWaiting();
-self.addEventListener('activate', () => self.clients.claim());
+// skipWaiting appartient à la phase d'installation : appelé au niveau du
+// module, il peut arriver trop tard pour la prise de contrôle.
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
 
 // ── Notifications push ──
 
