@@ -282,6 +282,7 @@ export default function NotificationSettings({
                       <>
                         <p className="notif-diag-line warn">
                           <AlertTriangle size={14} />
+                          {test.step ? `[${test.step}] ` : ''}
                           {test.error || "L'envoi a échoué."}
                         </p>
                         {test.missing && test.missing.length > 0 && (

@@ -212,17 +212,42 @@ export interface TestReport {
  */
 export async function sendTestNotification(): Promise<TestReport> {
   const user = auth.currentUser;
-  if (!user) return { ok: false, error: 'Non connecté.' };
+  if (!user) return { ok: false, step: 'session', error: 'Non connecté.' };
 
+  // Chaque étape est isolée : un échec de jeton et une réponse illisible ne se
+  // diagnostiquent pas au même endroit, et un message brut de JSON.parse ne
+  // disait ni l'un ni l'autre.
+  let token: string;
   try {
-    const token = await user.getIdToken();
-    const res = await fetch('/api/push/test', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const body = (await res.json()) as TestReport;
-    return { ...body, ok: res.ok && body.ok !== false };
+    token = await user.getIdToken();
   } catch (err) {
-    return { ok: false, error: (err as Error).message };
+    return { ok: false, step: 'jeton', error: `Jeton illisible : ${(err as Error).message}` };
   }
+
+  let res: Response;
+  try {
+    res = await fetch('/api/push/test', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      cache: 'no-store',
+    });
+  } catch (err) {
+    return { ok: false, step: 'réseau', error: `Appel impossible : ${(err as Error).message}` };
+  }
+
+  const raw = await res.text();
+  let body: TestReport;
+  try {
+    body = JSON.parse(raw) as TestReport;
+  } catch {
+    // On montre ce qui est réellement arrivé : sans ça on ne peut pas savoir
+    // si c'est une page d'erreur, une réponse vide, ou autre chose.
+    return {
+      ok: false,
+      step: 'réponse',
+      error: `Réponse illisible (HTTP ${res.status}) : ${raw.slice(0, 160) || '(corps vide)'}`,
+    };
+  }
+
+  return { ...body, ok: res.ok && body.ok !== false };
 }
