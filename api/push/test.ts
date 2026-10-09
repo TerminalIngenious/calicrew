@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getAuth } from 'firebase-admin/auth';
 import { getDb, configureWebPush, sendTo, getDayKey, type Subscription } from '../_lib/push.js';
 
 /**
@@ -15,8 +14,22 @@ import { getDb, configureWebPush, sendTo, getDayKey, type Subscription } from '.
  * Il ne renvoie jamais la valeur d'un secret, seulement sa présence.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Une erreur non rattrapée ici produit un 500 opaque côté Vercel, ce qui
+  // nous ramènerait au problème que cet endpoint est censé résoudre.
+  try {
+    return await run(req, res);
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      step: 'serveur',
+      error: (err as Error).message || 'Erreur serveur inattendue.',
+    });
+  }
+}
+
+async function run(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Méthode non autorisée' });
+    return res.status(405).json({ ok: false, error: 'Méthode non autorisée' });
   }
 
   const config = {
@@ -26,45 +39,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Sans lui, Vercel n'envoie aucun en-tête d'autorisation et les crons
     // repartent en 401 sans rien faire ni rien signaler.
     cronSecret: !!process.env.CRON_SECRET,
+    firebaseApiKey: !!process.env.VITE_FIREBASE_API_KEY,
   };
   const missing = Object.entries(config)
     .filter(([, present]) => !present)
     .map(([key]) => key);
 
-  if (!config.serviceAccount) {
-    return res.status(503).json({
-      ok: false,
-      step: 'config',
-      config,
-      missing,
-      error: 'FIREBASE_SERVICE_ACCOUNT manquant : impossible de vérifier qui appelle.',
-    });
-  }
-
-  const db = getDb();
-
   const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   if (!token) return res.status(401).json({ ok: false, step: 'auth', error: 'Jeton manquant' });
 
-  let uid: string;
-  try {
-    uid = (await getAuth().verifyIdToken(token)).uid;
-  } catch {
-    return res.status(401).json({ ok: false, step: 'auth', error: 'Jeton invalide' });
-  }
-
-  if (!config.vapidPublic || !config.vapidPrivate) {
-    return res.status(503).json({
-      ok: false, step: 'config', config, missing,
-      error: 'Clés VAPID manquantes : aucune notification ne peut partir.',
+  const uid = await verifyIdToken(token);
+  if (!uid) {
+    return res.status(401).json({
+      ok: false, step: 'auth', config, missing,
+      error: config.firebaseApiKey
+        ? 'Session expirée. Recharge l\'app et réessaie.'
+        : "VITE_FIREBASE_API_KEY absente côté serveur : impossible de vérifier qui appelle.",
     });
   }
 
-  const snap = await db.collection('pushSubscriptions').doc(uid).get();
+  if (!config.serviceAccount || !config.vapidPublic || !config.vapidPrivate) {
+    return res.status(503).json({
+      ok: false, step: 'config', config, missing,
+      error: 'Configuration serveur incomplète : aucune notification ne peut partir.',
+    });
+  }
+
+  const snap = await getDb().collection('pushSubscriptions').doc(uid).get();
   if (!snap.exists) {
     return res.status(404).json({
       ok: false, step: 'subscription', config, missing,
-      error: "Aucun abonnement enregistré pour ce compte. Réactive les rappels dans l'app.",
+      error: "Aucun abonnement enregistré pour ce compte. Désactive puis réactive les rappels.",
     });
   }
 
@@ -84,13 +89,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     config,
     missing,
     prefs: { creatine: !!sub.creatine, dailyChallenge: !!sub.dailyChallenge },
-    // L'endpoint identifie le service push du navigateur, sans rien révéler.
+    // Identifie le service push du navigateur, sans rien révéler de l'abonnement.
     pushService: hostOf(sub.endpoint),
     parisDay: getDayKey(),
     error: sent
       ? undefined
-      : "L'abonnement a été refusé par le service push. Il est probablement expiré : réactive les rappels.",
+      : "L'abonnement a été refusé par le service push. Il est expiré : réactive les rappels.",
   });
+}
+
+/**
+ * Vérifie le jeton via l'API Identity Toolkit plutôt que par `firebase-admin/auth`.
+ *
+ * Cet import-là fait échouer le bundler de Vercel au chargement du module, ce
+ * qui produisait un FUNCTION_INVOCATION_FAILED avant même d'entrer dans le
+ * handler. La clé d'API web de Firebase n'est pas un secret — elle est déjà
+ * dans le bundle client — et sert ici uniquement à valider le jeton.
+ */
+async function verifyIdToken(idToken: string): Promise<string | null> {
+  const key = process.env.VITE_FIREBASE_API_KEY;
+  if (!key) return null;
+
+  const res = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(key)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    }
+  );
+  if (!res.ok) return null;
+
+  const body = (await res.json()) as { users?: { localId?: string }[] };
+  return body.users?.[0]?.localId || null;
 }
 
 function hostOf(endpoint?: string): string {
