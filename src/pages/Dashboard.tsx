@@ -19,6 +19,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-10-09b',
+    date: '9 octobre 2026',
+    title: 'Programmes modifiables',
+    summary: 'Modifie un programme existant, et le bouton pour en créer un autre fonctionne enfin.',
+    details: `Programmes modifiables : le crayon sur une carte rouvre le programme dans le même formulaire qu'à la création. Change son nom, sa visibilité, ajoute ou retire des exercices, ajuste les séries, les reps et les poids. Plus besoin de le recréer pour corriger un détail.\n\nLa date de création est conservée : modifier un programme ne le fait pas remonter comme s'il venait d'être créé. Si quelqu'un a importé ton programme, il en a une copie : tes modifications ne changent rien chez lui.\n\nLa suppression demande maintenant confirmation, puisque le crayon est juste à côté.\n\nCorrection : créer un deuxième programme était impossible. Le bouton existait mais il était placé derrière la barre de navigation, donc invisible et non cliquable — un clic dessus atterrissait sur un onglet de navigation. Seul le premier programme pouvait être créé, via le bouton de l'écran vide.`,
+  },
+  {
     id: 'update-2026-10-09',
     date: '9 octobre 2026',
     title: 'Échanges par annonce',

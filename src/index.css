@@ -5068,6 +5068,19 @@ body {
   font-size: 1rem;
 }
 
+/* Modifier et supprimer, groupés à droite du titre. L'écart est volontaire :
+   la suppression est définitive, elle ne doit pas se toucher au pouce en
+   visant le crayon. */
+.program-card-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.program-card-actions .icon-btn {
+  color: var(--text-muted);
+}
+
 .program-card-desc {
   font-size: 0.8rem;
   color: var(--text-muted);

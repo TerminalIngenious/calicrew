@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Program, ProgramExercise, Exercise, WeightType, SetUnit } from '../types';
-import { Plus, Minus, Trash2, ArrowLeft, X, Globe, Lock } from 'lucide-react';
+import { Plus, Minus, Trash2, ArrowLeft, X, Globe, Lock, Pencil } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -15,9 +15,11 @@ export default function Programs() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  /** null = liste. Sinon on édite un programme existant, ou on en crée un. */
+  const [editor, setEditor] = useState<{ mode: 'create' } | { mode: 'edit'; program: Program } | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // Create form
+  // Formulaire, partagé par la création et la modification
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
@@ -74,33 +76,78 @@ export default function Programs() {
     setSelectedExercises((prev) => prev.map((ex, i) => i === idx ? { ...ex, weightType: type } : ex));
   }
 
-  async function saveProgram() {
-    if (!user || !name.trim() || selectedExercises.length === 0) return;
-    await addDoc(collection(db, 'programs'), {
-      name: name.trim(),
-      description: description.trim(),
-      createdBy: user.uid,
-      creatorName: myName,
-      exercises: selectedExercises,
-      isPublic,
-      createdAt: Date.now(),
-    });
+  function resetForm() {
     setName('');
     setDescription('');
     setSelectedExercises([]);
     setIsPublic(true);
-    setCreating(false);
-    load();
   }
 
-  async function deleteProgram(id: string) {
-    await deleteDoc(doc(db, 'programs', id));
-    setPrograms((prev) => prev.filter((p) => p.id !== id));
+  function startCreate() {
+    resetForm();
+    setEditor({ mode: 'create' });
+  }
+
+  /** Recharge le programme dans le formulaire, qui est le même qu'à la création. */
+  function startEdit(program: Program) {
+    setName(program.name);
+    setDescription(program.description || '');
+    setIsPublic(program.isPublic);
+    // Copie : on ne veut pas muter la liste tant que rien n'est enregistré.
+    setSelectedExercises(program.exercises.map((ex) => ({ ...ex })));
+    setEditor({ mode: 'edit', program });
+  }
+
+  function closeEditor() {
+    setEditor(null);
+    resetForm();
+  }
+
+  async function saveProgram() {
+    if (!user || !editor || saving) return;
+    if (!name.trim() || selectedExercises.length === 0) return;
+
+    setSaving(true);
+    try {
+      if (editor.mode === 'edit') {
+        // createdAt et creatorName restent ceux de l'origine : modifier un
+        // programme ne le fait pas remonter comme s'il venait d'être créé.
+        await updateDoc(doc(db, 'programs', editor.program.id), {
+          name: name.trim(),
+          description: description.trim(),
+          exercises: selectedExercises,
+          isPublic,
+        });
+      } else {
+        await addDoc(collection(db, 'programs'), {
+          name: name.trim(),
+          description: description.trim(),
+          createdBy: user.uid,
+          creatorName: myName,
+          exercises: selectedExercises,
+          isPublic,
+          createdAt: Date.now(),
+        });
+      }
+      closeEditor();
+      await load();
+    } catch (err) {
+      console.error('Enregistrement du programme impossible:', err);
+    }
+    setSaving(false);
+  }
+
+  async function deleteProgram(program: Program) {
+    // La suppression est définitive, et le crayon est juste à côté.
+    if (!confirm(`Supprimer "${program.name}" ?`)) return;
+    await deleteDoc(doc(db, 'programs', program.id));
+    setPrograms((prev) => prev.filter((p) => p.id !== program.id));
   }
 
   if (loading) return <div className="page loading"><Loader /></div>;
 
-  if (creating) {
+  if (editor) {
+    const isEdit = editor.mode === 'edit';
     const allExercises = [...DEFAULT_EXERCISES, ...customExercises].filter(
       (e) => e.category !== 'running' && e.category !== 'velo' && e.category !== 'sportco'
     );
@@ -109,10 +156,10 @@ export default function Programs() {
     return (
       <div className="page">
         <header className="page-header">
-          <button className="icon-btn" onClick={() => setCreating(false)}>
+          <button className="icon-btn" onClick={closeEditor} aria-label="Retour">
             <ArrowLeft size={20} />
           </button>
-          <h1>Nouveau programme</h1>
+          <h1>{isEdit ? 'Modifier le programme' : 'Nouveau programme'}</h1>
         </header>
 
         <div className="program-form">
@@ -211,9 +258,9 @@ export default function Programs() {
             className="primary-btn"
             style={{ marginTop: '1rem' }}
             onClick={saveProgram}
-            disabled={!name.trim() || selectedExercises.length === 0}
+            disabled={saving || !name.trim() || selectedExercises.length === 0}
           >
-            Enregistrer
+            {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer les modifications' : 'Enregistrer'}
           </button>
         </div>
 
@@ -263,7 +310,7 @@ export default function Programs() {
       {programs.length === 0 ? (
         <div className="programs-empty">
           <p className="empty">Aucun programme. Crée ton premier !</p>
-          <button className="primary-btn" onClick={() => setCreating(true)}>
+          <button className="primary-btn" onClick={startCreate}>
             <Plus size={20} /> Nouveau programme
           </button>
         </div>
@@ -276,9 +323,22 @@ export default function Programs() {
                   <h3>{prog.name}</h3>
                   {prog.description && <span className="program-card-desc">{prog.description}</span>}
                 </div>
-                <button className="icon-btn" onClick={() => deleteProgram(prog.id)}>
-                  <Trash2 size={14} />
-                </button>
+                <div className="program-card-actions">
+                  <button
+                    className="icon-btn"
+                    aria-label={`Modifier ${prog.name}`}
+                    onClick={() => startEdit(prog)}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    className="icon-btn"
+                    aria-label={`Supprimer ${prog.name}`}
+                    onClick={() => deleteProgram(prog)}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
               <div className="program-card-exercises">
                 {prog.exercises.map((ex, i) => (
@@ -297,7 +357,7 @@ export default function Programs() {
       )}
 
       {programs.length > 0 && (
-        <button className="primary-btn floating-btn" onClick={() => setCreating(true)}>
+        <button className="primary-btn floating-btn" onClick={startCreate}>
           <Plus size={20} /> Nouveau programme
         </button>
       )}
