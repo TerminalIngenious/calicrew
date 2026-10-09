@@ -5,6 +5,7 @@ import {
   AMRAP_MAX_ITEMS, AMRAP_MAX_MINUTES, AMRAP_MIN_MINUTES, AMRAP_PRESETS,
 } from '../lib/amrap';
 import type { Exercise, SetUnit } from '../types';
+import { useScrollLock } from '../lib/useScrollLock';
 
 export interface AmrapItem {
   exerciseId: string;
@@ -41,6 +42,7 @@ export default function AmrapBuilder({
   onClose: () => void;
   onStart: (name: string, minutes: number, items: AmrapItem[]) => Promise<void> | void;
 }) {
+  useScrollLock(true);
   const [name, setName] = useState('');
   const [minutes, setMinutes] = useState(20);
   const [items, setItems] = useState<AmrapItem[]>([DEFAULT_ITEM]);

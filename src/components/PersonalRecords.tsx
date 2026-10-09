@@ -6,6 +6,7 @@ import {
   makeRecordId, recordDetail, useRecords,
 } from '../lib/records';
 import type { Exercise, PersonalRecord, RecordUnit } from '../types';
+import { useScrollLock } from '../lib/useScrollLock';
 
 /** Valeur libre dans le sélecteur d'exercice. */
 const FREE = '__free__';
@@ -62,6 +63,7 @@ export default function PersonalRecords({
   const { records, loading, save, remove } = useRecords(uid);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
+  useScrollLock(draft !== null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 

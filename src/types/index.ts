@@ -55,6 +55,12 @@ export interface Session {
    * Cindy : l'affichage retombe alors sur « AMRAP ».
    */
   amrapName?: string;
+  /**
+   * Séance qui ne rapporte pas de coffre : rattrapage d'un défi juste après
+   * une vraie séance, ou essai dans l'app. Les reps comptent quand même, c'est
+   * la récompense qu'on renonce à toucher deux fois.
+   */
+  noReward?: boolean;
 }
 
 // ── Programs ──

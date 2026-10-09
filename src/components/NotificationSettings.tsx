@@ -12,6 +12,7 @@ import {
   type PushPrefs,
   type SyncOutcome,
 } from '../lib/push';
+import { useScrollLock } from '../lib/useScrollLock';
 
 const ERROR_MESSAGES: Record<string, string> = {
   unsupported: "Ton navigateur ne supporte pas les notifications push.",
@@ -36,6 +37,7 @@ export default function NotificationSettings({
 }) {
   const [prefs, setPrefs] = useState<PushPrefs>(DEFAULT_PUSH_PREFS);
   const [open, setOpen] = useState(false);
+  useScrollLock(open);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetail, setErrorDetail] = useState<string | null>(null);

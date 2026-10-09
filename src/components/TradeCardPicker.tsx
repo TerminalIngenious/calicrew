@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { RARITY_COLORS } from '../lib/cards';
 import type { Card } from '../types';
+import { useScrollLock } from '../lib/useScrollLock';
 
 /**
  * Sélection d'une carte. Un clic valide directement : il n'y a qu'un choix à
@@ -31,6 +32,7 @@ export default function TradeCardPicker({
   onPick: (cardId: string) => void;
   onClose: () => void;
 }) {
+  useScrollLock(true);
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="explore-modal" onClick={(e) => e.stopPropagation()}>

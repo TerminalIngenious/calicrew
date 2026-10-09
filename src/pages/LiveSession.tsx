@@ -52,6 +52,8 @@ export default function LiveSession() {
   // AMRAP
   const [amrapRounds, setAmrapRounds] = useState(0);
   const [amrapTimeUp, setAmrapTimeUp] = useState(false);
+  /** Coché avant de terminer : la séance ne donnera pas de coffre. */
+  const [noReward, setNoReward] = useState(false);
 
   // Confirmation terminer
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -311,15 +313,18 @@ export default function LiveSession() {
       : session.exercises;
     const updateData: Record<string, unknown> = { completed: true, duration, exercises };
     if (isAmrapSession) updateData.amrapRounds = amrapRounds;
-    setSession({ ...session, exercises });
+    if (noReward) updateData.noReward = true;
+    setSession({ ...session, exercises, noReward });
     await updateDoc(doc(db, 'sessions', id), updateData);
 
-    try {
-      await updateDoc(doc(db, 'userProgress', session.userId), {
-        chestsToOpen: arrayUnion({ rarity: 'commune', pool: 'current' }),
-      });
-    } catch {
-      // userProgress might not exist yet
+    if (!noReward) {
+      try {
+        await updateDoc(doc(db, 'userProgress', session.userId), {
+          chestsToOpen: arrayUnion({ rarity: 'commune', pool: 'current' }),
+        });
+      } catch {
+        // userProgress might not exist yet
+      }
     }
 
     if (timerRef.current) clearInterval(timerRef.current);
@@ -373,6 +378,9 @@ export default function LiveSession() {
             <Calendar size={16} />
             <span>{format(new Date(session.date), 'EEEE d MMMM yyyy', { locale: fr })}</span>
           </div>
+          {session.noReward && (
+            <span className="recap-no-reward">Séance sans coffre</span>
+          )}
           {isAmrap ? (
             <span className="recap-categories">AMRAP — {session.amrapDuration ? Math.floor(session.amrapDuration / 60) : 20} min</span>
           ) : (
@@ -663,6 +671,13 @@ export default function LiveSession() {
               <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
                 {amrapRounds} round{amrapRounds > 1 ? 's' : ''} en {formatTime(elapsed)}
               </p>
+              <label className="no-reward-row">
+                <input type="checkbox" checked={noReward} onChange={() => setNoReward(!noReward)} />
+                <span>
+                  <strong>Séance sans coffre</strong>
+                  <em>Pour un rattrapage ou un essai. Les reps comptent quand même.</em>
+                </span>
+              </label>
               <div className="modal-actions">
                 <button className="secondary-btn" onClick={() => setShowFinish(false)}>
                   Continuer
@@ -919,6 +934,17 @@ export default function LiveSession() {
             <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Durée : {formatTime(elapsed)} • {completedSets}/{totalSets} séries faites
             </p>
+            <label className="no-reward-row">
+              <input
+                type="checkbox"
+                checked={noReward}
+                onChange={() => setNoReward(!noReward)}
+              />
+              <span>
+                <strong>Séance sans coffre</strong>
+                <em>Pour un rattrapage ou un essai. Les reps comptent quand même.</em>
+              </span>
+            </label>
             <div className="modal-actions">
               <button className="secondary-btn" onClick={() => setShowFinish(false)}>
                 Continuer

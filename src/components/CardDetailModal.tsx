@@ -1,6 +1,7 @@
 import { RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import type { Card } from '../types';
 import { X } from 'lucide-react';
+import { useScrollLock } from '../lib/useScrollLock';
 
 interface Props {
   card: Card;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function CardDetailModal({ card, owned, count, onClose }: Props) {
+  useScrollLock(true);
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="card-detail-modal" onClick={(e) => e.stopPropagation()}>

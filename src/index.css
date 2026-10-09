@@ -840,6 +840,55 @@ body {
   justify-content: flex-end;
 }
 
+/* Option « sans coffre » du dialogue de fin de séance. */
+.no-reward-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.no-reward-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0.1rem 0 0;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.no-reward-row strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.no-reward-row em {
+  display: block;
+  margin-top: 0.15rem;
+  font-style: normal;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.recap-no-reward {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 99px;
+  background: rgba(136, 136, 136, 0.15);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
 /* Leaderboard */
 .leaderboard {
   display: flex;
@@ -1289,6 +1338,7 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
+  overscroll-behavior: contain;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
@@ -1540,8 +1590,25 @@ body {
   margin: 1rem 1.25rem 0;
 }
 
+/*
+ * Zone défilante des modales en feuille. Sans `flex: 1` + `overflow-y`, le
+ * contenu déborde du cadre et le geste de défilement part sur la page du
+ * dessous. `overscroll-behavior: contain` empêche en plus l'enchaînement une
+ * fois arrivé en bout de liste, ce que fait Safari par défaut.
+ */
+.explore-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem 1.25rem 1.5rem;
+}
+
 .explore-results {
   flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
   overflow-y: auto;
   padding: 0.75rem 1.25rem 1.5rem;
   display: flex;
@@ -5848,8 +5915,9 @@ body {
 
 /* Le formulaire peut dépasser sur un petit écran : il défile de lui-même. */
 .pr-form {
-  max-height: 85vh;
+  max-height: 85dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .pr-field-label {
@@ -5903,8 +5971,9 @@ body {
 /* ── Constructeur d'AMRAP ── */
 
 .amrap-builder {
-  max-height: 88vh;
+  max-height: 88dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .amrap-builder-intro {
