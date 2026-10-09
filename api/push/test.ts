@@ -68,6 +68,17 @@ async function run(req: VercelRequest, res: VercelResponse) {
     });
   }
 
+  // La variable est présente mais peut contenir autre chose que le fichier
+  // attendu. Sans ce contrôle, l'erreur remontait sous la forme d'un message
+  // de JSON.parse incompréhensible, sans dire quelle variable était en cause.
+  const account = describeServiceAccount();
+  if (!account.ok) {
+    return res.status(503).json({
+      ok: false, step: 'config', config, missing,
+      error: `FIREBASE_SERVICE_ACCOUNT ${account.detail}`,
+    });
+  }
+
   const snap = await getDb().collection('pushSubscriptions').doc(uid).get();
   if (!snap.exists) {
     return res.status(404).json({
@@ -125,6 +136,34 @@ async function verifyIdToken(idToken: string): Promise<string | null> {
 
   const body = (await res.json()) as { users?: { localId?: string }[] };
   return body.users?.[0]?.localId || null;
+}
+
+/**
+ * Décrit l'état de FIREBASE_SERVICE_ACCOUNT sans jamais en révéler le contenu :
+ * seulement sa longueur, ses premiers caractères et les champs présents.
+ */
+function describeServiceAccount(): { ok: boolean; detail: string } {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT || '';
+  const attendu =
+    'Attendu : tout le contenu du fichier .json de la clé de service, sur une seule ligne, commençant par {"type":"service_account"';
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return {
+      ok: false,
+      detail: `n'est pas du JSON (${raw.length} caractères, commence par « ${raw.slice(0, 6)}… »). ${attendu}`,
+    };
+  }
+
+  const requis = ['type', 'project_id', 'private_key', 'client_email'];
+  const absents = requis.filter((k) => !parsed[k]);
+  if (absents.length > 0) {
+    return { ok: false, detail: `est du JSON mais sans les champs : ${absents.join(', ')}. ${attendu}` };
+  }
+
+  return { ok: true, detail: 'valide' };
 }
 
 function hostOf(endpoint?: string): string {
