@@ -1,5 +1,5 @@
 import { doc, setDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { auth, db } from './firebase';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -41,6 +41,40 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return output;
 }
 
+/**
+ * `navigator.serviceWorker.ready` ne rejette jamais : si aucun service worker
+ * ne prend le contrôle, la promesse reste en suspens indéfiniment. Sans cette
+ * garde, le bouton d'activation restait grisé pour toujours.
+ */
+async function readyRegistration(timeoutMs = 10_000): Promise<ServiceWorkerRegistration> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error('Service worker indisponible (délai dépassé)')),
+        timeoutMs
+      )
+    ),
+  ]);
+}
+
+async function subscribeNow(registration: ServiceWorkerRegistration): Promise<PushSubscription> {
+  const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource;
+  return registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+}
+
+function subscriptionPayload(sub: PushSubscription, uid: string, prefs: PushPrefs) {
+  const json = sub.toJSON();
+  return {
+    uid,
+    endpoint: json.endpoint,
+    keys: json.keys,
+    creatine: prefs.creatine,
+    dailyChallenge: prefs.dailyChallenge,
+    updatedAt: Date.now(),
+  };
+}
+
 export async function getPushPrefs(uid: string): Promise<PushPrefs> {
   const snap = await getDoc(doc(db, 'pushSubscriptions', uid));
   if (!snap.exists()) return DEFAULT_PUSH_PREFS;
@@ -77,27 +111,15 @@ export async function enablePush(uid: string, prefs: PushPrefs): Promise<EnableR
   if (permission !== 'granted') return { ok: false, reason: 'dismissed' };
 
   try {
-    const registration = await navigator.serviceWorker.ready;
-    const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource;
+    const registration = await readyRegistration();
 
-    let sub = await registration.pushManager.getSubscription();
-    if (sub) {
-      // Un abonnement créé avec une autre clé VAPID reste en place mais
-      // deviendrait inutilisable : on le remplace.
-      await sub.unsubscribe();
-      sub = null;
-    }
-    sub = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+    const existing = await registration.pushManager.getSubscription();
+    // Un abonnement créé avec une autre clé VAPID reste en place mais
+    // deviendrait inutilisable : on le remplace.
+    if (existing) await existing.unsubscribe();
 
-    const json = sub.toJSON();
-    await setDoc(doc(db, 'pushSubscriptions', uid), {
-      uid,
-      endpoint: json.endpoint,
-      keys: json.keys,
-      creatine: prefs.creatine,
-      dailyChallenge: prefs.dailyChallenge,
-      updatedAt: Date.now(),
-    });
+    const sub = await subscribeNow(registration);
+    await setDoc(doc(db, 'pushSubscriptions', uid), subscriptionPayload(sub, uid, prefs));
 
     return { ok: true };
   } catch (err) {
@@ -120,9 +142,83 @@ export async function updatePushPrefs(uid: string, prefs: Partial<PushPrefs>): P
 /** Désabonne complètement et supprime l'abonnement stocké. */
 export async function disablePush(uid: string): Promise<void> {
   if (isPushSupported()) {
-    const registration = await navigator.serviceWorker.ready;
-    const sub = await registration.pushManager.getSubscription();
-    if (sub) await sub.unsubscribe();
+    try {
+      const registration = await readyRegistration();
+      const sub = await registration.pushManager.getSubscription();
+      if (sub) await sub.unsubscribe();
+    } catch {
+      // Le désabonnement local a échoué : on supprime quand même le document,
+      // sinon on resterait abonné côté serveur sans pouvoir l'arrêter.
+    }
   }
   await deleteDoc(doc(db, 'pushSubscriptions', uid));
+}
+
+export type SyncOutcome =
+  | 'inactive'       // aucun rappel activé, rien à vérifier
+  | 'ok'             // l'abonnement stocké est bien celui du navigateur
+  | 'repaired'       // il avait été révoqué ou avait changé : réenregistré
+  | 'no-permission'  // la permission a été retirée dans les réglages
+  | 'unsupported'
+  | 'failed';
+
+/**
+ * Réaligne l'abonnement du navigateur avec celui stocké dans Firestore.
+ *
+ * iOS révoque les abonnements push tout seul — après une mise à jour de la
+ * PWA, une réinstallation, ou simplement plusieurs semaines sans ouvrir
+ * l'app. Les préférences restaient alors à « activé » alors que l'endpoint
+ * enregistré était mort : l'app affichait des rappels actifs et il n'arrivait
+ * jamais rien. On s'en rend compte ici et on se réabonne sans rien demander,
+ * puisque la permission est déjà accordée.
+ */
+export async function syncSubscription(uid: string, prefs: PushPrefs): Promise<SyncOutcome> {
+  if (!prefs.creatine && !prefs.dailyChallenge) return 'inactive';
+  if (!isPushSupported() || !VAPID_PUBLIC_KEY) return 'unsupported';
+  if (Notification.permission !== 'granted') return 'no-permission';
+
+  try {
+    const registration = await readyRegistration();
+    const sub =
+      (await registration.pushManager.getSubscription()) || (await subscribeNow(registration));
+
+    const stored = await getDoc(doc(db, 'pushSubscriptions', uid));
+    if (stored.exists() && stored.data().endpoint === sub.toJSON().endpoint) return 'ok';
+
+    await setDoc(doc(db, 'pushSubscriptions', uid), subscriptionPayload(sub, uid, prefs));
+    return 'repaired';
+  } catch (err) {
+    console.error('Synchronisation de l\'abonnement push impossible:', err);
+    return 'failed';
+  }
+}
+
+export interface TestReport {
+  ok: boolean;
+  step?: string;
+  error?: string;
+  missing?: string[];
+  pushService?: string;
+}
+
+/**
+ * Déclenche une notification de test côté serveur. Elle emprunte exactement le
+ * chemin des rappels automatiques, donc elle valide tout sauf le déclenchement
+ * par le cron lui-même.
+ */
+export async function sendTestNotification(): Promise<TestReport> {
+  const user = auth.currentUser;
+  if (!user) return { ok: false, error: 'Non connecté.' };
+
+  try {
+    const token = await user.getIdToken();
+    const res = await fetch('/api/push/test', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const body = (await res.json()) as TestReport;
+    return { ...body, ok: res.ok && body.ok !== false };
+  } catch (err) {
+    return { ok: false, error: (err as Error).message };
+  }
 }

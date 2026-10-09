@@ -51,13 +51,50 @@ les endpoints refusent toute requête sans ce header.
 
 Déployer `firestore.rules` (collection `pushSubscriptions` ajoutée).
 
-## Test manuel
+## Diagnostic
+
+### Depuis l'app (le plus simple)
+
+Profil → Notifications → **Envoyer une notification de test**. Le bouton apparaît
+dès qu'un rappel est activé. Il emprunte exactement le chemin des rappels
+automatiques — mêmes clés VAPID, même Admin SDK, même abonnement stocké — donc
+il valide toute la chaîne sauf le déclenchement par le cron.
+
+Ce qu'il peut répondre :
+
+| Message | Cause |
+|---|---|
+| « Envoyée » | la chaîne fonctionne ; si rien n'apparaît, le blocage est dans les réglages du téléphone |
+| « Config serveur manquante : … » | la ou les variables d'environnement citées ne sont pas renseignées sur Vercel |
+| « Aucun abonnement enregistré » | le navigateur n'est pas abonné ; désactiver puis réactiver les rappels |
+| « refusé par le service push » | l'abonnement a expiré ; il est supprimé automatiquement, réactiver les rappels |
+
+L'endpoint ne renvoie jamais la valeur d'un secret, seulement sa présence.
+
+### En ligne de commande
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://<domaine>/api/cron/creatine
 ```
 
-Réponse attendue : `{"targeted":N,"sent":N}`.
+Réponse attendue : `{"targeted":N,"sent":N,"skipped":N}`.
+
+Un `401` signifie soit un mauvais secret, soit — plus souvent — que `CRON_SECRET`
+n'est pas défini sur Vercel. Dans ce cas Vercel n'envoie aucun en-tête
+d'autorisation et **les crons repartent silencieusement en 401 tous les jours
+sans que rien ne le signale**. C'est la panne la plus probable quand les rappels
+ne partent pas alors que tout le reste semble correct.
+
+## Pannes déjà rencontrées
+
+- **Abonnement révoqué par iOS.** Safari supprime l'abonnement push après une
+  mise à jour de la PWA, une réinstallation, ou plusieurs semaines sans ouvrir
+  l'app. Les préférences restaient à « activé » avec un endpoint mort.
+  `syncSubscription()` le détecte à l'ouverture des réglages et se réabonne sans
+  rien demander, puisque la permission est déjà accordée.
+- **Bouton d'activation grisé pour toujours.** `navigator.serviceWorker.ready` ne
+  rejette jamais : sans service worker actif, la promesse reste en suspens et
+  l'interface restait bloquée. Un délai de 10 s la borne désormais.
 
 ## Limites connues
 

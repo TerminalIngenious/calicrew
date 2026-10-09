@@ -19,6 +19,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-10-09c',
+    date: '9 octobre 2026',
+    title: 'Notifications réparables',
+    summary: 'Un bouton de test, et les abonnements expirés se rétablissent tout seuls.',
+    details: `Bouton de test : dans Profil → Notifications, « Envoyer une notification de test » déclenche un vrai rappel immédiatement. Il emprunte le même chemin que les rappels automatiques, donc s'il arrive, c'est que tout fonctionne. S'il n'arrive pas, le message dit où ça coince au lieu d'échouer en silence.\n\nAbonnements rétablis automatiquement : iOS supprime l'abonnement aux notifications après une mise à jour de l'app, une réinstallation, ou plusieurs semaines sans l'ouvrir. Les rappels restaient affichés comme actifs alors que plus rien ne pouvait arriver. L'app s'en rend compte maintenant en ouvrant les réglages et se réabonne toute seule, sans rien redemander.\n\nPlus de bouton bloqué : l'activation pouvait rester grisée indéfiniment quand le service worker ne répondait pas. Elle abandonne désormais au bout de dix secondes avec un message.`,
+  },
+  {
     id: 'update-2026-10-09b',
     date: '9 octobre 2026',
     title: 'Programmes modifiables',

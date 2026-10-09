@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Settings, Smartphone, X, Bell, ChevronRight } from 'lucide-react';
+import { Settings, Smartphone, X, Bell, ChevronRight, Send, CheckCircle2, AlertTriangle } from 'lucide-react';
 import {
   isPushSupported,
   needsInstall,
@@ -7,8 +7,12 @@ import {
   enablePush,
   updatePushPrefs,
   disablePush,
+  syncSubscription,
+  sendTestNotification,
   DEFAULT_PUSH_PREFS,
   type PushPrefs,
+  type SyncOutcome,
+  type TestReport,
 } from '../lib/push';
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -37,16 +41,38 @@ export default function NotificationSettings({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
+  const [sync, setSync] = useState<SyncOutcome | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [test, setTest] = useState<TestReport | null>(null);
 
   const supported = isPushSupported();
   const installRequired = needsInstall();
   const enabled = prefs.creatine || prefs.dailyChallenge;
 
+  // Les préférences disent « activé » mais l'abonnement du navigateur a pu
+  // être révoqué entre-temps : on le vérifie et on le répare au chargement.
   useEffect(() => {
+    let cancelled = false;
     getPushPrefs(uid)
-      .then(setPrefs)
-      .catch(() => setPrefs(DEFAULT_PUSH_PREFS));
+      .then(async (loaded) => {
+        if (cancelled) return;
+        setPrefs(loaded);
+        const outcome = await syncSubscription(uid, loaded);
+        if (!cancelled) setSync(outcome);
+      })
+      .catch(() => {
+        if (!cancelled) setPrefs(DEFAULT_PUSH_PREFS);
+      });
+    return () => { cancelled = true; };
   }, [uid]);
+
+  async function runTest() {
+    if (testing) return;
+    setTesting(true);
+    setTest(null);
+    setTest(await sendTestNotification());
+    setTesting(false);
+  }
 
   async function toggle(key: keyof PushPrefs) {
     if (busy) return;
@@ -70,7 +96,20 @@ export default function NotificationSettings({
         await disablePush(uid);
         setPrefs(next);
       } else {
-        await updatePushPrefs(uid, { [key]: next[key] });
+        try {
+          await updatePushPrefs(uid, { [key]: next[key] });
+        } catch {
+          // Le document a disparu — le serveur le supprime quand le service
+          // push rejette l'abonnement. On se réabonne au lieu d'afficher une
+          // erreur que l'utilisateur ne peut pas corriger.
+          const result = await enablePush(uid, next);
+          if (!result.ok) {
+            setError(ERROR_MESSAGES[result.reason]);
+            setErrorDetail(result.detail ?? null);
+            setBusy(false);
+            return;
+          }
+        }
         setPrefs(next);
       }
     } catch (err) {
@@ -165,6 +204,55 @@ export default function NotificationSettings({
                     onChange={() => toggle('dailyChallenge')}
                   />
                 </label>
+              </div>
+            )}
+
+            {supported && !installRequired && enabled && (
+              <div className="notif-diag">
+                {sync === 'repaired' && (
+                  <p className="notif-diag-line warn">
+                    <AlertTriangle size={14} />
+                    Ton abonnement avait expiré, il vient d'être rétabli.
+                  </p>
+                )}
+                {sync === 'no-permission' && (
+                  <p className="notif-diag-line warn">
+                    <AlertTriangle size={14} />
+                    La permission a été retirée dans les réglages du navigateur.
+                  </p>
+                )}
+                {sync === 'failed' && (
+                  <p className="notif-diag-line warn">
+                    <AlertTriangle size={14} />
+                    Impossible de vérifier ton abonnement. Désactive puis réactive les rappels.
+                  </p>
+                )}
+
+                <button className="secondary-btn small notif-test-btn" onClick={runTest} disabled={testing}>
+                  <Send size={14} /> {testing ? 'Envoi…' : 'Envoyer une notification de test'}
+                </button>
+
+                {test && (
+                  <div className={`notif-diag-result ${test.ok ? 'ok' : 'ko'}`}>
+                    {test.ok ? (
+                      <p className="notif-diag-line">
+                        <CheckCircle2 size={14} />
+                        Envoyée. Si rien n'apparaît, vérifie les notifications de CaliCrew
+                        dans les réglages de ton téléphone.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="notif-diag-line warn">
+                          <AlertTriangle size={14} />
+                          {test.error || "L'envoi a échoué."}
+                        </p>
+                        {test.missing && test.missing.length > 0 && (
+                          <code>Config serveur manquante : {test.missing.join(', ')}</code>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
