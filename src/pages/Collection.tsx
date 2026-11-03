@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCardsBySet, getFamilies, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import type { UserProgress, Card } from '../types';
 import { Layers, Info, X, ArrowLeft } from 'lucide-react';
@@ -27,8 +27,28 @@ export default function Collection() {
   const [showInfo, setShowInfo] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
+  const [groupBy, setGroupBy] = useState<'rarity' | 'family'>('rarity');
+
   const season = getCurrentSeason();
   const cards: Card[] = season ? getCardsBySet(season.id) : [];
+
+  // La saison 1 n'a qu'une famille : inutile de proposer la bascule.
+  const families = getFamilies(cards);
+
+  const groups =
+    groupBy === 'family'
+      ? families.map((family) => ({
+          key: family,
+          label: family,
+          color: undefined as string | undefined,
+          cards: cards.filter((c) => c.category === family),
+        }))
+      : RARITY_ORDER.map((rarity) => ({
+          key: rarity,
+          label: RARITY_LABELS[rarity],
+          color: RARITY_COLORS[rarity] as string | undefined,
+          cards: cards.filter((c) => c.rarity === rarity),
+        }));
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -104,18 +124,35 @@ export default function Collection() {
         <span>{ownedCount} / {cards.length} cartes</span>
       </div>
 
-      {RARITY_ORDER.map((rarity) => {
-        const rarityCards = cards.filter((c) => c.rarity === rarity);
-        if (rarityCards.length === 0) return null;
-        const ownedInRarity = rarityCards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
+      {families.length > 1 && (
+        <div className="layout-switch collection-group-switch">
+          <button
+            className={`layout-switch-btn ${groupBy === 'rarity' ? 'active' : ''}`}
+            onClick={() => setGroupBy('rarity')}
+          >
+            Par rareté
+          </button>
+          <button
+            className={`layout-switch-btn ${groupBy === 'family' ? 'active' : ''}`}
+            onClick={() => setGroupBy('family')}
+          >
+            Par famille
+          </button>
+        </div>
+      )}
+
+      {groups.map((group) => {
+        const groupCards = group.cards;
+        if (groupCards.length === 0) return null;
+        const ownedInGroup = groupCards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
 
         return (
-          <section key={rarity} className="section collection-rarity-section">
-            <h3 className="collection-rarity-header" style={{ color: RARITY_COLORS[rarity] }}>
-              {RARITY_LABELS[rarity]} ({ownedInRarity}/{rarityCards.length})
+          <section key={group.key} className="section collection-rarity-section">
+            <h3 className="collection-rarity-header" style={{ color: group.color }}>
+              {group.label} ({ownedInGroup}/{groupCards.length})
             </h3>
             <div className="card-grid card-grid-images">
-              {rarityCards.map((card) => {
+              {groupCards.map((card) => {
                 const owned = (ownedCards[card.id] || 0) > 0;
                 const count = ownedCards[card.id] || 0;
                 return (

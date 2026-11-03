@@ -1,4 +1,5 @@
 import type { Card, CardRarity } from '../types';
+import { PASS2_CARDS } from './cardsS2';
 
 // ── Pass 1 : Casier Judiciaire (50 cartes) ──
 
@@ -68,6 +69,7 @@ const PASS1_CARDS: Card[] = [
 
 const CARD_SETS: Record<string, Card[]> = {
   'pass-1': PASS1_CARDS,
+  'pass-2': PASS2_CARDS,
 };
 
 export function getCardsBySet(setId: string): Card[] {
@@ -81,6 +83,16 @@ export function getAllCurrentCards(seasonId: string): Card[] {
 export function getCardVariants(baseCardId: string, setId: string): Card[] {
   const cards = getCardsBySet(setId);
   return cards.filter((c) => c.baseCardId === baseCardId);
+}
+
+/**
+ * Familles d'un set, dans l'ordre où elles apparaissent.
+ *
+ * La saison 1 n'en a qu'une — tout était « Politique » — donc l'appelant peut
+ * s'en servir pour décider s'il vaut la peine de proposer un regroupement.
+ */
+export function getFamilies(cards: Card[]): string[] {
+  return [...new Set(cards.map((c) => c.category).filter(Boolean))];
 }
 
 export function getCardDisplayName(card: Card): string {

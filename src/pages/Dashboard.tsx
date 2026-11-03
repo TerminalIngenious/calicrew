@@ -19,6 +19,13 @@ import Loader from '../components/Loader';
 
 const UPDATES = [
   {
+    id: 'update-2026-11-03',
+    date: '3 novembre 2026',
+    title: 'Saison 2 — Fous du bus',
+    summary: 'La saison 2 arrive le 29 novembre, avec 51 cartes réparties en 8 familles.',
+    details: `Saison 2 « Fous du bus » : 51 cartes, et une nouveauté — elles sont réparties en 8 familles de tailles différentes. InfluVoleurs, Dictateurs, Tueurs en série, Chanteurs & rappeurs, Milliardaires, Pirates, Scientifiques et Mythologique.\n\nDans la Collection, un bouton bascule entre « Par rareté » et « Par famille ». Chaque famille mélange du commun et du rare : aucune n'est un jackpot, aucune n'est un tas de rebuts. Les compléter demandera de la chance et des échanges.\n\nLe pass repart de zéro le 29 novembre, comme il se doit pour une nouvelle saison. Ce qui est gagné reste gagné : ta collection, tes badges et tes succès ne bougent pas. Les coffres que tu n'as pas encore ouverts resteront des coffres de la saison 1 et donneront des cartes de la saison 1 — garde-les si tu veux compléter Casier Judiciaire, ouvre-les si tu préfères repartir à neuf.\n\nIl te reste donc quelques semaines pour finir la saison 1.`,
+  },
+  {
     id: 'update-2026-10-10',
     date: '10 octobre 2026',
     title: 'Circuit, programmes AMRAP & séance sans coffre',

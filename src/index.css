@@ -845,6 +845,10 @@ body {
   margin-bottom: 0.75rem;
 }
 
+.collection-group-switch {
+  margin: 0 0 1rem;
+}
+
 .layout-switch-btn svg {
   vertical-align: -2px;
   margin-right: 0.2rem;

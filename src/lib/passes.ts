@@ -1,4 +1,4 @@
-import type { Season, PassLevel, Quest, SportType, Session, CardRarity } from '../types';
+import type { Season, PassLevel, Quest, SportType, Session, CardRarity, UserProgress } from '../types';
 import { exerciseReps, exerciseSeconds } from './stats';
 
 // ── Ancien système de quêtes (fallback) ──
@@ -436,6 +436,10 @@ function buildLevels(): PassLevel[] {
 const PASS1_START = new Date(2026, 8, 1).getTime();
 const NINETY_DAYS = 90 * 24 * 60 * 60 * 1000;
 
+// La saison 2 démarre à la seconde où la 1 s'arrête : pas de trou pendant
+// lequel getCurrentSeason() renverrait null.
+const PASS2_START = PASS1_START + NINETY_DAYS;
+
 export const SEASONS: Season[] = [
   {
     id: 'pass-1',
@@ -446,11 +450,55 @@ export const SEASONS: Season[] = [
     passLevels: buildLevels(),
     quests: [],
   },
+  {
+    id: 'pass-2',
+    name: 'Saison 2',
+    theme: 'Fous du bus',
+    startDate: PASS2_START,
+    endDate: PASS2_START + NINETY_DAYS,
+    passLevels: buildLevels(),
+    quests: [],
+  },
 ];
 
 export function getCurrentSeason(): Season | null {
   const now = Date.now();
   return SEASONS.find((s) => now >= s.startDate && now < s.endDate) || null;
+}
+
+/**
+ * Faut-il basculer ce joueur sur une nouvelle saison ?
+ *
+ * Un `currentSeasonId` vide désigne un compte qui n'a jamais joué : il
+ * démarre dans la saison en cours, ce n'est pas une bascule.
+ */
+export function needsSeasonReset(progress: UserProgress, seasonId: string): boolean {
+  return !!progress.currentSeasonId && progress.currentSeasonId !== seasonId;
+}
+
+/**
+ * Remet le pass à zéro pour une nouvelle saison.
+ *
+ * Sans ça, l'XP cumulée resterait acquise : un joueur arriverait au premier
+ * jour de la saison 2 déjà à mi-parcours, et surtout ne toucherait plus aucun
+ * coffre tant qu'il n'aurait pas dépassé son total de la saison précédente,
+ * puisque les récompenses se déclenchent au franchissement d'un niveau.
+ *
+ * Ce qui a été gagné reste gagné : les cartes, les badges et les succès ne
+ * sont pas touchés. Les coffres encore fermés sont épinglés sur la saison où
+ * ils ont été obtenus, sinon ils donneraient en silence des cartes de la
+ * nouvelle saison.
+ */
+export function startNewSeason(progress: UserProgress, seasonId: string): UserProgress {
+  const previous = progress.currentSeasonId;
+  return {
+    ...progress,
+    passXp: 0,
+    currentSeasonId: seasonId,
+    chestsToOpen: (progress.chestsToOpen || []).map((chest) =>
+      chest.pool === 'current' && previous ? { ...chest, pool: previous } : chest
+    ),
+  };
 }
 
 export function getSeasonById(id: string): Season | undefined {

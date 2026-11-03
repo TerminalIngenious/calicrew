@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS, needsSeasonReset, startNewSeason } from '../lib/passes';
 import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
 import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
 import { primeAudio, playCardExplosion } from '../lib/sound';
@@ -94,7 +94,19 @@ export default function BattlePass() {
     const ref = doc(db, 'userProgress', user.uid);
     const snap = await getDoc(ref);
     if (snap.exists()) {
-      setProgress(snap.data() as UserProgress);
+      const stored = snap.data() as UserProgress;
+      // Nouvelle saison : le pass repart de zéro, la collection reste.
+      if (season && needsSeasonReset(stored, season.id)) {
+        const fresh = startNewSeason(stored, season.id);
+        await updateDoc(ref, {
+          passXp: fresh.passXp,
+          currentSeasonId: fresh.currentSeasonId,
+          chestsToOpen: fresh.chestsToOpen,
+        });
+        setProgress(fresh);
+      } else {
+        setProgress(stored);
+      }
     } else {
       const init = { ...DEFAULT_PROGRESS, currentSeasonId: season?.id || '' };
       await setDoc(ref, init);
@@ -242,7 +254,10 @@ export default function BattlePass() {
   async function openChest() {
     if (progress.chestsToOpen.length === 0 || !user || !season) return;
     const chest = progress.chestsToOpen[0];
-    const pool = getCardsBySet(chest.pool === 'current' ? season.id : chest.pool);
+    // Un coffre épinglé sur une saison retirée du code donnerait un set vide :
+    // on retombe alors sur la saison en cours plutôt que de ne rien tirer.
+    const pinned = chest.pool === 'current' ? season.id : chest.pool;
+    const pool = getCardsBySet(pinned).length > 0 ? getCardsBySet(pinned) : getCardsBySet(season.id);
     const card = rollCard(pool, progress.ownedCards, chest.rarity === 'commune' ? undefined : chest.rarity);
 
     // La carte est tirée avant l'animation : sa rareté peut dépasser celle

@@ -304,7 +304,11 @@ export interface UserProgress {
   isPremium: boolean;
   ownedCards: Record<string, number>;
   questsClaimed: Record<string, number>;
-  chestsToOpen: { rarity: CardRarity; pool: 'current' | 'old' }[];
+  /**
+   * `pool` vaut 'current' — la saison en cours au moment de l'ouverture — ou
+   * l'id d'un set figé, pour un coffre gagné lors d'une saison passée.
+   */
+  chestsToOpen: { rarity: CardRarity; pool: string }[];
   achievementsClaimed: string[];
   currentSeasonId: string;
   avatarCardId?: string;
