@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SessionsProvider } from './contexts/SessionsContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getCurrentSeason } from './lib/passes';
+import { getCardsBySet, getFamilies } from './lib/cards';
+import type { Season } from './types';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewSession from './pages/NewSession';
@@ -32,27 +34,69 @@ function MaintenanceScreen() {
   );
 }
 
-function SeasonSplash({ onDone }: { onDone: () => void }) {
-  const season = getCurrentSeason();
-  const [phase, setPhase] = useState<'enter' | 'show' | 'exit'>('enter');
+/**
+ * Intro de saison.
+ *
+ * Elle se joue une fois par saison : la clé enregistrée porte l'id de la
+ * saison, sinon l'intro de la saison 2 ne partirait jamais pour ceux qui ont
+ * déjà vu celle de la saison 1.
+ *
+ * La séquence est découpée en temps plutôt qu'en une seule transition : on
+ * pose le décor, on annonce la saison, son nom, puis les familles défilent
+ * comme les destinations d'un panneau de bus. Un appui passe tout.
+ */
+/**
+ * Intro de saison.
+ *
+ * Elle se joue une fois par saison : la clé enregistrée porte l'id de la
+ * saison, sinon l'intro de la saison 2 ne partirait jamais pour ceux qui ont
+ * déjà vu celle de la saison 1.
+ *
+ * Toute la chorégraphie tient dans des `animation-delay` déclenchés en une
+ * fois. Un découpage en étapes successives relancerait les animations à
+ * chaque changement de classe — le titre se re-floutait à mi-parcours.
+ */
+function SeasonSplash({ season, onDone }: { season: Season; onDone: () => void }) {
+  const [exiting, setExiting] = useState(false);
+
+  const families = useMemo(() => getFamilies(getCardsBySet(season.id)), [season.id]);
+  // Une seule famille, c'est la saison 1 : le défilé n'aurait rien à montrer.
+  const showFamilies = families.length > 1;
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('show'), 100);
-    const t2 = setTimeout(() => setPhase('exit'), 3000);
-    const t3 = setTimeout(onDone, 3800);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [onDone]);
-
-  if (!season) { onDone(); return null; }
+    const total = showFamilies ? 6200 : 4200;
+    const t1 = window.setTimeout(() => setExiting(true), total);
+    const t2 = window.setTimeout(onDone, total + 700);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [onDone, showFamilies]);
 
   return (
-    <div className={`season-splash ${phase}`} onClick={onDone}>
+    <div className={`season-splash playing ${exiting ? 'exit' : ''}`} onClick={onDone}>
+      <div className="season-splash-road" />
+
       <div className="season-splash-content">
         <div className="season-splash-label">{season.name}</div>
         <div className="season-splash-theme">{season.theme}</div>
         <div className="season-splash-line" />
-        <div className="season-splash-sub">CaliCrew</div>
+
+        {showFamilies && (
+          <div className="season-splash-families" aria-hidden="true">
+            {families.map((family, i) => (
+              <span
+                key={family}
+                className="season-splash-family"
+                style={{ animationDelay: `${2.2 + i * 0.18}s` }}
+              >
+                {family}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className={`season-splash-sub ${showFamilies ? 'late' : ''}`}>CaliCrew</div>
       </div>
+
+      <button className="season-splash-skip" onClick={onDone}>Passer</button>
     </div>
   );
 }
@@ -68,19 +112,23 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 function AppContent() {
   const { user, loading } = useAuth();
   const [showSplash, setShowSplash] = useState(false);
-  const [splashDone, setSplashDone] = useState(() => !!localStorage.getItem('calicrew-splash-seen'));
+  const currentSeason = getCurrentSeason();
+  // La clé porte l'id de la saison : chaque nouvelle saison rejoue son intro.
+  const [splashDone, setSplashDone] = useState(
+    () => localStorage.getItem('calicrew-splash-seen') === currentSeason?.id
+  );
 
   useEffect(() => {
-    if (!loading && user && !splashDone) {
+    if (!loading && user && currentSeason && !splashDone) {
       setShowSplash(true);
     }
-  }, [loading, user, splashDone]);
+  }, [loading, user, splashDone, currentSeason]);
 
-  function handleSplashDone() {
+  const handleSplashDone = useCallback(() => {
     setShowSplash(false);
     setSplashDone(true);
-    localStorage.setItem('calicrew-splash-seen', 'pass-1');
-  }
+    if (currentSeason) localStorage.setItem('calicrew-splash-seen', currentSeason.id);
+  }, [currentSeason]);
 
   const season = getSeasonalTheme();
 
@@ -92,7 +140,9 @@ function AppContent() {
 
   return (
     <>
-      {showSplash && <SeasonSplash onDone={handleSplashDone} />}
+      {showSplash && currentSeason && (
+        <SeasonSplash season={currentSeason} onDone={handleSplashDone} />
+      )}
       {season === 'halloween' && <HalloweenDecor />}
       {season === 'pink' && <PinkDecor />}
       <Routes>

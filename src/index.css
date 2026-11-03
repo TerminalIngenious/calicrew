@@ -5117,42 +5117,84 @@ body {
 }
 
 /* ── Season Splash ── */
+/* ── Intro de saison ──
+ *
+ * Toute la chorégraphie est faite de délais déclenchés en une seule fois par
+ * `.playing`. Un découpage en étapes successives relançait les animations à
+ * chaque changement de classe.
+ */
 .season-splash {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #0a0a0a;
+  background: #07070d;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-
-.season-splash.show {
-  opacity: 1;
+  transition: opacity 0.7s ease;
 }
 
 .season-splash.exit {
   opacity: 0;
+  pointer-events: none;
+}
+
+/* Trait lumineux qui traverse l'écran : la route sous le bus. */
+.season-splash-road {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.28), transparent);
+  transform: scaleX(0);
+  opacity: 0;
 }
 
 .season-splash-content {
+  position: relative;
+  z-index: 1;
   text-align: center;
-  transform: scale(0.85);
-  opacity: 0;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+  padding: 0 1.5rem;
 }
 
-.season-splash.show .season-splash-content {
-  transform: scale(1);
-  opacity: 1;
+.season-splash-label,
+.season-splash-theme,
+.season-splash-line,
+.season-splash-sub,
+.season-splash-family {
+  opacity: 0;
 }
 
-.season-splash.exit .season-splash-content {
-  transform: scale(1.1);
-  opacity: 0;
+.season-splash.playing .season-splash-road {
+  animation: splashRoad 1.2s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.season-splash.playing .season-splash-label {
+  animation: splashSlideUp 0.6s 0.5s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-splash.playing .season-splash-theme {
+  animation: splashTheme 1s 0.9s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-splash.playing .season-splash-line {
+  animation: splashLineExpand 0.7s 1.7s both ease-out;
+}
+
+/* Le délai de chaque famille est posé en ligne : il dépend de son rang. */
+.season-splash.playing .season-splash-family {
+  animation: splashDestination 0.5s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-splash.playing .season-splash-sub {
+  animation: splashSlideUp 0.6s 2.2s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Avec le défilé des familles, la signature ne vient qu'après. */
+.season-splash.playing .season-splash-sub.late {
+  animation-delay: 4s;
 }
 
 .season-splash-label {
@@ -5161,21 +5203,19 @@ body {
   letter-spacing: 0.3em;
   color: rgba(255, 255, 255, 0.5);
   margin-bottom: 0.75rem;
-  animation: splashSlideUp 0.8s 0.3s both cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .season-splash-theme {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 800;
   color: white;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   line-height: 1.1;
-  background: linear-gradient(135deg, #fff 0%, #ff6b35 50%, #ff4444 100%);
+  background: linear-gradient(135deg, #fff 0%, #ff6b35 55%, #ff4444 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: splashSlideUp 0.8s 0.5s both cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .season-splash-line {
@@ -5183,7 +5223,22 @@ body {
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   margin: 1.2rem auto;
-  animation: splashLineExpand 0.6s 1s both ease-out;
+}
+
+/* Les familles défilent comme les destinations d'un panneau de bus. */
+.season-splash-families {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  margin-bottom: 1.4rem;
+}
+
+.season-splash-family {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .season-splash-sub {
@@ -5191,7 +5246,54 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.4em;
   color: rgba(255, 255, 255, 0.35);
-  animation: splashSlideUp 0.6s 1.2s both cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-splash-skip {
+  position: absolute;
+  bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+@keyframes splashRoad {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 0.6; }
+}
+
+@keyframes splashTheme {
+  from { opacity: 0; transform: translateY(26px) scale(0.92); filter: blur(10px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes splashDestination {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Une intro ne doit pas s'imposer à qui a demandé moins d'animations. */
+@media (prefers-reduced-motion: reduce) {
+  .season-splash.playing .season-splash-road,
+  .season-splash.playing .season-splash-label,
+  .season-splash.playing .season-splash-theme,
+  .season-splash.playing .season-splash-line,
+  .season-splash.playing .season-splash-sub,
+  .season-splash.playing .season-splash-family {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .season-splash-line { width: 120px; }
+  .season-splash-road { transform: scaleX(1); opacity: 1; }
 }
 
 @keyframes splashSlideUp {
