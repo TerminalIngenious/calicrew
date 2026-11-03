@@ -3,8 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS, needsSeasonReset, startNewSeason } from '../lib/passes';
-import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName } from '../lib/cards';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
+import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
 import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
@@ -207,6 +207,17 @@ export default function BattlePass() {
     return (progress.questsClaimed[questId] || 0) >= weekStart;
   }
 
+  // Quête d'archive : hors pass, visible tant qu'il manque des cartes à la
+  // collection de la saison précédente.
+  const previousSeason = season ? getPreviousSeason(season.id) : undefined;
+  const archiveMissing = previousSeason
+    ? getMissingCards(previousSeason.id, progress.ownedCards).length
+    : 0;
+  const archiveQuest =
+    previousSeason && !isSetComplete(previousSeason.id, progress.ownedCards)
+      ? getArchiveQuest(previousSeason)
+      : null;
+
   const dailyValue = getQuestValue(dailyQuest, daySessions);
   const dailyDone = dailyValue >= dailyQuest.target;
   const dailyClaimed = (progress.questsClaimed[dailyQuest.id] || 0) >= dayStart;
@@ -237,6 +248,27 @@ export default function BattlePass() {
     await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
   }
 
+  /**
+   * La quête d'archive ne passe pas par grantXp : elle ne donne aucun XP de
+   * pass, seulement un coffre épinglé sur la saison précédente.
+   */
+  async function claimArchiveQuest() {
+    if (!user || !archiveQuest || !previousSeason) return;
+    const updated: UserProgress = {
+      ...progress,
+      // Faux positif de react-hooks/purity : claimArchiveQuest n'est appelée
+      // que depuis un onClick, jamais pendant le rendu.
+      // eslint-disable-next-line react-hooks/purity
+      questsClaimed: { ...progress.questsClaimed, [archiveQuest.id]: Date.now() },
+      chestsToOpen: [...progress.chestsToOpen, { rarity: 'commune' as const, pool: previousSeason.id }],
+    };
+    setProgress(updated);
+    await updateDoc(doc(db, 'userProgress', user.uid), {
+      questsClaimed: updated.questsClaimed,
+      chestsToOpen: updated.chestsToOpen,
+    });
+  }
+
   async function claimDailyQuest() {
     if (!dailyDone || dailyClaimed) return;
     await grantXp(dailyQuest.id, dailyQuest.xp);
@@ -258,7 +290,15 @@ export default function BattlePass() {
     // on retombe alors sur la saison en cours plutôt que de ne rien tirer.
     const pinned = chest.pool === 'current' ? season.id : chest.pool;
     const pool = getCardsBySet(pinned).length > 0 ? getCardsBySet(pinned) : getCardsBySet(season.id);
-    const card = rollCard(pool, progress.ownedCards, chest.rarity === 'commune' ? undefined : chest.rarity);
+    // Un coffre d'archive n'a d'intérêt que s'il complète : il évite les
+    // doublons tant qu'il reste des cartes à trouver dans ce set.
+    const isArchive = chest.pool !== 'current' && chest.pool !== season.id;
+    const card = rollCard(
+      pool,
+      progress.ownedCards,
+      chest.rarity === 'commune' ? undefined : chest.rarity,
+      isArchive
+    );
 
     // La carte est tirée avant l'animation : sa rareté peut dépasser celle
     // garantie par le coffre, et c'est bien elle qui doit colorer la rotation.
@@ -618,6 +658,54 @@ export default function BattlePass() {
               </div>
             </div>
           )}
+
+          {archiveQuest && previousSeason && (() => {
+            const current = getQuestValue(archiveQuest);
+            const done = current >= archiveQuest.target;
+            const claimed = isQuestClaimed(archiveQuest.id);
+            const pct = Math.min(100, (current / archiveQuest.target) * 100);
+
+            return (
+              <div className="bp-archive">
+                <div className="bp-section-title-row">
+                  <h3 className="bp-section-title">
+                    <Package size={16} /> Collection {previousSeason.name}
+                  </h3>
+                  <span className="bp-quest-timer">{archiveMissing} manquante{archiveMissing > 1 ? 's' : ''}</span>
+                </div>
+                <p className="bp-archive-hint">
+                  Cette collection ne tombe plus dans les coffres du pass. Une quête
+                  bonus par semaine donne un coffre {previousSeason.name}, qui vise
+                  en priorité une carte qui te manque.
+                </p>
+                <div className={`bp-quest ${claimed ? 'bp-quest-claimed' : ''} ${done && !claimed ? 'bp-quest-ready' : ''}`}>
+                  <div className="bp-quest-accent" style={{ background: 'var(--accent-green)' }} />
+                  <div className="bp-quest-body">
+                    <div className="bp-quest-top">
+                      <div className="bp-quest-title-row">
+                        <span className="bp-quest-label">{archiveQuest.description}</span>
+                      </div>
+                      <div className="bp-quest-reward">
+                        {claimed ? (
+                          <span className="bp-quest-done-badge"><Check size={12} /></span>
+                        ) : done ? (
+                          <button className="bp-quest-claim" onClick={claimArchiveQuest}>
+                            Coffre
+                          </button>
+                        ) : (
+                          <span className="bp-quest-xp">Coffre</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="bp-quest-bar">
+                      <div className="bp-quest-fill" style={{ width: `${pct}%`, background: 'var(--accent-green)' }} />
+                    </div>
+                    <span className="bp-quest-progress">{current}/{archiveQuest.target}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="bp-section-title-row">
             <h3 className="bp-section-title">

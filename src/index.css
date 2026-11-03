@@ -849,6 +849,42 @@ body {
   margin: 0 0 1rem;
 }
 
+.collection-season-switch {
+  margin: 0 0 0.75rem;
+}
+
+.collection-season-switch em {
+  font-style: normal;
+  font-size: 0.68rem;
+  opacity: 0.6;
+}
+
+.collection-archive-hint {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ── Quête d'archive, hors pass ── */
+
+.bp-archive {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.bp-archive-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
 .layout-switch-btn svg {
   vertical-align: -2px;
   margin-right: 0.2rem;

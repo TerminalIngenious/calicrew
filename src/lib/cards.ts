@@ -91,6 +91,17 @@ export function getCardVariants(baseCardId: string, setId: string): Card[] {
  * La saison 1 n'en a qu'une — tout était « Politique » — donc l'appelant peut
  * s'en servir pour décider s'il vaut la peine de proposer un regroupement.
  */
+/** Cartes d'un set qui manquent encore à ce joueur. */
+export function getMissingCards(setId: string, owned: Record<string, number>): Card[] {
+  return getCardsBySet(setId).filter((c) => (owned[c.id] || 0) === 0);
+}
+
+/** Une collection de saison est-elle terminée ? */
+export function isSetComplete(setId: string, owned: Record<string, number>): boolean {
+  const cards = getCardsBySet(setId);
+  return cards.length > 0 && cards.every((c) => (owned[c.id] || 0) > 0);
+}
+
 export function getFamilies(cards: Card[]): string[] {
   return [...new Set(cards.map((c) => c.category).filter(Boolean))];
 }
@@ -131,13 +142,23 @@ const RARITY_WEIGHTS: Record<CardRarity, number> = {
 
 export function rollCard(
   pool: Card[],
-  _ownedCards: Record<string, number>,
+  ownedCards: Record<string, number>,
   minRarity?: CardRarity,
+  /**
+   * Ne tirer que parmi les cartes non possédées, tant qu'il en reste. Sert aux
+   * coffres d'archive, dont le seul but est de compléter une collection : un
+   * doublon les rendrait inutiles.
+   */
+  preferMissing = false,
 ): Card | null {
   let filtered = pool;
   if (minRarity) {
     const minIndex = RARITY_ORDER.indexOf(minRarity);
     filtered = pool.filter((c) => RARITY_ORDER.indexOf(c.rarity) <= minIndex);
+  }
+  if (preferMissing) {
+    const missing = filtered.filter((c) => (ownedCards[c.id] || 0) === 0);
+    if (missing.length > 0) filtered = missing;
   }
   if (filtered.length === 0) return null;
 

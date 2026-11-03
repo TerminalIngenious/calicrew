@@ -3,8 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, getFamilies, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
-import { getCurrentSeason } from '../lib/passes';
+import { getCardsBySet, getFamilies, isSetComplete, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCurrentSeason, SEASONS } from '../lib/passes';
 import type { UserProgress, Card } from '../types';
 import { Layers, Info, X, ArrowLeft } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
@@ -30,7 +30,26 @@ export default function Collection() {
   const [groupBy, setGroupBy] = useState<'rarity' | 'family'>('rarity');
 
   const season = getCurrentSeason();
-  const cards: Card[] = season ? getCardsBySet(season.id) : [];
+
+  /**
+   * Saisons consultables : celle en cours, plus les passées dont la collection
+   * n'est pas finie. Une collection complète disparaît — il n'y a plus rien à
+   * y chercher, et la garder encombrerait l'écran saison après saison.
+   */
+  // Le rang dans SEASONS suffit à écarter les saisons à venir : pas besoin de
+  // lire l'horloge pendant le rendu, ce qui ne serait pas une fonction pure.
+  const currentIndex = SEASONS.findIndex((s) => s.id === season?.id);
+  const viewableSeasons = SEASONS.filter(
+    (s, i) => i === currentIndex || (i < currentIndex && !isSetComplete(s.id, ownedCards))
+  );
+
+  const [viewedId, setViewedId] = useState<string | null>(null);
+  const activeId = viewedId && viewableSeasons.some((s) => s.id === viewedId)
+    ? viewedId
+    : season?.id || '';
+  const viewedSeason = SEASONS.find((s) => s.id === activeId);
+
+  const cards: Card[] = activeId ? getCardsBySet(activeId) : [];
 
   // La saison 1 n'a qu'une famille : inutile de proposer la bascule.
   const families = getFamilies(cards);
@@ -123,6 +142,29 @@ export default function Collection() {
         <Layers size={20} />
         <span>{ownedCount} / {cards.length} cartes</span>
       </div>
+
+      {viewableSeasons.length > 1 && (
+        <div className="layout-switch collection-season-switch">
+          {viewableSeasons.map((s) => (
+            <button
+              key={s.id}
+              className={`layout-switch-btn ${activeId === s.id ? 'active' : ''}`}
+              onClick={() => setViewedId(s.id)}
+            >
+              {s.name}
+              {s.id !== season?.id && <em> · terminée</em>}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {viewedSeason && viewedSeason.id !== season?.id && (
+        <p className="collection-archive-hint">
+          {viewedSeason.theme} ne tombe plus dans les coffres du pass. La quête
+          bonus hebdomadaire du Pass donne un coffre de cette saison tant qu'il
+          te manque des cartes.
+        </p>
+      )}
 
       {families.length > 1 && (
         <div className="layout-switch collection-group-switch">

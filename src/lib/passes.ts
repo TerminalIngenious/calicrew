@@ -532,3 +532,34 @@ export function getWeekStart(): number {
   const monday = new Date(shifted.getFullYear(), shifted.getMonth(), diff, 10, 0, 0, 0);
   return monday.getTime();
 }
+
+// ── Collections des saisons passées ──
+
+/**
+ * Saison qui précède celle donnée, dans l'ordre de SEASONS.
+ * Renvoie undefined pour la toute première.
+ */
+export function getPreviousSeason(seasonId: string): Season | undefined {
+  const index = SEASONS.findIndex((s) => s.id === seasonId);
+  return index > 0 ? SEASONS[index - 1] : undefined;
+}
+
+/**
+ * Quête bonus hebdomadaire, en dehors du pass.
+ *
+ * Elle ne rapporte pas d'XP — elle est volontairement hors progression — mais
+ * un coffre de la saison précédente, pour laisser une chance de compléter une
+ * collection qu'on ne peut plus remplir autrement. Elle n'apparaît que tant
+ * qu'il manque des cartes : une fois la collection finie, elle disparaît.
+ */
+export function getArchiveQuest(previousSeason: Season): Quest {
+  const week = getWeekNumber();
+  return {
+    id: `w${week}-archive-${previousSeason.id}`,
+    label: `Archive — ${previousSeason.name}`,
+    description: 'Fais 4 séances cette semaine',
+    target: 4,
+    type: 'sessions',
+    xp: 0,
+  };
+}
