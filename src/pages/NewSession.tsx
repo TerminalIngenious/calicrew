@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
-import { sportCoXp } from '../lib/passes';
+import { sportCoXp, getCurrentSeason, needsSeasonReset, startNewSeason } from '../lib/passes';
 import { buildAmrapExercises } from '../lib/amrap';
 import AmrapBuilder from '../components/AmrapBuilder';
 import type { AmrapItem } from '../components/AmrapBuilder';
-import type { Exercise, ExerciseLog, WeightType, Program, SetUnit } from '../types';
+import type { Exercise, ExerciseLog, WeightType, Program, SetUnit, UserProgress } from '../types';
 import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
 
 /** Running et vélo partagent le même formulaire temps / distance / dénivelé. */
@@ -334,7 +334,20 @@ export default function NewSession() {
         const ref = doc(db, 'userProgress', user!.uid);
         const snap = await getDoc(ref);
         if (snap.exists()) {
-          await updateDoc(ref, { passXp: (snap.data().passXp || 0) + xpGained });
+          const stored = snap.data() as UserProgress;
+          const season = getCurrentSeason();
+          // La bascule de saison se fait d'ordinaire à l'ouverture du Pass.
+          // Si elle n'a pas encore eu lieu, cet XP s'ajouterait au total de la
+          // saison précédente et disparaîtrait à la première visite du Pass.
+          const base =
+            season && needsSeasonReset(stored, season.id)
+              ? startNewSeason(stored, season.id)
+              : stored;
+          await updateDoc(ref, {
+            passXp: (base.passXp || 0) + xpGained,
+            currentSeasonId: base.currentSeasonId,
+            chestsToOpen: base.chestsToOpen,
+          });
         }
       } catch (err) {
         console.error('Erreur XP sport co:', err);
