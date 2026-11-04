@@ -24,3 +24,7 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Dossier de travail saison 2 : PNG sources (55 Mo) et kit React de rendu.
+# Les visuels livres a l app sont dans public/cards/ en WebP.
+calicrew-s2/
