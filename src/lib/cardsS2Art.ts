@@ -53,7 +53,7 @@ export interface CardArt {
 
 export const S2_ART: Record<string, CardArt> = {
   's2-ciao-energy': {
-    numero: '001/050', prenom: '', nom: 'Ciao Energy',
+    numero: '001/049', prenom: '', nom: 'Ciao Energy',
     ligne: 1, valeur: 95,
     citation: 'Ce n\'est pas un partenariat.',
     photo: '/photos/s2-ciao-energy.webp',
@@ -71,7 +71,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-p-diddy': {
-    numero: '002/050', prenom: 'P.', nom: 'Diddy',
+    numero: '002/049', prenom: 'P.', nom: 'Diddy',
     ligne: 4, valeur: 96,
     citation: 'You need locks on the doors.',
     photo: '/photos/s2-p-diddy.webp',
@@ -89,7 +89,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-xddl': {
-    numero: '003/050', prenom: 'Xavier', nom: 'Dupont de Ligonnès',
+    numero: '003/049', prenom: 'Xavier', nom: 'Dupont de Ligonnès',
     ligne: 3, valeur: 91,
     citation: 'Nous partons vivre en Australie.',
     photo: '/photos/s2-xddl.webp',
@@ -107,7 +107,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-hitler': {
-    numero: '004/050', prenom: 'Adolf', nom: 'Hitler',
+    numero: '004/049', prenom: 'Adolf', nom: 'Hitler',
     ligne: 2, valeur: 90,
     citation: 'Je voulais devenir peintre.',
     photo: '/photos/s2-hitler.webp',
@@ -125,7 +125,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-elon-musk': {
-    numero: '005/050', prenom: 'Elon', nom: 'Musk',
+    numero: '005/049', prenom: 'Elon', nom: 'Musk',
     ligne: 5, valeur: 92,
     citation: 'My heart goes out to you.',
     photo: '/photos/s2-elon-musk.webp',
@@ -143,7 +143,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-zeus': {
-    numero: '006/050', prenom: '', nom: 'Zeus',
+    numero: '006/049', prenom: '', nom: 'Zeus',
     ligne: 9, valeur: 89,
     citation: 'C\'est pas moi, c\'est le cygne.',
     photo: '/photos/s2-zeus.webp',
@@ -161,7 +161,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-einstein': {
-    numero: '007/050', prenom: 'Albert', nom: 'Einstein',
+    numero: '007/049', prenom: 'Albert', nom: 'Einstein',
     ligne: 8, valeur: 88,
     citation: 'Dieu ne joue pas aux dés.',
     photo: '/photos/s2-einstein.webp',
@@ -179,7 +179,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-mister-v': {
-    numero: '008/050', prenom: 'Mister', nom: 'V',
+    numero: '008/049', prenom: 'Mister', nom: 'V',
     ligne: 1, valeur: 84,
     citation: 'La vraie pizza de la mama… surgelée.',
     photo: '/photos/s2-mister-v.webp',
@@ -197,7 +197,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-ed-gein': {
-    numero: '009/050', prenom: 'Ed', nom: 'Gein',
+    numero: '009/049', prenom: 'Ed', nom: 'Gein',
     ligne: 3, valeur: 83,
     citation: 'Maman avait toujours raison.',
     photo: '/photos/s2-ed-gein.webp',
@@ -215,7 +215,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-jack-eventreur': {
-    numero: '010/050', prenom: '', nom: 'Jack l\'Éventreur',
+    numero: '010/049', prenom: '', nom: 'Jack l\'Éventreur',
     ligne: 3, valeur: 85,
     citation: 'Catch me when you can.',
     photo: '/photos/s2-jack-eventreur.webp',
@@ -233,7 +233,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-jeffrey-dahmer': {
-    numero: '011/050', prenom: 'Jeffrey', nom: 'Dahmer',
+    numero: '011/049', prenom: 'Jeffrey', nom: 'Dahmer',
     ligne: 3, valeur: 86,
     citation: 'Vous avez vu ma série ?',
     photo: '/photos/s2-jeffrey-dahmer.webp',
@@ -251,7 +251,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-kanye-west': {
-    numero: '012/050', prenom: 'Kanye', nom: 'West',
+    numero: '012/049', prenom: 'Kanye', nom: 'West',
     ligne: 4, valeur: 87,
     citation: 'I am a god.',
     photo: '/photos/s2-kanye-west.webp',
@@ -269,7 +269,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-drake': {
-    numero: '013/050', prenom: '', nom: 'Drake',
+    numero: '013/049', prenom: '', nom: 'Drake',
     ligne: 4, valeur: 82,
     citation: 'Started from the bottom, now we\'re here.',
     photo: '/photos/s2-drake.webp',
@@ -287,7 +287,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-loki': {
-    numero: '014/050', prenom: '', nom: 'Loki',
+    numero: '014/049', prenom: '', nom: 'Loki',
     ligne: 9, valeur: 81,
     citation: 'Je peux tout expliquer.',
     photo: '/photos/s2-loki.webp',
@@ -305,7 +305,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-ricky-ross': {
-    numero: '015/050', prenom: 'Ricky Donnell', nom: 'Ross',
+    numero: '015/049', prenom: 'Ricky Donnell', nom: 'Ross',
     ligne: 6, valeur: 80,
     citation: 'Le vrai Rick Ross, c\'est moi.',
     photo: '/photos/s2-ricky-ross.webp',
@@ -323,7 +323,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-tibo-inshape': {
-    numero: '016/050', prenom: 'Tibo', nom: 'InShape',
+    numero: '016/049', prenom: 'Tibo', nom: 'InShape',
     ligne: 1, valeur: 70,
     citation: 'Il faut bien payer les charges.',
     photo: '/photos/s2-tibo-inshape.webp',
@@ -341,7 +341,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-petain': {
-    numero: '017/050', prenom: 'Philippe', nom: 'Pétain',
+    numero: '017/049', prenom: 'Philippe', nom: 'Pétain',
     ligne: 2, valeur: 72,
     citation: 'Je fais à la France le don de ma personne.',
     photo: '/photos/s2-petain.webp',
@@ -359,7 +359,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-pouyanne': {
-    numero: '018/050', prenom: 'Patrick', nom: 'Pouyanné',
+    numero: '018/049', prenom: 'Patrick', nom: 'Pouyanné',
     ligne: 5, valeur: 64,
     citation: '13 milliards ? C\'est en baisse.',
     photo: '/photos/s2-pouyanne.webp',
@@ -377,7 +377,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-cronos': {
-    numero: '019/050', prenom: '', nom: 'Cronos',
+    numero: '019/049', prenom: '', nom: 'Cronos',
     ligne: 9, valeur: 76,
     citation: 'Je les ai tous avalés… sauf un.',
     photo: '/photos/s2-cronos.webp',
@@ -395,7 +395,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-minotaure': {
-    numero: '020/050', prenom: '', nom: 'Le Minotaure',
+    numero: '020/049', prenom: '', nom: 'Le Minotaure',
     ligne: 9, valeur: 69,
     citation: 'C\'est combien ça ? Prix misérable.',
     photo: '/photos/s2-minotaure.webp',
@@ -413,7 +413,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-atoum': {
-    numero: '021/050', prenom: '', nom: 'Atoum',
+    numero: '021/049', prenom: '', nom: 'Atoum',
     ligne: 9, valeur: 66,
     citation: 'J\'ai tout fait tout seul.',
     photo: '/photos/s2-atoum.webp',
@@ -431,7 +431,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-freud': {
-    numero: '022/050', prenom: 'Sigmund', nom: 'Freud',
+    numero: '022/049', prenom: 'Sigmund', nom: 'Freud',
     ligne: 7, valeur: 75,
     citation: 'Parfois, un cigare n\'est qu\'un cigare.',
     photo: '/photos/s2-freud.webp',
@@ -449,7 +449,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-aristote': {
-    numero: '023/050', prenom: '', nom: 'Aristote',
+    numero: '023/049', prenom: '', nom: 'Aristote',
     ligne: 7, valeur: 74,
     citation: 'La femme est un homme incomplet.',
     photo: '/photos/s2-aristote.webp',
@@ -467,7 +467,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-hannibal-lecter': {
-    numero: '025/050', prenom: 'Hannibal', nom: 'Lecter',
+    numero: '024/049', prenom: 'Hannibal', nom: 'Lecter',
     ligne: 3, valeur: 79,
     citation: 'Bonsoir, Clarice.',
     photo: '/photos/s2-hannibal-lecter.webp',
@@ -485,7 +485,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-newton': {
-    numero: '026/050', prenom: 'Isaac', nom: 'Newton',
+    numero: '025/049', prenom: 'Isaac', nom: 'Newton',
     ligne: 8, valeur: 77,
     citation: 'Si j\'ai vu plus loin, c\'est en montant sur des épaules de géants.',
     photo: '/photos/s2-newton.webp',
@@ -503,7 +503,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-staline': {
-    numero: '027/050', prenom: 'Joseph', nom: 'Staline',
+    numero: '026/049', prenom: 'Joseph', nom: 'Staline',
     ligne: 2, valeur: 78,
     citation: 'Pas d\'homme, pas de problème.',
     photo: '/photos/s2-staline.webp',
@@ -521,7 +521,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-netanyahou': {
-    numero: '028/050', prenom: 'Benyamin', nom: 'Netanyahou',
+    numero: '027/049', prenom: 'Benyamin', nom: 'Netanyahou',
     ligne: 2, valeur: 73,
     citation: 'Le magicien revient toujours.',
     photo: '/photos/s2-netanyahou.webp',
@@ -539,7 +539,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-bezos': {
-    numero: '029/050', prenom: 'Jeff', nom: 'Bezos',
+    numero: '028/049', prenom: 'Jeff', nom: 'Bezos',
     ligne: 5, valeur: 71,
     citation: 'Your margin is my opportunity.',
     photo: '/photos/s2-bezos.webp',
@@ -557,7 +557,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-bruel': {
-    numero: '030/050', prenom: 'Patrick', nom: 'Bruel',
+    numero: '029/049', prenom: 'Patrick', nom: 'Bruel',
     ligne: 4, valeur: 67,
     citation: 'Tapis !',
     photo: '/photos/s2-bruel.webp',
@@ -575,7 +575,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-claude-francois': {
-    numero: '031/050', prenom: 'Claude', nom: 'François',
+    numero: '030/049', prenom: 'Claude', nom: 'François',
     ligne: 4, valeur: 68,
     citation: 'Comme d\'habitude…',
     photo: '/photos/s2-claude-francois.webp',
@@ -593,7 +593,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-schopenhauer': {
-    numero: '032/050', prenom: 'Arthur', nom: 'Schopenhauer',
+    numero: '031/049', prenom: 'Arthur', nom: 'Schopenhauer',
     ligne: 7, valeur: 58,
     citation: 'La vie oscille, comme un pendule, de la souffrance à l\'ennui.',
     photo: '/photos/s2-schopenhauer.webp',
@@ -611,7 +611,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-le-peuple': {
-    numero: '033/050', prenom: '', nom: 'Le peuple',
+    numero: '032/049', prenom: '', nom: 'Le peuple',
     ligne: 7, valeur: 45,
     citation: 'J\'ai vu une vidéo sur TikTok.',
     photo: '/photos/s2-le-peuple.webp',
@@ -629,7 +629,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-fourniret': {
-    numero: '034/050', prenom: 'Michel', nom: 'Fourniret',
+    numero: '033/049', prenom: 'Michel', nom: 'Fourniret',
     ligne: 3, valeur: 63,
     citation: 'Je ne parlerai qu\'à mon avocat.',
     photo: null,
@@ -647,7 +647,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-natoo': {
-    numero: '035/050', prenom: '', nom: 'Natoo',
+    numero: '034/049', prenom: '', nom: 'Natoo',
     ligne: 1, valeur: 54,
     citation: 'Abonnez-vous, c\'est gratuit.',
     photo: '/photos/s2-natoo.webp',
@@ -665,7 +665,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-joyca': {
-    numero: '036/050', prenom: '', nom: 'Joyca',
+    numero: '035/049', prenom: '', nom: 'Joyca',
     ligne: 1, valeur: 52,
     citation: 'Ça sent bon ? C\'est mon parfum.',
     photo: '/photos/s2-joyca.webp',
@@ -683,7 +683,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-maghla': {
-    numero: '037/050', prenom: '', nom: 'Maghla',
+    numero: '036/049', prenom: '', nom: 'Maghla',
     ligne: 1, valeur: 51,
     citation: '100 % polyester, 100 % amour.',
     photo: '/photos/s2-maghla.webp',
@@ -701,7 +701,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-mussolini': {
-    numero: '038/050', prenom: 'Benito', nom: 'Mussolini',
+    numero: '037/049', prenom: 'Benito', nom: 'Mussolini',
     ligne: 2, valeur: 62,
     citation: 'Mieux vaut vivre un jour comme un lion que cent ans comme un mouton.',
     photo: '/photos/s2-mussolini.webp',
@@ -719,7 +719,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-franco': {
-    numero: '039/050', prenom: 'Francisco', nom: 'Franco',
+    numero: '038/049', prenom: 'Francisco', nom: 'Franco',
     ligne: 2, valeur: 60,
     citation: 'Je suis toujours mort.',
     photo: '/photos/s2-franco.webp',
@@ -737,7 +737,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-castro': {
-    numero: '040/050', prenom: 'Fidel', nom: 'Castro',
+    numero: '039/049', prenom: 'Fidel', nom: 'Castro',
     ligne: 2, valeur: 59,
     citation: 'L\'histoire m\'acquittera.',
     photo: '/photos/s2-castro.webp',
@@ -755,7 +755,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-6ix9ine': {
-    numero: '041/050', prenom: '', nom: '6ix9ine',
+    numero: '040/049', prenom: '', nom: '6ix9ine',
     ligne: 4, valeur: 48,
     citation: 'Snitches get riches.',
     photo: '/photos/s2-6ix9ine.webp',
@@ -773,7 +773,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-booba-kaaris': {
-    numero: '042/050', prenom: '', nom: 'Booba & Kaaris',
+    numero: '041/049', prenom: '', nom: 'Booba & Kaaris',
     ligne: 4, valeur: 57,
     citation: 'On se retrouve au duty free.',
     photo: '/photos/s2-booba-kaaris.webp',
@@ -791,7 +791,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-freeze-corleone': {
-    numero: '043/050', prenom: '', nom: 'Freeze Corleone',
+    numero: '042/049', prenom: '', nom: 'Freeze Corleone',
     ligne: 4, valeur: 56,
     citation: '667, demande pas.',
     photo: '/photos/s2-freeze-corleone.webp',
@@ -809,7 +809,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-zuckerberg': {
-    numero: '044/050', prenom: 'Mark', nom: 'Zuckerberg',
+    numero: '043/049', prenom: 'Mark', nom: 'Zuckerberg',
     ligne: 5, valeur: 55,
     citation: 'Senator, we run ads.',
     photo: '/photos/s2-zuckerberg.webp',
@@ -827,7 +827,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-escobar': {
-    numero: '045/050', prenom: 'Pablo', nom: 'Escobar',
+    numero: '044/049', prenom: 'Pablo', nom: 'Escobar',
     ligne: 6, valeur: 61,
     citation: 'Plata o plomo.',
     photo: '/photos/s2-escobar.webp',
@@ -845,7 +845,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-tesla': {
-    numero: '046/050', prenom: 'Nikola', nom: 'Tesla',
+    numero: '045/049', prenom: 'Nikola', nom: 'Tesla',
     ligne: 8, valeur: 53,
     citation: 'Le présent est à eux ; le futur est à moi.',
     photo: '/photos/s2-tesla.webp',
@@ -863,7 +863,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-mengele': {
-    numero: '047/050', prenom: 'Josef', nom: 'Mengele',
+    numero: '046/049', prenom: 'Josef', nom: 'Mengele',
     ligne: 8, valeur: 50,
     citation: 'Ce n\'est pas mon vrai nom.',
     photo: '/photos/s2-mengele.webp',
@@ -881,7 +881,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-maduro': {
-    numero: '048/050', prenom: 'Nicolás', nom: 'Maduro',
+    numero: '047/049', prenom: 'Nicolás', nom: 'Maduro',
     ligne: 2, valeur: 47,
     citation: 'J\'ai été kidnappé.',
     photo: '/photos/s2-maduro.webp',
@@ -899,7 +899,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-poseidon': {
-    numero: '049/050', prenom: '', nom: 'Poséidon',
+    numero: '048/049', prenom: '', nom: 'Poséidon',
     ligne: 9, valeur: 49,
     citation: 'Ça va secouer.',
     photo: '/photos/s2-poseidon.webp',
@@ -917,7 +917,7 @@ export const S2_ART: Record<string, CardArt> = {
     ],
   },
   's2-thor': {
-    numero: '050/050', prenom: '', nom: 'Thor',
+    numero: '049/049', prenom: '', nom: 'Thor',
     ligne: 9, valeur: 46,
     citation: 'Il est où mon marteau ?',
     photo: '/photos/s2-thor.webp',

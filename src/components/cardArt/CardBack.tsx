@@ -63,7 +63,7 @@ export default function CardBack({ saison = 'S2', annee = '2026', titre = 'LES F
               </div>
             </div>
             <div className="cb-t-foot">
-              <div className="cb-barcode"><div className="cb-bars" /><small>{saison}·000·050</small></div>
+              <div className="cb-barcode"><div className="cb-bars" /><small>{saison}·000·049</small></div>
               <div className="cb-punch">
                 <i style={{ left: '18%', top: '22%' }} />
                 <i style={{ left: '44%', top: '52%' }} />

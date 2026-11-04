@@ -1,7 +1,7 @@
 import type { Card } from '../types';
 
 /**
- * Saison 2 — Fous du bus (50 cartes).
+ * Saison 2 — Fous du bus (49 cartes).
  *
  * Nouveauté de la saison : les cartes sont réparties en **familles** de tailles
  * inégales, portées par `category` — un champ qui existait déjà sans vraiment
@@ -9,22 +9,22 @@ import type { Card } from '../types';
  * carte reste une carte.
  *
  * Les raretés reprennent la répartition du Google Doc : 2 historiques (les
- * « mythiques » du doc), 5 légendaires, 8 épiques, 16 rares, 20 communes. Elles
+ * « mythiques » du doc), 5 légendaires, 8 épiques, 15 rares, 19 communes. Elles
  * sont étalées sur les neuf familles : aucune n'est entièrement composée de
  * rebuts, aucune n'est un jackpot. Compléter une famille demande donc de la
  * chance *et* des échanges, ce qui est le but.
+ *
+ * Le doc listait une cinquantième carte, écartée depuis : la saison compte 49
+ * cartes, numérotées sans trou de 001/049 à 049/049.
  *
  * L'ordre du tableau compte : l'intro de saison fait défiler les familles dans
  * cet ordre, et la page Collection les empile pareil. On garde donc le
  * regroupement par famille, rareté décroissante à l'intérieur.
  *
- * Les visuels sont en WebP et non en PNG comme la saison 1 : les cartes sont
- * livrées en 990×1487, soit 1,1 Mo pièce en PNG — 54 Mo pour la saison, trop
- * lourd à télécharger sur mobile. En WebP qualité 90, même résolution, le lot
- * tombe à 6,9 Mo sans perte visible sur les petits textes de la carte.
- *
- * L'emoji reste le repli : Femtogo n'a pas encore de visuel, et il sert aussi
- * de rendu tant que l'image n'est pas chargée.
+ * `image` ne sert qu'aux vignettes de la grille, en WebP 360 px — la taille à
+ * laquelle elles s'affichent vraiment. Ouverte, la carte est dessinée en direct
+ * par <CardFront> à partir de cardsS2Art.ts, et l'emoji ne sert plus que de
+ * repli le temps que l'image arrive.
  */
 
 /** Ordre d'affichage des familles — les « lignes de bus » de la saison. */
@@ -67,13 +67,12 @@ export const PASS2_CARDS: Card[] = [
   { id: 's2-hannibal-lecter', name: 'Hannibal Lecter', subtitle: 'Le cannibale raffiné', emoji: '🍷', image: '/cards/s2-hannibal-lecter.webp', rarity: 'rare', category: 'Tueurs en série', set: 'pass-2' },
   { id: 's2-fourniret', name: 'Michel Fourniret', subtitle: 'L\'ogre des Ardennes', emoji: '🌲', image: '/cards/s2-fourniret.webp', rarity: 'commune', category: 'Tueurs en série', set: 'pass-2' },
 
-  // ── Chanteurs & rappeurs (9) ──
+  // ── Chanteurs & rappeurs (8) ──
   { id: 's2-p-diddy', name: 'P. Diddy', subtitle: 'Huile de bébé', emoji: '🫒', image: '/cards/s2-p-diddy.webp', rarity: 'historique', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-kanye-west', name: 'Kanye West', subtitle: 'T-shirt à 20 €', emoji: '👕', image: '/cards/s2-kanye-west.webp', rarity: 'epique', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-drake', name: 'Drake', subtitle: 'La beuteu', emoji: '🦉', image: '/cards/s2-drake.webp', rarity: 'epique', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-claude-francois', name: 'Claude François', subtitle: 'L\'ampoule', emoji: '💡', image: '/cards/s2-claude-francois.webp', rarity: 'rare', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-bruel', name: 'Patrick Bruel', subtitle: 'Le poker', emoji: '🃏', image: '/cards/s2-bruel.webp', rarity: 'rare', category: 'Chanteurs & rappeurs', set: 'pass-2' },
-  { id: 's2-femtogo', name: 'Femtogo', subtitle: 'Le pédo', emoji: '🎧', rarity: 'rare', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-booba-kaaris', name: 'Booba & Kaaris', subtitle: 'Orly', emoji: '✈️', image: '/cards/s2-booba-kaaris.webp', rarity: 'commune', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-freeze-corleone', name: 'Freeze Corleone', subtitle: '667', emoji: '🥶', image: '/cards/s2-freeze-corleone.webp', rarity: 'commune', category: 'Chanteurs & rappeurs', set: 'pass-2' },
   { id: 's2-6ix9ine', name: '6ix9ine', subtitle: 'L\'arc-en-ciel', emoji: '🌈', image: '/cards/s2-6ix9ine.webp', rarity: 'commune', category: 'Chanteurs & rappeurs', set: 'pass-2' },
