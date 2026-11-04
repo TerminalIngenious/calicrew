@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { collection, query, where, getDocs, getDocsFromCache, getDocsFromServer } from 'firebase/firestore';
 import type { QuerySnapshot } from 'firebase/firestore';
@@ -26,6 +26,8 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  /** Quand le serveur a répondu pour la dernière fois — borne les relectures. */
+  const derniereLecture = useRef(0);
 
   const load = useCallback(async (forceServer = false) => {
     if (!user) {
@@ -57,6 +59,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
     try {
       const snap = forceServer ? await getDocsFromServer(q) : await getDocs(q);
+      derniereLecture.current = Date.now();
       applique(snap);
     } catch (err) {
       console.error('Erreur chargement sessions:', err);
@@ -85,6 +88,31 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     await load(true);
+  }, [load]);
+
+  /**
+   * Au retour sur l'app, on relit les séances.
+   *
+   * La PWA n'est pas fermée, elle est mise en arrière-plan : sans ça, revenir
+   * après une séance faite sur un autre appareil affichait toujours la liste
+   * d'avant, et le seul moyen de la rafraîchir était de fermer l'app.
+   *
+   * Pas plus d'une fois toutes les cinq minutes. Firestore facture au document
+   * lu : relire tout l'historique à chaque aller-retour entre deux apps ferait
+   * des milliers de lectures par jour et par joueur pour rien.
+   */
+  useEffect(() => {
+    const auRetour = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - derniereLecture.current < 5 * 60 * 1000) return;
+      load();
+    };
+    document.addEventListener('visibilitychange', auRetour);
+    window.addEventListener('focus', auRetour);
+    return () => {
+      document.removeEventListener('visibilitychange', auRetour);
+      window.removeEventListener('focus', auRetour);
+    };
   }, [load]);
 
   return (
