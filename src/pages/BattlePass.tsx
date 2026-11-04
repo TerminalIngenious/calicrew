@@ -4,6 +4,8 @@ import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
+import { getCardArt } from '../lib/cardsS2Art';
+import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
 import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
 import { primeAudio, playCardExplosion } from '../lib/sound';
@@ -448,7 +450,13 @@ export default function BattlePass() {
         <div className="modal-overlay" onClick={() => setOpenedCard(null)}>
           <div className="bp-card-reveal" onClick={(e) => e.stopPropagation()}>
             <div className="bp-card-reveal-glow" style={{ background: RARITY_COLORS[openedCard.rarity] }} />
-            {openedCard.image ? (
+            {getCardArt(openedCard.id) ? (
+              // La carte qu'on vient de tirer se dessine en direct, comme dans
+              // la collection : c'est le moment où on la regarde le plus.
+              <div className="bp-card-reveal-live">
+                <CardFront card={openedCard} art={getCardArt(openedCard.id)!} />
+              </div>
+            ) : openedCard.image ? (
               <img src={openedCard.image} alt={getCardDisplayName(openedCard)} className="collection-detail-img" />
             ) : (
               <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>

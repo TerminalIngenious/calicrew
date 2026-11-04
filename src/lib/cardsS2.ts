@@ -53,7 +53,7 @@ export const PASS2_CARDS: Card[] = [
   { id: 's2-hitler', name: 'Adolf Hitler', subtitle: 'Le führer', emoji: '💩', image: '/cards/s2-hitler.webp', rarity: 'legendaire', category: 'Dictateurs', set: 'pass-2' },
   { id: 's2-staline', name: 'Joseph Staline', subtitle: 'Le goulag', emoji: '☭', image: '/cards/s2-staline.webp', rarity: 'rare', category: 'Dictateurs', set: 'pass-2' },
   { id: 's2-netanyahou', name: 'Benyamin Netanyahou', subtitle: 'Bibi le magicien', emoji: '🏛️', image: '/cards/s2-netanyahou.webp', rarity: 'rare', category: 'Dictateurs', set: 'pass-2' },
-  { id: 's2-petain', name: 'Philippe Pétain', subtitle: 'Travail - Famille - Patrie', emoji: '🪖', image: '/cards/s2-petain.webp', rarity: 'rare', category: 'Dictateurs', set: 'pass-2' },
+  { id: 's2-petain', name: 'Philippe Pétain', subtitle: 'Travail, Famille, Patrie', emoji: '🪖', image: '/cards/s2-petain.webp', rarity: 'rare', category: 'Dictateurs', set: 'pass-2' },
   { id: 's2-mussolini', name: 'Benito Mussolini', subtitle: 'Il Duce', emoji: '🇮🇹', image: '/cards/s2-mussolini.webp', rarity: 'commune', category: 'Dictateurs', set: 'pass-2' },
   { id: 's2-franco', name: 'Francisco Franco', subtitle: 'El Caudillo', emoji: '🇪🇸', image: '/cards/s2-franco.webp', rarity: 'commune', category: 'Dictateurs', set: 'pass-2' },
   { id: 's2-castro', name: 'Fidel Castro', subtitle: 'Líder Máximo', emoji: '🚬', image: '/cards/s2-castro.webp', rarity: 'commune', category: 'Dictateurs', set: 'pass-2' },

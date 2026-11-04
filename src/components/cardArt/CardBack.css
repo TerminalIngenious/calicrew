@@ -1,0 +1,90 @@
+/* CardBack.css — dos des cartes Calicrew S2, dessiné en direct (net à tout zoom)
+   Polices : voir fonts.css */
+.cb{container-type:inline-size;width:100%;
+  --y:#ffc400;--y2:#ffe27a;--yglow:rgba(255,196,0,.45);--ink:#0b0b0d;--paper:#f3ead2;
+  font-family:"CF Barlow","Barlow Condensed","Arial Narrow",system-ui,sans-serif;line-height:normal;text-align:left}
+.cb *{box-sizing:border-box;margin:0;padding:0}
+.cb-back{position:relative;width:100%;aspect-ratio:2/3;--cut:7cqw;
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut));
+  background:linear-gradient(135deg,var(--y2) 0%,var(--y) 20%,#6b5200 40%,var(--y) 55%,#5a4500 75%,var(--y2) 100%)}
+.cb-inner{position:absolute;inset:1.4cqw;--cut:6.2cqw;overflow:hidden;
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut));
+  background:
+    radial-gradient(70% 45% at 50% 50%,#1a1608 0%,transparent 70%),
+    linear-gradient(180deg,#0b0b0e,#050506)}
+
+/* motif de fond : plan de lignes discret */
+.cb-map{position:absolute;inset:0;width:100%;height:100%;opacity:.22}
+.cb-map path{fill:none;stroke:var(--y);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cb-map circle{fill:#050506;stroke:var(--y);stroke-width:1.1}
+
+/* bandes de signalisation haut / bas */
+.cb-hazard{position:absolute;left:0;right:0;height:4.4cqw;
+  background:repeating-linear-gradient(-45deg,var(--y) 0 3cqw,#0b0b0d 3cqw 6cqw);opacity:.95}
+.cb-hazard.cb-t{top:0}.cb-hazard.cb-b{bottom:0}
+
+.cb-top-label,.cb-bot-label{position:absolute;left:0;right:0;text-align:center;font-weight:800;letter-spacing:.32em;color:var(--y);font-size:3cqw}
+.cb-top-label{top:7.4cqw}.cb-bot-label{bottom:7.4cqw}
+
+/* ---------- Ticket ---------- */
+.cb-ticket{position:absolute;left:11cqw;right:11cqw;top:16cqw;bottom:16cqw;
+  background:
+    radial-gradient(circle at 0 26%,transparent 3.2cqw,transparent 0) ,
+    var(--paper);
+  border-radius:2.4cqw;
+  box-shadow:0 0 0 .6cqw rgba(0,0,0,.4),0 3cqw 6cqw rgba(0,0,0,.7),0 0 8cqw var(--yglow);
+  transform:rotate(-2.5deg);
+  display:flex;flex-direction:column;color:var(--ink);overflow:hidden;
+  /* encoches + perforations */
+  -webkit-mask:
+    radial-gradient(circle 3.2cqw at 0 31%,#0000 98%,#000) left/51% 100% no-repeat,
+    radial-gradient(circle 3.2cqw at 100% 31%,#0000 98%,#000) right/51% 100% no-repeat;
+  mask:
+    radial-gradient(circle 3.2cqw at 0 31%,#0000 98%,#000) left/51% 100% no-repeat,
+    radial-gradient(circle 3.2cqw at 100% 31%,#0000 98%,#000) right/51% 100% no-repeat;
+}
+.cb-ticket::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 30% 20%,rgba(255,255,255,.35),transparent 60%),
+    repeating-linear-gradient(0deg,rgba(0,0,0,.025) 0 .3cqw,transparent .3cqw .9cqw);
+  mix-blend-mode:multiply}
+
+.cb-t-head{background:var(--y);padding:3cqw 4cqw 2.6cqw;display:flex;align-items:center;justify-content:space-between;gap:2cqw;height:31%}
+.cb-t-head .cb-busico{width:12cqw;height:12cqw;border-radius:2cqw;background:var(--ink);display:grid;place-items:center;flex:0 0 auto}
+.cb-t-head .cb-busico svg{width:8cqw;height:8cqw;fill:var(--y)}
+.cb-t-head .cb-ht{flex:1;line-height:1}
+.cb-t-head .cb-ht small{display:block;font-weight:800;font-size:2.8cqw;letter-spacing:.2em}
+.cb-t-head .cb-ht b{display:block;font-family:"CF Anton",Anton,Impact,sans-serif;font-weight:400;font-size:7.4cqw;letter-spacing:.02em;margin-top:.6cqw}
+.cb-t-head .cb-s2{font-family:"CF Anton",Anton,Impact,sans-serif;font-size:9cqw;line-height:.9;text-align:center}
+.cb-t-head .cb-s2 small{display:block;font-family:"CF Barlow","Barlow Condensed";font-weight:800;font-size:2.4cqw;letter-spacing:.2em}
+
+.cb-perf{height:0;border-top:.5cqw dashed rgba(11,11,13,.45);margin:0 4cqw}
+
+.cb-t-body{flex:1;position:relative;padding:3.6cqw 5cqw 3cqw;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.cb-logo{font-family:"CF Anton",Anton,Impact,sans-serif;font-size:13cqw;line-height:.9;letter-spacing:.01em;color:var(--ink);
+  text-shadow:.5cqw .5cqw 0 var(--y)}
+.cb-subtitle{display:flex;align-items:center;gap:2cqw;width:100%;margin-top:1cqw}
+.cb-subtitle i{flex:1;height:.5cqw;background:var(--ink)}
+.cb-subtitle span{font-weight:800;font-style:italic;font-size:5.4cqw;letter-spacing:.06em;white-space:nowrap}
+
+.cb-lines{display:grid;grid-template-columns:repeat(9,1fr);gap:1.1cqw;width:100%;margin-top:2.6cqw}
+.cb-lines b{aspect-ratio:1;border-radius:1cqw;background:var(--ink);color:var(--y);display:grid;place-items:center;font-family:"CF Anton",Anton,Impact,sans-serif;font-weight:400;font-size:3.8cqw}
+
+.cb-validity{margin-top:2.4cqw;text-align:center;font-weight:700;font-size:2.9cqw;letter-spacing:.14em;line-height:1.35}
+.cb-validity strong{display:block;font-weight:800;font-size:3.4cqw;letter-spacing:.18em}
+
+.cb-stamp{position:absolute;right:1cqw;bottom:-1cqw;width:19cqw;height:19cqw;border:.6cqw solid #b3261e;border-radius:50%;
+  display:grid;place-items:center;transform:rotate(14deg);color:#b3261e;opacity:.6;text-align:center;font-weight:800;line-height:1}
+.cb-stamp span{font-size:2.6cqw;letter-spacing:.12em}
+.cb-stamp b{display:block;font-family:"CF Anton",Anton,Impact,sans-serif;font-weight:400;font-size:4.6cqw;margin:.6cqw 0}
+
+.cb-t-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:3cqw;padding:0 5cqw 3.6cqw}
+.cb-barcode{flex:1;height:10cqw;display:flex;flex-direction:column;gap:.8cqw}
+.cb-barcode .cb-bars{flex:1;background:repeating-linear-gradient(90deg,var(--ink) 0 .5cqw,transparent .5cqw .9cqw,var(--ink) .9cqw 1.9cqw,transparent 1.9cqw 2.4cqw,var(--ink) 2.4cqw 2.7cqw,transparent 2.7cqw 3.6cqw,var(--ink) 3.6cqw 4.5cqw,transparent 4.5cqw 5cqw)}
+.cb-barcode small{font-family:"CF VT323",VT323,monospace;font-size:3.4cqw;letter-spacing:.2em;line-height:1}
+.cb-punch{flex:0 0 auto;width:20cqw;height:10cqw;border:.4cqw solid var(--ink);border-radius:1cqw;position:relative;
+  background:radial-gradient(circle,#050506 .9cqw,transparent 1cqw) 0 0/3.3cqw 3.3cqw}
+.cb-punch::after{content:"COMPOSTEZ";position:absolute;left:0;right:0;bottom:-3.4cqw;text-align:center;font-weight:800;font-size:2.2cqw;letter-spacing:.2em}
+/* trous composteur : seulement quelques-uns visibles */
+.cb-punch{background:none}
+.cb-punch i{position:absolute;width:2cqw;height:2cqw;border-radius:50%;background:#050506;box-shadow:inset 0 .3cqw .4cqw rgba(255,255,255,.15)}

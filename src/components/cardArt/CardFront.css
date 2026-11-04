@@ -1,0 +1,156 @@
+/* CardFront.css — carte Calicrew S2 dessinée en direct (nette à tout zoom, animée) */
+
+.cf{container-type:inline-size;width:100%;
+  --ink:#f4f1ea;--muted:#9aa0ad;--panel:rgba(8,10,16,.82);--line:rgba(255,255,255,.10);
+  --r:#f5b301;--r2:#ffe08a;--rglow:rgba(245,179,1,.55);
+  font-family:"CF Barlow","Barlow Condensed","Arial Narrow",system-ui,sans-serif;color:var(--ink);line-height:normal;text-align:left}
+.cf *{box-sizing:border-box;margin:0;padding:0}
+.cf.commune{--r:#a7adb8;--r2:#e6e9ee;--rglow:rgba(167,173,184,.45)}
+.cf.rare{--r:#2f8cff;--r2:#9fd0ff;--rglow:rgba(47,140,255,.55)}
+.cf.epique{--r:#a855f7;--r2:#e0b8ff;--rglow:rgba(168,85,247,.55)}
+.cf.legendaire{--r:#f5b301;--r2:#ffe08a;--rglow:rgba(245,179,1,.55)}
+.cf.mythique{--r:#ff2d55;--r2:#ffb3c2;--rglow:rgba(255,45,85,.6)}
+.cf .cf-flag{width:1.3em;height:.87em;vertical-align:-.08em;border-radius:.1em;margin-left:.3em}
+.cf-static .cf-rain,.cf-static .cf-led-scroll{animation:none!important}
+
+.cf-card{
+  position:relative;width:100%;aspect-ratio:2/3;
+  --cut:7cqw;
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut));
+  background:
+    linear-gradient(135deg,var(--r2) 0%,var(--r) 18%,#3a2a05 34%,var(--r) 50%,#2b1f03 68%,var(--r2) 84%,var(--r) 100%);
+  filter:drop-shadow(0 0 4cqw var(--rglow));
+}
+.cf-inner{
+  position:absolute;inset:1.4cqw;
+  --cut:6.2cqw;
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,var(--cut) 100%,0 calc(100% - var(--cut)),0 var(--cut));
+  overflow:hidden;
+  background:
+    radial-gradient(60% 40% at 50% 30%,#1b1f2e 0%,transparent 70%),
+    linear-gradient(180deg,#0b0e18 0%,#06070c 60%,#030306 100%);
+}
+
+/* ---------- Ambiance bus de nuit ---------- */
+.cf-bokeh{position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(3cqw 3cqw at 12% 22%,rgba(255,140,40,.55),transparent 70%),
+    radial-gradient(5cqw 5cqw at 85% 18%,rgba(255,60,60,.35),transparent 70%),
+    radial-gradient(2.4cqw 2.4cqw at 78% 40%,rgba(255,200,90,.6),transparent 70%),
+    radial-gradient(6cqw 6cqw at 20% 48%,rgba(60,120,255,.25),transparent 70%),
+    radial-gradient(2cqw 2cqw at 92% 52%,rgba(255,170,60,.5),transparent 70%),
+    radial-gradient(4cqw 4cqw at 6% 60%,rgba(255,90,40,.3),transparent 70%);
+  filter:blur(.4cqw);
+}
+.cf-streetlight{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 40%,var(--rglow) 52%,transparent 64%);
+  opacity:.35;mix-blend-mode:screen}
+.cf-rain{position:absolute;inset:-20% 0 0 0;pointer-events:none;opacity:.35;
+  background-image:repeating-linear-gradient(100deg,transparent 0 2.2cqw,rgba(255,255,255,.18) 2.2cqw 2.35cqw,transparent 2.35cqw 5cqw);
+  animation:cf-rain 1.4s linear infinite}
+@keyframes cf-rain{to{transform:translateY(12cqw)}}
+@media (prefers-reduced-motion:reduce){.cf-rain,.cf-led-scroll{animation:none!important}}
+
+/* ---------- Photo ---------- */
+.cf-photo{position:absolute;left:0;right:0;top:7cqw;height:80cqw;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8%,#000 80%,transparent 100%),linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%);
+  -webkit-mask-composite:source-in;mask-composite:intersect;
+  mask-image:linear-gradient(180deg,transparent 0,#000 8%,#000 80%,transparent 100%),linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%);
+}
+.cf-photo-bg{position:absolute;inset:0;transition:background .3s}
+.cf-photo-bg.cf-blur{background-size:cover!important;filter:blur(5cqw) saturate(.9) brightness(.85);transform:scale(1.3)}
+.cf-photo img{position:relative;width:100%;height:100%;object-fit:contain;object-position:center top;
+  -webkit-mask-image:var(--feather,none);mask-image:var(--feather,none);
+  filter:contrast(1.12) saturate(.85) brightness(.82)}
+.cf-photo .cf-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.cf-photo .cf-ph svg{width:52%;height:auto;opacity:.5}
+/* fondu sombre sous le nom */
+.cf-shade{position:absolute;left:0;right:0;top:60cqw;height:40cqw;pointer-events:none;z-index:2;
+  background:linear-gradient(180deg,transparent,rgba(4,5,9,.75) 45%,rgba(4,5,9,.95))}
+/* reflet de vitre de bus */
+.cf-glass{position:absolute;left:0;right:0;top:7cqw;height:80cqw;pointer-events:none;
+  background:
+    linear-gradient(160deg,rgba(255,255,255,.08) 0%,transparent 30%),
+    radial-gradient(1cqw 1.3cqw at 22% 30%,rgba(255,255,255,.35),transparent 70%),
+    radial-gradient(.8cqw 1cqw at 70% 22%,rgba(255,255,255,.3),transparent 70%),
+    radial-gradient(1.1cqw 1.5cqw at 82% 58%,rgba(255,255,255,.3),transparent 70%),
+    radial-gradient(.7cqw .9cqw at 35% 64%,rgba(255,255,255,.25),transparent 70%);}
+
+/* ---------- Girouette (famille = ligne de bus) ---------- */
+.cf-girouette{position:absolute;top:3.4cqw;left:50%;transform:translateX(-50%);
+  width:66cqw;height:9cqw;display:flex;gap:1.2cqw;z-index:3}
+.cf-line-no{flex:0 0 9cqw;display:grid;place-items:center;
+  background:var(--r);color:#0a0a0a;font-family:"CF Anton",Anton,Impact,sans-serif;font-size:6cqw;line-height:1;
+  border-radius:1.4cqw;box-shadow:0 0 2.5cqw var(--rglow),inset 0 -.6cqw 0 rgba(0,0,0,.25)}
+.cf-led{flex:1;position:relative;overflow:hidden;border-radius:1.4cqw;
+  background:#050505;border:.4cqw solid #1b1b1b;box-shadow:inset 0 0 2cqw #000}
+.cf-led::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle,transparent 45%,#050505 60%) 0 0/0.9cqw 0.9cqw}
+.cf-led-scroll{position:absolute;top:50%;left:0;transform:translateY(-50%);white-space:nowrap;
+  font-family:"CF VT323",VT323,monospace;font-size:7.6cqw;letter-spacing:.06em;color:var(--r2);
+  text-shadow:0 0 1.2cqw var(--r),0 0 3cqw var(--rglow);
+  animation:cf-led 9s linear infinite}
+@keyframes cf-led{0%{transform:translate(2cqw,-50%)}100%{transform:translate(-50%,-50%)}}
+
+/* ---------- Coin haut gauche : valeur ---------- */
+.cf-value{position:absolute;top:12.5cqw;left:5cqw;z-index:3;text-align:center;width:16cqw}
+.cf-value .cf-num{font-family:"CF Anton",Anton,Impact,sans-serif;font-size:15cqw;line-height:.95;color:var(--ink);
+  text-shadow:0 .5cqw 0 rgba(0,0,0,.6)}
+.cf-value .cf-tag{font-weight:800;font-size:4.2cqw;color:var(--r);letter-spacing:.08em}
+.cf-stop{margin:1.4cqw auto 0;width:9.5cqw;height:9.5cqw;border-radius:50%;
+  display:grid;place-items:center;border:.5cqw solid var(--r);
+  background:radial-gradient(circle,#1a1405,#0a0a0a);box-shadow:0 0 2cqw var(--rglow)}
+.cf-stop svg{width:5.4cqw;height:5.4cqw;fill:var(--r)}
+
+/* ---------- Bandeau rareté vertical ---------- */
+.cf-rarity{position:absolute;top:14cqw;right:3.6cqw;z-index:3;width:6.4cqw;height:36cqw;
+  border:.35cqw solid var(--r);border-radius:1cqw;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center}
+.cf-rarity span{writing-mode:vertical-rl;font-weight:800;font-size:3.6cqw;letter-spacing:.18em;color:var(--r)}
+
+/* ---------- Bas de carte ---------- */
+.cf-bottom{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:0 4.2cqw 2.4cqw;
+  display:flex;flex-direction:column;gap:1.3cqw}
+.cf-first{white-space:nowrap;font-family:"CF Anton",Anton,Impact,sans-serif;font-size:6.2cqw;line-height:1;color:var(--ink);letter-spacing:.02em;
+  text-shadow:0 .6cqw 1.2cqw #000}
+.cf-last{white-space:nowrap;font-family:"CF Anton",Anton,Impact,sans-serif;font-size:9.4cqw;line-height:.95;color:var(--ink);letter-spacing:.01em;
+  text-shadow:0 .6cqw 1.6cqw #000;margin-top:-.4cqw}
+.cf-nick{white-space:nowrap;font-weight:800;font-style:italic;font-size:7.2cqw;line-height:1;
+  background:linear-gradient(180deg,var(--r2),var(--r));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 1.4cqw var(--rglow))}
+.cf-quote{position:relative;padding:1.6cqw 3cqw;border-top:.3cqw solid var(--r);border-bottom:.3cqw solid var(--r);
+  background:linear-gradient(90deg,transparent,rgba(0,0,0,.6) 15%,rgba(0,0,0,.6) 85%,transparent);
+  font-style:italic;font-weight:600;font-size:4.1cqw;text-align:center;line-height:1.15}
+.cf-quote::before,.cf-quote::after{font-family:"CF Anton",Anton,Impact,sans-serif;font-style:normal;color:var(--r);font-size:6cqw;position:absolute;top:50%;transform:translateY(-50%)}
+.cf-quote::before{content:"“";left:.4cqw}.cf-quote::after{content:"”";right:.4cqw}
+
+.cf-stats{display:grid;grid-template-columns:repeat(5,1fr);border:.3cqw solid var(--line);border-radius:1.4cqw;
+  background:var(--panel)}
+.cf-stat{text-align:center;padding:1.4cqw .4cqw 1.2cqw;border-left:.3cqw solid var(--line)}
+.cf-stat:first-child{border-left:0}
+.cf-stat .cf-k{overflow:hidden;font-weight:700;font-size:2.9cqw;color:var(--r);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.cf-stat .cf-v{font-family:"CF Anton",Anton,Impact,sans-serif;font-size:6.6cqw;line-height:1.1}
+.cf-stat .cf-bar{height:.7cqw;margin:.6cqw 1.6cqw 0;border-radius:1cqw;background:rgba(255,255,255,.1);overflow:hidden}
+.cf-stat .cf-bar i{display:block;height:100%;background:var(--r);box-shadow:0 0 1cqw var(--r)}
+
+.cf-panels{display:grid;grid-template-columns:1.25fr 1fr;border:.3cqw solid var(--line);border-radius:1.4cqw;background:var(--panel)}
+.cf-panels h4{font-weight:800;font-size:3cqw;letter-spacing:.06em;color:var(--r);text-transform:uppercase;margin-bottom:1cqw}
+.cf-skills{padding:1.8cqw 2cqw;border-right:.3cqw solid var(--line)}
+.cf-skill{display:flex;gap:1.4cqw;margin-bottom:1.2cqw}
+.cf-skill:last-child{margin-bottom:0}
+.cf-skill .cf-ic{flex:0 0 4.6cqw;height:4.6cqw;border-radius:50%;border:.3cqw solid var(--r);display:grid;place-items:center;
+  font-size:2.6cqw;color:var(--r);font-weight:800}
+.cf-skill b{display:block;font-weight:800;font-size:3cqw;line-height:1.05;text-transform:uppercase}
+.cf-skill p{font-weight:500;font-size:2.6cqw;line-height:1.15;color:#c9ccd4}
+.cf-skill em{font-style:normal;color:var(--r);font-weight:700}
+.cf-infos{padding:1.8cqw 2cqw}
+.cf-row{display:flex;justify-content:space-between;gap:1cqw;padding:.7cqw 0;border-bottom:.25cqw solid var(--line);font-size:2.9cqw}
+.cf-row:last-child{border-bottom:0}
+.cf-row span:first-child{color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.cf-row span:last-child{font-weight:700;text-align:right}
+.cf-row .cf-wanted{color:var(--r)}
+
+.cf-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.8cqw;line-height:1;
+  border-top:.3cqw dashed rgba(255,255,255,.2);font-weight:700;font-size:2.2cqw;letter-spacing:.12em;color:var(--muted)}
+.cf-logo{font-family:"CF Anton",Anton,Impact,sans-serif;font-size:3.2cqw;letter-spacing:.06em;color:var(--r);text-shadow:0 0 1.4cqw var(--rglow)}
+

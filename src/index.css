@@ -4782,6 +4782,11 @@ body {
   animation: cardRevealPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.bp-card-reveal-live {
+  max-width: 280px;
+  width: 80vw;
+}
+
 .collection-detail-img {
   max-width: 280px;
   width: 80vw;
@@ -4895,6 +4900,16 @@ body {
 
 .c3d-back {
   transform: rotateY(180deg);
+}
+
+/* Une face dessinée en direct porte déjà ses propres ombres : la drop-shadow
+   prévue pour une image à plat la rendrait sale sur les bords découpés. */
+.c3d-node {
+  filter: none;
+}
+
+.c3d-node > * {
+  pointer-events: none;
 }
 
 /* Reflet holographique, découpé à la forme octogonale de la carte. */

@@ -2,7 +2,10 @@ import { getRarityLabel, RARITY_COLORS, getCardDisplayName, getCardBack } from '
 import type { Card } from '../types';
 import { X } from 'lucide-react';
 import { useScrollLock } from '../lib/useScrollLock';
+import { getCardArt } from '../lib/cardsS2Art';
 import Card3D from './Card3D';
+import CardFront from './cardArt/CardFront';
+import CardBack from './cardArt/CardBack';
 
 interface Props {
   card: Card;
@@ -13,7 +16,12 @@ interface Props {
 
 export default function CardDetailModal({ card, owned, count, onClose }: Props) {
   useScrollLock(true);
-  const back = getCardBack(card.set);
+  // Une carte dont on a les données complètes se dessine en direct — girouette
+  // qui défile, pluie, et net à tout zoom. Sinon on retombe sur l'image, puis
+  // sur l'emoji : c'est le cas de toute la saison 1 et de Femtogo.
+  const art = getCardArt(card.id);
+  const back = art ? <CardBack /> : getCardBack(card.set);
+  const front = art ? <CardFront card={card} art={art} /> : card.image;
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="card-detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -21,9 +29,9 @@ export default function CardDetailModal({ card, owned, count, onClose }: Props) 
           <X size={18} />
         </button>
         <div className="card-detail-glow" style={{ background: RARITY_COLORS[card.rarity] }} />
-        {card.image && back ? (
+        {front && back ? (
           <div className="card-detail-3d">
-            <Card3D front={card.image} back={back} rarity={card.rarity} alt={getCardDisplayName(card)} />
+            <Card3D front={front} back={back} rarity={card.rarity} alt={getCardDisplayName(card)} />
             <span className="card-detail-3d-hint">Glisse pour tourner la carte</span>
           </div>
         ) : card.image ? (

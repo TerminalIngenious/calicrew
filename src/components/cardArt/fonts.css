@@ -1,0 +1,9 @@
+/* Polices des cartes Calicrew (fichiers dans src/assets/fonts) */
+@font-face{font-family:"CF Anton";src:url("../../assets/fonts/anton-400.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"CF VT323";src:url("../../assets/fonts/vt323-400.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"CF Barlow";src:url("../../assets/fonts/barlow-condensed-500.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"CF Barlow";src:url("../../assets/fonts/barlow-condensed-600.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"CF Barlow";src:url("../../assets/fonts/barlow-condensed-700.woff2") format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"CF Barlow";src:url("../../assets/fonts/barlow-condensed-800.woff2") format("woff2");font-weight:800;font-display:swap}
+@font-face{font-family:"CF Barlow";src:url("../../assets/fonts/barlow-condensed-700-italic.woff2") format("woff2");font-weight:700;font-style:italic;font-display:swap}
+@font-face{font-family:"CF Barlow";src:url("../../assets/fonts/barlow-condensed-800-italic.woff2") format("woff2");font-weight:800;font-style:italic;font-display:swap}

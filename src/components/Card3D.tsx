@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import type { CardRarity } from '../types';
 
 /**
@@ -28,10 +29,19 @@ const HOLO: Record<CardRarity, string> = {
 };
 
 interface Props {
-  front: string;
-  back: string;
+  /** Une URL d'image, ou une carte dessinée en direct (<CardFront>). */
+  front: ReactNode;
+  back: ReactNode;
   rarity: CardRarity;
   alt?: string;
+}
+
+/** Une face : image si on lui donne une URL, composant sinon. */
+function Face({ side, className }: { side: ReactNode; className: string }) {
+  if (typeof side === 'string') {
+    return <img className={className} src={side} alt="" draggable={false} />;
+  }
+  return <div className={`${className} c3d-node`}>{side}</div>;
 }
 
 export default function Card3D({ front, back, rarity, alt = '' }: Props) {
@@ -136,8 +146,8 @@ export default function Card3D({ front, back, rarity, alt = '' }: Props) {
       aria-label={alt}
     >
       <div className="c3d-card" ref={cardRef}>
-        <img className="c3d-face" src={front} alt="" draggable={false} />
-        <img className="c3d-face c3d-back" src={back} alt="" draggable={false} />
+        <Face side={front} className="c3d-face" />
+        <Face side={back} className="c3d-face c3d-back" />
         <div className="c3d-glare" ref={glareRef} />
       </div>
       <div className="c3d-shadow" />
