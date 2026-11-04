@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
+import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
 import { CacheFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
@@ -8,6 +8,22 @@ declare const self: ServiceWorkerGlobalScope;
 
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
+
+/*
+ * Toute navigation est servie par la page précachée.
+ *
+ * Sans cette route, seule l'adresse « / » fonctionnait hors ligne : le
+ * précache contient index.html, mais rien ne reliait /progress ou /group à ce
+ * fichier. Recharger l'app depuis un de ces écrans sans réseau affichait la
+ * page d'erreur du navigateur, alors que tout était sur l'appareil. Les routes
+ * de l'app sont résolues côté client : elles pointent toutes vers index.html.
+ */
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL('index.html'), {
+    // Les fonctions serveur ne sont pas des pages de l'app.
+    denylist: [/^\/api\//],
+  })
+);
 
 // Les cartes ne sont pas précachées : elles sont immuables et trop lourdes
 // pour être rechargées à chaque déploiement. Première consultation = mise en
