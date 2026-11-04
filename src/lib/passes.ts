@@ -467,6 +467,19 @@ export function getCurrentSeason(): Season | null {
 }
 
 /**
+ * Le rang de la dernière saison commencée, -1 si aucune ne l'est.
+ *
+ * `getCurrentSeason` rend `null` entre deux saisons et une fois la dernière
+ * terminée. Pour savoir ce qu'on a le droit de montrer, c'est « déjà
+ * commencée » qui compte, pas « en cours » : une collection passée reste
+ * consultable, une saison à venir doit rester fermée.
+ */
+export function lastStartedSeasonIndex(): number {
+  const now = Date.now();
+  return SEASONS.filter((s) => now >= s.startDate).length - 1;
+}
+
+/**
  * Faut-il basculer ce joueur sur une nouvelle saison ?
  *
  * Un `currentSeasonId` vide désigne un compte qui n'a jamais joué : il

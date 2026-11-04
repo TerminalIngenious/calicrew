@@ -3,8 +3,8 @@ import { useAuth, MAX_DISPLAY_NAME } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
-import { getCurrentSeason, SEASONS } from '../lib/passes';
+import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById, getCardBack } from '../lib/cards';
+import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
 import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
@@ -20,6 +20,9 @@ import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
 import SeasonShelf from '../components/SeasonShelf';
 import type { SeasonShelfEntry } from '../components/SeasonShelf';
+
+/** « 29 novembre » — la date d'ouverture annoncée sur un bandeau verrouillé. */
+const DATE_OUVERTURE = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' });
 
 export default function Profile() {
   const { user, displayName: myName, updateDisplayName, signOut } = useAuth();
@@ -131,17 +134,25 @@ export default function Profile() {
     return `${m} min`;
   }
 
-  const season = getCurrentSeason();
-
   /**
    * Les saisons déjà ouvertes, la plus récente en premier.
    *
-   * On s'arrête au rang de la saison en cours : une saison à venir n'a rien à
-   * montrer, et ses cartes ne doivent pas fuiter avant son lancement. Le rang
-   * suffit, pas besoin de relire l'horloge pendant le rendu.
+   * On compte celles qui ont commencé plutôt que de chercher la saison en
+   * cours : entre deux saisons, ou une fois la dernière terminée, il n'y a pas
+   * de saison en cours — et la collection disparaîtrait du profil alors qu'elle
+   * est justement ce qu'on vient y voir.
    */
-  const currentIndex = SEASONS.findIndex((s) => s.id === season?.id);
+  const currentIndex = lastStartedSeasonIndex();
   const openedSeasons = SEASONS.filter((_, i) => i <= currentIndex).reverse();
+
+  /**
+   * La saison suivante, annoncée mais verrouillée.
+   *
+   * Une seule : on tease ce qui arrive, pas tout le calendrier. Son bandeau ne
+   * montre que des dos de carte — le thème et la date suffisent à donner envie,
+   * les personnages restent cachés jusqu'au lancement.
+   */
+  const nextSeason = SEASONS[currentIndex + 1];
 
   /**
    * Les cartes, saison par saison.
@@ -158,6 +169,18 @@ export default function Profile() {
     const marquantes = RARITY_ORDER.flatMap((r) => cards.filter((c) => c.rarity === r && c.image)).slice(0, 3);
     return { season: s, cards, owned, marquantes };
   });
+
+  if (nextSeason) {
+    seasonShelves.unshift({
+      season: nextSeason,
+      cards: [],
+      owned: [],
+      marquantes: [],
+      locked: true,
+      backImage: getCardBack(nextSeason.id),
+      startLabel: DATE_OUVERTURE.format(nextSeason.startDate),
+    });
+  }
 
   const totalOwned = seasonShelves.reduce((n, sh) => n + sh.owned.length, 0);
   const totalCards = seasonShelves.reduce((n, sh) => n + sh.cards.length, 0);

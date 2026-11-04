@@ -7035,3 +7035,32 @@ body {
 .season-slab-wrap .empty {
   padding: 1rem;
 }
+
+/* Saison annoncée mais pas encore ouverte : bordure en pointillés, fond refroidi
+   et dos de carte face cachée. Rien n'y est cliquable, il n'y a rien à ouvrir. */
+.season-slab-wrap.locked {
+  border-style: dashed;
+  background: transparent;
+}
+
+.season-slab-wrap.locked .season-slab {
+  cursor: default;
+}
+
+.season-slab-wrap.locked .season-slab-bg img {
+  filter: grayscale(0.35) brightness(0.8);
+}
+
+.season-slab-wrap.locked .season-slab-kicker {
+  color: var(--text-muted);
+}
+
+.season-slab-wrap.locked .season-slab-title {
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.season-slab-wrap.locked .season-slab-count {
+  color: var(--accent);
+  font-weight: 600;
+}
