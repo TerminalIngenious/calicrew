@@ -21,6 +21,12 @@ export default function BottomNav() {
 
   return (
     <nav className="bottom-nav">
+      {/* Uniquement visible sur ordinateur, où la barre devient une colonne :
+          une app de bureau sans son nom en haut de la colonne fait page web. */}
+      <div className="nav-brand">
+        <img src="/icon.svg" alt="" width={28} height={28} />
+        <span>CaliCrew</span>
+      </div>
       {NAV_ITEMS.map(({ path, icon: Icon, label }) => (
         <button
           key={path}

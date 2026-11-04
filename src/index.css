@@ -7097,3 +7097,171 @@ body {
   font-weight: 600;
   color: var(--text-muted);
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Format ordinateur
+   ──────────────────────────────────────────────────────────────────────────
+   L'app a été dessinée pour le téléphone, et sur un écran d'ordinateur elle
+   restait une colonne de 480 px perdue au milieu du noir : on voyait un site
+   mobile agrandi, pas un logiciel. À partir de 1024 px, la barre du bas
+   devient une colonne de navigation à gauche — c'est la convention de toutes
+   les applications de bureau — et la fenêtre est occupée en entier.
+
+   Tout tient dans cette feuille de style : aucun écran n'a besoin de savoir
+   sur quoi il s'affiche, et le mobile n'est touché nulle part.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.nav-brand {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --rail-width: 15rem;
+    /* Largeur de lecture confortable. Au-delà, les lignes de texte et les
+       cartes s'étirent jusqu'à devenir illisibles : les applications de
+       bureau gardent toutes une colonne centrale et laissent respirer. */
+    --content-width: 1180px;
+  }
+
+  #root {
+    max-width: none;
+  }
+
+  /* ── La barre de navigation devient une colonne ── */
+
+  .bottom-nav {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: none;
+    width: var(--rail-width);
+    max-width: none;
+    height: 100dvh;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    padding: 1.25rem 0.75rem;
+    border-top: none;
+    border-right: 1px solid var(--border);
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.25rem 0.85rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .nav-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+  }
+
+  .nav-btn.active {
+    background: rgba(255, 107, 53, 0.12);
+  }
+
+  /* ── Le contenu occupe la fenêtre ── */
+
+  /*
+   * Une grille d'une seule colonne centrée plutôt qu'une largeur maximale
+   * posée sur .page : la page garde ses enfants empilés dans l'ordre, sans
+   * qu'aucun écran ait à être réécrit.
+   */
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, var(--content-width));
+    justify-content: center;
+    align-content: start;
+    padding: 2.25rem 2.5rem 3rem;
+  }
+
+  .page.loading {
+    display: flex;
+  }
+
+  /* La colonne de navigation est en position fixe : c'est la marge qui
+     empêche le contenu de passer dessous. */
+  .page:has(.bottom-nav) {
+    margin-left: var(--rail-width);
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  /* Les séances tiennent sur deux colonnes : une liste d'une seule ligne par
+     entrée laissait les deux tiers de l'écran vides. */
+  .session-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  /* Les tuiles de stats sont des chiffres : étirées sur la moitié de l'écran
+     elles perdent toute lisibilité. On les laisse à leur taille, alignées à
+     gauche. */
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(0, 220px));
+    justify-content: start;
+  }
+
+  .home-cta,
+  .home-secondary-cta,
+  .primary-btn {
+    width: auto;
+    min-width: 16rem;
+    justify-self: start;
+  }
+
+  /* Le bouton flottant est centré sur la fenêtre : sans correction, la
+     colonne de navigation le décale visuellement vers la gauche. Et comme
+     plus rien n'occupe le bas de l'écran, il reprend sa place basse. */
+  .floating-btn,
+  .page:has(.bottom-nav) .floating-btn {
+    left: calc(50% + var(--rail-width) / 2);
+    bottom: 1.5rem;
+  }
+
+  /* La souris n'a pas d'état :active permanent — sans survol, tout l'écran
+     paraît figé. */
+  .session-card:hover,
+  .creatine-card:hover,
+  .secondary-btn:hover {
+    background: var(--bg-card-hover);
+  }
+}
+
+/* Le lien vers la vitrine, sous le formulaire de connexion. */
+.login-install {
+  text-align: center;
+  margin-top: 1.75rem;
+  font-size: 0.85rem;
+}
+
+.login-install a {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+}
