@@ -6892,3 +6892,146 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .halloween-spider { animation: none; }
 }
+
+/* ── Étagère des saisons (profil) ── */
+
+.season-shelf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.season-slab-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.season-slab-wrap.open {
+  border-color: var(--accent);
+}
+
+/* Le bandeau prend toute la largeur : c'est l'affiche de la saison, pas une
+   ligne de liste. */
+.season-slab {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 124px;
+  padding: 0.9rem 2.5rem 0.9rem 1rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Fond : les cartes qui ont marqué la saison, étalées en éventail à droite
+   comme une main qu'on ouvre. Le dégradé les noie vers la gauche pour que le
+   titre se pose dessus sans cartouche. */
+.season-slab-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Contexte d'empilement propre : sans lui, le z-index du dégradé
+     concurrencerait celui du titre et le recouvrirait. */
+  isolation: isolate;
+}
+
+.season-slab-bg img {
+  position: absolute;
+  top: 50%;
+  width: 74px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 5px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+}
+
+/* Les cartes arrivent de la plus rare à la moins rare. La plus rare se place
+   donc à droite, là où le dégradé l'épargne, et devant les autres — l'ordre du
+   DOM la mettrait dessous sans ces z-index. */
+.season-slab-bg img:nth-child(1) {
+  right: 4px;
+  z-index: 3;
+  transform: translateY(-50%) rotate(11deg);
+}
+
+.season-slab-bg img:nth-child(2) {
+  right: 34px;
+  z-index: 2;
+  transform: translateY(-50%) rotate(4deg);
+}
+
+.season-slab-bg img:nth-child(3) {
+  right: 64px;
+  z-index: 1;
+  transform: translateY(-50%) rotate(-3deg);
+}
+
+.season-slab-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background:
+    linear-gradient(95deg, var(--bg-card) 34%, rgba(20, 20, 40, 0.74) 62%, rgba(20, 20, 40, 0.3) 100%),
+    linear-gradient(0deg, rgba(10, 10, 26, 0.6), transparent 72%);
+}
+
+.season-slab-face {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  max-width: 62%;
+}
+
+.season-slab-kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.season-slab-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.season-slab-count {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.season-slab-chevron {
+  position: absolute;
+  bottom: 0.55rem;
+  right: 0.7rem;
+  color: var(--text);
+  opacity: 0.75;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+  transition: transform 0.2s;
+}
+
+.season-slab-wrap.open .season-slab-chevron {
+  transform: rotate(180deg);
+}
+
+.season-slab-cards {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.season-slab-wrap .empty {
+  padding: 1rem;
+}

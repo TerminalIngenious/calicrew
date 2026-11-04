@@ -3,8 +3,8 @@ import { useAuth, MAX_DISPLAY_NAME } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, RARITY_ORDER, getCardDisplayName } from '../lib/cards';
-import { getCurrentSeason } from '../lib/passes';
+import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
+import { getCurrentSeason, SEASONS } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
 import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
@@ -18,6 +18,8 @@ import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pe
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
+import SeasonShelf from '../components/SeasonShelf';
+import type { SeasonShelfEntry } from '../components/SeasonShelf';
 
 export default function Profile() {
   const { user, displayName: myName, updateDisplayName, signOut } = useAuth();
@@ -37,6 +39,8 @@ export default function Profile() {
   const [selectedBadge, setSelectedBadge] = useState<RankBadge | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  /** La saison dépliée dans la section Cartes — une seule à la fois. */
+  const [openSeasonId, setOpenSeasonId] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -128,11 +132,41 @@ export default function Profile() {
   }
 
   const season = getCurrentSeason();
-  const allCards = season ? getCardsBySet(season.id) : [];
-  const ownedCardIds = Object.keys(ownedCards).filter((id) => ownedCards[id] > 0);
-  const uniqueCards = allCards.filter((c) => ownedCardIds.includes(c.id));
 
-  const avatarCard = avatarCardId ? allCards.find((c) => c.id === avatarCardId) : undefined;
+  /**
+   * Les saisons déjà ouvertes, la plus récente en premier.
+   *
+   * On s'arrête au rang de la saison en cours : une saison à venir n'a rien à
+   * montrer, et ses cartes ne doivent pas fuiter avant son lancement. Le rang
+   * suffit, pas besoin de relire l'horloge pendant le rendu.
+   */
+  const currentIndex = SEASONS.findIndex((s) => s.id === season?.id);
+  const openedSeasons = SEASONS.filter((_, i) => i <= currentIndex).reverse();
+
+  /**
+   * Les cartes, saison par saison.
+   *
+   * Tout était empilé dans une seule grille : à partir de deux saisons, on ne
+   * distinguait plus de quelle collection venait quelle carte. Chaque saison a
+   * donc son bandeau, qu'on déplie pour voir ce qu'on a.
+   */
+  const seasonShelves: SeasonShelfEntry[] = openedSeasons.map((s) => {
+    const cards = getCardsBySet(s.id);
+    const owned = RARITY_ORDER.flatMap((r) => cards.filter((c) => c.rarity === r && (ownedCards[c.id] || 0) > 0));
+    // Le fond du bandeau : les cartes les plus rares de la saison, celles qui
+    // l'ont marquée. Possédées ou non — c'est une affiche, pas un inventaire.
+    const marquantes = RARITY_ORDER.flatMap((r) => cards.filter((c) => c.rarity === r && c.image)).slice(0, 3);
+    return { season: s, cards, owned, marquantes };
+  });
+
+  const totalOwned = seasonShelves.reduce((n, sh) => n + sh.owned.length, 0);
+  const totalCards = seasonShelves.reduce((n, sh) => n + sh.cards.length, 0);
+  // Toutes les cartes possédées, toutes saisons confondues : sert à l'avatar.
+  const uniqueCards = seasonShelves.flatMap((sh) => sh.owned);
+
+  // L'avatar se cherche dans toutes les saisons, pas seulement celle en cours :
+  // sinon il disparaîtrait de lui-même au changement de saison.
+  const avatarCard = avatarCardId ? getCardById(avatarCardId) : undefined;
 
   async function selectAvatar(card: Card | null) {
     if (!targetUid) return;
@@ -202,7 +236,7 @@ export default function Profile() {
             )}
           </h2>
         )}
-        <span className="profile-cards-count">{uniqueCards.length}/{allCards.length} cartes</span>
+        <span className="profile-cards-count">{totalOwned}/{totalCards} cartes</span>
       </div>
 
       {showAvatarPicker && (
@@ -348,39 +382,20 @@ export default function Profile() {
 
       <section className="section">
         <div className="section-head-row">
-          <h3>Cartes ({uniqueCards.length})</h3>
+          <h3>Cartes ({totalOwned})</h3>
           {isOwnProfile && (
             <button className="section-head-link" onClick={() => navigate('/collection')}>
               Collection <ChevronRight size={14} />
             </button>
           )}
         </div>
-        {uniqueCards.length === 0 ? (
-          <p className="empty">Aucune carte pour le moment</p>
-        ) : (
-          <div className="card-grid card-grid-images">
-            {RARITY_ORDER.flatMap((rarity) =>
-              uniqueCards
-                .filter((c) => c.rarity === rarity)
-                .map((card) => (
-                  <div
-                    key={card.id}
-                    className="collection-card-img owned"
-                    onClick={() => setSelectedCard(card)}
-                  >
-                    {card.image ? (
-                      <img src={card.image} alt={getCardDisplayName(card)} className="collection-card-thumb" loading="lazy" />
-                    ) : (
-                      <div className="collection-card-emoji-fallback"><span>{card.emoji}</span></div>
-                    )}
-                    {ownedCards[card.id] > 1 && (
-                      <span className="collection-card-count">x{ownedCards[card.id]}</span>
-                    )}
-                  </div>
-                ))
-            )}
-          </div>
-        )}
+        <SeasonShelf
+          shelves={seasonShelves}
+          ownedCards={ownedCards}
+          openSeasonId={openSeasonId}
+          onToggle={(id) => setOpenSeasonId(openSeasonId === id ? null : id)}
+          onSelectCard={setSelectedCard}
+        />
       </section>
 
       {selectedCard && (
