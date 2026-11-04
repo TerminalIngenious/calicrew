@@ -371,6 +371,11 @@ export default function Profile() {
         </section>
       )}
 
+      {/* Les deux bandeaux ont la même forme : collés l'un à l'autre, ils se
+          lisaient comme une seule liste. Le trait dit que ce sont deux
+          choses différentes. */}
+      {badges.length > 0 && <hr className="profile-trait" />}
+
       <section className="section">
         <SeasonShelf
           shelves={seasonShelves}
