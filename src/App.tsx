@@ -13,6 +13,7 @@ import Progress from './pages/Progress';
 import Group from './pages/Group';
 import BattlePass from './pages/BattlePass';
 import Collection from './pages/Collection';
+import SeasonCards from './pages/SeasonCards';
 import Profile from './pages/Profile';
 import Programs from './pages/Programs';
 import type { ReactNode } from 'react';
@@ -154,6 +155,8 @@ function AppContent() {
         <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
         <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
         <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
+        <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+        <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
         <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

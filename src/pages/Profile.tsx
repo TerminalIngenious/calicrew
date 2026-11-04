@@ -17,7 +17,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award, TrendingUp, ChevronRight, LogOut, Settings } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
-import CardDetailModal from '../components/CardDetailModal';
 import SeasonShelf from '../components/SeasonShelf';
 import type { SeasonShelfEntry } from '../components/SeasonShelf';
 
@@ -41,9 +40,6 @@ export default function Profile() {
   const [badges, setBadges] = useState<RankBadge[]>([]);
   const [selectedBadge, setSelectedBadge] = useState<RankBadge | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-  /** La saison dépliée dans la section Cartes — une seule à la fois. */
-  const [openSeasonId, setOpenSeasonId] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -182,8 +178,6 @@ export default function Profile() {
     });
   }
 
-  const totalOwned = seasonShelves.reduce((n, sh) => n + sh.owned.length, 0);
-  const totalCards = seasonShelves.reduce((n, sh) => n + sh.cards.length, 0);
   // Toutes les cartes possédées, toutes saisons confondues : sert à l'avatar.
   const uniqueCards = seasonShelves.flatMap((sh) => sh.owned);
 
@@ -259,7 +253,7 @@ export default function Profile() {
             )}
           </h2>
         )}
-        <span className="profile-cards-count">{totalOwned}/{totalCards} cartes</span>
+        <span className="profile-cards-count">{uniqueCards.length} cartes</span>
       </div>
 
       {showAvatarPicker && (
@@ -404,31 +398,11 @@ export default function Profile() {
       )}
 
       <section className="section">
-        <div className="section-head-row">
-          <h3>Cartes ({totalOwned})</h3>
-          {isOwnProfile && (
-            <button className="section-head-link" onClick={() => navigate('/collection')}>
-              Collection <ChevronRight size={14} />
-            </button>
-          )}
-        </div>
         <SeasonShelf
           shelves={seasonShelves}
-          ownedCards={ownedCards}
-          openSeasonId={openSeasonId}
-          onToggle={(id) => setOpenSeasonId(openSeasonId === id ? null : id)}
-          onSelectCard={setSelectedCard}
+          onOpen={(id) => navigate(isOwnProfile ? `/season/${id}` : `/season/${id}/${targetUid}`)}
         />
       </section>
-
-      {selectedCard && (
-        <CardDetailModal
-          card={selectedCard}
-          owned
-          count={ownedCards[selectedCard.id] || 0}
-          onClose={() => setSelectedCard(null)}
-        />
-      )}
 
       {programs.length > 0 && (
         <section className="section">

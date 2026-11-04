@@ -1,24 +1,24 @@
-import { ChevronDown, Lock } from 'lucide-react';
-import { getCardDisplayName } from '../lib/cards';
+import { ChevronRight, Lock } from 'lucide-react';
 import type { Card, Season } from '../types';
 
 /**
- * Les cartes d'un profil, rangées par saison.
+ * Les saisons d'un profil, une affiche chacune.
  *
- * Tout était empilé dans une seule grille triée par rareté : à partir de deux
- * saisons, plus moyen de savoir de quelle collection venait quelle carte. Chaque
- * saison a donc son bandeau pleine largeur — son nom, son thème, son compte et,
- * en fond, les cartes qui l'ont marquée — qu'on déplie pour voir ce qu'on a.
+ * Les cartes étaient empilées dans une seule grille triée par rareté : à partir
+ * de deux saisons, plus moyen de savoir de quelle collection venait quelle
+ * carte. Chaque saison a donc son bandeau pleine largeur — son nom, son thème,
+ * son compte et, en fond, les cartes qui l'ont marquée.
  *
- * Une seule saison ouverte à la fois : deux grilles dépliées l'une sous l'autre
- * ramèneraient le problème qu'on cherche à régler.
+ * Le bandeau mène à la page de la saison plutôt que de déplier sa grille sur
+ * place : à cinquante cartes, le profil devenait un mur à faire défiler avant
+ * d'atteindre le reste.
  */
 
 export interface SeasonShelfEntry {
   season: Season;
   /** Toute la saison, pour le compte affiché sur le bandeau. */
   cards: Card[];
-  /** Les cartes possédées, déjà triées. */
+  /** Les cartes possédées, pour le compte affiché sur le bandeau. */
   owned: Card[];
   /** Le fond du bandeau : les trois plus rares de la saison, possédées ou non. */
   marquantes: Card[];
@@ -38,80 +38,37 @@ export interface SeasonShelfEntry {
 
 interface Props {
   shelves: SeasonShelfEntry[];
-  ownedCards: Record<string, number>;
-  openSeasonId: string | null;
-  onToggle: (seasonId: string) => void;
-  onSelectCard: (card: Card) => void;
+  onOpen: (seasonId: string) => void;
 }
 
-export default function SeasonShelf({
-  shelves,
-  ownedCards,
-  openSeasonId,
-  onToggle,
-  onSelectCard,
-}: Props) {
+export default function SeasonShelf({ shelves, onOpen }: Props) {
   return (
     <div className="season-shelf">
-      {shelves.map(({ season, cards, owned, marquantes, locked, backImage, startLabel }) => {
-        const open = !locked && openSeasonId === season.id;
-        return (
-          <div key={season.id} className={`season-slab-wrap ${open ? 'open' : ''} ${locked ? 'locked' : ''}`}>
-            <button
-              className="season-slab"
-              onClick={() => !locked && onToggle(season.id)}
-              aria-expanded={locked ? undefined : open}
-              aria-disabled={locked || undefined}
-            >
-              <div className="season-slab-bg" aria-hidden="true">
-                {locked
-                  ? [0, 1, 2].map((i) => <img key={i} src={backImage} alt="" loading="lazy" />)
-                  : marquantes.map((c) => <img key={c.id} src={c.image} alt="" loading="lazy" />)}
-              </div>
-              <div className="season-slab-face">
-                <span className="season-slab-kicker">{season.name}</span>
-                <span className="season-slab-title">{season.theme}</span>
-                <span className="season-slab-count">
-                  {locked ? `Bientôt · ${startLabel}` : `${owned.length}/${cards.length} cartes`}
-                </span>
-              </div>
+      {shelves.map(({ season, cards, owned, marquantes, locked, backImage, startLabel }) => (
+        <div key={season.id} className={`season-slab-wrap ${locked ? 'locked' : ''}`}>
+          <button
+            className="season-slab"
+            onClick={() => !locked && onOpen(season.id)}
+            aria-disabled={locked || undefined}
+          >
+            <div className="season-slab-bg" aria-hidden="true">
               {locked
-                ? <Lock size={16} className="season-slab-chevron" />
-                : <ChevronDown size={18} className="season-slab-chevron" />}
-            </button>
-
-            {open && (
-              owned.length === 0 ? (
-                <p className="empty">Aucune carte de cette saison</p>
-              ) : (
-                <div className="card-grid card-grid-images season-slab-cards">
-                  {owned.map((card) => (
-                    <div
-                      key={card.id}
-                      className="collection-card-img owned"
-                      onClick={() => onSelectCard(card)}
-                    >
-                      {card.image ? (
-                        <img
-                          src={card.image}
-                          alt={getCardDisplayName(card)}
-                          className="collection-card-thumb"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="collection-card-emoji-fallback"><span>{card.emoji}</span></div>
-                      )}
-                      {ownedCards[card.id] > 1 && (
-                        <span className="collection-card-count">x{ownedCards[card.id]}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )
-            )}
-          </div>
-        );
-      })}
+                ? [0, 1, 2].map((i) => <img key={i} src={backImage} alt="" loading="lazy" />)
+                : marquantes.map((c) => <img key={c.id} src={c.image} alt="" loading="lazy" />)}
+            </div>
+            <div className="season-slab-face">
+              <span className="season-slab-kicker">{season.name}</span>
+              <span className="season-slab-title">{season.theme}</span>
+              <span className="season-slab-count">
+                {locked ? `Bientôt · ${startLabel}` : `${owned.length}/${cards.length} cartes`}
+              </span>
+            </div>
+            {locked
+              ? <Lock size={16} className="season-slab-chevron" />
+              : <ChevronRight size={18} className="season-slab-chevron" />}
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
