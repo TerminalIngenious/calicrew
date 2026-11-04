@@ -1,21 +1,31 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SessionsProvider } from './contexts/SessionsContext';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { getCurrentSeason } from './lib/passes';
 import { getCardsBySet, getFamilies } from './lib/cards';
 import type { Season } from './types';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import NewSession from './pages/NewSession';
-import LiveSession from './pages/LiveSession';
-import Progress from './pages/Progress';
-import Group from './pages/Group';
-import BattlePass from './pages/BattlePass';
-import Collection from './pages/Collection';
-import SeasonCards from './pages/SeasonCards';
-import Profile from './pages/Profile';
-import Programs from './pages/Programs';
+
+/**
+ * Les pages au-delà de l'accueil sont chargées à la demande.
+ *
+ * Tout partait dans un seul fichier de 1,3 Mo qu'il fallait télécharger avant
+ * d'afficher quoi que ce soit — dont les graphiques de Progress, à eux seuls
+ * un tiers du poids, pour un écran que la plupart des lancements n'ouvrent
+ * jamais. Login et Dashboard restent dans le paquet principal : ce sont les
+ * deux écrans par lesquels on arrive.
+ */
+const NewSession = lazy(() => import('./pages/NewSession'));
+const LiveSession = lazy(() => import('./pages/LiveSession'));
+const Progress = lazy(() => import('./pages/Progress'));
+const Group = lazy(() => import('./pages/Group'));
+const BattlePass = lazy(() => import('./pages/BattlePass'));
+const Collection = lazy(() => import('./pages/Collection'));
+const SeasonCards = lazy(() => import('./pages/SeasonCards'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Programs = lazy(() => import('./pages/Programs'));
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
@@ -146,21 +156,23 @@ function AppContent() {
       )}
       {season === 'halloween' && <HalloweenDecor />}
       {season === 'pink' && <PinkDecor />}
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
-        <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
-        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-        <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
-        <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
-        <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
-        <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
-        <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
-        <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      </Routes>
+      <Suspense fallback={<div className="page loading"><Loader /></div>}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
+          <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
+          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+          <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
+          <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
+          <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
+          <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+          <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+          <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        </Routes>
+      </Suspense>
     </>
   );
 }

@@ -1,11 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { getCardsBySet, getFamilies, isSetComplete, RARITY_ORDER, getRarityLabel, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason, SEASONS } from '../lib/passes';
-import type { UserProgress, Card } from '../types';
+import { useUserProgress } from '../lib/useUserProgress';
+import type { Card } from '../types';
 import { Layers, Info, X, ArrowLeft } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
@@ -22,8 +21,8 @@ const DROP_RATES = [
 export default function Collection() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+  const { progress, loading } = useUserProgress(user?.uid);
+  const ownedCards = progress?.ownedCards || {};
   const [showInfo, setShowInfo] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
@@ -69,19 +68,7 @@ export default function Collection() {
           cards: cards.filter((c) => c.rarity === rarity),
         }));
 
-  const load = useCallback(async () => {
-    if (!user) return;
-    const snap = await getDoc(doc(db, 'userProgress', user.uid));
-    if (snap.exists()) {
-      const data = snap.data() as UserProgress;
-      setOwnedCards(data.ownedCards || {});
-    }
-    setLoading(false);
-  }, [user]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
 
   if (loading) return <div className="page loading"><Loader /></div>;
 

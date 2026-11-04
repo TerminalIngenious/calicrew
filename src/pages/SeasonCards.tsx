@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
-import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
-import type { Card, UserProgress } from '../types';
+import { useUserProgress } from '../lib/useUserProgress';
+import type { Card } from '../types';
 import CardDetailModal from '../components/CardDetailModal';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
@@ -40,24 +39,9 @@ export default function SeasonCards() {
   const isOwnProfile = !uid || uid === user?.uid;
   const targetUid = uid || user?.uid;
 
-  const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!targetUid) return;
-    // `obsolete` couvre le cas où l'on quitte la page, ou où l'on change de
-    // joueur, avant que la lecture ne revienne : sans lui on écrirait le
-    // résultat d'une requête qui ne concerne plus l'écran affiché.
-    let obsolete = false;
-    (async () => {
-      const snap = await getDoc(doc(db, 'userProgress', targetUid));
-      if (obsolete) return;
-      if (snap.exists()) setOwnedCards((snap.data() as UserProgress).ownedCards || {});
-      setLoading(false);
-    })();
-    return () => { obsolete = true; };
-  }, [targetUid]);
+  const { progress, loading } = useUserProgress(targetUid);
+  const ownedCards = progress?.ownedCards || {};
 
   const season = SEASONS.find((s) => s.id === setId);
   const cards = season ? getCardsBySet(season.id) : [];

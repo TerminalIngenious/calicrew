@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth, MAX_DISPLAY_NAME } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
-import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, limit, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
+import { useUserProgress } from '../lib/useUserProgress';
 import { totalReps as sumReps } from '../lib/stats';
-import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
+import type { Session, Card, Program, RankBadge } from '../types';
 import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
 import { bestAmrapsByCircuit } from '../lib/amrap';
 import RankBadgeIcon from '../components/RankBadgeIcon';
@@ -32,12 +33,16 @@ export default function Profile() {
   const isOwnProfile = !uid || uid === user?.uid;
   const targetUid = uid || user?.uid;
 
+  // Cartes, avatar et badges viennent du même document, servi par le cache
+  // avant le serveur : la page s'affiche sans attendre le réseau.
+  const { progress, loading: progressLoading } = useUserProgress(targetUid);
+  const ownedCards = progress?.ownedCards || {};
+  const avatarCardId = progress?.avatarCardId;
+
   const [displayName, setDisplayName] = useState('');
-  const [ownedCards, setOwnedCards] = useState<Record<string, number>>({});
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
-  const [avatarCardId, setAvatarCardId] = useState<string | undefined>();
-  const [badges, setBadges] = useState<RankBadge[]>([]);
+  const badges = sortBadges(progress?.badges || []);
   const [selectedBadge, setSelectedBadge] = useState<RankBadge | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -73,28 +78,31 @@ export default function Profile() {
   const load = useCallback(async () => {
     if (!targetUid) return;
 
-    if (isOwnProfile) {
-      setDisplayName(myName);
-      setSessions(ownSessions);
-    } else {
-      const userSnap = await getDoc(doc(db, 'users', targetUid));
-      if (userSnap.exists()) {
-        setDisplayName(userSnap.data().displayName || 'Inconnu');
+    // Chaque bloc porte son propre filet : une panne sur les programmes ne doit
+    // pas emporter le nom et les séances, et surtout aucune ne doit laisser
+    // l'écran de chargement tourner dans le vide.
+    try {
+      if (isOwnProfile) {
+        setDisplayName(myName);
+        setSessions(ownSessions);
       } else {
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const found = usersSnap.docs.find((d) => d.data().uid === targetUid);
-        setDisplayName(found?.data().displayName || 'Inconnu');
+        const userSnap = await getDoc(doc(db, 'users', targetUid));
+        if (userSnap.exists()) {
+          setDisplayName(userSnap.data().displayName || 'Inconnu');
+        } else {
+          // Quelques comptes ont un document dont l'identifiant n'est pas leur
+          // uid. On les retrouve par une requête ciblée : parcourir toute la
+          // collection téléchargeait chaque utilisateur de l'app pour en lire un.
+          const found = await getDocs(
+            query(collection(db, 'users'), where('uid', '==', targetUid), limit(1))
+          );
+          setDisplayName(found.docs[0]?.data().displayName || 'Inconnu');
+        }
+        const sessSnap = await getDocs(query(collection(db, 'sessions'), where('userId', '==', targetUid)));
+        setSessions(sessSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Session)));
       }
-      const sessSnap = await getDocs(query(collection(db, 'sessions'), where('userId', '==', targetUid)));
-      setSessions(sessSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Session)));
-    }
-
-    const progressSnap = await getDoc(doc(db, 'userProgress', targetUid));
-    if (progressSnap.exists()) {
-      const data = progressSnap.data() as UserProgress;
-      setOwnedCards(data.ownedCards || {});
-      setAvatarCardId(data.avatarCardId);
-      setBadges(sortBadges(data.badges || []));
+    } catch (err) {
+      console.error('Profil indisponible :', err);
     }
 
     try {
@@ -188,11 +196,10 @@ export default function Profile() {
     if (!targetUid) return;
     const newId = card?.id || null;
     await updateDoc(doc(db, 'userProgress', targetUid), { avatarCardId: newId });
-    setAvatarCardId(newId ?? undefined);
     setShowAvatarPicker(false);
   }
 
-  if (loading) return <div className="page loading"><Loader /></div>;
+  if (loading || progressLoading) return <div className="page loading"><Loader /></div>;
 
   return (
     <div className="page">

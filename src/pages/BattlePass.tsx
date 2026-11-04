@@ -93,28 +93,39 @@ export default function BattlePass() {
 
   const loadProgress = useCallback(async () => {
     if (!user) return;
-    const ref = doc(db, 'userProgress', user.uid);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const stored = snap.data() as UserProgress;
-      // Nouvelle saison : le pass repart de zéro, la collection reste.
-      if (season && needsSeasonReset(stored, season.id)) {
-        const fresh = startNewSeason(stored, season.id);
-        await updateDoc(ref, {
-          passXp: fresh.passXp,
-          currentSeasonId: fresh.currentSeasonId,
-          chestsToOpen: fresh.chestsToOpen,
-        });
-        setProgress(fresh);
+    // Lecture serveur assumée, pas de cache : cette page décide s'il faut
+    // repartir pour une nouvelle saison et l'écrit dans la foulée. Agir sur
+    // une version périmée remettrait le pass à zéro à tort.
+    //
+    // Le `finally` est ce qui manquait : sans lui, la moindre erreur laissait
+    // l'écran de chargement tourner sans fin.
+    try {
+      const ref = doc(db, 'userProgress', user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const stored = snap.data() as UserProgress;
+        // Nouvelle saison : le pass repart de zéro, la collection reste.
+        if (season && needsSeasonReset(stored, season.id)) {
+          const fresh = startNewSeason(stored, season.id);
+          await updateDoc(ref, {
+            passXp: fresh.passXp,
+            currentSeasonId: fresh.currentSeasonId,
+            chestsToOpen: fresh.chestsToOpen,
+          });
+          setProgress(fresh);
+        } else {
+          setProgress(stored);
+        }
       } else {
-        setProgress(stored);
+        const init = { ...DEFAULT_PROGRESS, currentSeasonId: season?.id || '' };
+        await setDoc(ref, init);
+        setProgress(init);
       }
-    } else {
-      const init = { ...DEFAULT_PROGRESS, currentSeasonId: season?.id || '' };
-      await setDoc(ref, init);
-      setProgress(init);
+    } catch (err) {
+      console.error('Pass indisponible :', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [user, season]);
 
   useEffect(() => {
