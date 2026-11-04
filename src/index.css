@@ -2623,64 +2623,6 @@ body {
   transform: translateX(18px);
 }
 
-/* Cindy card */
-.cindy-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(78, 205, 196, 0.08));
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  cursor: pointer;
-}
-
-.cindy-card-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.cindy-icon {
-  color: var(--accent);
-}
-
-.cindy-card h3 {
-  font-size: 1rem;
-  margin-bottom: 0.1rem;
-}
-
-.cindy-desc {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.cindy-badge {
-  background: var(--accent);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 20px;
-}
-
-.section-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.25rem 0;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-}
-
-.section-divider::before,
-.section-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
 /* AMRAP time picker */
 .amrap-time-picker {
   display: flex;
@@ -5603,33 +5545,6 @@ body {
   color: var(--text-muted);
 }
 
-.programs-quick-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.program-quick-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.65rem 0.85rem;
-  cursor: pointer;
-  color: var(--text);
-}
-
-.program-quick-card:active {
-  background: var(--bg-card-hover);
-}
-
-.program-quick-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
 .programs-empty {
   display: flex;
   flex-direction: column;
@@ -5639,18 +5554,7 @@ body {
   min-height: 50vh;
 }
 
-.program-quick-info {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 /* ── Custom exercise edit mode ── */
-
-.category-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
 
 .edit-cat-btn {
   padding: 0.25rem;
@@ -7295,4 +7199,178 @@ body {
   font-size: 0.85rem;
   line-height: 1.45;
   text-align: center;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Choix des exercices
+   ──────────────────────────────────────────────────────────────────────────
+   Le catalogue compte une centaine d'exercices sur neuf catégories, et la
+   page les empilait tous : neuf titres, cent boutons, une page interminable
+   pour en cocher quatre — presque toujours les quatre mêmes. On n'en montre
+   plus qu'une catégorie à la fois, avec une recherche au-dessus et les
+   exercices les plus fréquents du joueur en premier onglet.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.exo-raccourcis {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+  /* La barre de défilement horizontale mangeait un bout des pastilles. */
+  scrollbar-width: none;
+}
+
+.exo-raccourcis::-webkit-scrollbar {
+  display: none;
+}
+
+.exo-raccourci {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  padding: 0.6rem 0.9rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.exo-raccourci em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.exo-raccourci.amrap {
+  color: var(--accent);
+  border-color: rgba(255, 107, 53, 0.4);
+}
+
+.exo-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.exo-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+/* Le petit rond de croix que Safari ajoute aux champs de recherche : on a le
+   nôtre, qui remet aussi la liste à zéro. */
+.exo-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.exo-filters {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.exo-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.exo-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.exo-filter.active {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.exo-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Sur ordinateur, les catégories deviennent une colonne : la barre
+   horizontale demandait de faire défiler pour atteindre Sport Co alors que
+   la place ne manque pas. */
+@media (min-width: 1024px) {
+  .exo-picker {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .exo-filters {
+    position: sticky;
+    top: 2rem;
+    flex-direction: column;
+    overflow: visible;
+    gap: 0.15rem;
+  }
+
+  .exo-filter {
+    justify-content: flex-start;
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+  }
+
+  .exo-filter:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+  }
+
+  .exo-filter.active:hover {
+    color: var(--accent);
+  }
+
+  .exo-search {
+    max-width: 26rem;
+  }
+
+  .exercise-chip:hover {
+    border-color: var(--accent);
+  }
 }

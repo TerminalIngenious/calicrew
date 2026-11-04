@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useUserSessions } from '../contexts/SessionsContext';
 import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -9,7 +10,12 @@ import { buildAmrapExercises } from '../lib/amrap';
 import AmrapBuilder from '../components/AmrapBuilder';
 import type { AmrapItem } from '../components/AmrapBuilder';
 import type { Exercise, ExerciseLog, WeightType, Program, SetUnit, UserProgress } from '../types';
-import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2, Search, Star } from 'lucide-react';
+
+/** Enlève accents et casse : « Développé » se trouve en tapant « developpe ». */
+function sansAccent(texte: string): string {
+  return texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
 
 /** Running et vélo partagent le même formulaire temps / distance / dénivelé. */
 function isDistanceBased(category: string): boolean {
@@ -18,6 +24,7 @@ function isDistanceBased(category: string): boolean {
 
 export default function NewSession() {
   const { user } = useAuth();
+  const { sessions } = useUserSessions();
   const navigate = useNavigate();
   const [step, setStep] = useState<'select' | 'config'>('select');
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
@@ -45,6 +52,9 @@ export default function NewSession() {
   const [editModeCategory, setEditModeCategory] = useState<string | null>(null);
   const [selectedCustomExo, setSelectedCustomExo] = useState<Exercise | null>(null);
   const [showAmrap, setShowAmrap] = useState(false);
+  const [recherche, setRecherche] = useState('');
+  /** Catégorie affichée. 'frequents' = les exercices que le joueur fait vraiment. */
+  const [filtre, setFiltre] = useState<string>('frequents');
   const [myPrograms, setMyPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
@@ -229,10 +239,6 @@ export default function NewSession() {
     navigate(`/session/${docRef.id}`);
   }
 
-  function getAllExercises(): Exercise[] {
-    return [...DEFAULT_EXERCISES, ...customExercises];
-  }
-
   function toggleExercise(ex: Exercise) {
     setSelectedExercises((prev) =>
       prev.find((e) => e.id === ex.id) ? prev.filter((e) => e.id !== ex.id) : [...prev, ex]
@@ -393,8 +399,54 @@ export default function NewSession() {
     }
   }
 
-  const allExercises = getAllExercises();
-  const categories = [...new Set(allExercises.map((e) => e.category))] as Exercise['category'][];
+  const allExercises = useMemo(
+    () => [...DEFAULT_EXERCISES, ...customExercises],
+    [customExercises]
+  );
+  const categories = useMemo(
+    () => [...new Set(allExercises.map((e) => e.category))] as Exercise['category'][],
+    [allExercises]
+  );
+
+  /**
+   * Les exercices que le joueur fait vraiment, les plus fréquents d'abord.
+   *
+   * Le catalogue compte une centaine d'exercices répartis sur neuf catégories.
+   * Tout afficher d'un coup, c'était cent boutons à faire défiler pour en
+   * cocher quatre — et presque toujours les quatre mêmes. L'historique sait
+   * lesquels : autant commencer par là.
+   */
+  const frequents = useMemo(() => {
+    const compte = new Map<string, number>();
+    for (const s of sessions.slice(0, 30)) {
+      for (const ex of s.exercises) {
+        compte.set(ex.exerciseId, (compte.get(ex.exerciseId) || 0) + 1);
+      }
+    }
+    return [...compte.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([id]) => allExercises.find((e) => e.id === id))
+      .filter((e): e is Exercise => !!e)
+      .slice(0, 12);
+  }, [sessions, allExercises]);
+
+  // Sans historique, l'onglet n'aurait rien à montrer : on ouvre sur la
+  // première catégorie plutôt que sur une page vide.
+  const ongletDefaut = frequents.length >= 3 ? 'frequents' : categories[0];
+  const filtreActif = filtre === 'frequents' && frequents.length < 3 ? ongletDefaut : filtre;
+
+  const resultats = useMemo(() => {
+    const q = sansAccent(recherche.trim());
+    // La recherche ignore les onglets : chercher « dips » alors qu'on est sur
+    // Tirage doit trouver Dips, pas répondre « aucun résultat ».
+    if (q) return allExercises.filter((e) => sansAccent(e.name).includes(q));
+    if (filtreActif === 'frequents') return frequents;
+    return allExercises.filter((e) => e.category === filtreActif);
+  }, [recherche, filtreActif, allExercises, frequents]);
+
+  const modeEdition = editModeCategory === filtreActif;
+  const categorieAUnPerso =
+    filtreActif !== 'frequents' && allExercises.some((e) => e.category === filtreActif && e.isCustom);
 
   if (step === 'select') {
     return (
@@ -407,64 +459,95 @@ export default function NewSession() {
           <div />
         </header>
 
-        <section className="section">
-          <div className="cindy-card" onClick={() => setShowAmrap(true)}>
-            <div className="cindy-card-left">
-              <Zap size={22} className="cindy-icon" />
-              <div>
-                <h3>AMRAP</h3>
-                <span className="cindy-desc">Ton circuit, ton chrono</span>
-              </div>
-            </div>
-            <span className="cindy-badge">WOD</span>
-          </div>
-        </section>
+        {/* Les raccourcis tiennent sur une ligne. Ils occupaient deux sections
+            avec titres au-dessus du catalogue, et repoussaient d'autant ce que
+            la page sert à faire : choisir des exercices. */}
+        <div className="exo-raccourcis">
+          <button className="exo-raccourci amrap" onClick={() => setShowAmrap(true)}>
+            <Zap size={16} />
+            <span>AMRAP</span>
+          </button>
+          {myPrograms.map((prog) => (
+            <button key={prog.id} className="exo-raccourci" onClick={() => startFromProgram(prog)}>
+              <ClipboardList size={16} />
+              <span>{prog.name}</span>
+              <em>{prog.exercises.length} exos</em>
+            </button>
+          ))}
+        </div>
 
         {showAmrap && (
           <AmrapBuilder onClose={() => setShowAmrap(false)} onStart={startAmrap} />
         )}
 
-        {myPrograms.length > 0 && (
-          <section className="section">
-            <h3 className="category-title"><ClipboardList size={16} style={{ marginRight: 6 }} />Programmes</h3>
-            <div className="programs-quick-list">
-              {myPrograms.map((prog) => (
-                <button key={prog.id} className="program-quick-card" onClick={() => startFromProgram(prog)}>
-                  <span className="program-quick-name">{prog.name}</span>
-                  <span className="program-quick-info">{prog.exercises.length} exos</span>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <div className="section-divider">
-          <span>ou choisis tes exercices</span>
+        <div className="exo-search">
+          <Search size={16} />
+          <input
+            type="search"
+            placeholder="Rechercher un exercice"
+            value={recherche}
+            onChange={(e) => setRecherche(e.target.value)}
+          />
+          {recherche && (
+            <button className="icon-btn" onClick={() => setRecherche('')} aria-label="Effacer">
+              <X size={16} />
+            </button>
+          )}
         </div>
 
-        {categories.map((cat) => {
-          const hasCustom = allExercises.some((e) => e.category === cat && e.isCustom);
-          const isEditMode = editModeCategory === cat;
-          return (
-            <section key={cat} className="section">
-              <div className="category-title-row">
-                <h3 className="category-title">{CATEGORY_LABELS[cat]}</h3>
-                {hasCustom && (
-                  <button
-                    className={`icon-btn edit-cat-btn ${isEditMode ? 'active' : ''}`}
-                    onClick={() => setEditModeCategory(isEditMode ? null : cat)}
-                  >
-                    <Pencil size={14} />
-                  </button>
-                )}
-              </div>
+        <div className="exo-picker">
+          <div className="exo-filters">
+            {frequents.length >= 3 && (
+              <button
+                className={`exo-filter ${filtreActif === 'frequents' && !recherche ? 'active' : ''}`}
+                onClick={() => { setFiltre('frequents'); setRecherche(''); }}
+              >
+                <Star size={14} />
+                Fréquents
+              </button>
+            )}
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`exo-filter ${filtreActif === cat && !recherche ? 'active' : ''}`}
+                onClick={() => { setFiltre(cat); setRecherche(''); }}
+              >
+                {CATEGORY_LABELS[cat]}
+              </button>
+            ))}
+          </div>
+
+          <div className="exo-results">
+            <div className="exo-results-head">
+              <span>
+                {recherche
+                  ? `${resultats.length} résultat${resultats.length > 1 ? 's' : ''}`
+                  : filtreActif === 'frequents'
+                    ? 'Ce que tu fais le plus souvent'
+                    : `${resultats.length} exercices`}
+              </span>
+              {/* Le crayon ne concerne que les exercices créés à la main : il
+                  n'apparaît que dans la catégorie qui en contient. */}
+              {categorieAUnPerso && !recherche && (
+                <button
+                  className={`icon-btn edit-cat-btn ${modeEdition ? 'active' : ''}`}
+                  onClick={() => setEditModeCategory(modeEdition ? null : filtreActif)}
+                >
+                  <Pencil size={14} />
+                </button>
+              )}
+            </div>
+
+            {resultats.length === 0 ? (
+              <p className="empty">Aucun exercice ne correspond.</p>
+            ) : (
               <div className="exercise-grid">
-                {allExercises.filter((e) => e.category === cat).map((ex) => (
+                {resultats.map((ex) => (
                   <button
                     key={ex.id}
-                    className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''} ${isEditMode && ex.isCustom ? 'edit-mode' : ''}`}
+                    className={`exercise-chip ${selectedExercises.find((e) => e.id === ex.id) ? 'selected' : ''} ${modeEdition && ex.isCustom ? 'edit-mode' : ''}`}
                     onClick={() => {
-                      if (isEditMode && ex.isCustom) {
+                      if (modeEdition && ex.isCustom) {
                         setSelectedCustomExo(ex);
                       } else {
                         toggleExercise(ex);
@@ -472,17 +555,17 @@ export default function NewSession() {
                     }}
                   >
                     {ex.name}
-                    {!isEditMode && selectedExercises.find((e) => e.id === ex.id) && <Check size={14} />}
+                    {!modeEdition && selectedExercises.find((e) => e.id === ex.id) && <Check size={14} />}
                   </button>
                 ))}
               </div>
-            </section>
-          );
-        })}
+            )}
 
-        <button className="add-exercise-btn" onClick={() => setShowAddExercise(true)}>
-          <Plus size={16} /> Ajouter un exercice
-        </button>
+            <button className="add-exercise-btn" onClick={() => setShowAddExercise(true)}>
+              <Plus size={16} /> Ajouter un exercice
+            </button>
+          </div>
+        </div>
 
         {showAddExercise && (
           <div className="modal-overlay">
