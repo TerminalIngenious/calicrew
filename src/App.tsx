@@ -32,6 +32,7 @@ import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
 import { getSeasonalTheme } from './lib/seasonalTheme';
+import { estInstallee } from './lib/install';
 
 const MAINTENANCE = false;
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
@@ -113,6 +114,22 @@ function SeasonSplash({ season, onDone }: { season: Season; onDone: () => void }
   );
 }
 
+/**
+ * La racine du site.
+ *
+ * Un visiteur arrive sur la présentation, un membre sur son tableau de bord.
+ * Deux exceptions : tant que la connexion n'est pas tranchée on n'affiche ni
+ * l'un ni l'autre — faire clignoter la vitrine devant un membre connecté
+ * serait pire que d'attendre —, et dans l'app déjà installée on va droit à la
+ * connexion, puisque la vitrine n'aurait plus rien à y proposer.
+ */
+function Racine() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="page loading"><Loader /></div>;
+  if (user || estInstallee()) return <ProtectedRoute><Dashboard /></ProtectedRoute>;
+  return <Decouvrir />;
+}
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="page loading"><Loader /></div>;
@@ -165,7 +182,7 @@ function AppContent() {
               CaliCrew. Depuis un autre domaine, le navigateur refuserait. */}
           <Route path="/decouvrir" element={<Decouvrir />} />
           <Route path="/telecharger" element={<Decouvrir />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/" element={<Racine />} />
           <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
           <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
           <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />

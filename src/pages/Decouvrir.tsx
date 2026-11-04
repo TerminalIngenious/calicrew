@@ -184,7 +184,10 @@ export default function Decouvrir() {
             <img src="/icon.svg" alt="" width={26} height={26} />
             CaliCrew
           </span>
-          <Link className="lp-bar-link" to="/">
+          {/* Vers /login et non vers la racine : la racine, c'est cette
+              page-ci tant qu'on n'est pas connecté — on tournerait en rond.
+              Un membre déjà connecté, lui, est renvoyé à son tableau de bord. */}
+          <Link className="lp-bar-link" to="/login">
             Ouvrir l'app
           </Link>
         </div>
@@ -204,7 +207,7 @@ export default function Decouvrir() {
 
         <div className="lp-cta">
           {installee ? (
-            <Link className="lp-btn lp-btn-primaire" to="/">
+            <Link className="lp-btn lp-btn-primaire" to="/login">
               Ouvrir CaliCrew
             </Link>
           ) : (
@@ -219,7 +222,7 @@ export default function Decouvrir() {
               Installer sur {NOM_PLATEFORME[PLATEFORME]}
             </button>
           )}
-          <Link className="lp-btn lp-btn-fantome" to="/">
+          <Link className="lp-btn lp-btn-fantome" to="/login">
             Essayer dans le navigateur
           </Link>
         </div>
@@ -355,7 +358,7 @@ export default function Decouvrir() {
 
       <footer className="lp-pied">
         <span>CaliCrew</span>
-        <Link to="/">Ouvrir l'app</Link>
+        <Link to="/login">Ouvrir l'app</Link>
       </footer>
 
       {fichier && (

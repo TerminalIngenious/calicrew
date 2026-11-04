@@ -1,12 +1,12 @@
 import { estInstallee } from '../lib/install';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { Dumbbell } from 'lucide-react';
 import { isConfigured } from '../lib/firebase';
 
 export default function Login() {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -14,6 +14,10 @@ export default function Login() {
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // La vitrine renvoie ici pour « ouvrir l'app » : sans cette garde, un
+  // membre déjà connecté retomberait sur le formulaire de connexion.
+  if (user) return <Navigate to="/" replace />;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
