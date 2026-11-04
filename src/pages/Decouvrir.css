@@ -349,19 +349,22 @@
   width: min(170px, 26vw);
   aspect-ratio: 2 / 3;
   border-radius: 12px;
-  background: linear-gradient(150deg, #1e1e3a, #101024);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 24px 48px -22px rgba(0, 0, 0, 0.95);
   object-fit: cover;
 }
 
-.lp-fan-card:nth-child(1) { transform: rotate(-16deg) translate(70%, 10%); z-index: 1; }
-.lp-fan-card:nth-child(2) { transform: rotate(-8deg) translate(38%, 2%); z-index: 2; }
+/* Les cartes se chevauchent juste assez pour faire éventail : au-delà, celles
+   du milieu disparaissaient entièrement derrière la carte centrale. */
+.lp-fan-card:nth-child(1) { transform: rotate(-15deg) translate(56%, 11%); z-index: 1; }
+.lp-fan-card:nth-child(2) { transform: rotate(-7.5deg) translate(28%, 3%); z-index: 2; }
 .lp-fan-card:nth-child(3) { z-index: 4; }
-.lp-fan-card:nth-child(4) { transform: rotate(8deg) translate(-38%, 2%); z-index: 2; }
-.lp-fan-card:nth-child(5) { transform: rotate(16deg) translate(-70%, 10%); z-index: 1; }
+.lp-fan-card:nth-child(4) { transform: rotate(7.5deg) translate(-28%, 3%); z-index: 2; }
+.lp-fan-card:nth-child(5) { transform: rotate(15deg) translate(-56%, 11%); z-index: 1; }
 
-.lp-fan-vraie {
+/* La carte du milieu est la plus rare de l'éventail : elle passe devant et
+   garde un liseré chaud pour qu'on la regarde en premier. */
+.lp-fan-card:nth-child(3) {
   border-color: rgba(255, 107, 53, 0.35);
 }
 
@@ -369,6 +372,19 @@
 
 /* Deux par deux plutôt qu'au fil de l'eau : à quatre boutons, le retour à la
    ligne laissait un orphelin tout seul sur la dernière rangée. */
+/* Sur un écran de téléphone, cinq cartes écartées comme sur ordinateur
+   débordaient des deux côtés : elles se chevauchent davantage pour tenir. */
+@media (max-width: 720px) {
+  .lp-fan-card {
+    width: 27vw;
+  }
+
+  .lp-fan-card:nth-child(1) { transform: rotate(-15deg) translate(82%, 11%); }
+  .lp-fan-card:nth-child(2) { transform: rotate(-7.5deg) translate(41%, 3%); }
+  .lp-fan-card:nth-child(4) { transform: rotate(7.5deg) translate(-41%, 3%); }
+  .lp-fan-card:nth-child(5) { transform: rotate(15deg) translate(-82%, 11%); }
+}
+
 .lp-store {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

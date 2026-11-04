@@ -48,6 +48,23 @@ function LogoApple({ size = 22 }: { size?: number }) {
   );
 }
 
+/*
+ * Les cartes de la vitrine sont des copies WebP des originaux : six images de
+ * carte pesaient 1,3 Mo sur une page de présentation, dont la moitié des
+ * visiteurs repartiront. Même rendu, 146 ko au lieu de 1 080.
+ *
+ * L'éventail de la section Collection, de la plus commune au centre à la plus
+ * rare : c'est la rareté qui monte vers le milieu, pas le hasard. La carte
+ * centrale est une historique, la seule rareté qu'on ne croise presque jamais.
+ */
+const EVENTAIL = [
+  '/cards/vitrine/s1-arnold.webp',
+  '/cards/vitrine/s1-macron-jetski.webp',
+  '/cards/vitrine/s1-washington.webp',
+  '/cards/vitrine/s1-obama-mic.webp',
+  '/cards/vitrine/s1-zelensky.webp',
+];
+
 /* ── État de l'installation ── */
 
 function abonneEtat(cb: () => void): () => void {
@@ -264,7 +281,7 @@ export default function Decouvrir() {
               </div>
             </div>
           </div>
-          <img className="lp-carte" src="/cards/s1-arnold.png" alt="" loading="lazy" />
+          <img className="lp-carte" src="/cards/vitrine/s1-arnold.webp" alt="" loading="lazy" />
         </div>
       </section>
 
@@ -289,11 +306,9 @@ export default function Decouvrir() {
           entre membres du crew, et tournent entre tes doigts.
         </p>
         <div className="lp-fan" aria-hidden="true">
-          <span className="lp-fan-card" />
-          <span className="lp-fan-card" />
-          <img className="lp-fan-card lp-fan-vraie" src="/cards/s1-arnold.png" alt="" loading="lazy" />
-          <span className="lp-fan-card" />
-          <span className="lp-fan-card" />
+          {EVENTAIL.map((carte) => (
+            <img className="lp-fan-card" key={carte} src={carte} alt="" loading="lazy" />
+          ))}
         </div>
       </section>
 
