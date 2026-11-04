@@ -1,3 +1,4 @@
+import { SEASONS } from '../../lib/passes';
 import './fonts.css';
 import './CardBack.css';
 
@@ -16,18 +17,40 @@ function BusIcon() {
   );
 }
 
+/**
+ * Le ticket est composté le jour de l'ouverture de la saison.
+ *
+ * La date était figée au jour de fabrication du dos, soit avant l'ouverture :
+ * un titre de transport validé avant d'être valable. On la lit donc sur la
+ * saison, et une saison 3 n'aura rien à corriger.
+ */
+function dateCompostage(setId: string): string {
+  const saison = SEASONS.find((s) => s.id === setId);
+  if (!saison) return '';
+  const d = new Date(saison.startDate);
+  const deuxChiffres = (n: number) => String(n).padStart(2, '0');
+  return `${deuxChiffres(d.getDate())}·${deuxChiffres(d.getMonth() + 1)}·${deuxChiffres(d.getFullYear() % 100)}`;
+}
+
 /** Les correspondances du plan de lignes dessiné en fond. */
 const ARRETS: [number, number][] = [
   [45, 35], [25, 55], [75, 55], [60, 95], [35, 105], [80, 90], [70, 45], [30, 85], [70, 110],
 ];
 
 interface Props {
+  /** La saison dont le dos est tiré — sert aussi à dater le compostage. */
+  set?: string;
   saison?: string;
   annee?: string;
   titre?: string;
 }
 
-export default function CardBack({ saison = 'S2', annee = '2026', titre = 'LES FOUS DU BUS' }: Props) {
+export default function CardBack({
+  set = 'pass-2',
+  saison = 'S2',
+  annee = '2026',
+  titre = 'LES FOUS DU BUS',
+}: Props) {
   return (
     <div className="cb">
       <div className="cb-back">
@@ -54,7 +77,7 @@ export default function CardBack({ saison = 'S2', annee = '2026', titre = 'LES F
             </div>
             <div className="cb-perf" />
             <div className="cb-t-body">
-              <div className="cb-stamp"><div><span>VALIDÉ</span><b>FOU</b><span>03·11·26</span></div></div>
+              <div className="cb-stamp"><div><span>VALIDÉ</span><b>FOU</b><span>{dateCompostage(set)}</span></div></div>
               <div className="cb-logo">CALICREW</div>
               <div className="cb-subtitle"><i /><span>{titre}</span><i /></div>
               <div className="cb-lines">{[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => <b key={n}>{n}</b>)}</div>

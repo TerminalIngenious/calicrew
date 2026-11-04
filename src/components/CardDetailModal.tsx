@@ -20,7 +20,7 @@ export default function CardDetailModal({ card, owned, count, onClose }: Props) 
   // qui défile, pluie, et net à tout zoom. Sinon on retombe sur l'image, puis
   // sur l'emoji : c'est le cas de toute la saison 1 et de Femtogo.
   const art = getCardArt(card.id);
-  const back = art ? <CardBack /> : getCardBack(card.set);
+  const back = art ? <CardBack set={card.set} /> : getCardBack(card.set);
   const front = art ? <CardFront card={card} art={art} /> : card.image;
   return (
     <div className="modal-overlay" onClick={onClose}>
