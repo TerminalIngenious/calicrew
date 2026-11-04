@@ -25,13 +25,11 @@ export interface SeasonShelfEntry {
   /**
    * Saison pas encore ouverte : on l'annonce, sans rien dévoiler.
    *
-   * Le bandeau montre alors trois dos de carte, face cachée, et la date
-   * d'ouverture à la place du compte. Aucun personnage ne doit fuiter avant le
-   * lancement — c'est tout l'intérêt d'une saison.
+   * Le bandeau reste noir et vide, avec la date d'ouverture à la place du
+   * compte. Même le dos des cartes en disait trop : le ticket de bus livrait le
+   * décor de la saison et ses neuf lignes.
    */
   locked?: boolean;
-  /** Le dos des cartes, étalé face cachée sur un bandeau verrouillé. */
-  backImage?: string;
   /** « 29 novembre » : la date d'ouverture, déjà formatée. */
   startLabel?: string;
 }
@@ -44,18 +42,18 @@ interface Props {
 export default function SeasonShelf({ shelves, onOpen }: Props) {
   return (
     <div className="season-shelf">
-      {shelves.map(({ season, cards, owned, marquantes, locked, backImage, startLabel }) => (
+      {shelves.map(({ season, cards, owned, marquantes, locked, startLabel }) => (
         <div key={season.id} className={`season-slab-wrap ${locked ? 'locked' : ''}`}>
           <button
             className="season-slab"
             onClick={() => !locked && onOpen(season.id)}
             aria-disabled={locked || undefined}
           >
-            <div className="season-slab-bg" aria-hidden="true">
-              {locked
-                ? [0, 1, 2].map((i) => <img key={i} src={backImage} alt="" loading="lazy" />)
-                : marquantes.map((c) => <img key={c.id} src={c.image} alt="" loading="lazy" />)}
-            </div>
+            {!locked && (
+              <div className="season-slab-bg" aria-hidden="true">
+                {marquantes.map((c) => <img key={c.id} src={c.image} alt="" loading="lazy" />)}
+              </div>
+            )}
             <div className="season-slab-face">
               <span className="season-slab-kicker">{season.name}</span>
               <span className="season-slab-title">{season.theme}</span>

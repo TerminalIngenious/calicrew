@@ -3,7 +3,7 @@ import { useAuth, MAX_DISPLAY_NAME } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById, getCardBack } from '../lib/cards';
+import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
 import type { UserProgress, Session, Card, Program, RankBadge } from '../types';
@@ -144,9 +144,9 @@ export default function Profile() {
   /**
    * La saison suivante, annoncée mais verrouillée.
    *
-   * Une seule : on tease ce qui arrive, pas tout le calendrier. Son bandeau ne
-   * montre que des dos de carte — le thème et la date suffisent à donner envie,
-   * les personnages restent cachés jusqu'au lancement.
+   * Une seule : on tease ce qui arrive, pas tout le calendrier. Son bandeau
+   * reste noir — le thème et la date suffisent à donner envie, et tout visuel,
+   * même un dos de carte, en dirait déjà trop.
    */
   const nextSeason = SEASONS[currentIndex + 1];
 
@@ -173,7 +173,6 @@ export default function Profile() {
       owned: [],
       marquantes: [],
       locked: true,
-      backImage: getCardBack(nextSeason.id),
       startLabel: DATE_OUVERTURE.format(nextSeason.startDate),
     });
   }
