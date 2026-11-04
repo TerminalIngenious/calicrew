@@ -1,7 +1,8 @@
-import { RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { RARITY_LABELS, RARITY_COLORS, getCardDisplayName, getCardBack } from '../lib/cards';
 import type { Card } from '../types';
 import { X } from 'lucide-react';
 import { useScrollLock } from '../lib/useScrollLock';
+import Card3D from './Card3D';
 
 interface Props {
   card: Card;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function CardDetailModal({ card, owned, count, onClose }: Props) {
   useScrollLock(true);
+  const back = getCardBack(card.set);
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="card-detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -19,7 +21,12 @@ export default function CardDetailModal({ card, owned, count, onClose }: Props) 
           <X size={18} />
         </button>
         <div className="card-detail-glow" style={{ background: RARITY_COLORS[card.rarity] }} />
-        {card.image ? (
+        {card.image && back ? (
+          <div className="card-detail-3d">
+            <Card3D front={card.image} back={back} rarity={card.rarity} alt={getCardDisplayName(card)} />
+            <span className="card-detail-3d-hint">Glisse pour tourner la carte</span>
+          </div>
+        ) : card.image ? (
           <img src={card.image} alt={getCardDisplayName(card)} className="card-detail-img" />
         ) : (
           <div className="card-detail-emoji">

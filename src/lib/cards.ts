@@ -76,6 +76,20 @@ export function getCardsBySet(setId: string): Card[] {
   return CARD_SETS[setId] || [];
 }
 
+/**
+ * Le verso des cartes, commun à toute une saison.
+ *
+ * Seule la saison 2 en a un : ses cartes sont dessinées recto-verso (le dos est
+ * un ticket de bus). Une saison absente d'ici s'affiche simplement à plat.
+ */
+const CARD_BACKS: Record<string, string> = {
+  'pass-2': '/cards/s2-dos.webp',
+};
+
+export function getCardBack(setId: string): string | undefined {
+  return CARD_BACKS[setId];
+}
+
 export function getAllCurrentCards(seasonId: string): Card[] {
   return getCardsBySet(seasonId);
 }
