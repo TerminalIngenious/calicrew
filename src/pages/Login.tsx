@@ -1,6 +1,7 @@
+import { estInstallee } from '../lib/install';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Dumbbell } from 'lucide-react';
 import { isConfigured } from '../lib/firebase';
 
@@ -78,6 +79,13 @@ export default function Login() {
         <p className="toggle-auth" onClick={() => setIsSignUp(!isSignUp)}>
           {isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? En créer un'}
         </p>
+        {/* Beaucoup arrivent ici par un lien et repartent sans savoir que
+            l'app s'installe. La vitrine explique et propose l'installation. */}
+        {!estInstallee() && (
+          <p className="login-install">
+            <Link to="/decouvrir">Installer CaliCrew sur cet appareil</Link>
+          </p>
+        )}
       </div>
     </div>
   );

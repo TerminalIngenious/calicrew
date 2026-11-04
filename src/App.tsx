@@ -26,6 +26,7 @@ const Collection = lazy(() => import('./pages/Collection'));
 const SeasonCards = lazy(() => import('./pages/SeasonCards'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Programs = lazy(() => import('./pages/Programs'));
+const Decouvrir = lazy(() => import('./pages/Decouvrir'));
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
@@ -159,6 +160,11 @@ function AppContent() {
       <Suspense fallback={<div className="page loading"><Loader /></div>}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          {/* La vitrine est publique, et surtout servie par le même domaine que
+              l'app : c'est ce qui permet à son bouton d'installer réellement
+              CaliCrew. Depuis un autre domaine, le navigateur refuserait. */}
+          <Route path="/decouvrir" element={<Decouvrir />} />
+          <Route path="/telecharger" element={<Decouvrir />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
           <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />

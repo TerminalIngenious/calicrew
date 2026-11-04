@@ -1,0 +1,509 @@
+/*
+ * Site vitrine.
+ *
+ * Il partage la direction artistique de l'app — fond nuit, orange, même
+ * famille typographique — mais sa feuille de style est séparée : une page de
+ * présentation vit à un autre rythme que l'app (grandes respirations, titres
+ * énormes, tout centré), et ses classes ne doivent pas se mêler à celles des
+ * écrans. Elles portent toutes le préfixe `lp-`.
+ */
+
+.lp {
+  --lp-max: 1120px;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Les pages de l'app s'arrêtent à 480 px de large : la vitrine, elle, prend
+   toute la fenêtre quel que soit l'écran. */
+#root:has(.lp) {
+  max-width: none;
+}
+
+/* ── Barre du haut ── */
+
+.lp-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(10, 10, 26, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.lp-bar-in {
+  max-width: var(--lp-max);
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lp-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.lp-bar-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ── Hero ── */
+
+.lp-hero {
+  position: relative;
+  max-width: var(--lp-max);
+  margin: 0 auto;
+  padding: 4.5rem 1.25rem 2rem;
+  text-align: center;
+}
+
+/* La lueur orange derrière le titre : elle donne une profondeur que le fond
+   plat n'a pas, sans rien peser. */
+.lp-hero-glow {
+  position: absolute;
+  top: -12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, 120%);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 107, 53, 0.16), transparent 62%);
+  pointer-events: none;
+}
+
+.lp-h1 {
+  position: relative;
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  background: linear-gradient(180deg, #fff 35%, #b9b9cc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lp-sub {
+  position: relative;
+  max-width: 34rem;
+  margin: 1.4rem auto 0;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  line-height: 1.5;
+  color: #9a9ab0;
+}
+
+.lp-cta {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2.25rem;
+}
+
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.95rem 1.7rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+
+.lp-btn:hover {
+  transform: translateY(-1px);
+}
+
+.lp-btn-primaire {
+  background: var(--accent);
+  color: #fff;
+}
+
+.lp-btn-primaire:hover {
+  background: var(--accent-light);
+}
+
+.lp-btn-fantome {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lp-btn-fantome:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lp-mention {
+  position: relative;
+  margin-top: 1.1rem;
+  font-size: 0.85rem;
+  color: #6f6f85;
+}
+
+/* ── La scène : le téléphone et la carte ── */
+
+.lp-scene {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 3.5rem;
+  perspective: 1200px;
+}
+
+.lp-phone {
+  width: min(300px, 78vw);
+  aspect-ratio: 9 / 18.5;
+  padding: 0.55rem;
+  border-radius: 2.6rem;
+  background: linear-gradient(160deg, #2b2b45, #121222);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.lp-screen {
+  height: 100%;
+  border-radius: 2.1rem;
+  background: var(--bg);
+  padding: 1.4rem 0.9rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow: hidden;
+  text-align: left;
+}
+
+.lp-screen-head {
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.2rem 0.1rem 0.3rem;
+}
+
+.lp-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.lp-tile {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lp-tile b {
+  color: var(--accent);
+  font-size: 1.25rem;
+}
+
+.lp-tile span {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+
+.lp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.lp-row i {
+  font-style: normal;
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.lp-bar-graph {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  height: 5.5rem;
+  padding: 0 0.1rem 0.3rem;
+}
+
+.lp-bar-graph span {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--accent), rgba(255, 107, 53, 0.25));
+}
+
+/* La carte posée en biais contre le téléphone : c'est elle qui raconte que
+   l'app n'est pas qu'un carnet de séances. */
+.lp-carte {
+  position: absolute;
+  right: max(2vw, calc(50% - 310px));
+  bottom: 8%;
+  width: min(190px, 34vw);
+  border-radius: 12px;
+  transform: rotate(7deg);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.9);
+}
+
+@media (max-width: 720px) {
+  .lp-carte {
+    right: 2%;
+    bottom: 2%;
+    width: 36vw;
+  }
+}
+
+/* ── Sections ── */
+
+.lp-section,
+.lp-telecharger {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 6rem 1.25rem;
+  text-align: center;
+}
+
+/* Sur téléphone, six rem de part et d'autre faisaient défiler des écrans
+   entiers de vide entre deux sections. */
+@media (max-width: 720px) {
+  .lp-section,
+  .lp-telecharger {
+    padding: 3.5rem 1.25rem;
+  }
+}
+
+.lp-kicker {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.9rem;
+}
+
+.lp-h2 {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.lp-texte {
+  max-width: 34rem;
+  margin: 1.2rem auto 0;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.6;
+  color: #9a9ab0;
+}
+
+/* Les sections montent à l'écran quand on arrive dessus. Sans JavaScript, ou
+   si l'utilisateur a demandé moins d'animations, elles sont simplement là. */
+.lp-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lp-reveal.vu {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ── L'éventail de cartes ── */
+
+.lp-fan {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-top: 3rem;
+  height: min(300px, 52vw);
+}
+
+.lp-fan-card {
+  width: min(170px, 26vw);
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  background: linear-gradient(150deg, #1e1e3a, #101024);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 48px -22px rgba(0, 0, 0, 0.95);
+  object-fit: cover;
+}
+
+.lp-fan-card:nth-child(1) { transform: rotate(-16deg) translate(70%, 10%); z-index: 1; }
+.lp-fan-card:nth-child(2) { transform: rotate(-8deg) translate(38%, 2%); z-index: 2; }
+.lp-fan-card:nth-child(3) { z-index: 4; }
+.lp-fan-card:nth-child(4) { transform: rotate(8deg) translate(-38%, 2%); z-index: 2; }
+.lp-fan-card:nth-child(5) { transform: rotate(16deg) translate(-70%, 10%); z-index: 1; }
+
+.lp-fan-vraie {
+  border-color: rgba(255, 107, 53, 0.35);
+}
+
+/* ── Boutons de téléchargement ── */
+
+/* Deux par deux plutôt qu'au fil de l'eau : à quatre boutons, le retour à la
+   ligne laissait un orphelin tout seul sur la dernière rangée. */
+.lp-store {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  max-width: 30rem;
+  margin: 2.5rem auto 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .lp-store {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lp-store-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 1.25rem;
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.lp-store-btn:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.lp-store-btn span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.lp-store-btn small {
+  font-size: 0.68rem;
+  color: #b9b9c6;
+}
+
+.lp-store-btn strong {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Pied de page ── */
+
+.lp-pied {
+  max-width: var(--lp-max);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.lp-pied a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ── Fiche d'instructions ── */
+
+.lp-voile {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.lp-fiche {
+  width: 100%;
+  max-width: 30rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.5rem;
+  text-align: left;
+  animation: lp-monte 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 640px) {
+  .lp-voile {
+    align-items: center;
+  }
+}
+
+@keyframes lp-monte {
+  from { transform: translateY(16px); opacity: 0; }
+}
+
+.lp-fiche h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.lp-fiche ol {
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #b4b4c6;
+}
+
+.lp-fiche-note {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.lp-fiche-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.lp-fiche-actions .lp-btn {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+}
