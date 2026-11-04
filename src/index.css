@@ -7265,3 +7265,34 @@ body {
   border-bottom: 1px solid var(--border);
   padding-bottom: 2px;
 }
+
+/* Mot de passe oublié : un lien déguisé en bouton — c'est une action
+   (un mail part), mais elle ne doit pas concurrencer « Se connecter ». */
+.login-reset {
+  display: block;
+  margin: 0.9rem auto 0;
+  padding: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-reset:disabled {
+  opacity: 0.5;
+}
+
+.login-reset-ok {
+  margin-top: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(78, 205, 196, 0.12);
+  border: 1px solid rgba(78, 205, 196, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--accent-green);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  text-align: center;
+}

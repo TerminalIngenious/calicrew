@@ -6,7 +6,7 @@ import { Dumbbell } from 'lucide-react';
 import { isConfigured } from '../lib/firebase';
 
 export default function Login() {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, resetPassword } = useAuth();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -14,6 +14,7 @@ export default function Login() {
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [lienEnvoye, setLienEnvoye] = useState(false);
 
   // La vitrine renvoie ici pour « ouvrir l'app » : sans cette garde, un
   // membre déjà connecté retomberait sur le formulaire de connexion.
@@ -35,6 +36,37 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  }
+
+  /**
+   * Mot de passe oublié.
+   *
+   * Le message de confirmation est le même que l'adresse ait un compte ou
+   * non, et les erreurs de Firebase sont avalées : répondre « ce compte
+   * n'existe pas » permettrait à n'importe qui de vérifier, une adresse après
+   * l'autre, qui est inscrit.
+   */
+  async function motDePasseOublie() {
+    if (!email.trim()) {
+      setError('Entre ton adresse mail au-dessus, puis reclique ici.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      await resetPassword(email);
+    } catch (err: unknown) {
+      // Seule une adresse mal écrite mérite d'être signalée : c'est une faute
+      // de frappe, pas une information sur quelqu'un d'autre.
+      const code = (err as { code?: string }).code;
+      if (code === 'auth/invalid-email') {
+        setError('Cette adresse n\'a pas l\'air valide.');
+        setLoading(false);
+        return;
+      }
+    }
+    setLienEnvoye(true);
+    setLoading(false);
   }
 
   return (
@@ -80,6 +112,20 @@ export default function Login() {
             {loading ? '...' : isSignUp ? 'Créer mon compte' : 'Se connecter'}
           </button>
         </form>
+
+        {/* Seulement à la connexion : à l'inscription, il n'y a pas encore de
+            mot de passe à oublier. */}
+        {!isSignUp &&
+          (lienEnvoye ? (
+            <p className="login-reset-ok">
+              Si un compte existe avec cette adresse, le lien vient de partir. Regarde tes
+              mails, et le dossier indésirables.
+            </p>
+          ) : (
+            <button type="button" className="login-reset" onClick={motDePasseOublie} disabled={loading}>
+              Mot de passe oublié ?
+            </button>
+          ))}
         <p className="toggle-auth" onClick={() => setIsSignUp(!isSignUp)}>
           {isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? En créer un'}
         </p>

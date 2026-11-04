@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
+  sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
 import type { User } from 'firebase/auth';
@@ -25,6 +26,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   updateDisplayName: (name: string) => Promise<void>;
 }
 
@@ -82,13 +84,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDisplayName(trimmed);
   }
 
+  /**
+   * Envoie le lien de réinitialisation.
+   *
+   * Un mot de passe n'est jamais stocké : Firebase n'en garde qu'une empreinte
+   * à sens unique, et personne — nous compris — ne peut le relire. Le seul
+   * chemin de retour est donc d'en choisir un nouveau par mail. Firebase
+   * envoie le message et héberge la page de changement.
+   */
+  async function resetPassword(email: string) {
+    await sendPasswordResetEmail(auth, email.trim());
+  }
+
   async function signOut() {
     await firebaseSignOut(auth);
   }
 
   return (
     <AuthContext.Provider
-      value={{ user, displayName, loading, signUp, signIn, signOut, updateDisplayName }}
+      value={{ user, displayName, loading, signUp, signIn, signOut, resetPassword, updateDisplayName }}
     >
       {children}
     </AuthContext.Provider>
