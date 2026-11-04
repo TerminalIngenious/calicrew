@@ -379,6 +379,54 @@ export function sportCoXp(seconds: number): number {
   return Math.floor(seconds / 1800) * 25;
 }
 
+// ── Endurance ──
+
+/**
+ * XP d'une sortie : course, vélo, marche.
+ *
+ * Jusqu'ici seul le sport co rapportait de l'XP directement — courir une
+ * heure n'ajoutait rien, la sortie ne comptait qu'à travers l'unique quête
+ * d'endurance de la semaine. Les gens couraient, l'app le savait, elle n'en
+ * faisait rien.
+ *
+ * Compté au quart d'heure et non à la demi-heure comme le sport co : à la
+ * demi-heure, une sortie de 45 minutes était arrondie à 30 et le dernier
+ * quart d'heure partait à la poubelle.
+ */
+export const ENDURANCE_XP_QUART = 12;
+
+/**
+ * Marcher une heure n'est pas courir une heure : moitié moins. C'est aussi ce
+ * qui permet de compter la marche sans qu'elle devienne la façon la plus
+ * rentable de monter de niveau.
+ */
+const MARCHE = new Set(['fast-walk']);
+
+/** Plafond par jour, pour que faire six fois le tour du quartier ne paie pas. */
+export const ENDURANCE_XP_MAX_JOUR = 60;
+
+export function enduranceXp(seconds: number, exerciseId: string): number {
+  const quarts = Math.floor(seconds / 900);
+  const taux = MARCHE.has(exerciseId) ? ENDURANCE_XP_QUART / 2 : ENDURANCE_XP_QUART;
+  return Math.round(quarts * taux);
+}
+
+/**
+ * Applique le plafond quotidien et renvoie le compteur du jour mis à jour.
+ *
+ * Le compteur porte sa date : un compteur sans date ne saurait pas qu'on a
+ * changé de jour, et le plafond de lundi bloquerait encore mardi.
+ */
+export function plafonneEndurance(
+  gagne: number,
+  journee: { date: string; xp: number } | undefined,
+  aujourdhui: string
+): { xp: number; journee: { date: string; xp: number } } {
+  const deja = journee?.date === aujourdhui ? journee.xp : 0;
+  const accorde = Math.max(0, Math.min(gagne, ENDURANCE_XP_MAX_JOUR - deja));
+  return { xp: accorde, journee: { date: aujourdhui, xp: deja + accorde } };
+}
+
 // ── Levels ──
 
 export const PASS_LEVELS = 100;

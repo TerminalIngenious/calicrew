@@ -322,4 +322,9 @@ export interface UserProgress {
   creatineDays?: string[];
   /** Records saisis par le joueur lui-même. */
   personalRecords?: PersonalRecord[];
+  /**
+   * XP d'endurance déjà accordé aujourd'hui. La date est stockée avec : sans
+   * elle, le plafond d'un jour continuerait de s'appliquer le lendemain.
+   */
+  enduranceXpDay?: { date: string; xp: number };
 }

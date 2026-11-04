@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
 import { amrapTitle, circuitLabel, materializeAmrapSets, repsPerRound, roundTotals } from '../lib/amrap';
-import { sportCoXp } from '../lib/passes';
+import { sportCoXp, enduranceXp } from '../lib/passes';
 import { sessionReps, getUnit, unitLabel, setWeight } from '../lib/stats';
 
 /** Pas d'incrément : 5 s pour un isométrique, 1 rep sinon. */
@@ -531,6 +531,12 @@ export default function LiveSession() {
                         <div className="recap-mini-stat">
                           <span className="recap-mini-value">{ex.runElevation}</span>
                           <span>m D+</span>
+                        </div>
+                      )}
+                      {enduranceXp(ex.runDuration || 0, ex.exerciseId) > 0 && (
+                        <div className="recap-mini-stat">
+                          <span className="recap-mini-value">+{enduranceXp(ex.runDuration || 0, ex.exerciseId)}</span>
+                          <span>XP</span>
                         </div>
                       )}
                     </div>

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
-import { sportCoXp, getCurrentSeason, needsSeasonReset, startNewSeason } from '../lib/passes';
+import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason } from '../lib/passes';
 import { buildAmrapExercises } from '../lib/amrap';
 import AmrapBuilder from '../components/AmrapBuilder';
 import type { AmrapItem } from '../components/AmrapBuilder';
@@ -328,8 +328,15 @@ export default function NewSession() {
     const totalRunDuration =
       runningConfigs.reduce((sum, c) => sum + c.duration * 60, 0) + totalSportCoDuration;
 
-    const xpGained = sportCoXp(totalSportCoDuration);
-    if (xpGained > 0) {
+    // La course, le vélo et la marche rapportent désormais comme le sport co.
+    // Le plafond n'est appliqué qu'à eux : le sport co a déjà le sien, dans le
+    // fait qu'on ne joue pas un match de foot six fois par jour.
+    const enduranceBrut = runningConfigs.reduce(
+      (sum, c) => sum + enduranceXp(c.duration * 60, c.exercise.id),
+      0
+    );
+    const xpSportCo = sportCoXp(totalSportCoDuration);
+    if (xpSportCo > 0 || enduranceBrut > 0) {
       try {
         const ref = doc(db, 'userProgress', user!.uid);
         const snap = await getDoc(ref);
@@ -343,14 +350,21 @@ export default function NewSession() {
             season && needsSeasonReset(stored, season.id)
               ? startNewSeason(stored, season.id)
               : stored;
+          const aujourdhui = new Date().toISOString().split('T')[0];
+          const { xp: xpEndurance, journee } = plafonneEndurance(
+            enduranceBrut,
+            base.enduranceXpDay,
+            aujourdhui
+          );
           await updateDoc(ref, {
-            passXp: (base.passXp || 0) + xpGained,
+            passXp: (base.passXp || 0) + xpSportCo + xpEndurance,
+            enduranceXpDay: journee,
             currentSeasonId: base.currentSeasonId,
             chestsToOpen: base.chestsToOpen,
           });
         }
       } catch (err) {
-        console.error('Erreur XP sport co:', err);
+        console.error('Erreur XP sport co / endurance:', err);
       }
     }
 
@@ -610,6 +624,14 @@ export default function NewSession() {
   const isSportCoOnly = exerciseConfigs.length === 0 && runningConfigs.length === 0 && sportCoConfigs.length > 0;
   const sportCoTotalMin = sportCoConfigs.reduce((sum, c) => sum + c.duration, 0);
   const sportCoPreviewXp = sportCoXp(sportCoTotalMin * 60);
+  // L'aperçu ignore le plafond du jour : il dirait « 0 XP » à quelqu'un qui a
+  // déjà couru ce matin, sans qu'on puisse lui expliquer pourquoi au moment où
+  // il saisit. Le plafond s'applique à l'enregistrement, là où on connaît le
+  // compteur réel.
+  const endurancePreviewXp = runningConfigs.reduce(
+    (sum, c) => sum + enduranceXp(c.duration * 60, c.exercise.id),
+    0
+  );
 
   function formatPace(durationMin: number, distanceKm: number): string {
     if (distanceKm <= 0) return '—';
@@ -745,6 +767,16 @@ export default function NewSession() {
             </div>
           </div>
         ))}
+
+        {endurancePreviewXp > 0 && (
+          <div className="sportco-xp-banner">
+            <Zap size={16} />
+            <span>
+              {endurancePreviewXp} XP gagnés
+              <em>12 XP par quart d'heure, moitié moins en marche</em>
+            </span>
+          </div>
+        )}
 
         {exerciseConfigs.map((config, i) => {
           const repsPerSet = Math.ceil(config.targetTotal / config.targetSets);
