@@ -13,8 +13,8 @@ import type { Plateforme } from '../lib/install';
 import './Decouvrir.css';
 
 /* ── Logos des plateformes ──
-   Redessinés à la main : ce sont des repères, le visiteur doit reconnaître son
-   appareil d'un coup d'œil sans qu'on ait à écrire le mode d'emploi. */
+   Redessinés à la main : ils servent de repère, le visiteur doit reconnaître
+   son appareil d'un coup d'œil. */
 
 function LogoAndroid({ size = 22 }: { size?: number }) {
   return (
@@ -46,6 +46,13 @@ function LogoApple({ size = 22 }: { size?: number }) {
       <path d="M16.6 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.15-2.8.85-3.5.85-.72 0-1.86-.83-3.06-.81-1.57.02-3.02.91-3.83 2.32-1.63 2.83-.42 7.02 1.17 9.32.78 1.12 1.7 2.38 2.91 2.34 1.17-.05 1.61-.76 3.03-.76 1.41 0 1.82.76 3.06.73 1.26-.02 2.06-1.14 2.83-2.27.89-1.3 1.26-2.56 1.28-2.62-.03-.01-2.46-.94-2.49-3.75ZM14.3 5.6c.64-.78 1.07-1.86.95-2.94-.92.04-2.03.61-2.69 1.38-.59.69-1.11 1.79-.97 2.84 1.03.08 2.08-.52 2.71-1.28Z" />
     </svg>
   );
+}
+
+/** Le logo de l'appareil sur lequel on se trouve. */
+function LogoAppareil({ size = 26 }: { size?: number }) {
+  if (PLATEFORME === 'android') return <LogoAndroid size={size} />;
+  if (PLATEFORME === 'windows') return <LogoWindows size={size} />;
+  return <LogoApple size={size} />;
 }
 
 /*
@@ -89,38 +96,43 @@ const NOM_PLATEFORME: Record<Plateforme, string> = {
   autre: 'cet appareil',
 };
 
-/** Les instructions à afficher quand le navigateur ne propose rien lui-même. */
-function instructions(plateforme: Plateforme): { titre: string; etapes: string[]; note?: string } {
+/**
+ * Le mode d'emploi, pour les appareils où le navigateur ne propose rien.
+ *
+ * On ne montre jamais de bouton dans ces cas-là : un bouton « Installer » qui
+ * ouvre un mode d'emploi au lieu d'installer est un bouton qui ment.
+ */
+function instructions(): { titre: string; etapes: string[]; note?: string } {
   if (NAVIGATEUR === 'in-app') {
     return {
-      titre: 'Ouvre ce lien dans ton navigateur',
+      titre: 'Ouvre cette page dans ton navigateur',
       etapes: [
         'Tu es dans le navigateur intégré d\'une autre app — il n\'a pas de menu d\'installation.',
         'Appuie sur les trois points en haut à droite, puis « Ouvrir dans le navigateur ».',
-        'Reviens ici et reprends l\'installation.',
+        'Reviens ici : le bouton d\'installation apparaîtra tout seul.',
       ],
-      note: 'Ou copie le lien et colle-le dans Safari ou Chrome.',
     };
   }
-  if (plateforme === 'ios') {
+  if (PLATEFORME === 'ios') {
     return {
-      titre: 'Installer sur iPhone',
+      titre: 'Sur iPhone, trois gestes',
       etapes: [
         'Appuie sur le bouton Partager, en bas de Safari.',
         'Fais défiler et choisis « Sur l\'écran d\'accueil ».',
         'Appuie sur « Ajouter ». CaliCrew rejoint tes apps.',
       ],
-      note: 'Apple ne permet pas de lancer l\'installation depuis la page : ces trois gestes sont le seul chemin, et le résultat est exactement le même.',
+      note: 'Apple ne laisse aucune page lancer une installation : il n\'y a pas de bouton à cliquer, mais le résultat est exactement le même qu\'ailleurs — une vraie app sur ton écran d\'accueil, qui marche sans réseau.',
     };
   }
-  if (plateforme === 'macos' && NAVIGATEUR === 'safari') {
+  if (PLATEFORME === 'macos' && NAVIGATEUR === 'safari') {
     return {
-      titre: 'Installer sur Mac',
+      titre: 'Sur Mac, depuis Safari',
       etapes: [
         'Dans la barre de menus, ouvre « Fichier ».',
         'Choisis « Ajouter au Dock ».',
         'CaliCrew s\'ouvre désormais dans sa propre fenêtre.',
       ],
+      note: 'Depuis Chrome ou Edge, un bouton d\'installation apparaît directement sur cette page.',
     };
   }
   if (NAVIGATEUR === 'firefox') {
@@ -128,12 +140,12 @@ function instructions(plateforme: Plateforme): { titre: string; etapes: string[]
       titre: 'Firefox n\'installe pas les apps',
       etapes: [
         'Ouvre cette page dans Chrome, Edge ou Safari.',
-        'Le bouton d\'installation s\'activera tout seul.',
+        'Le bouton d\'installation apparaîtra tout seul.',
       ],
     };
   }
   return {
-    titre: `Installer sur ${NOM_PLATEFORME[plateforme]}`,
+    titre: `Installer sur ${NOM_PLATEFORME[PLATEFORME]}`,
     etapes: [
       'Ouvre le menu de ton navigateur (les trois points, en haut à droite).',
       'Choisis « Installer CaliCrew » ou « Ajouter à l\'écran d\'accueil ».',
@@ -146,9 +158,13 @@ function instructions(plateforme: Plateforme): { titre: string; etapes: string[]
 /* ── Page ── */
 
 export default function Decouvrir() {
+  /*
+   * Le navigateur ne propose l'installation que sur l'appareil où l'on se
+   * trouve, et seulement quand il l'accepte. Tant que cette invitation n'est
+   * pas là, aucun bouton n'est affiché : il n'y a rien derrière.
+   */
   const invitePrete = useSyncExternalStore(abonneInstallation, etatInstallation, () => false);
   const installee = useSyncExternalStore(abonneEtat, dejaInstallee, () => false);
-  const [fiche, setFiche] = useState<Plateforme | null>(null);
   const [lienCopie, setLienCopie] = useState(false);
   const page = useRef<HTMLDivElement>(null);
 
@@ -176,12 +192,8 @@ export default function Decouvrir() {
     return () => obs.disconnect();
   }, []);
 
-  const installe = useCallback(async (plateforme: Plateforme) => {
-    // L'invitation du navigateur ne vaut que pour l'appareil utilisé : un
-    // visiteur sur Windows qui clique « Android » ne peut qu'être renseigné.
-    if (plateforme === PLATEFORME && (await lanceInstallation())) return;
-    setFiche(plateforme);
-    setLienCopie(false);
+  const installe = useCallback(() => {
+    void lanceInstallation();
   }, []);
 
   const copieLien = useCallback(() => {
@@ -191,7 +203,7 @@ export default function Decouvrir() {
     );
   }, []);
 
-  const fichier = fiche ? instructions(fiche) : null;
+  const manuel = instructions();
 
   return (
     <div className="lp" ref={page}>
@@ -201,9 +213,9 @@ export default function Decouvrir() {
             <img src="/icon.svg" alt="" width={26} height={26} />
             CaliCrew
           </span>
-          {/* Vers /login et non vers la racine : la racine, c'est cette
-              page-ci tant qu'on n'est pas connecté — on tournerait en rond.
-              Un membre déjà connecté, lui, est renvoyé à son tableau de bord. */}
+          {/* Vers /login et non vers la racine : la racine, c'est cette page-ci
+              tant qu'on n'est pas connecté — on tournerait en rond. Un membre
+              déjà connecté, lui, est renvoyé à son tableau de bord. */}
           <Link className="lp-bar-link" to="/login">
             Ouvrir l'app
           </Link>
@@ -223,32 +235,35 @@ export default function Decouvrir() {
         </p>
 
         <div className="lp-cta">
-          {installee ? (
-            <Link className="lp-btn lp-btn-primaire" to="/login">
-              Ouvrir CaliCrew
-            </Link>
-          ) : (
-            <button className="lp-btn lp-btn-primaire" onClick={() => installe(PLATEFORME)}>
-              {PLATEFORME === 'ios' || PLATEFORME === 'macos' ? (
-                <LogoApple size={20} />
-              ) : PLATEFORME === 'windows' ? (
-                <LogoWindows size={20} />
-              ) : (
-                <LogoAndroid size={20} />
-              )}
+          {!installee && invitePrete && (
+            <button className="lp-btn lp-btn-primaire" onClick={installe}>
+              <LogoAppareil size={20} />
               Installer sur {NOM_PLATEFORME[PLATEFORME]}
             </button>
           )}
-          <Link className="lp-btn lp-btn-fantome" to="/login">
-            Essayer dans le navigateur
+          <Link
+            className={`lp-btn ${!installee && invitePrete ? 'lp-btn-fantome' : 'lp-btn-primaire'}`}
+            to="/login"
+          >
+            {installee ? 'Ouvrir CaliCrew' : invitePrete ? 'Essayer dans le navigateur' : 'Ouvrir CaliCrew'}
           </Link>
         </div>
 
         <p className="lp-mention">
-          {invitePrete
-            ? 'Installation directe, sans App Store ni Play Store. Gratuit.'
-            : 'Sans App Store ni Play Store. Gratuit, et ça pèse moins qu\'une photo.'}
+          {installee
+            ? 'Déjà installée sur cet appareil.'
+            : invitePrete
+              ? 'Installation directe, sans App Store ni Play Store. Gratuit.'
+              : 'Gratuit, sans App Store ni Play Store, et ça pèse moins qu\'une photo.'}
         </p>
+
+        {/* Un lien, pas un bouton : sur cet appareil-ci rien ne s'installe au
+            clic, et il vaut mieux le dire que faire semblant. */}
+        {!installee && !invitePrete && (
+          <a className="lp-ancre" href="#telecharger">
+            Comment l'installer sur {NOM_PLATEFORME[PLATEFORME]} ↓
+          </a>
+        )}
 
         <div className="lp-scene" aria-hidden="true">
           <div className="lp-phone">
@@ -333,41 +348,43 @@ export default function Decouvrir() {
           seule.
         </p>
 
-        <div className="lp-store">
-          <button className="lp-store-btn" onClick={() => installe('android')}>
-            <LogoAndroid size={26} />
-            <span>
-              <small>Installer sur</small>
-              <strong>Android</strong>
-            </span>
-          </button>
-          <button className="lp-store-btn" onClick={() => installe('ios')}>
-            <LogoApple size={26} />
-            <span>
-              <small>Ajouter sur</small>
-              <strong>iPhone</strong>
-            </span>
-          </button>
-          <button className="lp-store-btn" onClick={() => installe('windows')}>
-            <LogoWindows size={24} />
-            <span>
-              <small>Installer sur</small>
-              <strong>Windows</strong>
-            </span>
-          </button>
-          <button className="lp-store-btn" onClick={() => installe('macos')}>
-            <LogoApple size={26} />
-            <span>
-              <small>Installer sur</small>
-              <strong>macOS</strong>
-            </span>
-          </button>
-        </div>
+        {installee ? (
+          <div className="lp-etat">
+            <p>CaliCrew est déjà installée sur cet appareil.</p>
+            <Link className="lp-btn lp-btn-primaire" to="/login">
+              Ouvrir l'app
+            </Link>
+          </div>
+        ) : invitePrete ? (
+          <div className="lp-store">
+            <button className="lp-store-btn" onClick={installe}>
+              <LogoAppareil size={26} />
+              <span>
+                <small>Installer sur</small>
+                <strong>{NOM_PLATEFORME[PLATEFORME]}</strong>
+              </span>
+            </button>
+          </div>
+        ) : (
+          <div className="lp-manuel">
+            <h3>{manuel.titre}</h3>
+            <ol>
+              {manuel.etapes.map((etape, i) => (
+                <li key={i}>{etape}</li>
+              ))}
+            </ol>
+            {manuel.note && <p className="lp-manuel-note">{manuel.note}</p>}
+            {NAVIGATEUR === 'in-app' && (
+              <button className="lp-btn lp-btn-fantome lp-manuel-btn" onClick={copieLien}>
+                {lienCopie ? 'Lien copié' : 'Copier le lien'}
+              </button>
+            )}
+          </div>
+        )}
 
         <p className="lp-mention">
-          Android, Windows et macOS installent l'app en un clic depuis Chrome ou Edge. Sur
-          iPhone, Apple demande de passer par le menu Partager de Safari — trois gestes, on te
-          les montre.
+          Sur Android, Windows et macOS, elle s'installe en un clic depuis Chrome ou Edge. Sur
+          iPhone, Apple impose le menu Partager de Safari.
         </p>
       </section>
 
@@ -375,30 +392,6 @@ export default function Decouvrir() {
         <span>CaliCrew</span>
         <Link to="/login">Ouvrir l'app</Link>
       </footer>
-
-      {fichier && (
-        <div className="lp-voile" onClick={() => setFiche(null)}>
-          <div className="lp-fiche" onClick={(e) => e.stopPropagation()}>
-            <h3>{fichier.titre}</h3>
-            <ol>
-              {fichier.etapes.map((etape, i) => (
-                <li key={i}>{etape}</li>
-              ))}
-            </ol>
-            {fichier.note && <p className="lp-fiche-note">{fichier.note}</p>}
-            <div className="lp-fiche-actions">
-              {NAVIGATEUR === 'in-app' && (
-                <button className="lp-btn lp-btn-fantome" onClick={copieLien}>
-                  {lienCopie ? 'Lien copié' : 'Copier le lien'}
-                </button>
-              )}
-              <button className="lp-btn lp-btn-primaire" onClick={() => setFiche(null)}>
-                J'ai compris
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

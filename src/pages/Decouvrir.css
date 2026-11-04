@@ -156,6 +156,16 @@
   color: #6f6f85;
 }
 
+.lp-ancre {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
 /* ── La scène : le téléphone et la carte ── */
 
 .lp-scene {
@@ -455,47 +465,34 @@
   text-decoration: none;
 }
 
-/* ── Fiche d'instructions ── */
+/* ── Mode d'emploi, là où aucun bouton n'est possible ── */
 
-.lp-voile {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
+.lp-etat {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 1rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 2.5rem 0 1.5rem;
+  color: var(--accent-green);
+  font-weight: 600;
 }
 
-.lp-fiche {
-  width: 100%;
+.lp-manuel {
   max-width: 30rem;
+  margin: 2.5rem auto 1.5rem;
+  padding: 1.5rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 1.5rem;
+  border-radius: 16px;
   text-align: left;
-  animation: lp-monte 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (min-width: 640px) {
-  .lp-voile {
-    align-items: center;
-  }
-}
-
-@keyframes lp-monte {
-  from { transform: translateY(16px); opacity: 0; }
-}
-
-.lp-fiche h3 {
-  font-size: 1.2rem;
+.lp-manuel h3 {
+  font-size: 1.1rem;
   margin-bottom: 1rem;
 }
 
-.lp-fiche ol {
+.lp-manuel ol {
   padding-left: 1.2rem;
   display: flex;
   flex-direction: column;
@@ -505,21 +502,16 @@
   color: #b4b4c6;
 }
 
-.lp-fiche-note {
+.lp-manuel-note {
   margin-top: 1rem;
   font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.5;
 }
 
-.lp-fiche-actions {
-  display: flex;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
-}
-
-.lp-fiche-actions .lp-btn {
-  flex: 1;
+.lp-manuel-btn {
+  width: 100%;
+  margin-top: 1.25rem;
   padding: 0.8rem 1rem;
   font-size: 0.95rem;
 }
