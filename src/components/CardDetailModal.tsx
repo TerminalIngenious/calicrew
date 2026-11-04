@@ -1,4 +1,4 @@
-import { RARITY_LABELS, RARITY_COLORS, getCardDisplayName, getCardBack } from '../lib/cards';
+import { getRarityLabel, RARITY_COLORS, getCardDisplayName, getCardBack } from '../lib/cards';
 import type { Card } from '../types';
 import { X } from 'lucide-react';
 import { useScrollLock } from '../lib/useScrollLock';
@@ -35,7 +35,7 @@ export default function CardDetailModal({ card, owned, count, onClose }: Props) 
         )}
         <div className="card-detail-info">
           <span className="card-detail-rarity" style={{ background: RARITY_COLORS[card.rarity] }}>
-            {RARITY_LABELS[card.rarity]}
+            {getRarityLabel(card.rarity, card.set)}
           </span>
           <h3 className="card-detail-name">{getCardDisplayName(card)}</h3>
           {card.subtitle && <span className="card-detail-subtitle">{card.subtitle}</span>}

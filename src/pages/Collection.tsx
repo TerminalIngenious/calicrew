@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCardsBySet, getFamilies, isSetComplete, RARITY_ORDER, RARITY_LABELS, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
+import { getCardsBySet, getFamilies, isSetComplete, RARITY_ORDER, getRarityLabel, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason, SEASONS } from '../lib/passes';
 import type { UserProgress, Card } from '../types';
 import { Layers, Info, X, ArrowLeft } from 'lucide-react';
@@ -64,7 +64,7 @@ export default function Collection() {
         }))
       : RARITY_ORDER.map((rarity) => ({
           key: rarity,
-          label: RARITY_LABELS[rarity],
+          label: getRarityLabel(rarity, activeId),
           color: RARITY_COLORS[rarity] as string | undefined,
           cards: cards.filter((c) => c.rarity === rarity),
         }));
@@ -113,7 +113,7 @@ export default function Collection() {
               {DROP_RATES.map((rate) => (
                 <div key={rate.rarity} className="drop-rate-row">
                   <span className="drop-rate-label" style={{ color: RARITY_COLORS[rate.rarity] }}>
-                    {RARITY_LABELS[rate.rarity]}
+                    {getRarityLabel(rate.rarity, activeId)}
                   </span>
                   <div className="drop-rate-bar-bg">
                     <div

@@ -12,12 +12,18 @@ import type { CardRarity } from '../types';
  * rien à dessiner ici — la carte est déjà un visuel complet.
  */
 
-/** Teinte du reflet selon la rareté. `rainbow` = dégradé holographique. */
+/**
+ * Teinte du reflet selon la rareté. `rainbow` = dégradé holographique.
+ *
+ * Opacités abaissées d'un tiers par rapport au kit d'origine : il avait été
+ * réglé sur des cartes dessinées en direct, plus sombres. Nos visuels sont des
+ * photos, et le reflet à pleine force voilait la carte de sa couleur.
+ */
 const HOLO: Record<CardRarity, string> = {
-  commune: 'rgba(255,255,255,.18)',
-  rare: 'rgba(90,170,255,.30)',
-  epique: 'rgba(190,120,255,.32)',
-  legendaire: 'rgba(255,205,60,.38)',
+  commune: 'rgba(255,255,255,.12)',
+  rare: 'rgba(90,170,255,.20)',
+  epique: 'rgba(190,120,255,.21)',
+  legendaire: 'rgba(255,205,60,.25)',
   historique: 'rainbow',
 };
 
@@ -55,8 +61,8 @@ export default function Card3D({ front, back, rarity, alt = '' }: Props) {
       glare.style.opacity = face === 0 ? '1' : '0.6';
       glare.style.background =
         holo === 'rainbow'
-          ? `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,.45), transparent 45%),
-             linear-gradient(${115 + ry * 0.6}deg, rgba(255,0,90,.22), rgba(255,200,0,.22), rgba(0,255,170,.22), rgba(0,140,255,.22), rgba(200,0,255,.22))`
+          ? `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,.30), transparent 45%),
+             linear-gradient(${115 + ry * 0.6}deg, rgba(255,0,90,.14), rgba(255,200,0,.14), rgba(0,255,170,.14), rgba(0,140,255,.14), rgba(200,0,255,.14))`
           : `radial-gradient(circle at ${gx}% ${gy}%, ${holo}, transparent 55%)`;
     };
 

@@ -4,7 +4,7 @@ import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
-import { RARITY_LABELS, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
+import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
 import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
@@ -453,7 +453,7 @@ export default function BattlePass() {
             ) : (
               <div className="bp-card-reveal-inner" style={{ borderColor: RARITY_COLORS[openedCard.rarity] }}>
                 <span className="bp-card-reveal-rarity-tag" style={{ background: RARITY_COLORS[openedCard.rarity] }}>
-                  {RARITY_LABELS[openedCard.rarity]}
+                  {getRarityLabel(openedCard.rarity, openedCard.set)}
                 </span>
                 <span className="bp-card-reveal-emoji">{openedCard.emoji}</span>
                 <h3 className="bp-card-reveal-name">{getCardDisplayName(openedCard)}</h3>
@@ -641,7 +641,7 @@ export default function BattlePass() {
                 {progress.chestsToOpen.map((chest, i) => {
                   const special = chest.rarity !== 'commune';
                   const chestColor = special ? RARITY_COLORS[chest.rarity] : 'var(--accent)';
-                  const chestLabel = special ? RARITY_LABELS[chest.rarity] : 'Ouvrir';
+                  const chestLabel = special ? getRarityLabel(chest.rarity, season.id) : 'Ouvrir';
                   return (
                     <button
                       key={i}
@@ -772,7 +772,7 @@ export default function BattlePass() {
             const special = lvl.freeChest && lvl.freeChest !== 'commune';
             const lvlChestColor = special ? RARITY_COLORS[lvl.freeChest!] : undefined;
             const lvlChestLabel = special
-              ? `Coffre ${RARITY_LABELS[lvl.freeChest!]}`
+              ? `Coffre ${getRarityLabel(lvl.freeChest!, season.id)}`
               : 'Coffre';
 
             return (

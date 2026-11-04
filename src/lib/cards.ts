@@ -136,6 +136,26 @@ export const RARITY_LABELS: Record<CardRarity, string> = {
   commune: 'Commune',
 };
 
+/**
+ * Ce que chaque saison appelle ses raretés, quand elle s'écarte du libellé
+ * commun.
+ *
+ * La saison 2 dit « Mythique » là où la saison 1 disait « Historique », et le
+ * mot est imprimé sur l'artwork des cartes : l'app doit suivre, sinon le badge
+ * contredit la carte qu'il légende. Un simple renommage global ne suffisait
+ * pas, il aurait aussi rebaptisé les cartes de la saison 1.
+ *
+ * Seul le libellé change : la rareté reste `historique` partout dans le code
+ * et dans les parties déjà jouées.
+ */
+const RARITY_LABELS_BY_SET: Record<string, Partial<Record<CardRarity, string>>> = {
+  'pass-2': { historique: 'Mythique' },
+};
+
+export function getRarityLabel(rarity: CardRarity, setId?: string): string {
+  return (setId && RARITY_LABELS_BY_SET[setId]?.[rarity]) || RARITY_LABELS[rarity];
+}
+
 export const RARITY_COLORS: Record<CardRarity, string> = {
   historique: '#ff2d55',
   legendaire: '#ffd700',
