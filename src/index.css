@@ -7374,3 +7374,36 @@ body {
     border-color: var(--accent);
   }
 }
+
+/* Le bandeau des badges reprend celui des saisons : mêmes dimensions, même
+   voile, même chevron. Seul le fond change — des médailles hexagonales à la
+   place des cartes, donc des largeurs et un chevauchement différents. */
+.badge-slab-bg .rank-badge {
+  position: absolute;
+  top: 50%;
+}
+
+/* La pastille du rang disparaît du fond : à trois médailles superposées, les
+   deux premières la cachaient de toute façon, et celle de devant venait
+   buter sur le chevron. Le métal dit déjà la place. */
+.badge-slab-bg .rank-badge-rank {
+  display: none;
+}
+
+.badge-slab-bg .rank-badge:nth-child(1) {
+  right: 14px;
+  z-index: 3;
+  transform: translateY(-50%) rotate(8deg);
+}
+
+.badge-slab-bg .rank-badge:nth-child(2) {
+  right: 58px;
+  z-index: 2;
+  transform: translateY(-50%) rotate(2deg);
+}
+
+.badge-slab-bg .rank-badge:nth-child(3) {
+  right: 102px;
+  z-index: 1;
+  transform: translateY(-50%) rotate(-5deg);
+}

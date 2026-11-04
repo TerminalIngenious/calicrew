@@ -27,6 +27,7 @@ const SeasonCards = lazy(() => import('./pages/SeasonCards'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Programs = lazy(() => import('./pages/Programs'));
 const Decouvrir = lazy(() => import('./pages/Decouvrir'));
+const Badges = lazy(() => import('./pages/Badges'));
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
@@ -191,6 +192,8 @@ function AppContent() {
           <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
           <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
           <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+          <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
+          <Route path="/badges/:uid" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
           <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

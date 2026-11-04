@@ -7,15 +7,15 @@ import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '..
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
 import { useUserProgress } from '../lib/useUserProgress';
 import { totalReps as sumReps } from '../lib/stats';
-import type { Session, Card, Program, RankBadge } from '../types';
-import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
+import type { Session, Card, Program } from '../types';
+import { sortBadges } from '../lib/badges';
 import { bestAmrapsByCircuit } from '../lib/amrap';
-import RankBadgeIcon from '../components/RankBadgeIcon';
+import BadgeSlab from '../components/BadgeSlab';
 import PersonalRecords from '../components/PersonalRecords';
 import SeasonalBadge from '../components/SeasonalBadge';
 import NotificationSettings from '../components/NotificationSettings';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, Award, TrendingUp, ChevronRight, LogOut, Settings } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, TrendingUp, ChevronRight, LogOut, Settings } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import SeasonShelf from '../components/SeasonShelf';
@@ -43,7 +43,6 @@ export default function Profile() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const badges = sortBadges(progress?.badges || []);
-  const [selectedBadge, setSelectedBadge] = useState<RankBadge | null>(null);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [editingName, setEditingName] = useState(false);
@@ -365,42 +364,11 @@ export default function Profile() {
 
       {badges.length > 0 && (
         <section className="section">
-          <h3><Award size={16} style={{ marginRight: 6 }} />Badges ({badges.length})</h3>
-          <div className="badges-grid">
-            {badges.map((badge) => (
-              <div key={badge.id} className="badge-cell" onClick={() => setSelectedBadge(badge)}>
-                <RankBadgeIcon badge={badge} size={64} />
-                <span className="badge-cell-title">{badgeTitle(badge)}</span>
-                <span className="badge-cell-season">{badge.seasonName}</span>
-              </div>
-            ))}
-          </div>
+          <BadgeSlab
+            badges={badges}
+            onOpen={() => navigate(isOwnProfile ? '/badges' : `/badges/${targetUid}`)}
+          />
         </section>
-      )}
-
-      {selectedBadge && (
-        <div className="modal-overlay" onClick={() => setSelectedBadge(null)}>
-          <div
-            className="badge-modal"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              '--metal-from': BADGE_RANKS[selectedBadge.rank]?.from,
-              '--metal-to': BADGE_RANKS[selectedBadge.rank]?.to,
-            } as React.CSSProperties}
-          >
-            <button className="member-modal-close" onClick={() => setSelectedBadge(null)}>
-              <X size={18} />
-            </button>
-            <RankBadgeIcon badge={selectedBadge} size={112} />
-            <h3 className="badge-modal-title">{badgeTitle(selectedBadge)}</h3>
-            <span className="badge-modal-metal">{BADGE_RANKS[selectedBadge.rank]?.name}</span>
-            <div className="badge-modal-meta">
-              <span>{selectedBadge.seasonName}</span>
-              <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
-              <span>Groupe {selectedBadge.groupName}</span>
-            </div>
-          </div>
-        </div>
       )}
 
       <section className="section">
