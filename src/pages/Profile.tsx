@@ -434,7 +434,7 @@ export default function Profile() {
         <section className="section">
           <h3><Settings size={16} style={{ marginRight: 6 }} />Compte</h3>
           <div className="settings-list">
-            <NotificationSettings uid={user.uid} variant="row" />
+            <NotificationSettings uid={user.uid} />
             <button className="settings-row settings-row-danger" onClick={() => signOut()}>
               <LogOut size={17} />
               <div className="settings-row-info">

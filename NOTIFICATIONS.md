@@ -22,8 +22,11 @@ Et trois notifications en temps réel, déclenchées par l'app et non par l'heur
 
 ## Les quatre familles
 
-L'abonnement porte quatre interrupteurs, réglables dans Profil →
-Notifications :
+L'abonnement porte quatre clés, mais **l'app n'en montre qu'un seul
+interrupteur** : Profil → Notifications, oui ou non. Les quatre sont réglées
+ensemble. Elles existent côté données parce que le serveur s'en sert pour
+savoir quoi envoyer à qui, pas pour être proposées une par une — quatre
+décisions pour quelque chose qui n'en mérite qu'une.
 
 | Clé | Ce que ça envoie |
 |---|---|

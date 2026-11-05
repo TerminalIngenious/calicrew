@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Settings, Smartphone, X, Bell, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Smartphone, Bell, AlertTriangle } from 'lucide-react';
 import {
   isPushSupported,
   needsInstall,
   getPushPrefs,
   enablePush,
-  updatePushPrefs,
   disablePush,
   syncSubscription,
   auMoinsUn,
@@ -13,7 +12,6 @@ import {
   type PushPrefs,
   type SyncOutcome,
 } from '../lib/push';
-import { useScrollLock } from '../lib/useScrollLock';
 
 const ERROR_MESSAGES: Record<string, string> = {
   unsupported: "Ton navigateur ne supporte pas les notifications push.",
@@ -26,19 +24,23 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 /**
- * `icon` : bouton engrenage compact pour un en-tête.
- * `row` : ligne pleine largeur, pour une liste de réglages.
+ * Tout ou rien.
+ *
+ * Il y avait un interrupteur par famille de rappel — quatre fenêtres à lire
+ * et quatre décisions à prendre pour quelque chose qui n'en mérite qu'une.
+ * On ne demande plus qu'une chose : les notifications, oui ou non. Les quatre
+ * familles existent toujours dans l'abonnement, parce que le serveur s'en
+ * sert pour savoir quoi envoyer à qui, mais elles sont réglées ensemble.
  */
-export default function NotificationSettings({
-  uid,
-  variant = 'icon',
-}: {
-  uid: string;
-  variant?: 'icon' | 'row';
-}) {
+const TOUT: PushPrefs = {
+  creatine: true,
+  dailyChallenge: true,
+  groupe: true,
+  ambiance: true,
+};
+
+export default function NotificationSettings({ uid }: { uid: string }) {
   const [prefs, setPrefs] = useState<PushPrefs>(DEFAULT_PUSH_PREFS);
-  const [open, setOpen] = useState(false);
-  useScrollLock(open);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
@@ -89,44 +91,26 @@ export default function NotificationSettings({
     setBusy(false);
   }
 
-
-  async function toggle(key: keyof PushPrefs) {
+  async function basculer() {
     if (busy) return;
     setBusy(true);
     setError(null);
     setErrorDetail(null);
-    const next = { ...prefs, [key]: !prefs[key] };
 
     try {
-      if (!enabled) {
-        // Première activation : demande la permission et crée l'abonnement.
-        const result = await enablePush(uid, next);
-        if (!result.ok) {
+      if (enabled) {
+        await disablePush(uid);
+        setPrefs(DEFAULT_PUSH_PREFS);
+        setSync(null);
+      } else {
+        const result = await enablePush(uid, TOUT);
+        if (result.ok) {
+          setPrefs(TOUT);
+          setSync(await syncSubscription(uid, TOUT));
+        } else {
           setError(ERROR_MESSAGES[result.reason]);
           setErrorDetail(result.detail ?? null);
-          setBusy(false);
-          return;
         }
-        setPrefs(next);
-      } else if (!auMoinsUn(next)) {
-        await disablePush(uid);
-        setPrefs(next);
-      } else {
-        try {
-          await updatePushPrefs(uid, { [key]: next[key] });
-        } catch {
-          // Le document a disparu — le serveur le supprime quand le service
-          // push rejette l'abonnement. On se réabonne au lieu d'afficher une
-          // erreur que l'utilisateur ne peut pas corriger.
-          const result = await enablePush(uid, next);
-          if (!result.ok) {
-            setError(ERROR_MESSAGES[result.reason]);
-            setErrorDetail(result.detail ?? null);
-            setBusy(false);
-            return;
-          }
-        }
-        setPrefs(next);
       }
     } catch (err) {
       setError('Erreur lors de la mise à jour des notifications.');
@@ -135,183 +119,86 @@ export default function NotificationSettings({
     setBusy(false);
   }
 
-  function close() {
-    setOpen(false);
-    setError(null);
-    setErrorDetail(null);
+  // Sur iPhone hors écran d'accueil, le push est impossible : un interrupteur
+  // qui ne peut rien faire vaut moins qu'une explication.
+  if (installRequired) {
+    return (
+      <div className="notif-install-hint">
+        <Smartphone size={18} />
+        <span>
+          Sur iPhone, installe CaliCrew sur ton écran d'accueil pour activer les notifications.
+          <em>Partager → Sur l'écran d'accueil</em>
+        </span>
+      </div>
+    );
   }
+
+  if (!supported) return null;
 
   return (
     <>
-      {variant === 'row' ? (
-        <button className="settings-row" onClick={() => setOpen(true)}>
-          <Bell size={17} />
-          <div className="settings-row-info">
-            <span className="settings-row-label">Notifications</span>
-            <span className="settings-row-sub">
-              {enabled
-                ? [
-                    prefs.creatine && 'créatine',
-                    prefs.dailyChallenge && 'défi du jour',
-                    prefs.groupe && 'le groupe',
-                    prefs.ambiance && 'vannes',
-                  ]
-                    .filter(Boolean)
-                    .join(' • ')
-                : 'Aucun rappel activé'}
-            </span>
-          </div>
-          <ChevronRight size={16} />
-        </button>
-      ) : (
-        <button
-          className={`icon-btn notif-settings-btn ${enabled ? 'active' : ''}`}
-          onClick={() => setOpen(true)}
-          aria-label="Réglages des notifications"
-        >
-          <Settings size={18} />
-          {enabled && <span className="notif-settings-dot" />}
-        </button>
+      <label className="settings-row">
+        <Bell size={17} />
+        <div className="settings-row-info">
+          <span className="settings-row-label">Notifications</span>
+          <span className="settings-row-sub">{enabled ? 'Activées' : 'Désactivées'}</span>
+        </div>
+        <input
+          type="checkbox"
+          className="notif-switch"
+          checked={enabled}
+          disabled={busy}
+          onChange={basculer}
+        />
+      </label>
+
+      {/* Rien à afficher quand l'abonnement est sain : ce bloc ne sert qu'à
+          signaler ce qui demande une action. */}
+      {enabled && needsAttention && (
+        <div className="notif-diag">
+          {sync === 'repaired' && (
+            <p className="notif-diag-line warn">
+              <AlertTriangle size={14} />
+              La liaison avec ton téléphone avait expiré, elle vient d'être rétablie.
+            </p>
+          )}
+          {sync === 'permission-default' && (
+            <>
+              <p className="notif-diag-line warn">
+                <AlertTriangle size={14} />
+                Tes rappels sont activés mais l'iPhone n'a plus l'autorisation
+                de les afficher. Ça arrive après une réinstallation de l'app.
+              </p>
+              <button
+                className="primary-btn small notif-action-btn"
+                onClick={regrant}
+                disabled={busy}
+              >
+                {busy ? 'Demande en cours…' : "Redemander l'autorisation"}
+              </button>
+            </>
+          )}
+          {sync === 'permission-denied' && (
+            <p className="notif-diag-line warn">
+              <AlertTriangle size={14} />
+              Les notifications sont refusées pour CaliCrew. Va dans Réglages
+              de l'iPhone → Notifications → CaliCrew et autorise-les, puis
+              rouvre l'app.
+            </p>
+          )}
+          {sync === 'failed' && (
+            <p className="notif-diag-line warn">
+              <AlertTriangle size={14} />
+              Impossible de joindre ton téléphone. Désactive puis réactive les rappels.
+            </p>
+          )}
+        </div>
       )}
 
-      {open && (
-        <div className="modal-overlay" onClick={close}>
-          <div className="notif-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="notif-modal-header">
-              <h3><Settings size={18} /> Notifications</h3>
-              <button className="member-modal-close" onClick={close}>
-                <X size={18} />
-              </button>
-            </div>
-
-            {installRequired ? (
-              <div className="notif-install-hint">
-                <Smartphone size={18} />
-                <span>
-                  Sur iPhone, installe CaliCrew sur ton écran d'accueil pour activer les notifications.
-                  <em>Partager → Sur l'écran d'accueil</em>
-                </span>
-              </div>
-            ) : !supported ? (
-              <p className="empty" style={{ fontSize: '0.85rem' }}>
-                Ton navigateur ne supporte pas les notifications push.
-              </p>
-            ) : (
-              <div className="notif-list">
-                <label className="notif-row">
-                  <div className="notif-row-info">
-                    <span className="notif-row-label">Rappel créatine</span>
-                    <span className="notif-row-desc">Tous les jours à 20h</span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    className="notif-switch"
-                    checked={prefs.creatine}
-                    disabled={busy}
-                    onChange={() => toggle('creatine')}
-                  />
-                </label>
-
-                <label className="notif-row">
-                  <div className="notif-row-info">
-                    <span className="notif-row-label">Rappel défi du jour</span>
-                    <span className="notif-row-desc">À 17h, seulement si le défi n'est pas validé</span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    className="notif-switch"
-                    checked={prefs.dailyChallenge}
-                    disabled={busy}
-                    onChange={() => toggle('dailyChallenge')}
-                  />
-                </label>
-
-                <label className="notif-row">
-                  <div className="notif-row-info">
-                    <span className="notif-row-label">La vie du groupe</span>
-                    <span className="notif-row-desc">
-                      Quand on te double au classement, qu'un pote finit sa séance
-                      ou qu'on répond à ton annonce d'échange
-                    </span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    className="notif-switch"
-                    checked={prefs.groupe}
-                    disabled={busy}
-                    onChange={() => toggle('groupe')}
-                  />
-                </label>
-
-                <label className="notif-row">
-                  <div className="notif-row-info">
-                    <span className="notif-row-label">Vannes et défis surprises</span>
-                    <span className="notif-row-desc">
-                      La vanne du soir à 21h et le défi surprise de 14h
-                    </span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    className="notif-switch"
-                    checked={prefs.ambiance}
-                    disabled={busy}
-                    onChange={() => toggle('ambiance')}
-                  />
-                </label>
-              </div>
-            )}
-
-            {/* Rien à afficher quand l'abonnement est sain : le bloc ne sert
-                qu'à signaler ce qui demande une action. */}
-            {supported && !installRequired && enabled && needsAttention && (
-              <div className="notif-diag">
-                {sync === 'repaired' && (
-                  <p className="notif-diag-line warn">
-                    <AlertTriangle size={14} />
-                    La liaison avec ton téléphone avait expiré, elle vient d'être rétablie.
-                  </p>
-                )}
-                {sync === 'permission-default' && (
-                  <>
-                    <p className="notif-diag-line warn">
-                      <AlertTriangle size={14} />
-                      Tes rappels sont activés mais l'iPhone n'a plus l'autorisation
-                      de les afficher. Ça arrive après une réinstallation de l'app.
-                    </p>
-                    <button
-                      className="primary-btn small notif-action-btn"
-                      onClick={regrant}
-                      disabled={busy}
-                    >
-                      {busy ? 'Demande en cours…' : "Redemander l'autorisation"}
-                    </button>
-                  </>
-                )}
-                {sync === 'permission-denied' && (
-                  <p className="notif-diag-line warn">
-                    <AlertTriangle size={14} />
-                    Les notifications sont refusées pour CaliCrew. Va dans Réglages
-                    de l'iPhone → Notifications → CaliCrew et autorise-les, puis
-                    rouvre l'app.
-                  </p>
-                )}
-                {sync === 'failed' && (
-                  <p className="notif-diag-line warn">
-                    <AlertTriangle size={14} />
-                    Impossible de joindre ton téléphone. Désactive puis réactive les rappels.
-                  </p>
-                )}
-
-              </div>
-            )}
-
-            {error && (
-              <div className="notif-error">
-                <p>{error}</p>
-                {errorDetail && <code>{errorDetail}</code>}
-              </div>
-            )}
-          </div>
+      {error && (
+        <div className="notif-error">
+          <p>{error}</p>
+          {errorDetail && <code>{errorDetail}</code>}
         </div>
       )}
     </>
