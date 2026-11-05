@@ -7415,3 +7415,105 @@ body {
   border: 0;
   background: var(--border);
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Progression sur ordinateur
+   ──────────────────────────────────────────────────────────────────────────
+   La page empilait quatre chiffres en deux carrés, un accordéon de records,
+   un sélecteur pleine largeur puis des courbes de 250 px de haut : sur un
+   écran large, les courbes — la seule chose qui gagne vraiment à être
+   grande — étaient le bloc le plus écrasé.
+
+   Trois cases : les totaux en bandeau, les courbes à gauche sur la place
+   qui reste, les records en colonne à droite. Une liste de records est
+   faite de lignes courtes, elle n'a pas besoin de 1180 px ; une courbe, si.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Sur téléphone le conteneur n'existe pas : `contents` rend ses trois blocs
+   enfants directs de la page, donc l'empilement d'avant est intact. */
+.progress-body {
+  display: contents;
+}
+
+/* La hauteur du graphique passe par le CSS et non par la prop de Recharts :
+   c'est le seul moyen de l'agrandir sur grand écran sans qu'un composant ait
+   à savoir sur quoi il s'affiche. 284 px = les 250 px d'avant, plus le
+   remplissage et les bordures de la carte. */
+.chart-container {
+  height: 284px;
+}
+
+@media (min-width: 1024px) {
+  .progress-body {
+    display: grid;
+    /* Des proportions plutôt qu'une colonne fixe : à 1024 px, 22rem de
+       records ne laissaient que 320 px aux courbes. */
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-areas:
+      'totaux totaux'
+      'courbes records';
+    gap: 1.75rem 2rem;
+    align-items: start;
+  }
+
+  .progress-totals {
+    grid-area: totaux;
+    margin-top: 0;
+  }
+
+  .progress-charts {
+    grid-area: courbes;
+  }
+
+  .progress-pr {
+    grid-area: records;
+  }
+
+  /* L'écart entre les cases remplace les marges des sections. */
+  .progress-pr .section {
+    margin-top: 0;
+  }
+
+  /* Quatre chiffres sur une ligne : en deux colonnes ils laissaient la
+     moitié du bandeau vide. */
+  .progress-totals .profile-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* Le filtre revient à côté du titre : pleine largeur au-dessus des
+     courbes, il faisait une barre grise pour un seul menu. */
+  .progress-charts-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .progress-charts-title {
+    margin: 0;
+  }
+
+  .progress-charts-head .filter-bar {
+    margin-bottom: 0;
+  }
+
+  .progress-charts-head .filter-bar select {
+    width: auto;
+    min-width: 15rem;
+    padding: 0.5rem 0.85rem;
+  }
+
+  /* Plus large sans être plus haut, une courbe s'aplatit : les variations
+     deviennent illisibles. */
+  .chart-container {
+    height: 360px;
+  }
+
+  /* La première carte de courbe est collée au titre, pas à une marge de
+     section. */
+  .progress-charts .section:first-of-type {
+    margin-top: 0;
+  }
+}

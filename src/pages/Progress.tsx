@@ -107,8 +107,8 @@ export default function Progress() {
       {loading ? (
         <div className="page loading"><Loader /></div>
       ) : (
-        <>
-          <section className="section">
+        <div className="progress-body">
+          <section className="section progress-totals">
             <h3>Total <span className="stats-period-inline">all-time</span></h3>
             <div className="profile-stats">
               <div className="profile-stat">
@@ -142,57 +142,38 @@ export default function Progress() {
             </div>
           </section>
 
-          <PersonalRecords uid={user?.uid} editable />
-
-          <h3 className="progress-charts-title">Graphiques</h3>
-
-          <div className="filter-bar">
-            <select
-              value={selectedExercise}
-              onChange={(e) => setSelectedExercise(e.target.value)}
-            >
-              <option value="all">Tous les exercices</option>
-              {exerciseNames.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+          <div className="progress-pr">
+            <PersonalRecords uid={user?.uid} editable />
           </div>
 
-          {sortedSessions.length === 0 ? (
-            <p className="empty">Fais quelques séances pour voir ta progression ici !</p>
-          ) : (
-            <>
-              <section className="section">
-                <h3>Volume total ({unitLabel(selectedUnit)})</h3>
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={volumeData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                      <YAxis stroke="#888" fontSize={12} />
-                      <Tooltip
-                        contentStyle={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: 8 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="volume"
-                        stroke="#ff6b35"
-                        strokeWidth={2}
-                        dot={{ fill: '#ff6b35', r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </section>
+          <div className="progress-charts">
+            <div className="progress-charts-head">
+              <h3 className="progress-charts-title">Graphiques</h3>
 
-              {selectedExercise !== 'all' && maxRepsData.length > 0 && (
+              <div className="filter-bar">
+                <select
+                  value={selectedExercise}
+                  onChange={(e) => setSelectedExercise(e.target.value)}
+                >
+                  <option value="all">Tous les exercices</option>
+                  {exerciseNames.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {sortedSessions.length === 0 ? (
+              <p className="empty">Fais quelques séances pour voir ta progression ici !</p>
+            ) : (
+              <>
                 <section className="section">
-                  <h3>Max {unitLabel(selectedUnit)} par séance</h3>
+                  <h3>Volume total ({unitLabel(selectedUnit)})</h3>
                   <div className="chart-container">
-                    <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={maxRepsData}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={volumeData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                         <XAxis dataKey="date" stroke="#888" fontSize={12} />
                         <YAxis stroke="#888" fontSize={12} />
@@ -201,19 +182,44 @@ export default function Progress() {
                         />
                         <Line
                           type="monotone"
-                          dataKey="maxReps"
-                          stroke="#4ecdc4"
+                          dataKey="volume"
+                          stroke="#ff6b35"
                           strokeWidth={2}
-                          dot={{ fill: '#4ecdc4', r: 4 }}
+                          dot={{ fill: '#ff6b35', r: 4 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
                 </section>
-              )}
-            </>
-          )}
-        </>
+
+                {selectedExercise !== 'all' && maxRepsData.length > 0 && (
+                  <section className="section">
+                    <h3>Max {unitLabel(selectedUnit)} par séance</h3>
+                    <div className="chart-container">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={maxRepsData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis dataKey="date" stroke="#888" fontSize={12} />
+                          <YAxis stroke="#888" fontSize={12} />
+                          <Tooltip
+                            contentStyle={{ background: '#1a1a2e', border: '1px solid #333', borderRadius: 8 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="maxReps"
+                            stroke="#4ecdc4"
+                            strokeWidth={2}
+                            dot={{ fill: '#4ecdc4', r: 4 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+          </div>
+        </div>
       )}
 
       <BottomNav />
