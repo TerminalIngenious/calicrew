@@ -1,4 +1,4 @@
-import { Zap, Target, Clock } from 'lucide-react';
+import { Zap, Target, Clock, Footprints } from 'lucide-react';
 import type { RankBadge, RankCategory } from '../types';
 import { BADGE_CATEGORIES, BADGE_RANKS, estEvenement, eventStyle } from '../lib/badges';
 
@@ -6,6 +6,7 @@ const CATEGORY_ICONS: Record<RankCategory, typeof Zap> = {
   reps: Zap,
   variety: Target,
   time: Clock,
+  pas: Footprints,
 };
 
 /**

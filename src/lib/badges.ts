@@ -12,6 +12,7 @@ export const BADGE_CATEGORIES: Record<RankCategory, CategoryStyle> = {
   reps: { label: 'Reps', from: '#ff8a3d', to: '#ff4d2d' },
   variety: { label: 'Variété', from: '#c084fc', to: '#7c3aed' },
   time: { label: 'Temps', from: '#5eead4', to: '#0891b2' },
+  pas: { label: 'Pas', from: '#a3e635', to: '#4d7c0f' },
 };
 
 /** Habillage d'une place du podium : le métal de la monture. */

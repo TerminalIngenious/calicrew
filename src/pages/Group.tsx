@@ -17,6 +17,7 @@ import { db } from '../lib/firebase';
 import { getCardsBySet, getCardById, getCardDisplayName, getAllCurrentCards, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
+import { pasDuMois } from '../lib/pas';
 import { makeBadgeId, badgeTitle } from '../lib/badges';
 import {
   BID_REFUSAL_MESSAGES, SWAP_REFUSAL_MESSAGES, canAnswer, checkBid, countOf, listingKind,
@@ -34,7 +35,7 @@ import Loader from '../components/Loader';
 import { useGrandEcran } from '../lib/useGrandEcran';
 import { previensEchange } from '../lib/notify';
 
-type SortMode = 'reps' | 'variety' | 'time';
+type SortMode = 'reps' | 'variety' | 'time' | 'pas';
 
 interface MonthlyRanking {
   category: RankCategory;
@@ -180,6 +181,7 @@ export default function Group() {
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
     const monthStartMs = monthStart.getTime();
+    const moisCourant = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`;
 
     const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
       const sessionSnap = rest[i * 2] as Awaited<ReturnType<typeof getDocs>>;
@@ -201,6 +203,9 @@ export default function Group() {
         uid: memberId,
         displayName: userMap.get(memberId) || 'Inconnu',
         totalReps,
+        // Les pas ne sortent pas des séances : ils sont saisis à la main et
+        // vivent dans la progression du joueur.
+        totalPas: pasDuMois(progress?.pasJours, moisCourant),
         totalSets,
         sessionsCount: sessions.length,
         totalDuration,
@@ -234,6 +239,8 @@ export default function Group() {
       getDocs(collection(db, 'users')),
       ...group.memberIds.flatMap((memberId) => [
         getDocs(query(collection(db, 'sessions'), where('userId', '==', memberId))),
+        // Les pas ne sont pas dans les séances : ils sont saisis à la main.
+        getDoc(doc(db, 'userProgress', memberId)),
       ]),
     ]);
 
@@ -243,9 +250,12 @@ export default function Group() {
       if (data.uid) userMap.set(data.uid, data.displayName || 'Inconnu');
     });
 
-    const entries: { uid: string; displayName: string; totalReps: number; exerciseVariety: number; totalDuration: number }[] =
+    const moisEcoule = getLastMonthKey();
+
+    const entries: { uid: string; displayName: string; totalReps: number; exerciseVariety: number; totalDuration: number; totalPas: number }[] =
       group.memberIds.map((memberId, i) => {
-        const sessionSnap = rest[i] as Awaited<ReturnType<typeof getDocs>>;
+        const sessionSnap = rest[i * 2] as Awaited<ReturnType<typeof getDocs>>;
+        const progressSnapMembre = rest[i * 2 + 1] as Awaited<ReturnType<typeof getDoc>>;
         const sessions = sessionSnap.docs
           .map((d) => d.data() as Session)
           .filter((s) => s.createdAt >= lastMonthStart && s.createdAt < currentMonthStart && s.completed);
@@ -254,10 +264,18 @@ export default function Group() {
         const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
         const exerciseVariety = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId))).size;
 
-        return { uid: memberId, displayName: userMap.get(memberId) || 'Inconnu', totalReps, exerciseVariety, totalDuration };
+        const pasMembre = progressSnapMembre.exists()
+          ? pasDuMois((progressSnapMembre.data() as UserProgress).pasJours, moisEcoule)
+          : 0;
+
+        return {
+          uid: memberId,
+          displayName: userMap.get(memberId) || 'Inconnu',
+          totalReps, exerciseVariety, totalDuration, totalPas: pasMembre,
+        };
       });
 
-    const hasActivity = entries.some((e) => e.totalReps > 0 || e.totalDuration > 0);
+    const hasActivity = entries.some((e) => e.totalReps > 0 || e.totalDuration > 0 || e.totalPas > 0);
     if (!hasActivity) {
       if (progress) {
         await updateDoc(doc(db, 'userProgress', user.uid), { monthlyRewardsClaimed: lastMonthKey });
@@ -318,6 +336,10 @@ export default function Group() {
       [...entries].filter((e) => e.totalDuration > 0).sort((a, b) => b.totalDuration - a.totalDuration),
       (e) => fmtDur(e.totalDuration));
 
+    addRanking('pas', 'Pas',
+      [...entries].filter((e) => e.totalPas > 0).sort((a, b) => b.totalPas - a.totalPas),
+      (e) => `${e.totalPas.toLocaleString('fr-FR')} pas`);
+
     if (rankings.length > 0) {
       setMonthlyRankings(rankings);
       setMyRewards(rewards);
@@ -376,6 +398,9 @@ export default function Group() {
         break;
       case 'time':
         sorted.sort((a, b) => b.totalDuration - a.totalDuration);
+        break;
+      case 'pas':
+        sorted.sort((a, b) => b.totalPas - a.totalPas);
         break;
     }
     return sorted;
@@ -555,6 +580,7 @@ export default function Group() {
       case 'reps': return String(entry.totalReps);
       case 'variety': return String(entry.exerciseVariety);
       case 'time': return formatDuration(entry.totalDuration);
+      case 'pas': return entry.totalPas.toLocaleString('fr-FR');
     }
   }
 
@@ -563,6 +589,7 @@ export default function Group() {
       case 'reps': return 'reps';
       case 'variety': return 'exos';
       case 'time': return '';
+      case 'pas': return 'pas';
     }
   }
 
@@ -1110,6 +1137,12 @@ export default function Group() {
                     onClick={() => setSortMode('time')}
                   >
                     Temps
+                  </button>
+                  <button
+                    className={`sort-tab ${sortMode === 'pas' ? 'active' : ''}`}
+                    onClick={() => setSortMode('pas')}
+                  >
+                    Pas
                   </button>
                 </div>
               </div>

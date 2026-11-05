@@ -8,6 +8,7 @@ import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import PinkRibbon from '../components/PinkRibbon';
 import NotifGate from '../components/NotifGate';
+import PasCard from '../components/PasCard';
 import { getSeasonalTheme } from '../lib/seasonalTheme';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -113,6 +114,10 @@ export default function Dashboard() {
               </div>
             </div>
           </button>
+
+          {/* Juste après la créatine : ce sont les deux gestes quotidiens qui
+              ne passent pas par une séance. */}
+          <PasCard />
 
           <button className="primary-btn home-cta" onClick={() => navigate('/session/new')}>
             <Plus size={20} /> Nouvelle séance

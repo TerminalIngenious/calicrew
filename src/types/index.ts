@@ -119,6 +119,8 @@ export interface LeaderboardEntry {
   uid: string;
   displayName: string;
   totalReps: number;
+  /** Pas du mois en cours. Lu dans userProgress, pas dans les séances. */
+  totalPas: number;
   totalSets: number;
   sessionsCount: number;
   totalDuration: number;
@@ -241,7 +243,7 @@ export interface TradeListing {
 
 // ── Badges de classement ──
 
-export type RankCategory = 'reps' | 'variety' | 'time';
+export type RankCategory = 'reps' | 'variety' | 'time' | 'pas';
 
 export interface RankBadge {
   /** `${monthKey}-${category}-${rank}` : sert à ne pas attribuer deux fois le même. */
@@ -335,6 +337,14 @@ export interface UserProgress {
    * elle, le plafond d'un jour continuerait de s'appliquer le lendemain.
    */
   enduranceXpDay?: { date: string; xp: number };
+  /** Pas saisis à la main, par jour au format YYYY-MM-DD. Voir lib/pas.ts. */
+  pasJours?: Record<string, number>;
+  /**
+   * Part de l'XP d'endurance du jour qui vient des pas. Sans elle, corriger
+   * sa saisie paierait la nouvelle valeur en entier au lieu de la seule
+   * différence.
+   */
+  pasXpDay?: { date: string; xp: number };
   /**
    * Event FaceID. Volontairement à part de `ownedCards` : ces cartes ne font
    * partie d'aucune saison, ne comptent dans aucune collection et ne doivent

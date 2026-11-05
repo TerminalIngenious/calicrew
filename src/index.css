@@ -7539,3 +7539,99 @@ body {
   align-self: flex-start;
   margin-top: 0.5rem;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Les pas du jour
+   ──────────────────────────────────────────────────────────────────────────
+   Même place et même poids que la créatine : un geste quotidien qui n'est pas
+   une séance. La différence, c'est qu'il demande un chiffre et non une coche,
+   d'où le champ et le bouton sur une deuxième ligne.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.pas-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.pas-card-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--accent-green);
+}
+
+.pas-card-titres {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.pas-card-titre {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pas-card-sous {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pas-card-ok {
+  color: var(--accent-green);
+}
+
+.pas-card-saisie {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pas-card-saisie input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.pas-card-saisie input:focus {
+  border-color: var(--accent);
+}
+
+/* Les flèches du champ numérique volent de la place et personne ne monte à
+   dix mille pas en cliquant dessus. */
+.pas-card-saisie input::-webkit-outer-spin-button,
+.pas-card-saisie input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.pas-card-saisie input[type='number'] {
+  appearance: textfield;
+}
+
+.pas-card-saisie .primary-btn {
+  width: auto;
+  flex: 0 0 auto;
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+}
+
+.pas-card-bareme {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
