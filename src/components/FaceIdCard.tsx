@@ -5,11 +5,18 @@ import { faceLabel } from '../lib/faceid';
 /**
  * Une carte de l'event.
  *
- * Trois états : possédée, non possédée, et en cours de révélation. Le dernier
- * sert à l'ouverture d'un booster — la photo arrive floutée et se résout sous
- * une ligne de balayage, comme une image qu'on scanne. C'est le seul endroit
- * de l'app où une carte n'apparaît pas d'un coup, et c'est tout l'intérêt de
- * l'event : il s'appelle FaceID.
+ * Une carte possédée est son image, bord à bord : le dessin est fourni
+ * entier, comme pour la saison 1, et rien ne vient se poser dessus. Ce qu'on
+ * ajouterait — crochets, prénom, mention de face — ferait double emploi avec
+ * ce que l'illustration dit déjà, et finirait par la recouvrir.
+ *
+ * L'emplacement vide, lui, garde la monture : crochets de visée, silhouette
+ * et « ??? ». Ce n'est pas une carte, c'est la case où il en manque une, et
+ * elle doit se lire comme telle.
+ *
+ * Reste la révélation, commune aux deux : l'image arrive floutée et se résout
+ * sous une ligne de balayage. C'est la seule carte de l'app qui n'apparaît
+ * pas d'un coup, et c'est tout l'intérêt d'un event qui s'appelle FaceID.
  */
 export default function FaceIdCard({
   carte,
@@ -36,14 +43,19 @@ export default function FaceIdCard({
       className={[
         'fid-card',
         possedee ? 'owned' : 'locked',
+        montreLaPhoto ? 'illustree' : '',
         revele ? 'reveal' : '',
         taille === 'grande' ? 'big' : '',
       ].filter(Boolean).join(' ')}
     >
-      <span className="fid-corner tl" />
-      <span className="fid-corner tr" />
-      <span className="fid-corner bl" />
-      <span className="fid-corner br" />
+      {!montreLaPhoto && (
+        <>
+          <span className="fid-corner tl" />
+          <span className="fid-corner tr" />
+          <span className="fid-corner bl" />
+          <span className="fid-corner br" />
+        </>
+      )}
 
       <div className="fid-card-visuel">
         {montreLaPhoto ? (
@@ -54,15 +66,15 @@ export default function FaceIdCard({
         {revele && <span className="fid-scanline" />}
       </div>
 
-      <div className="fid-card-pied">
-        {/* « Non identifié » ne tient pas sur une vignette de 70 px et se
-            coupait en « Non id… ». Trois points d'interrogation disent la
-            même chose et tiennent partout. */}
-        <span className="fid-card-nom">
-          {possedee && !anonyme ? carte.nom : '???'}
-        </span>
-        <span className="fid-card-face">{faceLabel(carte.face)}</span>
-      </div>
+      {/* L'illustration porte déjà le prénom : on ne l'écrit qu'en dessous
+          d'une case vide, pour dire ce qui manque. « Non identifié » ne tient
+          pas sur une vignette de 70 px et se coupait en « Non id… ». */}
+      {!montreLaPhoto && (
+        <div className="fid-card-pied">
+          <span className="fid-card-nom">{anonyme ? '???' : carte.nom}</span>
+          <span className="fid-card-face">{faceLabel(carte.face)}</span>
+        </div>
+      )}
     </div>
   );
 }
