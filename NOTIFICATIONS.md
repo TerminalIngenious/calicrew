@@ -1,16 +1,38 @@
 # Notifications push
 
-Quatre rendez-vous quotidiens, envoyés par des Vercel Cron Jobs :
+Quatre rendez-vous quotidiens, envoyés par des Vercel Cron Jobs. Deux ont une
+heure à tenir, deux tombent au hasard :
 
-| Rappel | Heure visée | Cron UTC | Condition |
-|---|---|---|---|
-| Créatine | 20h | `0 18 * * *` (**été**) | rappel activé, créatine non cochée |
-| Défi du jour | 17h | `0 15 * * *` (**été**) | défi du jour non validé |
-| Défi surprise / patron du jour | 14h | `0 13 * * *` (hiver) | famille « vannes » activée |
-| La vanne du soir | 21h | `0 20 * * *` (hiver) | famille « vannes » activée |
+| Rappel | Heure | Condition |
+|---|---|---|
+| Créatine | 20h, tous les jours | rappel activé, créatine non cochée |
+| Défi du jour | 17h, tous les jours | défi du jour non validé |
+| Défi surprise / patron du jour | une heure tirée entre 10h et 17h | notifications activées |
+| La vanne du soir | une heure tirée entre 19h et 22h | notifications activées |
 
 > Les deux premiers sont encore sur les valeurs d'été alors qu'on est passé
 > à l'heure d'hiver : ils arrivent donc une heure trop tôt. Voir plus bas.
+
+### Comment une heure peut être tirée au hasard
+
+Le plan Hobby ne déclenche un cron qu'**une fois par jour** : un cron unique
+ne peut pas se réveiller à une heure différente chaque jour. On inscrit donc
+**un cron par heure possible**, chacun portant la sienne en paramètre :
+
+```
+/api/cron/hasard?h=9   /api/cron/hasard?h=11   /api/cron/hasard?h=13   /api/cron/hasard?h=15
+/api/cron/ambiance?h=18   /api/cron/ambiance?h=19   /api/cron/ambiance?h=20
+```
+
+`heureDuJour()` (dans `api/_lib/groupe.ts`) dit lequel est de service
+aujourd'hui. Les autres se réveillent, lisent, et repartent sans rien envoyer.
+Le tirage ne dépend que du numéro du jour : tout le groupe doit recevoir la
+vanne à la même heure, sinon ce n'est plus une vanne partagée.
+
+Ces heures-là sont en **UTC et ne suivent pas le changement d'heure** : une
+notification faite pour tomber n'importe quand ne perd rien à décaler d'une
+heure entre l'été et l'hiver. Il n'y a donc rien à faire dessus deux fois par
+an — seules la créatine et le défi du jour ont une heure à tenir.
 
 Et trois notifications en temps réel, déclenchées par l'app et non par l'heure :
 
@@ -86,17 +108,19 @@ suivre le changement d'heure automatiquement, ni avec un horaire multiple
 
 Il faut donc basculer les horaires à la main, deux fois par an :
 
-| Période | `creatine` (20h) | `daily-challenge` (17h) | `hasard` (14h) | `ambiance` (21h) |
-|---|---|---|---|---|
-| Heure d'hiver (dernier dimanche d'octobre → dernier dimanche de mars) | `0 19 * * *` | `0 16 * * *` | `0 13 * * *` | `0 20 * * *` |
-| Heure d'été (dernier dimanche de mars → dernier dimanche d'octobre) | `0 18 * * *` | `0 15 * * *` | `0 12 * * *` | `0 19 * * *` |
+Deux crons seulement sont concernés — ceux qui ont une heure à tenir :
 
-**État au 5 novembre 2026** : `hasard` et `ambiance` sont sur les valeurs
-d'hiver, donc justes. `creatine` et `daily-challenge` sont restés sur les
-valeurs d'été depuis le 25 octobre et arrivent **une heure trop tôt** — 19h et
-16h au lieu de 20h et 17h. Il suffit de les passer à `0 19` et `0 16`.
+| Période | `creatine` (20h) | `daily-challenge` (17h) |
+|---|---|---|
+| Heure d'hiver (dernier dimanche d'octobre → dernier dimanche de mars) | `0 19 * * *` | `0 16 * * *` |
+| Heure d'été (dernier dimanche de mars → dernier dimanche d'octobre) | `0 18 * * *` | `0 15 * * *` |
 
-**À faire le 28 mars 2027** : repasser les quatre aux valeurs d'été.
+**État au 5 novembre 2026** : tous deux sont restés sur les valeurs d'été
+depuis le 25 octobre et arrivent **une heure trop tôt** — 19h et 16h au lieu
+de 20h et 17h. Il suffit de les passer à `0 19` et `0 16`.
+
+**À faire le 28 mars 2027** : repasser aux valeurs d'été. Les crons `hasard`
+et `ambiance` n'ont rien à changer.
 
 ## Mise en route
 

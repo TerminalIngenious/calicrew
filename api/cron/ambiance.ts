@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getDb, configureWebPush, isAuthorized, sendTo, getDayNumber } from '../_lib/push.js';
 import {
   lisAbonnements, veutAmbiance, lisNoms, statsDe,
-  jourDeSemaine, quantieme, debutDuJour, moisCourant,
+  jourDeSemaine, quantieme, debutDuJour, moisCourant, heureDuJour,
   type Membre,
 } from '../_lib/groupe.js';
 import {
@@ -17,6 +17,9 @@ const SEUIL_LEADER = 5;
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
 
+/** Les heures possibles, en UTC — soit 19h-21h l'hiver, 20h-22h l'été. */
+const HEURES = [18, 19, 20];
+
 /**
  * La vanne du soir.
  *
@@ -24,9 +27,18 @@ const JOUR_MS = 24 * 60 * 60 * 1000;
  * n'autorise qu'un déclenchement par jour et par cron, donc six crons
  * auraient voulu dire six notifications certains soirs. Ici l'ordre des `if`
  * fait le tri — on ne dit qu'une chose, la plus intéressante du jour.
+ *
+ * L'heure, elle, change tous les soirs : trois crons pointent ici, chacun
+ * avec la sienne en paramètre, et seul celui de service va au bout. Une vanne
+ * attendue à heure fixe se lit d'avance.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+
+  const demandee = Number(req.query.h);
+  if (demandee !== heureDuJour(getDayNumber(), HEURES, 7)) {
+    return res.status(200).json({ skipped: true, heure: demandee });
+  }
 
   configureWebPush();
   const db = getDb();

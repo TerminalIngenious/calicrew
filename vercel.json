@@ -2,8 +2,13 @@
   "crons": [
     { "path": "/api/cron/daily-challenge", "schedule": "0 15 * * *" },
     { "path": "/api/cron/creatine", "schedule": "0 18 * * *" },
-    { "path": "/api/cron/hasard", "schedule": "0 13 * * *" },
-    { "path": "/api/cron/ambiance", "schedule": "0 20 * * *" }
+    { "path": "/api/cron/hasard?h=9", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/hasard?h=11", "schedule": "0 11 * * *" },
+    { "path": "/api/cron/hasard?h=13", "schedule": "0 13 * * *" },
+    { "path": "/api/cron/hasard?h=15", "schedule": "0 15 * * *" },
+    { "path": "/api/cron/ambiance?h=18", "schedule": "0 18 * * *" },
+    { "path": "/api/cron/ambiance?h=19", "schedule": "0 19 * * *" },
+    { "path": "/api/cron/ambiance?h=20", "schedule": "0 20 * * *" }
   ],
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/" }

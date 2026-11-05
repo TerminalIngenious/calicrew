@@ -241,3 +241,35 @@ export async function classement(
     })
     .sort((a, b) => b.reps - a.reps);
 }
+
+/**
+ * L'heure du jour pour une famille de notifications.
+ *
+ * Le plan Hobby ne déclenche un cron qu'une fois par jour : impossible de
+ * tirer une heure au hasard depuis un cron unique. On inscrit donc un cron
+ * par heure possible, chacun portant la sienne en paramètre, et c'est la
+ * fonction ci-dessous qui dit laquelle est de service aujourd'hui. Les autres
+ * se réveillent, lisent, et repartent sans rien envoyer.
+ *
+ * Le tirage dépend du numéro du jour et de rien d'autre : tout le groupe doit
+ * recevoir la notification à la même heure, sinon la vanne du soir n'est plus
+ * une vanne partagée. Le brassage évite la régularité d'un simple modulo, qui
+ * aurait donné un cycle visible en quatre jours.
+ *
+ * Les heures sont en UTC et ne suivent pas le changement d'heure : ces
+ * notifications sont faites pour tomber n'importe quand, une heure de
+ * décalage entre l'été et l'hiver ne se remarque pas. Seules la créatine et
+ * le défi du jour ont une heure à tenir.
+ */
+export function heureDuJour(jour: number, heures: number[], sel: number): number {
+  // Un brassage par bits et non une multiplication : sur quatre heures, une
+  // suite linéaire du numéro du jour redonnait un cycle de quatre jours,
+  // parfaitement prévisible au bout d'une semaine.
+  let h = (jour + sel) | 0;
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x45d9f3b);
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x45d9f3b);
+  h ^= h >>> 16;
+  return heures[Math.abs(h) % heures.length];
+}
