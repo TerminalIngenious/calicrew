@@ -7,6 +7,26 @@ Deux rappels quotidiens, envoyés par des Vercel Cron Jobs :
 | Créatine — « Chef, t'as pris ta créatine ?? » | 20h | `0 18 * * *` (été) | rappel activé |
 | Défi du jour | 17h | `0 15 * * *` (été) | défi du jour non validé |
 
+## Les textes
+
+Les deux rappels tournent sur une liste de phrases, une par jour, dans
+`api/_lib/messages.ts`. Le texte est choisi par le numéro du jour et non au
+hasard : tout le groupe reçoit le même, ce qui est justement l'intérêt.
+
+Pour en ajouter une, il suffit de l'écrire dans le tableau — la rotation
+s'allonge toute seule. Les deux phrases d'origine sont gardées en tête de
+liste.
+
+## L'activation côté app
+
+Une carte sur l'accueil (`src/components/NotifGate.tsx`) réclame l'activation
+tant qu'aucun rappel n'est actif, et n'a pas de croix pour la fermer. Elle
+disparaît dès que les rappels sont activés, et ne revient plus.
+
+Elle ne peut pas forcer l'autorisation : le navigateur ne montre sa demande
+qu'après un vrai clic, et une permission refusée ne peut plus être redemandée
+par le code. Dans ce cas la carte bascule sur les instructions de réglages.
+
 ## Heure d'été, heure d'hiver
 
 Les crons Vercel sont en UTC et ne gèrent pas les fuseaux. Le projet est sur le plan

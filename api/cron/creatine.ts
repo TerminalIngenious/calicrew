@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, isAuthorized, sendTo, getDayKey, type Subscription } from '../_lib/push.js';
+import { getDb, configureWebPush, isAuthorized, sendTo, getDayKey, getDayNumber, type Subscription } from '../_lib/push.js';
+import { CREATINE_MESSAGES, messageDuJour } from '../_lib/messages.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
@@ -27,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     pending.map((d) =>
       sendTo(d.data() as Subscription, {
         title: 'CaliCrew',
-        body: "Chef, t'as pris ta créatine ??",
+        body: messageDuJour(CREATINE_MESSAGES, getDayNumber()),
         tag: 'creatine',
         url: '/',
       })

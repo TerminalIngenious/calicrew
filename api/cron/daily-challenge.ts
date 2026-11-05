@@ -3,6 +3,7 @@ import {
   getDb, configureWebPush, isAuthorized, sendTo,
   getDayStart, getDayNumber, type Subscription,
 } from '../_lib/push.js';
+import { DAILY_CHALLENGE_MESSAGES, messageDuJour } from '../_lib/messages.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
@@ -32,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     pending.map((d) =>
       sendTo(d.data() as Subscription, {
         title: 'Défi du jour',
-        body: "T'as pas encore fait ton défi du jour ! Il te reste la soirée.",
+        body: messageDuJour(DAILY_CHALLENGE_MESSAGES, getDayNumber()),
         tag: 'daily-challenge',
         url: '/battlepass',
       })

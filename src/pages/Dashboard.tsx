@@ -7,6 +7,7 @@ import { Plus, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-rea
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import PinkRibbon from '../components/PinkRibbon';
+import NotifGate from '../components/NotifGate';
 import { getSeasonalTheme } from '../lib/seasonalTheme';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -154,7 +155,7 @@ const UPDATES = [
 ];
 
 export default function Dashboard() {
-  const { displayName: myName } = useAuth();
+  const { user, displayName: myName } = useAuth();
   const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
   const [showUpdates, setShowUpdates] = useState(false);
@@ -217,6 +218,10 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
+          {/* Avant tout le reste : c'est le seul endroit où on peut encore
+              rattraper quelqu'un qui n'a pas activé ses rappels. */}
+          {user && <NotifGate uid={user.uid} />}
 
           <span className="stats-period">Cette semaine</span>
           <div className="stats-grid">

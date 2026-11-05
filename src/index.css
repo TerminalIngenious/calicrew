@@ -7650,3 +7650,78 @@ body {
     background: transparent;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   L'appel aux notifications, sur l'accueil
+   ──────────────────────────────────────────────────────────────────────────
+   Elle doit se remarquer sans crier : c'est la première chose de la page,
+   au-dessus des stats de la semaine, mais elle ne reste qu'un temps. D'où le
+   fond orangé très voilé plutôt qu'un bandeau plein.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.notif-gate {
+  display: flex;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: var(--radius);
+}
+
+.notif-gate-icon {
+  display: flex;
+  flex: 0 0 2.25rem;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  background: rgba(255, 107, 53, 0.15);
+  border-radius: 50%;
+  color: var(--accent);
+}
+
+/* Bloquées, les notifications ne sont plus une invitation mais un constat :
+   l'orange de l'appel à l'action n'aurait plus de sens. */
+.notif-gate-icon.refuse {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.notif-gate-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.notif-gate-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.notif-gate-sub {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.notif-gate-link {
+  align-self: flex-start;
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.notif-gate-error {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--danger);
+}
+
+.notif-gate-btn {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
