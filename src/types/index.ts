@@ -327,4 +327,26 @@ export interface UserProgress {
    * elle, le plafond d'un jour continuerait de s'appliquer le lendemain.
    */
   enduranceXpDay?: { date: string; xp: number };
+  /**
+   * Event FaceID. Volontairement à part de `ownedCards` : ces cartes ne font
+   * partie d'aucune saison, ne comptent dans aucune collection et ne doivent
+   * pas pouvoir servir d'avatar. Voir lib/faceid.ts.
+   */
+  faceid?: FaceIdProgress;
+  /** Compteurs du mois tenus pour les notifications, écrits par le serveur. */
+  moisCourant?: {
+    mois: string;
+    reps: number;
+    seances: number;
+    derniere: number;
+    dernierPing?: string | null;
+  };
+}
+
+/** Voir lib/faceid.ts — stocké tel quel dans userProgress. */
+export interface FaceIdProgress {
+  cartes: Record<string, number>;
+  boosters: number;
+  questsPrises: string[];
+  bienvenue?: boolean;
 }

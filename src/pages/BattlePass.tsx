@@ -7,7 +7,8 @@ import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getD
 import { getCardArt } from '../lib/cardsS2Art';
 import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
-import { totalReps, exerciseReps, exerciseSeconds } from '../lib/stats';
+import { questValue } from '../lib/quests';
+import FaceIdButton from '../components/FaceIdButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
@@ -175,45 +176,7 @@ export default function BattlePass() {
   }
 
   function getQuestValue(quest: Quest, scope = weekSessions): number {
-    switch (quest.type) {
-      case 'sessions':
-        return scope.length;
-      case 'reps':
-        return totalReps(scope);
-      case 'duration':
-        return scope.reduce((sum, s) => sum + (s.duration || 0), 0);
-      case 'exercises':
-        return new Set(scope.flatMap((s) => (s.exercises || []).map((e) => e.exerciseId))).size;
-      case 'sets':
-        return scope.reduce(
-          (sum, s) => sum + (s.exercises || []).reduce(
-            (eSum, ex) => eSum + (ex.sets || []).filter((set) => set.completed).length, 0
-          ), 0
-        );
-      case 'amrap':
-        return scope.filter((s) => s.mode === 'amrap').length;
-      case 'running_sessions':
-        return scope.filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running')).length;
-      case 'running_duration':
-        return scope
-          .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
-          .reduce((sum, s) => sum + (s.duration || 0), 0);
-      case 'exercise_reps':
-        return scope.reduce(
-          (sum, s) => sum + (s.exercises || [])
-            .filter((ex) => ex.exerciseId === quest.exerciseId)
-            .reduce((eSum, ex) => eSum + exerciseReps(ex), 0),
-          0
-        );
-      case 'exercise_duration':
-        // Couvre le running (runDuration) et les isométriques comptés en secondes.
-        return scope.reduce(
-          (sum, s) => sum + (s.exercises || [])
-            .filter((ex) => ex.exerciseId === quest.exerciseId)
-            .reduce((eSum, ex) => eSum + (ex.runDuration || 0) + exerciseSeconds(ex), 0),
-          0
-        );
-    }
+    return questValue(quest, scope);
   }
 
   function isQuestClaimed(questId: string): boolean {
@@ -416,6 +379,10 @@ export default function BattlePass() {
           </div>
         </div>
       </div>
+
+      {/* L'event est posé par-dessus le pass, pas dedans : au-dessus des
+          onglets, dans une forme qui n'appartient qu'à lui. */}
+      <FaceIdButton faceid={progress.faceid} />
 
       <div className="bp-tabs">
         <button className={`bp-tab ${tab === 'quetes' ? 'active' : ''}`} onClick={() => setTab('quetes')}>
