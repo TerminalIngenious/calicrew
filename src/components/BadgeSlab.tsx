@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import RankBadgeIcon from './RankBadgeIcon';
-import { BADGE_RANKS } from '../lib/badges';
+import { BADGE_RANKS, estEvenement } from '../lib/badges';
 import type { RankBadge } from '../types';
 
 /**
@@ -17,14 +17,17 @@ interface Props {
   onOpen: () => void;
 }
 
-/** « 4 or · 5 argent · 5 bronze », en sautant les métaux absents. */
+/** « 1 event · 4 or · 5 argent », en sautant ce qui manque. */
 function resume(badges: RankBadge[]): string {
-  return BADGE_RANKS.map((rang, i) => {
-    const n = badges.filter((b) => b.rank === i).length;
+  // Les badges d'événement n'ont pas de métal : comptés par `rank`, ils
+  // seraient passés pour de l'or.
+  const events = badges.filter(estEvenement).length;
+  const metaux = badges.filter((b) => !estEvenement(b));
+  const parts = BADGE_RANKS.map((rang, i) => {
+    const n = metaux.filter((b) => b.rank === i).length;
     return n > 0 ? `${n} ${rang.name.toLowerCase()}` : null;
-  })
-    .filter(Boolean)
-    .join(' · ');
+  });
+  return [events > 0 ? `${events} event` : null, ...parts].filter(Boolean).join(' · ');
 }
 
 export default function BadgeSlab({ badges, onOpen }: Props) {

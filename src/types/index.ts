@@ -246,6 +246,14 @@ export type RankCategory = 'reps' | 'variety' | 'time';
 export interface RankBadge {
   /** `${monthKey}-${category}-${rank}` : sert à ne pas attribuer deux fois le même. */
   id: string;
+  /**
+   * Absent = badge de classement, le seul qui existait au départ. Un badge
+   * d'événement n'a ni podium ni mois : `category`, `rank` et `monthKey` ne
+   * sont là que parce que le type est partagé, et ne veulent rien dire.
+   */
+  kind?: 'rank' | 'event';
+  /** Pour un badge d'événement : lequel. */
+  eventId?: string;
   category: RankCategory;
   /** 0 = 1er, 1 = 2e, 2 = 3e. */
   rank: number;

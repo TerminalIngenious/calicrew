@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProgress } from '../lib/useUserProgress';
-import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS } from '../lib/badges';
+import { sortBadges, badgeTitle, badgeMonthLabel, BADGE_RANKS, estEvenement, eventStyle } from '../lib/badges';
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
@@ -66,8 +66,8 @@ export default function Badges() {
             className="badge-modal"
             onClick={(e) => e.stopPropagation()}
             style={{
-              '--metal-from': BADGE_RANKS[selectedBadge.rank]?.from,
-              '--metal-to': BADGE_RANKS[selectedBadge.rank]?.to,
+              '--metal-from': eventStyle(selectedBadge)?.from ?? BADGE_RANKS[selectedBadge.rank]?.from,
+              '--metal-to': eventStyle(selectedBadge)?.to ?? BADGE_RANKS[selectedBadge.rank]?.to,
             } as React.CSSProperties}
           >
             <button className="member-modal-close" onClick={() => setSelectedBadge(null)}>
@@ -75,12 +75,24 @@ export default function Badges() {
             </button>
             <RankBadgeIcon badge={selectedBadge} size={112} />
             <h3 className="badge-modal-title">{badgeTitle(selectedBadge)}</h3>
-            <span className="badge-modal-metal">{BADGE_RANKS[selectedBadge.rank]?.name}</span>
-            <div className="badge-modal-meta">
-              <span>{selectedBadge.seasonName}</span>
-              <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
-              <span>Groupe {selectedBadge.groupName}</span>
-            </div>
+            {estEvenement(selectedBadge) ? (
+              <>
+                <span className="badge-modal-metal">{eventStyle(selectedBadge)?.soustitre}</span>
+                <div className="badge-modal-meta">
+                  <span>Événement</span>
+                  <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="badge-modal-metal">{BADGE_RANKS[selectedBadge.rank]?.name}</span>
+                <div className="badge-modal-meta">
+                  <span>{selectedBadge.seasonName}</span>
+                  <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
+                  <span>Groupe {selectedBadge.groupName}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

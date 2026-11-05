@@ -204,6 +204,34 @@
   color: rgba(216, 245, 230, 0.55);
 }
 
+/* ── Le fichier bouclé ── */
+
+.fid-fini {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, rgba(47, 224, 138, 0.2), rgba(47, 224, 138, 0.05));
+  border: 1px solid rgba(47, 224, 138, 0.5);
+  border-radius: var(--radius);
+}
+
+.fid-fini-titre {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #eafff4;
+}
+
+.fid-fini-sous {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(216, 245, 230, 0.6);
+}
+
 /* ── Sections ── */
 
 .fid-section { margin-bottom: 2rem; }

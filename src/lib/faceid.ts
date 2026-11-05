@@ -1,4 +1,4 @@
-import type { FaceIdProgress, Quest } from '../types';
+import type { FaceIdProgress, Quest, RankBadge } from '../types';
 
 export type { FaceIdProgress };
 
@@ -11,7 +11,14 @@ export type { FaceIdProgress };
  * ressemble au reste de l'app n'est plus un event.
  */
 
-export const FACEID_DEBUT = new Date(2026, 10, 9, 0, 0, 0).getTime();
+/*
+ * L'ouverture est calée sur 10h et non sur minuit : c'est l'heure à laquelle
+ * `getWeekStart()` fait basculer la semaine, donc celle où arrivent les
+ * nouvelles quêtes hebdomadaires. À minuit, l'event se serait allumé dix
+ * heures avant ses propres missions, et le lundi matin aurait montré un
+ * événement sans rien à y faire.
+ */
+export const FACEID_DEBUT = new Date(2026, 10, 9, 10, 0, 0).getTime();
 export const FACEID_FIN = new Date(2026, 10, 30, 23, 59, 59).getTime();
 
 export interface MembreFaceId {
@@ -157,7 +164,7 @@ function melange<T>(liste: T[]): T[] {
  * d'ouverture : dix boosters pour huit nécessaires.
  */
 export const SEMAINES: number[] = [
-  new Date(2026, 10, 9, 10, 0, 0).getTime(),
+  FACEID_DEBUT,
   new Date(2026, 10, 16, 10, 0, 0).getTime(),
   new Date(2026, 10, 23, 10, 0, 0).getTime(),
 ];
@@ -204,10 +211,21 @@ export function questsDeSemaine(indexSemaine: number): Quest[] {
   }));
 }
 
-/** L'index de la semaine d'event en cours, ou -1 hors des trois semaines. */
+const SEMAINE_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * L'index de la semaine d'event en cours, ou -1 hors des trois semaines.
+ *
+ * La borne haute compte autant que la basse : l'event court jusqu'au 30, mais
+ * la dernière semaine de missions s'achève le 29. Sans elle, le 30 affichait
+ * encore les missions de la semaine écoulée, avec des compteurs figés que
+ * plus aucune séance ne faisait bouger.
+ */
 export function semaineCourante(maintenant = Date.now()): number {
   for (let i = SEMAINES.length - 1; i >= 0; i--) {
-    if (maintenant >= SEMAINES[i]) return i;
+    if (maintenant >= SEMAINES[i]) {
+      return maintenant < SEMAINES[i] + SEMAINE_MS ? i : -1;
+    }
   }
   return -1;
 }
@@ -219,4 +237,32 @@ export function evenementEnCours(maintenant = Date.now()): boolean {
 /** Jours restants avant la fin, 0 si c'est fini. */
 export function joursRestants(maintenant = Date.now()): number {
   return Math.max(0, Math.ceil((FACEID_FIN - maintenant) / (24 * 60 * 60 * 1000)));
+}
+
+// ── Le badge ──
+
+/** Identifiant du badge de l'event. Un seul, et il ne se regagne pas. */
+export const BADGE_ID = 'event-faceid';
+
+/**
+ * Le badge de fin.
+ *
+ * Il rejoint les badges de classement du profil, mais il n'a ni podium ni
+ * groupe : on ne le gagne pas en finissant devant quelqu'un, mais en allant
+ * au bout des vingt-quatre. `category` et `rank` ne sont là que parce que le
+ * type est partagé — rien ne les lit pour un badge d'événement.
+ */
+export function badgeFaceId(maintenant = Date.now()): RankBadge {
+  return {
+    id: BADGE_ID,
+    kind: 'event',
+    eventId: 'faceid',
+    category: 'reps',
+    rank: 0,
+    monthKey: '2026-11',
+    seasonId: '',
+    seasonName: 'Événement',
+    groupName: '',
+    earnedAt: maintenant,
+  };
 }

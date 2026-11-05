@@ -7216,6 +7216,12 @@ body {
   transform: translateY(-50%) rotate(-5deg);
 }
 
+/* Un badge d'événement a le cœur sombre : son dessin doit s'allumer dessus,
+   pas s'y fondre comme une icône blanche sur fond coloré. */
+.rank-badge.event .rank-badge-core {
+  color: #5cf5ab;
+}
+
 /* Trait de séparation dans le profil. */
 .profile-trait {
   height: 1px;

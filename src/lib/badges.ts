@@ -36,8 +36,50 @@ const MONTHS = [
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
 ];
 
-/** 'TOP 2 Reps' */
+/**
+ * Les badges d'événement.
+ *
+ * Ils n'ont ni podium ni mois : on ne les gagne pas en finissant devant
+ * quelqu'un, mais en allant au bout de quelque chose. Leur habillage est
+ * celui de leur événement, pas celui du métal.
+ */
+export interface EventBadgeStyle {
+  titre: string;
+  soustitre: string;
+  /** Monture : trois tons, comme un métal. */
+  from: string;
+  mid: string;
+  to: string;
+  /** Cœur, volontairement sombre pour que le dessin ressorte. */
+  coreFrom: string;
+  coreTo: string;
+  glow: string;
+}
+
+export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
+  faceid: {
+    titre: 'FaceID',
+    soustitre: 'Fichier complet',
+    from: '#9bf7cb',
+    mid: '#2fe08a',
+    to: '#0a6b40',
+    coreFrom: '#073a26',
+    coreTo: '#04130c',
+    glow: 'rgba(47, 224, 138, 0.5)',
+  },
+};
+
+export function estEvenement(badge: RankBadge): boolean {
+  return badge.kind === 'event';
+}
+
+export function eventStyle(badge: RankBadge): EventBadgeStyle | undefined {
+  return badge.eventId ? EVENT_BADGES[badge.eventId] : undefined;
+}
+
+/** 'TOP 2 Reps', ou le nom de l'événement. */
 export function badgeTitle(badge: RankBadge): string {
+  if (estEvenement(badge)) return eventStyle(badge)?.titre ?? 'Événement';
   return `${BADGE_RANKS[badge.rank]?.label ?? 'TOP'} ${BADGE_CATEGORIES[badge.category]?.label ?? ''}`.trim();
 }
 
@@ -52,7 +94,16 @@ export function makeBadgeId(monthKey: string, category: RankCategory, rank: numb
   return `${monthKey}-${category}-${rank}`;
 }
 
-/** Les plus prestigieux d'abord, puis les plus récents. */
+/**
+ * Les événements d'abord, puis les plus prestigieux, puis les plus récents.
+ *
+ * Un badge d'événement passe devant l'or : il ne se regagnera jamais, là où
+ * un TOP 1 revient tous les mois.
+ */
 export function sortBadges(badges: RankBadge[]): RankBadge[] {
-  return [...badges].sort((a, b) => a.rank - b.rank || b.earnedAt - a.earnedAt);
+  return [...badges].sort((a, b) => {
+    const ea = estEvenement(a) ? 0 : 1;
+    const eb = estEvenement(b) ? 0 : 1;
+    return ea - eb || a.rank - b.rank || b.earnedAt - a.earnedAt;
+  });
 }

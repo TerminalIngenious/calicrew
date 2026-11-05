@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, arrayUnion } from 'firebase/firestore';
 import { ArrowLeft, Package, Check } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,10 +11,12 @@ import Loader from '../components/Loader';
 import BottomNav from '../components/BottomNav';
 import FaceIdCard from '../components/FaceIdCard';
 import BoosterOpening from '../components/BoosterOpening';
+import RankBadgeIcon from '../components/RankBadgeIcon';
 import {
   CARTES, MEMBRES, TOTAL_CARTES, SEMAINES,
   ajoute, collectionComplete, evenementEnCours, joursRestants, lisFaceId,
   nbPossedees, questsDeSemaine, semaineCourante, tireBooster,
+  BADGE_ID, badgeFaceId,
 } from '../lib/faceid';
 import type { Quest } from '../types';
 import './FaceId.css';
@@ -69,6 +71,26 @@ export default function FaceId() {
         console.error('Booster d\'ouverture impossible :', err);
       });
   }, [user, progress, enCours, fid]);
+
+  /**
+   * Le badge de fin, dès que les vingt-quatre sont là.
+   *
+   * Posé ici et non dans un cron : c'est le seul endroit qui sait, à la
+   * seconde près, que la collection vient d'être bouclée — et la seule
+   * seconde où l'annoncer a du sens.
+   */
+  const badgeEnvoye = useRef(false);
+  useEffect(() => {
+    if (!user || !progress || !complete) return;
+    if ((progress.badges || []).some((b) => b.id === BADGE_ID)) return;
+    if (badgeEnvoye.current) return;
+    badgeEnvoye.current = true;
+    updateDoc(doc(db, 'userProgress', user.uid), { badges: arrayUnion(badgeFaceId()) })
+      .catch((err) => {
+        badgeEnvoye.current = false;
+        console.error('Badge FaceID impossible :', err);
+      });
+  }, [user, progress, complete]);
 
   async function ouvreBooster() {
     if (!user || occupe || fid.boosters <= 0) return;
@@ -150,6 +172,18 @@ export default function FaceId() {
         </div>
         <span className="fid-restant">{texteRestant(enCours, maintenant)}</span>
       </section>
+
+      {complete && (
+        <div className="fid-fini">
+          <RankBadgeIcon badge={badgeFaceId(0)} size={64} />
+          <div>
+            <span className="fid-fini-titre">Fichier complet</span>
+            <span className="fid-fini-sous">
+              Les vingt-quatre visages sont identifiés. Le badge FaceID est dans ton profil.
+            </span>
+          </div>
+        </div>
+      )}
 
       {fid.boosters > 0 && (
         <button className="fid-slot" onClick={ouvreBooster} disabled={occupe}>
