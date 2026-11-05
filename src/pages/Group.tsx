@@ -27,7 +27,7 @@ import RankBadgeIcon from '../components/RankBadgeIcon';
 import TradeCardPicker from '../components/TradeCardPicker';
 import type { Group as GroupType, LeaderboardEntry, Session, UserProgress, TradeListing, TradeKind, Card, CardRarity, RankBadge, RankCategory } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package } from 'lucide-react';
+import { Users, Trophy, Medal, Search, Clock, Zap, Target, UserPlus, UserCheck, UserX, ChevronDown, Crown, LogOut, X, Dumbbell, ArrowLeftRight, Check, MessageCircle, Package, RotateCcw } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import GroupChat from '../components/GroupChat';
@@ -593,14 +593,22 @@ export default function Group() {
     }
   }
 
+  /**
+   * Le temps avant la remise à zéro du classement.
+   *
+   * Une seule unité : « 25j 3h » prenait toute la ligne sur un téléphone, et
+   * les heures n'intéressent personne quand il reste trois semaines. Elles
+   * n'apparaissent que le dernier jour, quand elles comptent enfin.
+   */
   function getMonthResetLabel(): string {
     const now = new Date();
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
     const diff = nextMonth.getTime() - now.getTime();
     const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-    const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-    if (days > 0) return `${days}j ${hours}h`;
-    return `${hours}h`;
+    if (days > 0) return `${days} j`;
+    const hours = Math.floor(diff / (60 * 60 * 1000));
+    if (hours > 0) return `${hours} h`;
+    return `${Math.max(1, Math.floor(diff / 60000))} min`;
   }
 
   const MONTH_NAMES = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
@@ -1117,7 +1125,10 @@ export default function Group() {
               <div className="leaderboard-header">
                 <div className="bp-section-title-row">
                   <h3>Classement — {currentMonthName}</h3>
-                  <span className="bp-quest-timer">Reset dans {getMonthResetLabel()}</span>
+                  <span className="bp-quest-timer reset-chip">
+                    <RotateCcw size={12} />
+                    {getMonthResetLabel()}
+                  </span>
                 </div>
                 <div className="sort-tabs">
                   <button

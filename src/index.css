@@ -2234,11 +2234,52 @@ body {
 }
 
 /* Sort tabs */
+/*
+ * Sur téléphone, le titre, le compte à rebours et les quatre onglets de tri
+ * ne tiennent pas sur une ligne : « Classement — novembre » passait à la
+ * ligne et venait buter contre « Reset dans 25j 3h ». Deux lignes, donc : le
+ * mois et le compte à rebours en haut, les onglets en dessous sur toute la
+ * largeur. La ligne unique revient sur ordinateur, où la place existe.
+ */
 .leaderboard-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
   margin-bottom: 0.75rem;
+}
+
+.leaderboard-header .bp-section-title-row {
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.leaderboard-header h3 {
+  /* Le mois tient sur une ligne, et le compte à rebours garde sa place. */
+  white-space: nowrap;
+}
+
+/* Le compte à rebours devient une pastille : posé nu à côté du titre, on le
+   lisait comme la suite de la phrase. */
+.reset-chip {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Les quatre onglets se partagent la largeur au lieu de se serrer à gauche. */
+.leaderboard-header .sort-tabs {
+  gap: 0.35rem;
+}
+
+.leaderboard-header .sort-tabs .sort-tab {
+  flex: 1;
+  text-align: center;
 }
 
 .leaderboard-header h3 {
@@ -3060,16 +3101,28 @@ body {
 }
 
 /* Battle Pass */
+/*
+ * Le bandeau de saison monte jusqu'en haut de l'écran, mais pas jusque sous
+ * l'encoche.
+ *
+ * `.page` réserve `env(safe-area-inset-top)` ; ce `padding-top: 0` l'annulait,
+ * et sur un iPhone en app installée le nom de la saison et le compte à
+ * rebours passaient derrière la barre d'état. On garde la zone de sécurité et
+ * on ne retire que le retrait ordinaire, pour que le fond reste pleine
+ * largeur.
+ */
 .bp-page {
-  padding-top: 0 !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
 }
 
 .bp-hero {
   position: relative;
-  margin: -1rem -1rem 1rem -1rem;
-  padding: 1.25rem 1rem 1rem;
+  margin: 0 -1rem 1rem;
+  /* De l'air au-dessus du nom de saison : collé au bord, il se lisait comme
+     une continuation de la barre d'état. */
+  padding: 1.75rem 1rem 1rem;
   overflow: hidden;
-  max-height: 200px;
+  max-height: 230px;
 }
 
 .bp-hero-bg {
@@ -7396,14 +7449,16 @@ body {
     flex: 0 1 18rem;
   }
 
-  /* Le mois et le compte à rebours se touchaient faute d'écart, alors que la
-     place ne manque pas ici. */
+  /* La place existe : titre, compte à rebours et onglets reviennent sur une
+     seule ligne. */
   .leaderboard-header {
+    flex-direction: row;
+    align-items: center;
     gap: 1.5rem;
   }
 
-  .leaderboard-header .bp-section-title-row {
-    gap: 0.75rem;
+  .leaderboard-header .sort-tabs .sort-tab {
+    flex: 0 0 auto;
   }
 
   /* La souris attend un survol sur ce qui s'ouvre. */
