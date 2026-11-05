@@ -415,15 +415,11 @@
  * place sur une vignette qui n'en a pas. Il ne reste qu'un liseré vert, pour
  * la distinguer d'une case vide d'un coup d'œil.
  */
+/* Une carte dessinée porte son propre cadre : l'emplacement s'efface
+   derrière elle et ne garde que sa fonction de case. */
 .fid-card.illustree {
   background: none;
-}
-
-/* Les cartes sont livrées en 3/4 ; `contain` plutôt que `cover` pour qu'un
-   format légèrement différent laisse une marge au lieu d'être rogné. */
-.fid-card.illustree .fid-card-visuel img {
-  object-fit: contain;
-  object-position: center;
+  border-color: transparent;
 }
 
 /* Les crochets de visée, un par coin. */

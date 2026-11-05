@@ -52,24 +52,71 @@ export const MEMBRES: MembreFaceId[] = [
 
 export type Face = 'a' | 'b';
 
+/** Les cinq statistiques, dans l'ordre où elles sont imprimées. */
+export const STATS = ['Gainage', 'Régularité', 'Explosivité', 'Ego', 'Excuses'] as const;
+
 export interface CarteFaceId {
   id: string;
   slug: string;
   nom: string;
   face: Face;
-  /** Chemin de l'image. Absente tant que les photos ne sont pas fournies. */
+  /** Numéro imprimé sur la carte, de 1 à 24. */
+  numero: number;
+  /** La photo détourée. Absente tant qu'elle n'est pas fournie. */
   image: string;
+  /** Le surnom imprimé sous le prénom — différent d'une face à l'autre. */
+  surnom: string;
+  /** La note globale, sur 100. */
+  note: number;
+  /** Les cinq valeurs, dans l'ordre de STATS. */
+  stats: number[];
 }
 
+/**
+ * Ce qui est imprimé sur chaque carte.
+ *
+ * Les deux faces d'une même personne n'ont rien en commun sauf le prénom :
+ * c'est justement le sujet de l'event. Face A flatte, Face B accable — et la
+ * dernière statistique, « Excuses », s'inverse d'une face à l'autre. C'est
+ * elle qui fait la blague, donc elle est toujours en dernier, à la place où
+ * l'œil termine sa lecture.
+ *
+ * Tableau à remplir avec les vrais surnoms et les vraies valeurs. Les cartes
+ * non renseignées prennent les valeurs ci-dessous, pour que la mise en page
+ * reste vérifiable avant que tout soit écrit.
+ */
+export interface ArtFaceId {
+  surnom: string;
+  note: number;
+  stats: number[];
+}
+
+const ART_PAR_DEFAUT: Record<Face, ArtFaceId> = {
+  a: { surnom: 'Le Sage', note: 92, stats: [85, 90, 82, 88, 21] },
+  b: { surnom: 'Le Gros Râleur', note: 66, stats: [62, 70, 67, 91, 93] },
+};
+
+export const ART: Record<string, ArtFaceId> = {
+  // 'fid-matteo-a': { surnom: 'Le Sage', note: 92, stats: [85, 90, 82, 88, 21] },
+};
+
 /** Les vingt-quatre cartes, dans l'ordre du trombinoscope. */
-export const CARTES: CarteFaceId[] = MEMBRES.flatMap((m) =>
-  (['a', 'b'] as Face[]).map((face) => ({
-    id: `fid-${m.slug}-${face}`,
-    slug: m.slug,
-    nom: m.nom,
-    face,
-    image: `/faceid/${m.slug}-${face}.webp`,
-  }))
+export const CARTES: CarteFaceId[] = MEMBRES.flatMap((m, i) =>
+  (['a', 'b'] as Face[]).map((face, j) => {
+    const id = `fid-${m.slug}-${face}`;
+    const art = ART[id] || ART_PAR_DEFAUT[face];
+    return {
+      id,
+      slug: m.slug,
+      nom: m.nom,
+      face,
+      numero: i * 2 + j + 1,
+      image: `/faceid/${m.slug}-${face}.webp`,
+      surnom: art.surnom,
+      note: art.note,
+      stats: art.stats,
+    };
+  })
 );
 
 export const TOTAL_CARTES = CARTES.length;

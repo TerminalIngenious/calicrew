@@ -1,0 +1,268 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Carte de l'event FaceID
+   ──────────────────────────────────────────────────────────────────────────
+   Dessinée, pas affichée en image. Tout est en `cqw` : la carte prend la
+   largeur qu'on lui donne et le reste suit, de la vignette de 70 px à la
+   révélation en plein écran.
+
+   La face décide de la couleur, et de rien d'autre. Face A vérifie, Face B
+   épingle — mais c'est la même carte, et c'est ce qui rend la paire drôle.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.fc2 {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.fc2.face-a {
+  --fc-accent: #b6ff00;
+  --fc-accent-sombre: #4d7a00;
+  --fc-lueur: rgba(182, 255, 0, 0.45);
+}
+
+.fc2.face-b {
+  --fc-accent: #ff6b35;
+  --fc-accent-sombre: #8a3310;
+  --fc-lueur: rgba(255, 107, 53, 0.45);
+}
+
+/* Le cadre métallique. Les coins coupés viennent d'un `clip-path` plutôt que
+   d'une image : il suit la taille de la carte sans jamais se pixelliser. */
+.fc2-cadre {
+  --coupe: 7cqw;
+  position: relative;
+  aspect-ratio: 3 / 4;
+  padding: 1.6cqw;
+  background:
+    linear-gradient(150deg, var(--fc-accent) 0%, #9ca3af 26%, var(--fc-accent-sombre) 52%, #6b7280 74%, var(--fc-accent) 100%);
+  clip-path: polygon(
+    var(--coupe) 0, calc(100% - var(--coupe)) 0, 100% var(--coupe),
+    100% calc(100% - var(--coupe)), calc(100% - var(--coupe)) 100%,
+    var(--coupe) 100%, 0 calc(100% - var(--coupe)), 0 var(--coupe)
+  );
+  filter: drop-shadow(0 0 2.5cqw var(--fc-lueur));
+}
+
+.fc2-fond {
+  --coupe: 6cqw;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 38%, #10180a 0%, #070a05 55%, #030402 100%);
+  color: var(--fc-accent);
+  clip-path: polygon(
+    var(--coupe) 0, calc(100% - var(--coupe)) 0, 100% var(--coupe),
+    100% calc(100% - var(--coupe)), calc(100% - var(--coupe)) 100%,
+    var(--coupe) 100%, 0 calc(100% - var(--coupe)), 0 var(--coupe)
+  );
+}
+
+.fc2.face-b .fc2-fond {
+  background: radial-gradient(ellipse at 50% 38%, #1a0e07 0%, #0a0503 55%, #030201 100%);
+}
+
+.fc2-scanner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* La photo est détourée : elle se pose sur le fond, elle ne le remplace pas.
+   Ancrée en bas, elle garde la même ligne d'épaules d'une carte à l'autre. */
+.fc2-photo {
+  position: absolute;
+  inset: 12cqw 0 14cqw;
+  width: 100%;
+  height: auto;
+  max-height: calc(100% - 26cqw);
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+/* ── Le bandeau du haut ── */
+
+.fc2-haut {
+  position: absolute;
+  top: 3.2cqw;
+  left: 5cqw;
+  right: 5cqw;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: 'CF Barlow', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 5.6cqw;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+
+.fc2-marque em {
+  font-style: normal;
+  color: var(--fc-accent);
+}
+
+.fc2-numero {
+  font-size: 5cqw;
+  color: #fff;
+}
+
+/* ── La note ── */
+
+.fc2-note {
+  position: absolute;
+  top: 8cqw;
+  left: 5cqw;
+  font-family: 'CF Anton', system-ui, sans-serif;
+  font-size: 21cqw;
+  line-height: 0.85;
+  color: #fff;
+  /* Liseré sombre : la note passe devant la photo et devant le fond, elle
+     doit tenir sur les deux. */
+  text-shadow:
+    0 0 1.2cqw rgba(0, 0, 0, 0.9),
+    0.5cqw 0.5cqw 0 rgba(0, 0, 0, 0.55);
+}
+
+/* ── Le tampon ── */
+
+.fc2-tampon {
+  position: absolute;
+  right: -2cqw;
+  top: 44cqw;
+  padding: 1.8cqw 3.4cqw;
+  background: var(--fc-accent);
+  color: #0a0a0a;
+  font-family: 'CF Barlow', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 5.8cqw;
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: center;
+  transform: rotate(-7deg);
+  box-shadow: 0 0.6cqw 2cqw rgba(0, 0, 0, 0.6);
+}
+
+/* ── Le bas de la carte ── */
+
+.fc2-bas {
+  position: absolute;
+  left: 4cqw;
+  right: 4cqw;
+  bottom: 3cqw;
+  text-align: center;
+  /* Un voile sous le bloc : la photo descend jusque-là, et un nom posé
+     directement sur un t-shirt noir ou clair ne tient pas. */
+  background: linear-gradient(to top, rgba(3, 4, 2, 0.96) 60%, transparent);
+  padding-top: 7cqw;
+}
+
+.fc2-nom {
+  display: block;
+  font-family: 'CF Anton', system-ui, sans-serif;
+  font-size: 11cqw;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.9);
+}
+
+.fc2-surnom {
+  display: block;
+  margin-top: 0.4cqw;
+  font-family: 'CF Barlow', system-ui, sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 6.4cqw;
+  letter-spacing: 0.01em;
+  color: var(--fc-accent);
+  text-transform: uppercase;
+}
+
+/* ── Les statistiques ── */
+
+.fc2-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5cqw;
+  margin-top: 2.4cqw;
+  padding-top: 2cqw;
+  border-top: 0.3cqw solid color-mix(in srgb, var(--fc-accent) 45%, transparent);
+}
+
+.fc2-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7cqw;
+  min-width: 0;
+}
+
+.fc2-stat-nom {
+  font-family: 'CF Barlow', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 2.9cqw;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+
+.fc2-stat-ico {
+  width: 4.4cqw;
+  height: 4.4cqw;
+  color: var(--fc-accent);
+}
+
+.fc2-stat-val {
+  font-family: 'CF Anton', system-ui, sans-serif;
+  font-size: 7cqw;
+  line-height: 1;
+  color: #fff;
+}
+
+.fc2-logo {
+  display: block;
+  margin-top: 1.8cqw;
+  font-family: 'CF Barlow', system-ui, sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  font-size: 4cqw;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/*
+ * En vignette, on enlève.
+ *
+ * À 70 px de large, le bloc de statistiques fait moins de 5 px de haut par
+ * ligne : ce n'est plus lisible, c'est une bande grise qui salit la carte et
+ * mange la photo. Le nom et la note suffisent à reconnaître qui c'est, et
+ * c'est tout ce qu'on demande à une vignette.
+ */
+@container (max-width: 150px) {
+  .fc2-stats,
+  .fc2-logo,
+  .fc2-numero {
+    display: none;
+  }
+
+  .fc2-surnom {
+    font-size: 7cqw;
+  }
+
+  .fc2-nom {
+    font-size: 13cqw;
+  }
+
+  .fc2-tampon {
+    font-size: 6cqw;
+    top: 52cqw;
+  }
+
+  .fc2-bas {
+    padding-top: 10cqw;
+  }
+}
