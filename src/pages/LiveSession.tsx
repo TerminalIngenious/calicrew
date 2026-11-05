@@ -12,6 +12,7 @@ import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
 import { amrapTitle, circuitLabel, materializeAmrapSets, repsPerRound, roundTotals } from '../lib/amrap';
 import { sportCoXp, enduranceXp } from '../lib/passes';
 import { sessionReps, getUnit, unitLabel, setWeight } from '../lib/stats';
+import { previensSeance } from '../lib/notify';
 
 /** Pas d'incrément : 5 s pour un isométrique, 1 rep sinon. */
 import Loader from '../components/Loader';
@@ -339,6 +340,10 @@ export default function LiveSession() {
         // userProgress might not exist yet
       }
     }
+
+    // Après l'enregistrement, jamais avant : le serveur relit les séances
+    // pour savoir qui vient d'être doublé, et il lui faut celle-ci.
+    previensSeance();
 
     if (timerRef.current) clearInterval(timerRef.current);
     setFinished(true);

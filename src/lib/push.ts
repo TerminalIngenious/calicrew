@@ -6,9 +6,18 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 export interface PushPrefs {
   creatine: boolean;
   dailyChallenge: boolean;
+  /** Ce que font les autres : doublage au classement, séance finie, échange. */
+  groupe: boolean;
+  /** La vanne du soir et le défi surprise de l'après-midi. */
+  ambiance: boolean;
 }
 
-export const DEFAULT_PUSH_PREFS: PushPrefs = { creatine: false, dailyChallenge: false };
+export const DEFAULT_PUSH_PREFS: PushPrefs = {
+  creatine: false,
+  dailyChallenge: false,
+  groupe: false,
+  ambiance: false,
+};
 
 /** Le navigateur supporte-t-il le Web Push ? */
 export function isPushSupported(): boolean {
@@ -71,6 +80,8 @@ function subscriptionPayload(sub: PushSubscription, uid: string, prefs: PushPref
     keys: json.keys,
     creatine: prefs.creatine,
     dailyChallenge: prefs.dailyChallenge,
+    groupe: prefs.groupe,
+    ambiance: prefs.ambiance,
     updatedAt: Date.now(),
   };
 }
@@ -82,6 +93,12 @@ export async function getPushPrefs(uid: string): Promise<PushPrefs> {
   return {
     creatine: data.creatine ?? false,
     dailyChallenge: data.dailyChallenge ?? false,
+    // Les deux dernières familles sont arrivées après : un champ absent sur
+    // un abonnement déjà créé vaut oui, sinon ceux qui avaient activé les
+    // rappels les premiers seraient les seuls à ne rien recevoir. Le serveur
+    // applique exactement la même règle.
+    groupe: data.groupe ?? true,
+    ambiance: data.ambiance ?? true,
   };
 }
 
@@ -139,6 +156,11 @@ export async function updatePushPrefs(uid: string, prefs: Partial<PushPrefs>): P
   await updateDoc(doc(db, 'pushSubscriptions', uid), { ...prefs, updatedAt: Date.now() });
 }
 
+/** Au moins un rappel est-il actif ? */
+export function auMoinsUn(prefs: PushPrefs): boolean {
+  return prefs.creatine || prefs.dailyChallenge || prefs.groupe || prefs.ambiance;
+}
+
 /** Désabonne complètement et supprime l'abonnement stocké. */
 export async function disablePush(uid: string): Promise<void> {
   if (isPushSupported()) {
@@ -174,7 +196,7 @@ export type SyncOutcome =
  * puisque la permission est déjà accordée.
  */
 export async function syncSubscription(uid: string, prefs: PushPrefs): Promise<SyncOutcome> {
-  if (!prefs.creatine && !prefs.dailyChallenge) return 'inactive';
+  if (!auMoinsUn(prefs)) return 'inactive';
   if (!isPushSupported() || !VAPID_PUBLIC_KEY) return 'unsupported';
   // La distinction compte : « default » se répare par un bouton dans l'app,
   // « denied » ne se répare que dans les réglages du téléphone.

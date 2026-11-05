@@ -32,6 +32,7 @@ import SeasonalBadge from '../components/SeasonalBadge';
 import GroupChat from '../components/GroupChat';
 import Loader from '../components/Loader';
 import { useGrandEcran } from '../lib/useGrandEcran';
+import { previensEchange } from '../lib/notify';
 
 type SortMode = 'reps' | 'variety' | 'time';
 
@@ -688,6 +689,9 @@ export default function Group() {
         createdAt: Date.now(),
       });
       await updateDoc(doc(db, 'tradeListings', listing.id), { bids });
+      // L'auteur de l'annonce ne regarde pas l'onglet Échanges en permanence :
+      // sans ça, une proposition pouvait attendre des jours.
+      previensEchange(listing.id);
       setCardPicker(null);
       await loadTrades();
     } catch (err) {

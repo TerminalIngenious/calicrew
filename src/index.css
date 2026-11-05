@@ -4211,6 +4211,10 @@ body {
   position: relative;
   width: 100%;
   max-width: 420px;
+  /* Quatre familles de rappels au lieu de deux : la fenêtre dépassait l'écran
+     d'un petit téléphone et son bas devenait inatteignable. */
+  max-height: 85dvh;
+  overflow-y: auto;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 1rem;

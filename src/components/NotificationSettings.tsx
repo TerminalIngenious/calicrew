@@ -8,6 +8,7 @@ import {
   updatePushPrefs,
   disablePush,
   syncSubscription,
+  auMoinsUn,
   DEFAULT_PUSH_PREFS,
   type PushPrefs,
   type SyncOutcome,
@@ -45,7 +46,7 @@ export default function NotificationSettings({
 
   const supported = isPushSupported();
   const installRequired = needsInstall();
-  const enabled = prefs.creatine || prefs.dailyChallenge;
+  const enabled = auMoinsUn(prefs);
   // Seuls ces états demandent quelque chose à l'utilisateur.
   const needsAttention =
     sync === 'repaired' || sync === 'permission-default' ||
@@ -107,7 +108,7 @@ export default function NotificationSettings({
           return;
         }
         setPrefs(next);
-      } else if (!next.creatine && !next.dailyChallenge) {
+      } else if (!auMoinsUn(next)) {
         await disablePush(uid);
         setPrefs(next);
       } else {
@@ -149,7 +150,12 @@ export default function NotificationSettings({
             <span className="settings-row-label">Notifications</span>
             <span className="settings-row-sub">
               {enabled
-                ? [prefs.creatine && 'créatine', prefs.dailyChallenge && 'défi du jour']
+                ? [
+                    prefs.creatine && 'créatine',
+                    prefs.dailyChallenge && 'défi du jour',
+                    prefs.groupe && 'le groupe',
+                    prefs.ambiance && 'vannes',
+                  ]
                     .filter(Boolean)
                     .join(' • ')
                 : 'Aucun rappel activé'}
@@ -217,6 +223,39 @@ export default function NotificationSettings({
                     checked={prefs.dailyChallenge}
                     disabled={busy}
                     onChange={() => toggle('dailyChallenge')}
+                  />
+                </label>
+
+                <label className="notif-row">
+                  <div className="notif-row-info">
+                    <span className="notif-row-label">La vie du groupe</span>
+                    <span className="notif-row-desc">
+                      Quand on te double au classement, qu'un pote finit sa séance
+                      ou qu'on répond à ton annonce d'échange
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="notif-switch"
+                    checked={prefs.groupe}
+                    disabled={busy}
+                    onChange={() => toggle('groupe')}
+                  />
+                </label>
+
+                <label className="notif-row">
+                  <div className="notif-row-info">
+                    <span className="notif-row-label">Vannes et défis surprises</span>
+                    <span className="notif-row-desc">
+                      La vanne du soir à 21h et le défi surprise de 14h
+                    </span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="notif-switch"
+                    checked={prefs.ambiance}
+                    disabled={busy}
+                    onChange={() => toggle('ambiance')}
                   />
                 </label>
               </div>

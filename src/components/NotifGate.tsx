@@ -6,6 +6,7 @@ import {
   needsInstall,
   getPushPrefs,
   enablePush,
+  auMoinsUn,
 } from '../lib/push';
 
 /**
@@ -39,7 +40,7 @@ export default function NotifGate({ uid }: { uid: string }) {
     getPushPrefs(uid)
       .then((prefs) => {
         if (annule) return;
-        setEtat(prefs.creatine || prefs.dailyChallenge ? 'ok' : 'a-activer');
+        setEtat(auMoinsUn(prefs) ? 'ok' : 'a-activer');
       })
       // Lecture impossible (hors ligne au lancement) : on ne réclame rien
       // plutôt que de réclamer à tort à quelqu'un qui a déjà tout activé.
@@ -53,7 +54,9 @@ export default function NotifGate({ uid }: { uid: string }) {
     setEchec(null);
     // Les deux rappels d'un coup : c'est un oui ou un non, pas un réglage.
     // Le détail reste ajustable dans le profil.
-    const resultat = await enablePush(uid, { creatine: true, dailyChallenge: true });
+    const resultat = await enablePush(uid, {
+      creatine: true, dailyChallenge: true, groupe: true, ambiance: true,
+    });
     if (resultat.ok) {
       setEtat('ok');
     } else {
@@ -110,8 +113,9 @@ export default function NotifGate({ uid }: { uid: string }) {
       <div className="notif-gate-text">
         <span className="notif-gate-title">Active les notifications</span>
         <span className="notif-gate-sub">
-          Le rappel créatine à 20h et le défi du jour à 17h. C'est ce qui fait
-          qu'on tient la série — tu règles le détail dans ton profil.
+          La créatine, le défi du jour, les vannes du soir et le classement quand
+          on te double. C'est ce qui fait qu'on tient la série — tu règles le
+          détail dans ton profil.
         </span>
         {echec && <span className="notif-gate-error">{echec}</span>}
         <button className="primary-btn small notif-gate-btn" onClick={activer} disabled={occupe}>
