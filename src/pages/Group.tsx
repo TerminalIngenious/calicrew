@@ -31,6 +31,7 @@ import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import GroupChat from '../components/GroupChat';
 import Loader from '../components/Loader';
+import { useGrandEcran } from '../lib/useGrandEcran';
 
 type SortMode = 'reps' | 'variety' | 'time';
 
@@ -72,6 +73,7 @@ function MemberAvatar({ entry }: { entry: LeaderboardEntry }) {
 export default function Group() {
   const { user, displayName: myName } = useAuth();
   const navigate = useNavigate();
+  const grandEcran = useGrandEcran();
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -875,7 +877,7 @@ export default function Group() {
         <h1>Groupe</h1>
         <SeasonalBadge compact />
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {selectedGroup && (
+          {selectedGroup && !grandEcran && (
             <button className="icon-btn" onClick={() => setShowChat(true)}>
               <MessageCircle size={20} />
             </button>
@@ -1014,311 +1016,326 @@ export default function Group() {
       )}
 
       {selectedGroup && (
-        <>
-          <div className="group-info">
-            <h2>{selectedGroup.name}</h2>
-            <span className="member-count">
-              {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
-            </span>
+        <div className="group-body">
+          <div className="group-main">
+            <div className="group-info">
+              <h2>{selectedGroup.name}</h2>
+              <span className="member-count">
+                {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
+              </span>
 
-            {awards.length > 0 && (
-              <div className="awards-section-inline">
-                {awards.map((award, i) => (
-                  <div key={i} className="award-badge">
-                    {award.icon}
-                    <div>
-                      <span className="award-label">{award.label}</span>
-                      <span className="award-winner">{award.winner}</span>
+              {awards.length > 0 && (
+                <div className="awards-section-inline">
+                  {awards.map((award, i) => (
+                    <div key={i} className="award-badge">
+                      {award.icon}
+                      <div>
+                        <span className="award-label">{award.label}</span>
+                        <span className="award-winner">{award.winner}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {isCreator && pendingCount > 0 && (
+              <section className="section pending-section">
+                <h3>
+                  <UserPlus size={18} />
+                  Demandes en attente ({pendingCount})
+                </h3>
+                <div className="pending-list">
+                  {(selectedGroup.pendingIds || []).map((uid) => (
+                    <div key={uid} className="pending-item">
+                      <span className="pending-name">{pendingNames.get(uid) || 'Chargement...'}</span>
+                      <div className="pending-actions">
+                        <button className="accept-btn" onClick={() => acceptMember(uid)}>
+                          <UserCheck size={16} />
+                        </button>
+                        <button className="reject-btn" onClick={() => rejectMember(uid)}>
+                          <UserX size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
-          </div>
 
-          {isCreator && pendingCount > 0 && (
-            <section className="section pending-section">
-              <h3>
-                <UserPlus size={18} />
-                Demandes en attente ({pendingCount})
-              </h3>
-              <div className="pending-list">
-                {(selectedGroup.pendingIds || []).map((uid) => (
-                  <div key={uid} className="pending-item">
-                    <span className="pending-name">{pendingNames.get(uid) || 'Chargement...'}</span>
-                    <div className="pending-actions">
-                      <button className="accept-btn" onClick={() => acceptMember(uid)}>
-                        <UserCheck size={16} />
-                      </button>
-                      <button className="reject-btn" onClick={() => rejectMember(uid)}>
-                        <UserX size={16} />
-                      </button>
+            <div className="bp-tabs group-tabs">
+              <button
+                className={`bp-tab ${groupTab === 'classement' ? 'active' : ''}`}
+                onClick={() => setGroupTab('classement')}
+              >
+                <Trophy size={15} />
+                <span>Classement</span>
+              </button>
+              <button
+                className={`bp-tab ${groupTab === 'echanges' ? 'active' : ''}`}
+                onClick={() => { setGroupTab('echanges'); loadTrades(); }}
+              >
+                <ArrowLeftRight size={15} />
+                <span>Échanges</span>
+                {incomingTrades > 0 && <span className="bp-tab-badge">{incomingTrades}</span>}
+              </button>
+            </div>
+
+            {groupTab === 'classement' && (
+              <section className="section">
+              <div className="leaderboard-header">
+                <div className="bp-section-title-row">
+                  <h3>Classement — {currentMonthName}</h3>
+                  <span className="bp-quest-timer">Reset dans {getMonthResetLabel()}</span>
+                </div>
+                <div className="sort-tabs">
+                  <button
+                    className={`sort-tab ${sortMode === 'reps' ? 'active' : ''}`}
+                    onClick={() => setSortMode('reps')}
+                  >
+                    Reps
+                  </button>
+                  <button
+                    className={`sort-tab ${sortMode === 'variety' ? 'active' : ''}`}
+                    onClick={() => setSortMode('variety')}
+                  >
+                    Variété
+                  </button>
+                  <button
+                    className={`sort-tab ${sortMode === 'time' ? 'active' : ''}`}
+                    onClick={() => setSortMode('time')}
+                  >
+                    Temps
+                  </button>
+                </div>
+              </div>
+              <div className="leaderboard">
+                {sortedLeaderboard.map((entry, i) => (
+                  <div
+                    key={entry.uid}
+                    className={`leaderboard-row ${entry.uid === user!.uid ? 'me' : ''}`}
+                    onClick={() => setSelectedMember(entry)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="rank">{getRankIcon(i)}</div>
+                    <MemberAvatar entry={entry} />
+                    <div className="leaderboard-info">
+                      <span className="leaderboard-name">
+                        {entry.displayName}
+                        {entry.uid === user!.uid ? ' (toi)' : ''}
+                        {entry.uid === selectedGroup.createdBy && (
+                          <Crown size={12} className="leaderboard-crown" />
+                        )}
+                      </span>
+                      <span className="leaderboard-stats">
+                        {entry.sessionsCount} séance{entry.sessionsCount > 1 ? 's' : ''} •{' '}
+                        {entry.totalSets} séries
+                      </span>
+                    </div>
+                    <div className="leaderboard-reps">
+                      <span className="reps-number">{getSortDisplayValue(entry)}</span>
+                      {getSortUnit(entry) && <span className="reps-label">{getSortUnit(entry)}</span>}
                     </div>
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+              </section>
+            )}
 
-          <div className="bp-tabs group-tabs">
-            <button
-              className={`bp-tab ${groupTab === 'classement' ? 'active' : ''}`}
-              onClick={() => setGroupTab('classement')}
-            >
-              <Trophy size={15} />
-              <span>Classement</span>
-            </button>
-            <button
-              className={`bp-tab ${groupTab === 'echanges' ? 'active' : ''}`}
-              onClick={() => { setGroupTab('echanges'); loadTrades(); }}
-            >
-              <ArrowLeftRight size={15} />
-              <span>Échanges</span>
-              {incomingTrades > 0 && <span className="bp-tab-badge">{incomingTrades}</span>}
-            </button>
-          </div>
-
-          {groupTab === 'classement' && (
-            <section className="section">
-            <div className="leaderboard-header">
-              <div className="bp-section-title-row">
-                <h3>Classement — {currentMonthName}</h3>
-                <span className="bp-quest-timer">Reset dans {getMonthResetLabel()}</span>
-              </div>
-              <div className="sort-tabs">
-                <button
-                  className={`sort-tab ${sortMode === 'reps' ? 'active' : ''}`}
-                  onClick={() => setSortMode('reps')}
-                >
-                  Reps
-                </button>
-                <button
-                  className={`sort-tab ${sortMode === 'variety' ? 'active' : ''}`}
-                  onClick={() => setSortMode('variety')}
-                >
-                  Variété
-                </button>
-                <button
-                  className={`sort-tab ${sortMode === 'time' ? 'active' : ''}`}
-                  onClick={() => setSortMode('time')}
-                >
-                  Temps
-                </button>
-              </div>
-            </div>
-            <div className="leaderboard">
-              {sortedLeaderboard.map((entry, i) => (
-                <div
-                  key={entry.uid}
-                  className={`leaderboard-row ${entry.uid === user!.uid ? 'me' : ''}`}
-                  onClick={() => setSelectedMember(entry)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="rank">{getRankIcon(i)}</div>
-                  <MemberAvatar entry={entry} />
-                  <div className="leaderboard-info">
-                    <span className="leaderboard-name">
-                      {entry.displayName}
-                      {entry.uid === user!.uid ? ' (toi)' : ''}
-                      {entry.uid === selectedGroup.createdBy && (
-                        <Crown size={12} className="leaderboard-crown" />
-                      )}
-                    </span>
-                    <span className="leaderboard-stats">
-                      {entry.sessionsCount} séance{entry.sessionsCount > 1 ? 's' : ''} •{' '}
-                      {entry.totalSets} séries
-                    </span>
+            {groupTab === 'echanges' && (
+              <section className="section">
+                <div className="trades-section">
+                  <div className="trade-publish-row">
+                    <button className="primary-btn small trade-publish-btn" onClick={() => openPublishPicker('offre')}>
+                      <ArrowLeftRight size={16} /> J'échange une carte
+                    </button>
+                    <button className="secondary-btn small trade-publish-btn" onClick={() => openPublishPicker('recherche')}>
+                      <Search size={16} /> Je cherche une carte
+                    </button>
                   </div>
-                  <div className="leaderboard-reps">
-                    <span className="reps-number">{getSortDisplayValue(entry)}</span>
-                    {getSortUnit(entry) && <span className="reps-label">{getSortUnit(entry)}</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-            </section>
-          )}
+                  <p className="trade-hint">
+                    Dans les deux cas l'annonce part à tout le groupe, chacun répond
+                    avec sa carte, et c'est toi qui choisis avec qui conclure.
+                  </p>
 
-          {groupTab === 'echanges' && (
-            <section className="section">
-              <div className="trades-section">
-                <div className="trade-publish-row">
-                  <button className="primary-btn small trade-publish-btn" onClick={() => openPublishPicker('offre')}>
-                    <ArrowLeftRight size={16} /> J'échange une carte
-                  </button>
-                  <button className="secondary-btn small trade-publish-btn" onClick={() => openPublishPicker('recherche')}>
-                    <Search size={16} /> Je cherche une carte
-                  </button>
-                </div>
-                <p className="trade-hint">
-                  Dans les deux cas l'annonce part à tout le groupe, chacun répond
-                  avec sa carte, et c'est toi qui choisis avec qui conclure.
-                </p>
+                  {tradeError && <p className="pr-form-error">{tradeError}</p>}
 
-                {tradeError && <p className="pr-form-error">{tradeError}</p>}
-
-                {myListings.length > 0 && (
-                  <div className="trades-list">
-                    <span className="trades-list-label">Mes annonces</span>
-                    {myListings.map((listing) => {
-                      const card = getCardById(listing.cardId);
-                      const bids = listing.bids || [];
-                      return (
-                        <div key={listing.id} className="trade-listing">
-                          <div className="trade-listing-head">
-                            <div
-                              className="trade-card-item"
-                              style={{ borderColor: card ? RARITY_COLORS[card.rarity] : 'var(--border)' }}
-                            >
-                              {card?.image && <img src={card.image} alt="" className="trade-card-img" />}
-                              <span className="trade-card-name">{card ? getCardDisplayName(card) : '?'}</span>
-                            </div>
-                            <div className="trade-listing-meta">
-                              <span className={`trade-kind trade-kind-${listingKind(listing)}`}>
-                                {listingKind(listing) === 'recherche' ? 'Je cherche' : "J'échange"}
-                              </span>
-                              <span className="trade-listing-count">
-                                {bids.length === 0
-                                  ? 'Aucune proposition'
-                                  : `${bids.length} proposition${bids.length > 1 ? 's' : ''}`}
-                              </span>
-                              <button className="secondary-btn small" onClick={() => cancelListing(listing)}>
-                                Retirer
-                              </button>
-                            </div>
-                          </div>
-
-                          {bids.length > 0 && (
-                            <div className="trade-bids">
-                              {bids.map((bid) => {
-                                const bidCard = getCardById(bid.cardId);
-                                return (
-                                  <div key={bid.uid} className="trade-bid">
-                                    <div
-                                      className="trade-card-item small"
-                                      style={{ borderColor: bidCard ? RARITY_COLORS[bidCard.rarity] : 'var(--border)' }}
-                                    >
-                                      {bidCard?.image && <img src={bidCard.image} alt="" className="trade-card-img" />}
-                                      <span className="trade-card-name">
-                                        {bidCard ? getCardDisplayName(bidCard) : '?'}
-                                      </span>
-                                    </div>
-                                    <div className="trade-bid-info">
-                                      <span className="trade-bid-name">{bid.displayName}</span>
-                                      <div className="trade-actions">
-                                        <button
-                                          className="accept-btn"
-                                          disabled={tradeBusy}
-                                          onClick={() => acceptBid(listing, bid.uid)}
-                                        >
-                                          <Check size={14} /> Échanger
-                                        </button>
-                                        <button
-                                          className="reject-btn"
-                                          disabled={tradeBusy}
-                                          onClick={() => declineBid(listing, bid.uid)}
-                                        >
-                                          <X size={14} />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {otherListings.length > 0 && (
-                  <div className="trades-list">
-                    <span className="trades-list-label">Annonces du groupe</span>
-                    {otherListings.map((listing) => {
-                      const card = getCardById(listing.cardId);
-                      const mine = myBid(listing, user!.uid);
-                      const mineCard = mine ? getCardById(mine.cardId) : undefined;
-                      return (
-                        <div key={listing.id} className="trade-listing">
-                          <div className="trade-listing-head">
-                            <div
-                              className="trade-card-item"
-                              style={{ borderColor: card ? RARITY_COLORS[card.rarity] : 'var(--border)' }}
-                            >
-                              {card?.image && <img src={card.image} alt="" className="trade-card-img" />}
-                              <span className="trade-card-name">{card ? getCardDisplayName(card) : '?'}</span>
-                            </div>
-                            <div className="trade-listing-meta">
-                              <span className={`trade-kind trade-kind-${listingKind(listing)}`}>
-                                {listingKind(listing) === 'recherche'
-                                  ? `${listing.ownerName} cherche`
-                                  : `${listing.ownerName} échange`}
-                              </span>
-                              <span className="trade-listing-count">
-                                {(listing.bids || []).length} proposition
-                                {(listing.bids || []).length > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                          </div>
-
-                          {mine ? (
-                            <div className="trade-my-bid">
-                              <span className="trade-my-bid-label">
-                                Tu proposes {mineCard ? getCardDisplayName(mineCard) : '?'}
-                              </span>
-                              <div className="trade-actions">
-                                <button
-                                  className="secondary-btn small"
-                                  disabled={tradeBusy}
-                                  onClick={() => openBidPicker(listing)}
-                                >
-                                  Changer
-                                </button>
-                                <button
-                                  className="reject-btn"
-                                  disabled={tradeBusy}
-                                  onClick={() => withdrawBid(listing)}
-                                >
+                  {myListings.length > 0 && (
+                    <div className="trades-list">
+                      <span className="trades-list-label">Mes annonces</span>
+                      {myListings.map((listing) => {
+                        const card = getCardById(listing.cardId);
+                        const bids = listing.bids || [];
+                        return (
+                          <div key={listing.id} className="trade-listing">
+                            <div className="trade-listing-head">
+                              <div
+                                className="trade-card-item"
+                                style={{ borderColor: card ? RARITY_COLORS[card.rarity] : 'var(--border)' }}
+                              >
+                                {card?.image && <img src={card.image} alt="" className="trade-card-img" />}
+                                <span className="trade-card-name">{card ? getCardDisplayName(card) : '?'}</span>
+                              </div>
+                              <div className="trade-listing-meta">
+                                <span className={`trade-kind trade-kind-${listingKind(listing)}`}>
+                                  {listingKind(listing) === 'recherche' ? 'Je cherche' : "J'échange"}
+                                </span>
+                                <span className="trade-listing-count">
+                                  {bids.length === 0
+                                    ? 'Aucune proposition'
+                                    : `${bids.length} proposition${bids.length > 1 ? 's' : ''}`}
+                                </span>
+                                <button className="secondary-btn small" onClick={() => cancelListing(listing)}>
                                   Retirer
                                 </button>
                               </div>
                             </div>
-                          ) : canAnswer(listing, myOwnedCards) ? (
-                            <button
-                              className="secondary-btn small trade-bid-btn"
-                              disabled={tradeBusy}
-                              onClick={() => openBidPicker(listing)}
-                            >
-                              {listingKind(listing) === 'recherche'
-                                ? 'Donner cette carte'
-                                : 'Proposer une carte'}
-                            </button>
-                          ) : (
-                            <p className="trade-cannot-answer">
-                              Tu n'as pas cette carte.
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
 
-                {listings.length === 0 && (
-                  <p className="empty" style={{ fontSize: '0.85rem' }}>Aucune annonce en cours</p>
-                )}
-              </div>
-            </section>
-          )}
+                            {bids.length > 0 && (
+                              <div className="trade-bids">
+                                {bids.map((bid) => {
+                                  const bidCard = getCardById(bid.cardId);
+                                  return (
+                                    <div key={bid.uid} className="trade-bid">
+                                      <div
+                                        className="trade-card-item small"
+                                        style={{ borderColor: bidCard ? RARITY_COLORS[bidCard.rarity] : 'var(--border)' }}
+                                      >
+                                        {bidCard?.image && <img src={bidCard.image} alt="" className="trade-card-img" />}
+                                        <span className="trade-card-name">
+                                          {bidCard ? getCardDisplayName(bidCard) : '?'}
+                                        </span>
+                                      </div>
+                                      <div className="trade-bid-info">
+                                        <span className="trade-bid-name">{bid.displayName}</span>
+                                        <div className="trade-actions">
+                                          <button
+                                            className="accept-btn"
+                                            disabled={tradeBusy}
+                                            onClick={() => acceptBid(listing, bid.uid)}
+                                          >
+                                            <Check size={14} /> Échanger
+                                          </button>
+                                          <button
+                                            className="reject-btn"
+                                            disabled={tradeBusy}
+                                            onClick={() => declineBid(listing, bid.uid)}
+                                          >
+                                            <X size={14} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
-          <div className="group-actions" style={{ marginTop: '1rem', justifyContent: 'center' }}>
-            <button className="leave-btn" onClick={leaveGroup}>
-              <LogOut size={14} /> Quitter le groupe
-            </button>
+                  {otherListings.length > 0 && (
+                    <div className="trades-list">
+                      <span className="trades-list-label">Annonces du groupe</span>
+                      {otherListings.map((listing) => {
+                        const card = getCardById(listing.cardId);
+                        const mine = myBid(listing, user!.uid);
+                        const mineCard = mine ? getCardById(mine.cardId) : undefined;
+                        return (
+                          <div key={listing.id} className="trade-listing">
+                            <div className="trade-listing-head">
+                              <div
+                                className="trade-card-item"
+                                style={{ borderColor: card ? RARITY_COLORS[card.rarity] : 'var(--border)' }}
+                              >
+                                {card?.image && <img src={card.image} alt="" className="trade-card-img" />}
+                                <span className="trade-card-name">{card ? getCardDisplayName(card) : '?'}</span>
+                              </div>
+                              <div className="trade-listing-meta">
+                                <span className={`trade-kind trade-kind-${listingKind(listing)}`}>
+                                  {listingKind(listing) === 'recherche'
+                                    ? `${listing.ownerName} cherche`
+                                    : `${listing.ownerName} échange`}
+                                </span>
+                                <span className="trade-listing-count">
+                                  {(listing.bids || []).length} proposition
+                                  {(listing.bids || []).length > 1 ? 's' : ''}
+                                </span>
+                              </div>
+                            </div>
+
+                            {mine ? (
+                              <div className="trade-my-bid">
+                                <span className="trade-my-bid-label">
+                                  Tu proposes {mineCard ? getCardDisplayName(mineCard) : '?'}
+                                </span>
+                                <div className="trade-actions">
+                                  <button
+                                    className="secondary-btn small"
+                                    disabled={tradeBusy}
+                                    onClick={() => openBidPicker(listing)}
+                                  >
+                                    Changer
+                                  </button>
+                                  <button
+                                    className="reject-btn"
+                                    disabled={tradeBusy}
+                                    onClick={() => withdrawBid(listing)}
+                                  >
+                                    Retirer
+                                  </button>
+                                </div>
+                              </div>
+                            ) : canAnswer(listing, myOwnedCards) ? (
+                              <button
+                                className="secondary-btn small trade-bid-btn"
+                                disabled={tradeBusy}
+                                onClick={() => openBidPicker(listing)}
+                              >
+                                {listingKind(listing) === 'recherche'
+                                  ? 'Donner cette carte'
+                                  : 'Proposer une carte'}
+                              </button>
+                            ) : (
+                              <p className="trade-cannot-answer">
+                                Tu n'as pas cette carte.
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {listings.length === 0 && (
+                    <p className="empty" style={{ fontSize: '0.85rem' }}>Aucune annonce en cours</p>
+                  )}
+                </div>
+              </section>
+            )}
+
+            <div className="group-actions" style={{ marginTop: '1rem', justifyContent: 'center' }}>
+              <button className="leave-btn" onClick={leaveGroup}>
+                <LogOut size={14} /> Quitter le groupe
+              </button>
+            </div>
           </div>
-        </>
+
+          {/* Sur ordinateur, le chat n'est plus une fenêtre qu'on ouvre :
+              il tient une colonne, comme dans n'importe quel logiciel de
+              discussion. Sur téléphone il reste modal — il n'y a pas la
+              place pour deux colonnes. */}
+          {grandEcran && (
+            <aside className="group-side">
+              <div className="group-chat-panel">
+                <h3 className="group-chat-title">Chat</h3>
+                <GroupChat groupId={selectedGroup.id} />
+              </div>
+            </aside>
+          )}
+        </div>
       )}
 
       {cardPicker && (
@@ -1480,7 +1497,7 @@ export default function Group() {
         </div>
       )}
 
-      {showChat && selectedGroup && (
+      {showChat && selectedGroup && !grandEcran && (
         <div className="modal-overlay" onClick={() => setShowChat(false)}>
           <div className="chat-modal" onClick={(e) => e.stopPropagation()}>
             <div className="chat-modal-header">

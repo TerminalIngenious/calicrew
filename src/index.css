@@ -7517,3 +7517,136 @@ body {
     margin-top: 0;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Groupe sur ordinateur
+   ──────────────────────────────────────────────────────────────────────────
+   Le chat était une fenêtre qu'on ouvrait par une icône, qui couvrait la
+   moitié basse de l'écran et cachait le classement : impossible de regarder
+   les deux. Sur un écran large il n'y a aucune raison de choisir — le chat
+   prend une colonne à droite, en permanence, et l'icône disparaît de
+   l'en-tête puisqu'il n'y a plus rien à ouvrir.
+
+   Cette colonne n'apparaît qu'à 1280 px, et non à 1024 comme le reste du
+   format ordinateur : à 1024 px il restait 350 px au classement, moins que
+   sur une tablette. Mieux vaut un chat modal qu'un classement à l'étroit.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Sur téléphone les deux conteneurs n'existent pas : `contents` rend leurs
+   enfants enfants directs de la page, l'empilement d'avant est intact. */
+.group-body,
+.group-main {
+  display: contents;
+}
+
+@media (min-width: 1024px) {
+  /* Le nom du groupe et ses trophées du mois tiennent sur une ligne : centrés
+     sur toute la largeur, ils laissaient un bandeau presque vide. */
+  .group-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    text-align: left;
+  }
+
+  .group-info h2 {
+    margin-bottom: 0;
+  }
+
+  .group-info .awards-section-inline {
+    margin-left: auto;
+  }
+
+  /* Deux annonces par ligne : une annonce est une petite carte et son auteur,
+     elle n'a pas besoin de toute la colonne. */
+  .trades-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 0.6rem;
+  }
+
+  .trades-list-label {
+    grid-column: 1 / -1;
+  }
+
+  .trade-listing {
+    margin-bottom: 0;
+  }
+
+  .trade-publish-row {
+    justify-content: flex-start;
+  }
+
+  .trades-section .trade-publish-row .trade-publish-btn {
+    flex: 0 1 18rem;
+  }
+
+  /* Le mois et le compte à rebours se touchaient faute d'écart, alors que la
+     place ne manque pas ici. */
+  .leaderboard-header {
+    gap: 1.5rem;
+  }
+
+  .leaderboard-header .bp-section-title-row {
+    gap: 0.75rem;
+  }
+
+  /* La souris attend un survol sur ce qui s'ouvre. */
+  .leaderboard-row {
+    transition: background 0.15s;
+  }
+
+  .leaderboard-row:hover {
+    background: var(--bg-card-hover);
+  }
+}
+
+@media (min-width: 1280px) {
+  .group-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .group-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .group-side {
+    /* Elle suit le défilement du classement : la conversation reste lisible
+       qu'on soit en haut ou en bas de la page. */
+    position: sticky;
+    top: 2.25rem;
+    min-width: 0;
+  }
+
+  .group-chat-panel {
+    display: flex;
+    flex-direction: column;
+    /* Toute la hauteur de la fenêtre moins l'en-tête de page et une marge :
+       la zone de saisie doit rester visible sans avoir à faire défiler. */
+    height: calc(100dvh - 8rem);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .group-chat-title {
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  /* Le corps du chat est calé sur 60vh dans la fenêtre modale ; ici c'est le
+     panneau qui donne la hauteur, et les messages remplissent ce qui reste. */
+  .group-chat-panel .chat-body {
+    max-height: none;
+    background: transparent;
+  }
+}
