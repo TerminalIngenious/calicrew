@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Bell, X, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
+import { Plus, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import PinkRibbon from '../components/PinkRibbon';
@@ -18,158 +18,11 @@ import { useCreatine } from '../lib/creatine';
 import { amrapTitle } from '../lib/amrap';
 import Loader from '../components/Loader';
 
-const UPDATES = [
-  {
-    id: 'update-2026-11-03',
-    date: '3 novembre 2026',
-    title: 'Saison 2 — Fous du bus',
-    summary: 'La saison 2 arrive le 29 novembre, avec 51 cartes réparties en 8 familles.',
-    details: `Saison 2 « Fous du bus » : 51 cartes, et une nouveauté — elles sont réparties en 8 familles de tailles différentes. InfluVoleurs, Dictateurs, Tueurs en série, Chanteurs & rappeurs, Milliardaires, Pirates, Scientifiques et Mythologique.\n\nDans la Collection, un bouton bascule entre « Par rareté » et « Par famille ». Chaque famille mélange du commun et du rare : aucune n'est un jackpot, aucune n'est un tas de rebuts. Les compléter demandera de la chance et des échanges.\n\nLe pass repart de zéro le 29 novembre, comme il se doit pour une nouvelle saison. Ce qui est gagné reste gagné : ta collection, tes badges et tes succès ne bougent pas. Les coffres que tu n'as pas encore ouverts resteront des coffres de la saison 1 et donneront des cartes de la saison 1 — garde-les si tu veux compléter Casier Judiciaire, ouvre-les si tu préfères repartir à neuf.\n\nIl te reste donc quelques semaines pour finir la saison 1.`,
-  },
-  {
-    id: 'update-2026-10-10',
-    date: '10 octobre 2026',
-    title: 'Circuit, programmes AMRAP & séance sans coffre',
-    summary: 'Vos retours : défilement des échanges, mode circuit, séance sans récompense, programmes AMRAP.',
-    details: `Séance en circuit : un bouton en haut de la séance bascule entre « Par exercice » et « En circuit ». En circuit, tu fais un tour de tous les exercices avant de recommencer, au lieu de finir un exercice puis de passer au suivant. Rien ne change dans tes données, c'est l'ordre d'affichage — et le choix est retenu pour la séance.\n\nProgrammes AMRAP : à la création d'un programme, tu choisis entre « Séries & reps » et « AMRAP ». Un programme AMRAP enregistre son circuit et sa durée, et le lancer démarre directement une séance AMRAP.\n\nSéance sans coffre : une case au moment de terminer. Pour rattraper un défi juste après une vraie séance, ou faire un essai, sans toucher une récompense de plus. Les reps comptent toujours — c'est la récompense qu'on refuse, pas l'effort.\n\nCorrection : dans les échanges, le sélecteur de cartes faisait défiler la page du dessous au lieu de sa propre liste. Corrigé partout, pas seulement là.`,
-  },
-  {
-    id: 'update-2026-10-09d',
-    date: '9 octobre 2026',
-    title: 'Demander une carte',
-    summary: 'En plus de proposer une carte, tu peux maintenant en réclamer une qui te manque.',
-    details: `Les échanges marchent désormais dans les deux sens. « J'échange une carte » met une des tiennes à disposition, comme avant. « Je cherche une carte » fait l'inverse : tu choisis une carte que tu n'as pas, et ceux qui l'ont peuvent te répondre.\n\nQuand tu réponds à une recherche, c'est toi qui choisis ce que tu veux en retour, directement dans la collection de la personne. Elle garde le dernier mot et retient la proposition qui l'intéresse.\n\nLe sélecteur ne propose que des cartes qui te manquent quand tu publies une recherche, et le bouton « Donner cette carte » n'apparaît que si tu possèdes vraiment celle qui est demandée.\n\nLes annonces déjà publiées restent des offres, rien à refaire.`,
-  },
-  {
-    id: 'update-2026-10-09c',
-    date: '9 octobre 2026',
-    title: 'Notifications réparables',
-    summary: 'Un bouton de test, et les abonnements expirés se rétablissent tout seuls.',
-    details: `Bouton de test : dans Profil → Notifications, « Envoyer une notification de test » déclenche un vrai rappel immédiatement. Il emprunte le même chemin que les rappels automatiques, donc s'il arrive, c'est que tout fonctionne. S'il n'arrive pas, le message dit où ça coince au lieu d'échouer en silence.\n\nAbonnements rétablis automatiquement : iOS supprime l'abonnement aux notifications après une mise à jour de l'app, une réinstallation, ou plusieurs semaines sans l'ouvrir. Les rappels restaient affichés comme actifs alors que plus rien ne pouvait arriver. L'app s'en rend compte maintenant en ouvrant les réglages et se réabonne toute seule, sans rien redemander.\n\nPlus de bouton bloqué : l'activation pouvait rester grisée indéfiniment quand le service worker ne répondait pas. Elle abandonne désormais au bout de dix secondes avec un message.`,
-  },
-  {
-    id: 'update-2026-10-09b',
-    date: '9 octobre 2026',
-    title: 'Programmes modifiables',
-    summary: 'Modifie un programme existant, et le bouton pour en créer un autre fonctionne enfin.',
-    details: `Programmes modifiables : le crayon sur une carte rouvre le programme dans le même formulaire qu'à la création. Change son nom, sa visibilité, ajoute ou retire des exercices, ajuste les séries, les reps et les poids. Plus besoin de le recréer pour corriger un détail.\n\nLa date de création est conservée : modifier un programme ne le fait pas remonter comme s'il venait d'être créé. Si quelqu'un a importé ton programme, il en a une copie : tes modifications ne changent rien chez lui.\n\nLa suppression demande maintenant confirmation, puisque le crayon est juste à côté.\n\nCorrection : créer un deuxième programme était impossible. Le bouton existait mais il était placé derrière la barre de navigation, donc invisible et non cliquable — un clic dessus atterrissait sur un onglet de navigation. Seul le premier programme pouvait être créé, via le bouton de l'écran vide.`,
-  },
-  {
-    id: 'update-2026-10-09',
-    date: '9 octobre 2026',
-    title: 'Échanges par annonce',
-    summary: 'Mets une carte à l\'échange pour tout le groupe et choisis la meilleure offre.',
-    details: `Les échanges changent de forme. Avant, il fallait désigner une personne et deviner quelle carte elle possédait. Maintenant tu mets une carte à l'échange et toute ta team la voit.\n\nChacun propose la carte qu'il veut donner en échange. Toi tu vois toutes les propositions côte à côte, avec qui les a faites, et tu choisis celle qui t'intéresse. Les autres propositions restent disponibles si tu changes d'avis, et tu peux en refuser une sans fermer ton annonce.\n\nUne seule proposition par personne : reproposer remplace la précédente, au lieu d'empiler des offres périmées. Tu peux changer ou retirer la tienne à tout moment.\n\nVérification au moment de conclure : les deux inventaires sont relus juste avant l'échange. Si une carte est partie entre-temps dans un autre échange, rien n'est déplacé et tu es prévenu.\n\nLes offres en cours de l'ancien système ne sont pas reprises : si tu avais une offre en attente, republie-la en annonce.`,
-  },
-  {
-    id: 'update-2026-10-05',
-    date: '5 octobre 2026',
-    title: 'AMRAP sur mesure',
-    summary: 'Compose ton circuit, choisis ta durée, et les reps comptent enfin.',
-    details: `AMRAP sur mesure : tu n'es plus limité au Cindy. Choisis tes exercices, le nombre de reps (ou de secondes) de chaque, la durée du chrono et un nom, puis enchaîne les rounds. Jusqu'à 8 exercices par circuit.\n\nWOD de référence en un clic : Cindy, Chelsea et Mary remplissent le circuit pour toi, modifiable ensuite.\n\nCircuits en temps : un round peut contenir 30 s de gainage aussi bien que 10 pompes. Les secondes sont comptées comme du temps, jamais comme des reps.\n\nLes reps d'un AMRAP comptent enfin : à la fin de la séance, les rounds réalisés deviennent des séries. 12 rounds de 5 tractions valent 12 séries de 5, donc 60 tractions dans les classements, les quêtes et tes totaux. Avant, un AMRAP comptait pour zéro rep. Les séances AMRAP déjà enregistrées ne sont pas recalculées.\n\nRecords AMRAP par circuit : dans les profils, le meilleur résultat est affiché par circuit et par durée, avec le détail du circuit. Comparer des rounds entre deux circuits différents ne voulait rien dire.`,
-  },
-  {
-    id: 'update-2026-10-03',
-    date: '3 octobre 2026',
-    title: 'CrossFit & créatine synchronisée',
-    summary: 'Nouvelle catégorie CrossFit, PR à saisir soi-même et créatine synchronisée.',
-    details: `PR saisis à la main : tes records ne sont plus déduits de tes séances, c'est toi qui les écris. Tu choisis l'exercice, le type de record (reps, kg, temps ou km), la charge, la date et une précision libre. Un maxi de charge ou un record fait en compèt' n'avait aucune raison d'attendre d'être logué dans l'app pour exister.\n\nNouvelle catégorie CrossFit avec 31 mouvements : haltérophilie (épaulé, arraché, thruster, push press), gymnastique (pointes aux barres, muscle-up aux anneaux, wall walk, montée de corde) et conditionnement (burpees, wall balls, double unders, kettlebell swing, farmer's walk). Ils fonctionnent en séries, reps et charge comme la muscu : ils comptent dans les classements, dans les quêtes d'exercices et dans tes records. Les mouvements qui se mesurent au temps (marche en ATR, traîneau, rameur, assault bike) se loguent en secondes.\n\nCréatine synchronisée : ton suivi est maintenant le même sur téléphone et sur PC, et il survit à un vidage du cache. Il continue de fonctionner hors ligne.\n\nCompteur de créatine corrigé : le streak se recalcule à partir des jours réellement cochés. Il ne reste plus bloqué sur une ancienne valeur quand tu sautes des jours, décocher annule bien la journée, et la carte change de jour toute seule à minuit. Le streak de la veille reste affiché en gris tant que tu n'as pas pris ta dose du jour.\n\nRappel créatine plus malin : la notification de 20h ne part plus si tu as déjà coché la prise du jour.`,
-  },
-  {
-    id: 'update-2026-10-02',
-    date: '2 octobre 2026',
-    title: 'Octobre Rose & Halloween',
-    summary: 'L\'app passe en rose pour Octobre Rose, et en thème Halloween le 31.',
-    details: `Direction artistique Octobre Rose : pendant tout le mois, l'identité de l'app bascule en rose, avec une lueur en haut d'écran et des rubans qui montent lentement en fond. Les couleurs qui portent une information ne changent pas : l'or, l'argent et le bronze du podium, les raretés des cartes, le vert de validation et le rouge restent identiques.\n\nUn bandeau rappelle que octobre est le mois de sensibilisation au dépistage du cancer du sein.\n\nThème Halloween le 31 octobre : toiles d'araignée dans les coins, araignée suspendue et citrouille remplacent l'habillage rose pour la journée.\n\nLes deux habillages suivent la date et se retirent tout seuls, il n'y a rien à activer.`,
-  },
-  {
-    id: 'update-2026-10-01',
-    date: '1er octobre 2026',
-    title: 'Navigation repensée',
-    summary: 'Cinq onglets clairs, profil réorganisé et sous-onglets dans le groupe.',
-    details: `Navigation repensée : la barre du bas passe à cinq onglets avec un rôle clair chacun — Accueil, Progrès, Pass, Groupe, Profil. La page Progrès, qui existait sans qu'on puisse l'ouvrir, a maintenant son onglet.\n\nProfil réorganisé : tes stats, tes badges, tes records et tes cartes sont regroupés par section au lieu d'être empilés. Une section Compte rassemble le pseudo, les réglages de notifications (l'engrenage) et la déconnexion.\n\nGroupe en sous-onglets : Classement et Échanges sont séparés, la page ne déroule plus tout d'un bloc.`,
-  },
-  {
-    id: 'update-2026-09-30',
-    date: '30 septembre 2026',
-    title: 'Badges, records & pass 100 niveaux',
-    summary: 'Badges de podium, records personnels, séances modifiables et nouvelle ouverture de coffre.',
-    details: `Badges de classement : les 3 premiers de chaque classement mensuel (reps, variété, temps) reçoivent un badge en fin de mois, par exemple TOP 2 Reps saison 1. Chaque classement a sa couleur et chaque place du podium son métal. Les badges s'affichent dans le profil.\n\nRecords personnels : chaque profil liste les PR par exercice — meilleure série, charge maximale, meilleure distance et meilleur temps. Les séances AMRAP sont exclues pour ne pas fausser les records.\n\nSéance modifiable en cours de route : ajoute un exercice que tu avais oublié, change le poids en pleine séance (il peut varier d'une série à l'autre) et ajuste le nombre de séries.\n\nNouvelle ouverture de coffre : la carte tourne dans la couleur de sa rareté, s'arrête sur une explosion, puis apparaît — avec un son dont l'intensité dépend de la rareté.\n\nPass étendu à 100 niveaux : le niveau 100 donne un coffre historique, et des paliers garantissent un coffre rare ou plus, épique ou plus, ou légendaire ou plus. Les 24 premiers niveaux gardent leur coût en XP, personne ne perd un niveau.`,
-  },
-  {
-    id: 'update-2026-09-17',
-    date: '17 septembre 2026',
-    title: 'Reps ou secondes, vélo & pseudo',
-    summary: 'Choix reps/secondes par exercice, catégorie Vélo et pseudo modifiable.',
-    details: `Reps ou secondes : pour chaque exercice tu choisis l'unité. Un gainage ou un L-sit se logue en secondes, et ces secondes ne sont plus comptées comme des reps dans les classements, les quêtes et les records.\n\nNouvelle catégorie Vélo avec 9 exercices (vélo route, VTT, gravel, home trainer, spinning, fractionné et plus). Saisie du temps, de la distance et du dénivelé, avec la vitesse calculée en km/h.\n\nPseudo modifiable : tu peux changer ton pseudo depuis ton profil.`,
-  },
-  {
-    id: 'update-2026-09-14',
-    date: '14 septembre 2026',
-    title: 'Défi du jour, Sport Co & notifications',
-    summary: 'Un défi quotidien, la catégorie Sport Co, les notifications push et plus de quêtes.',
-    details: `Défi quotidien : chaque jour à 10h, un défi identique pour tout le monde, à 25 XP.\n\nNouvelle catégorie Sport Co avec 15 sports collectifs (football, basket, hand, volley, rugby, tennis, padel et plus). Tu indiques simplement la durée : 25 XP par 30 minutes.\n\nNotifications push : active le rappel créatine (20h) et le rappel du défi du jour (17h), qui ne part que si tu ne l'as pas encore validé.\n\nPlus de quêtes au choix : le pool passe à 26 quêtes avec des objectifs plus difficiles. Tu en choisis toujours 10, plus les 2 quêtes de base, soit 12.\n\nRécompenses mensuelles revues : les 3 premiers des 3 classements reçoivent un coffre épique ou mieux. Le mois d'août n'est pas compté.\n\nCorrection : l'écran de choix des quêtes n'apparaît plus vide après avoir sélectionné ses sports.`,
-  },
-  {
-    id: 'update-2026-09-11',
-    date: '11 septembre 2026',
-    title: 'Quêtes au choix & exos de muscu',
-    summary: 'Choisis tes quêtes le lundi, 20 exercices de musculation et un coffre à chaque séance.',
-    details: `Quêtes au choix : le lundi, tu indiques les sports que tu pratiques et tu sélectionnes tes quêtes de la semaine au lieu de les subir.\n\nRécompenses de fin de mois par classement du groupe : le podium de chaque classement est récompensé.\n\n20 exercices de musculation ajoutés : développés couché, incliné, décliné et militaire, curls, rowings, élévations, soulevé de terre, hip thrust et plus.\n\nExercices personnalisés : modifie-les ou supprime-les depuis le crayon de chaque catégorie, et utilise-les dans tes programmes.\n\nUn coffre commune offert à chaque séance terminée.`,
-  },
-  {
-    id: 'update-2026-09-10',
-    date: '10 septembre 2026',
-    title: 'Chat de groupe',
-    summary: 'Chat en temps réel dans chaque groupe et affichage corrigé sur iPhone.',
-    details: `Chat de groupe en temps réel : une icône dans le header du groupe ouvre la discussion, avec les avatars des membres.\n\nAffichage corrigé sur les écrans à encoche : le header, les pages et la barre de navigation respectent les zones sûres de l'iPhone.`,
-  },
-  {
-    id: 'update-2026-09-09',
-    date: '9 septembre 2026',
-    title: 'Programmes, créatine & quêtes v2',
-    summary: 'Programmes d\'entraînement, suivi créatine, quêtes rééquilibrées et plus.',
-    details: `Programmes d'entraînement : crée tes propres programmes avec tes exercices, séries, reps et poids. Partage-les en public pour que les autres puissent les importer. Lance une séance directement depuis un programme sauvegardé.\n\nSuivi créatine : un tracker quotidien sur le dashboard avec compteur de streak. Coche chaque jour pour suivre ta prise.\n\nTypes de poids : en plus du lesté, choisis entre haltères et barre lors de la configuration d'un exercice.\n\nQuêtes rééquilibrées : boost réduit (x1.2 au lieu de x1.6), plafonds sur tous les objectifs, quêtes de base fixes chaque semaine (3 séances, 30 min, 15 séries). Les quêtes d'exercices sont maintenant par séance ("fais 55 tractions en une séance") et pas sur la semaine entière.\n\nQuête Cindy : si tu fais des AMRAP, une quête Cindy apparaît (max 2/semaine). Les reps du Cindy comptent aussi dans les quêtes d'exercices (pompes, tractions, squats).\n\nSéances AMRAP modifiables : tu peux corriger le nombre de rounds après avoir terminé un Cindy.\n\nSéances Cindy exclues des quêtes d'exercices : les AMRAP ne gonflent plus les objectifs des quêtes perso.\n\nSplash screen : l'animation de saison ne s'affiche plus qu'une seule fois.\n\nChargement amélioré : la barre de chargement ne bloque plus à 95%.`,
-  },
-  {
-    id: 'update-2026-09-08',
-    date: '8 septembre 2026',
-    title: 'Quêtes intelligentes & améliorations',
-    summary: 'Quêtes personnalisées, classement mensuel, suppression de séances et plus.',
-    details: `Quêtes personnalisées : les quêtes de la semaine sont maintenant générées automatiquement en fonction de tes exercices de la semaine précédente. Plus tu progresses, plus les objectifs augmentent.\n\nClassement mensuel : le classement du groupe se réinitialise le 1er de chaque mois avec un timer de countdown.\n\nStats du dashboard alignées sur le reset des quêtes (lundi 10h).\n\nSuppression de séances : tu peux maintenant supprimer une séance depuis la page récap. Elle disparaît de tes stats, du classement et des quêtes.\n\nModification de séances : corrige tes reps après avoir terminé une séance avec le bouton édition.\n\nCartes cliquables partout : toutes les cartes (même non débloquées) sont cliquables dans la Collection et le Profil avec une vue détaillée.\n\nLesté / Poids : le toggle "Lesté" est remplacé par un stepper simple pour ajuster le poids directement.`,
-  },
-  {
-    id: 'update-2026-09-06',
-    date: '6 septembre 2026',
-    title: 'Running & Échanges de cartes',
-    summary: 'Nouvelle catégorie Running et système d\'échange entre membres.',
-    details: `Nouvelle catégorie Running avec 6 exercices dédiés (Course, Sprint, Fractionné, Course en côte, Tempo run, Marche rapide). Un formulaire spécifique permet de saisir le temps, la distance, le dénivelé et calcule automatiquement l'allure en min/km.\n\nSystème d'échange de cartes entre membres d'un même groupe : propose une de tes cartes contre celle d'un autre joueur, il accepte ou refuse.\n\nNouvelles quêtes running qui s'ajoutent au pool existant. Les quêtes se régénèrent le lundi à 10h avec un timer visible dans le pass.\n\nCoffres spéciaux : coffre Rare garanti au niveau 15, coffre Épique garanti au niveau 30, avec des couleurs distinctes dans le pass.`,
-  },
-  {
-    id: 'update-2026-09-05',
-    date: '5 septembre 2026',
-    title: 'Groupes & Profils',
-    summary: 'Photos de profil personnalisables, explorer les groupes et splash de saison.',
-    details: `Photo de profil personnalisable avec les personnages des cartes débloquées, visible dans le classement et la liste des membres du groupe.\n\nNouvelle fonctionnalité "Explorer les groupes" : une barre de recherche accessible en permanence pour voir tous les groupes et leurs membres.\n\nModal de prévisualisation quand tu cliques sur un membre du groupe avec ses stats et un bouton vers son profil complet.\n\nAnimation d'intro splash pour la Saison 1 : Casier Judiciaire à l'ouverture de l'app.\n\nRecherche de groupes améliorée avec gestion des accents.`,
-  },
-];
-
 export default function Dashboard() {
   const { user, displayName: myName } = useAuth();
   const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
-  const [showUpdates, setShowUpdates] = useState(false);
-  const [expandedUpdate, setExpandedUpdate] = useState<string | null>(null);
-
-  const lastSeenUpdate = localStorage.getItem('calicrew-last-seen-update');
-  const hasUnread = lastSeenUpdate !== UPDATES[0]?.id;
-
   const creatine = useCreatine();
-
-  function openUpdates() {
-    setShowUpdates(true);
-    localStorage.setItem('calicrew-last-seen-update', UPDATES[0]?.id || '');
-  }
 
   const recentSessions = useMemo(() => sessions.slice(0, 5), [sessions]);
 
@@ -194,12 +47,6 @@ export default function Dashboard() {
         <div>
           <h1>Salut {myName}</h1>
         <SeasonalBadge compact />
-        </div>
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button className="icon-btn notif-btn" onClick={openUpdates}>
-            <Bell size={18} />
-            {hasUnread && <span className="notif-dot" />}
-          </button>
         </div>
       </header>
 
@@ -321,45 +168,6 @@ export default function Dashboard() {
             )}
           </section>
         </>
-      )}
-
-      {showUpdates && (
-        <div className="modal-overlay" onClick={() => setShowUpdates(false)}>
-          <div className="updates-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="updates-modal-header">
-              <h3>Nouveautés</h3>
-              <button className="member-modal-close" onClick={() => setShowUpdates(false)}>
-                <X size={18} />
-              </button>
-            </div>
-            <div className="updates-list">
-              {UPDATES.map((update) => {
-                const isExpanded = expandedUpdate === update.id;
-                return (
-                  <div key={update.id} className="update-card" onClick={() => setExpandedUpdate(isExpanded ? null : update.id)}>
-                    <div className="update-card-header">
-                      <div>
-                        <span className="update-card-title">{update.title}</span>
-                        <span className="update-card-date">{update.date}</span>
-                      </div>
-                      <ChevronRight size={16} className={`update-chevron ${isExpanded ? 'rotated-90' : ''}`} />
-                    </div>
-                    {!isExpanded && (
-                      <p className="update-card-summary">{update.summary}</p>
-                    )}
-                    {isExpanded && (
-                      <div className="update-card-details">
-                        {update.details.split('\n\n').map((paragraph, i) => (
-                          <p key={i}>{paragraph}</p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
       )}
 
       <BottomNav />
