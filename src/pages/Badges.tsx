@@ -54,7 +54,13 @@ export default function Badges() {
             <div key={badge.id} className="badge-cell" onClick={() => setSelectedBadge(badge)}>
               <RankBadgeIcon badge={badge} size={64} />
               <span className="badge-cell-title">{badgeTitle(badge)}</span>
-              <span className="badge-cell-season">{badge.seasonName}</span>
+              {/* Le mois, et pas la saison : ces classements se jouent du 1er
+                  au dernier jour du mois, sans aucun rapport avec la saison
+                  en cours. Un badge daté « Casier Judiciaire » ne disait rien
+                  de quand il avait été gagné. */}
+              <span className="badge-cell-mois">
+                {estEvenement(badge) ? 'Événement' : badgeMonthLabel(badge.monthKey)}
+              </span>
             </div>
           ))}
         </div>
@@ -87,7 +93,6 @@ export default function Badges() {
               <>
                 <span className="badge-modal-metal">{BADGE_RANKS[selectedBadge.rank]?.name}</span>
                 <div className="badge-modal-meta">
-                  <span>{selectedBadge.seasonName}</span>
                   <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
                   <span>Groupe {selectedBadge.groupName}</span>
                 </div>
