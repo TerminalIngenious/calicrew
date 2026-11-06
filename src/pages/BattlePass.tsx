@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, generateWeeklyQuests, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, questsParDefaut, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
 import { getCardArt } from '../lib/cardsS2Art';
 import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
@@ -11,7 +11,7 @@ import { questValue } from '../lib/quests';
 import FaceIdButton from '../components/FaceIdButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
-import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer } from 'lucide-react';
+import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer, ChevronRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import Loader from '../components/Loader';
@@ -59,19 +59,27 @@ export default function BattlePass() {
   const isMonday = Date.now() - weekStart < 24 * 60 * 60 * 1000;
   const hasValidSelection = selection?.weekStart === weekStart && selection.locked;
   const needsSelection = !hasValidSelection;
-  const canSelect = isMonday && needsSelection;
+  /*
+   * Le choix des quêtes n'était possible que le lundi.
+   *
+   * Qui le ratait restait sur des quêtes de secours toute la semaine, sans
+   * aucun moyen de revenir dessus — et c'est arrivé à plusieurs. On peut
+   * maintenant choisir n'importe quel jour. Le lundi, l'écran s'ouvre tout
+   * seul, parce que c'est le rendez-vous ; les autres jours il faut le
+   * demander, pour ne pas barrer la route de quelqu'un qui vient simplement
+   * voir où il en est.
+   */
+  const [veutChoisir, setVeutChoisir] = useState(false);
+  const canSelect = needsSelection && (isMonday || veutChoisir);
   const selectionStep = !selection || selection.weekStart !== weekStart
     ? (selectedSports.length === 0 || questPool.length === 0 ? 'sports' : 'quests')
     : selection.locked ? 'done' : 'quests';
 
   const permanentQuests = useMemo(() => getPermanentQuests(), []);
 
-  const prevWeekStart = weekStart - 7 * 24 * 60 * 60 * 1000;
-  const prevWeekSessions = useMemo(
-    () => sessions.filter((s) => s.createdAt >= prevWeekStart && s.createdAt < weekStart && s.completed),
-    [sessions, prevWeekStart, weekStart]
-  );
-  const legacyQuests = useMemo(() => generateWeeklyQuests(prevWeekSessions), [prevWeekSessions]);
+  // Les quêtes imposées à qui n'a pas fait son choix : mêmes que celles du
+  // sélecteur, en même quantité, simplement non choisies.
+  const legacyQuests = useMemo(() => questsParDefaut(), []);
 
   const activeQuests = useMemo(() => {
     if (hasValidSelection) {
@@ -699,6 +707,21 @@ export default function BattlePass() {
             </h3>
             <span className="bp-quest-timer"><Clock size={13} /> {getQuestTimeLeft()}</span>
           </div>
+
+          {/* Ce sont les quêtes de secours : celui qui n'a pas fait son choix
+              du lundi doit pouvoir le faire, même mercredi. */}
+          {usingLegacy && (
+            <button className="bp-choisir" onClick={() => setVeutChoisir(true)}>
+              <Swords size={15} />
+              <div className="bp-choisir-texte">
+                <span className="bp-choisir-titre">Tu n'as pas choisi tes quêtes</span>
+                <span className="bp-choisir-sous">
+                  Voici celles par défaut. Choisis les tiennes, c'est encore possible.
+                </span>
+              </div>
+              <ChevronRight size={16} />
+            </button>
+          )}
           <div className="bp-quest-list">
             {activeQuests.map((quest) => {
               const current = getQuestValue(quest);

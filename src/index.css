@@ -7690,3 +7690,39 @@ body {
   line-height: 1.4;
   color: var(--text-muted);
 }
+
+/* Rattrapage du choix des quêtes, au-dessus de la liste de secours. */
+.bp-choisir {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255, 107, 53, 0.08);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: var(--radius);
+  color: var(--accent);
+  text-align: left;
+  cursor: pointer;
+}
+
+.bp-choisir-texte {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.bp-choisir-titre {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.bp-choisir-sous {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
