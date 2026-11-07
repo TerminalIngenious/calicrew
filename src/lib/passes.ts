@@ -71,9 +71,11 @@ const GENERAL_POOL: Omit<Quest, 'id'>[] = [
   { label: '45 minutes', description: 'Entraîne-toi 45 min au total', target: 2700, type: 'duration', xp: 100 },
   { label: '1 heure', description: 'Entraîne-toi 1h au total', target: 3600, type: 'duration', xp: 125 },
   { label: '4 séances', description: 'Fais 4 séances cette semaine', target: 4, type: 'sessions', xp: 100 },
-  // Dans le vivier général et pas seulement dans celui du running : c'est la
-  // quête de ceux qui marchent, et ils ne choisissent pas « running ».
+  // Dans le vivier général et pas seulement dans celui du running : ce sont
+  // les quêtes de ceux qui marchent, et ils ne choisissent pas « running ».
+  { label: '5 km à pied', description: 'Parcours 5 km à pied', target: 5, type: 'running_distance', xp: 75 },
   { label: '8 km à pied', description: 'Parcours 8 km à pied', target: 8, type: 'running_distance', xp: 100 },
+  { label: '12 km à pied', description: 'Parcours 12 km à pied', target: 12, type: 'running_distance', xp: 125 },
   { label: '5 séances', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions', xp: 125 },
 ];
 
@@ -147,6 +149,7 @@ const GENERAL_HARD: Omit<Quest, 'id'>[] = [
   { label: '2 heures', description: 'Entraîne-toi 2h au total', target: 7200, type: 'duration', xp: 175 },
   { label: '3 heures', description: 'Entraîne-toi 3h au total', target: 10800, type: 'duration', xp: 225 },
   { label: '6 séances', description: 'Fais 6 séances cette semaine', target: 6, type: 'sessions', xp: 175 },
+  { label: '20 km à pied', description: 'Parcours 20 km à pied', target: 20, type: 'running_distance', xp: 175 },
   { label: '7 séances', description: 'Fais 7 séances cette semaine', target: 7, type: 'sessions', xp: 225 },
 ];
 
@@ -184,6 +187,8 @@ const RUNNING_HARD: Omit<Quest, 'id'>[] = [
   { label: 'Fractionné+', description: 'Fais 45 min de fractionné', target: 2700, type: 'exercise_duration', xp: 200, exerciseId: 'interval-run', exerciseName: 'Fractionné' },
   { label: 'Côte+', description: 'Fais 40 min de course en côte', target: 2400, type: 'exercise_duration', xp: 200, exerciseId: 'hill-run', exerciseName: 'Course en côte' },
   { label: 'Tempo+', description: 'Fais 50 min de tempo run', target: 3000, type: 'exercise_duration', xp: 200, exerciseId: 'tempo-run', exerciseName: 'Tempo run' },
+  { label: '40 km', description: 'Parcours 40 km à pied', target: 40, type: 'running_distance', xp: 225 },
+  { label: '60 km', description: 'Parcours 60 km à pied', target: 60, type: 'running_distance', xp: 300 },
 ];
 
 const SPORT_POOLS: Record<SportType, Omit<Quest, 'id'>[]> = {
@@ -224,6 +229,23 @@ export function generateQuestPool(sports: SportType[]): Quest[] {
 
   const all = [...sportQuests, ...generalQuests];
   const shuffled = seededShuffle(all, seed + 42);
+
+  /*
+   * Au moins une quête de distance dans chaque vivier.
+   *
+   * C'est la seule que quelqu'un qui marche sans courir peut aller chercher.
+   * En la laissant au hasard du tirage, un joueur « calisthénie + muscu »
+   * tombait certaines semaines sur un vivier qui n'en contenait aucune — et
+   * c'est exactement celui pour qui elles ont été écrites. On en glisse donc
+   * une à la place de la dernière, plutôt que d'espérer.
+   */
+  if (!shuffled.some((q) => q.type === 'running_distance')) {
+    const secours = seededShuffle(
+      GENERAL_POOL.filter((q) => q.type === 'running_distance'),
+      seed + 7
+    )[0];
+    if (secours) shuffled[shuffled.length - 1] = secours;
+  }
 
   return shuffled.map((q, i) => ({
     ...q,
