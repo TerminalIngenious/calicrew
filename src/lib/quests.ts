@@ -33,6 +33,15 @@ export function questValue(quest: Quest, scope: Session[]): number {
       return scope
         .filter((s) => (s.exercises || []).some((e) => e.exerciseCategory === 'running'))
         .reduce((sum, s) => sum + (s.duration || 0), 0);
+    case 'running_distance':
+      // En kilomètres, et sur toute la catégorie running : courir, marcher
+      // vite ou marcher comptent pareil pour une distance.
+      return scope.reduce(
+        (sum, s) => sum + (s.exercises || [])
+          .filter((ex) => ex.exerciseCategory === 'running')
+          .reduce((eSum, ex) => eSum + (ex.runDistance || 0), 0),
+        0
+      );
     case 'exercise_reps':
       return scope.reduce(
         (sum, s) => sum + (s.exercises || [])

@@ -150,10 +150,69 @@ export function usePas() {
   return { pasDuJour, jours, loading, enregistre };
 }
 
-/** Total des pas sur un mois donné, au format YYYY-MM. */
-export function pasDuMois(jours: Record<string, number> | undefined, mois: string): number {
-  if (!jours) return 0;
-  return Object.entries(jours)
-    .filter(([k]) => k.startsWith(mois))
-    .reduce((total, [, v]) => total + (v || 0), 0);
+
+// ── Les pas qu'on a marchés en séance ──
+
+/**
+ * Pas par kilomètre.
+ *
+ * Une foulée de marche fait environ 77 cm, soit 1 300 pas au kilomètre. Un
+ * seul chiffre pour la marche et la marche rapide : la foulée rapide est un
+ * peu plus longue, mais la précision qu'on gagnerait à la distinguer serait
+ * fausse de toute façon — personne ne mesure sa foulée.
+ */
+export const PAS_PAR_KM = 1300;
+
+const EXOS_MARCHE = new Set(['walk', 'fast-walk']);
+
+interface SeanceMarche {
+  date?: string;
+  createdAt?: number;
+  completed?: boolean;
+  exercises?: { exerciseId?: string; runDistance?: number }[];
+}
+
+/** Les pas d'une séance, déduits des kilomètres marchés. */
+export function pasDeSeance(session: SeanceMarche): number {
+  const km = (session.exercises || [])
+    .filter((ex) => ex.exerciseId && EXOS_MARCHE.has(ex.exerciseId))
+    .reduce((total, ex) => total + (ex.runDistance || 0), 0);
+  return Math.round(km * PAS_PAR_KM);
+}
+
+/**
+ * Les pas d'un mois, saisie à la main et marches loguées confondues.
+ *
+ * Le maximum des deux par jour, et surtout pas la somme : le podomètre du
+ * téléphone a déjà compté les pas de la marche qu'on vient de loguer, donc
+ * les additionner reviendrait à les compter deux fois. Le plus élevé des
+ * deux est la meilleure estimation de ce qu'on a réellement marché — celui
+ * qui n'ouvre jamais la tuile a au moins ses marches, celui qui saisit son
+ * total du téléphone a déjà tout.
+ */
+export function pasDuMoisTotal(
+  jours: Record<string, number> | undefined,
+  sessions: SeanceMarche[],
+  mois: string
+): number {
+  // Les marches du jour s'additionnent entre elles — deux sorties font deux
+  // fois les pas. C'est seulement face à la saisie manuelle qu'on prend le
+  // plus grand des deux.
+  const marches = new Map<string, number>();
+  for (const s of sessions) {
+    if (!s.completed) continue;
+    const jour = s.createdAt ? dayKey(new Date(s.createdAt)) : s.date;
+    if (!jour || !jour.startsWith(mois)) continue;
+    const pas = pasDeSeance(s);
+    if (pas === 0) continue;
+    marches.set(jour, (marches.get(jour) || 0) + pas);
+  }
+
+  const parJour = new Map<string, number>(marches);
+  for (const [jour, n] of Object.entries(jours || {})) {
+    if (!jour.startsWith(mois)) continue;
+    parJour.set(jour, Math.max(parJour.get(jour) || 0, n || 0));
+  }
+
+  return [...parJour.values()].reduce((total, n) => total + n, 0);
 }

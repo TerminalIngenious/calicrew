@@ -90,6 +90,12 @@ export default function PasCard() {
             : `Les ${PAS_SEUIL.toLocaleString('fr-FR')} premiers pas sont ceux de la vie courante. Plus que ${(PAS_SEUIL - valeur).toLocaleString('fr-FR')}.`
           : `250 pas = 1 XP, au-delà des ${PAS_SEUIL.toLocaleString('fr-FR')} premiers`}
       </span>
+
+      {/* Sinon on se demande pourquoi le classement affiche plus de pas que
+          ce qu'on a tapé. */}
+      <span className="pas-card-bareme">
+        Tes marches loguées en séance comptent aussi dans le classement.
+      </span>
     </div>
   );
 }

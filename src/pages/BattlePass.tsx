@@ -757,7 +757,12 @@ export default function BattlePass() {
                       <span className="bp-quest-count">
                         {quest.type === 'duration' || quest.type === 'running_duration' || quest.type === 'exercise_duration'
                           ? `${Math.floor(current / 60)}/${Math.floor(quest.target / 60)} min`
-                          : `${current}/${quest.target}`}
+                          : quest.type === 'running_distance'
+                            // Une distance se compte en virgule, pas en entier :
+                            // arrondie, 9,8 km se serait affiché « 10/10 km »
+                            // sans que la quête soit finie.
+                            ? `${current.toFixed(1).replace('.', ',')}/${quest.target} km`
+                            : `${current}/${quest.target}`}
                       </span>
                     </div>
                   </div>

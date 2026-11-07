@@ -151,7 +151,7 @@ export interface Quest {
   label: string;
   description: string;
   target: number;
-  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap' | 'running_sessions' | 'running_duration' | 'exercise_reps' | 'exercise_duration';
+  type: 'sessions' | 'reps' | 'duration' | 'exercises' | 'sets' | 'amrap' | 'running_sessions' | 'running_duration' | 'running_distance' | 'exercise_reps' | 'exercise_duration';
   xp: number;
   exerciseId?: string;
   exerciseName?: string;

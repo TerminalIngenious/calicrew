@@ -71,6 +71,9 @@ const GENERAL_POOL: Omit<Quest, 'id'>[] = [
   { label: '45 minutes', description: 'Entraîne-toi 45 min au total', target: 2700, type: 'duration', xp: 100 },
   { label: '1 heure', description: 'Entraîne-toi 1h au total', target: 3600, type: 'duration', xp: 125 },
   { label: '4 séances', description: 'Fais 4 séances cette semaine', target: 4, type: 'sessions', xp: 100 },
+  // Dans le vivier général et pas seulement dans celui du running : c'est la
+  // quête de ceux qui marchent, et ils ne choisissent pas « running ».
+  { label: '8 km à pied', description: 'Parcours 8 km à pied', target: 8, type: 'running_distance', xp: 100 },
   { label: '5 séances', description: 'Fais 5 séances cette semaine', target: 5, type: 'sessions', xp: 125 },
 ];
 
@@ -124,6 +127,11 @@ const RUNNING_POOL: Omit<Quest, 'id'>[] = [
   { label: 'Course en côte', description: 'Fais 15 min de course en côte', target: 900, type: 'exercise_duration', xp: 100, exerciseId: 'hill-run', exerciseName: 'Course en côte' },
   { label: 'Tempo run', description: 'Fais 20 min de tempo run', target: 1200, type: 'exercise_duration', xp: 100, exerciseId: 'tempo-run', exerciseName: 'Tempo run' },
   { label: 'Marche rapide', description: 'Fais 30 min de marche rapide', target: 1800, type: 'exercise_duration', xp: 75, exerciseId: 'fast-walk', exerciseName: 'Marche rapide' },
+  // Les quêtes de distance se font en courant comme en marchant : ce sont
+  // les seules que quelqu'un qui ne court pas peut aller chercher.
+  { label: '10 km', description: 'Parcours 10 km à pied', target: 10, type: 'running_distance', xp: 100 },
+  { label: '15 km', description: 'Parcours 15 km à pied', target: 15, type: 'running_distance', xp: 125 },
+  { label: '25 km', description: 'Parcours 25 km à pied', target: 25, type: 'running_distance', xp: 175 },
 ];
 
 // ── Quêtes difficiles (actives à partir du 21 septembre 2026) ──
@@ -292,7 +300,7 @@ export const ENDURANCE_XP_QUART = 12;
  * qui permet de compter la marche sans qu'elle devienne la façon la plus
  * rentable de monter de niveau.
  */
-const MARCHE = new Set(['fast-walk']);
+const MARCHE = new Set(['fast-walk', 'walk']);
 
 /** Plafond par jour, pour que faire six fois le tour du quartier ne paie pas. */
 export const ENDURANCE_XP_MAX_JOUR = 60;

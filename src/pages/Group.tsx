@@ -17,7 +17,7 @@ import { db } from '../lib/firebase';
 import { getCardsBySet, getCardById, getCardDisplayName, getAllCurrentCards, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
-import { pasDuMois } from '../lib/pas';
+import { pasDuMoisTotal } from '../lib/pas';
 import { makeBadgeId, badgeTitle } from '../lib/badges';
 import {
   BID_REFUSAL_MESSAGES, SWAP_REFUSAL_MESSAGES, canAnswer, checkBid, countOf, listingKind,
@@ -205,7 +205,7 @@ export default function Group() {
         totalReps,
         // Les pas ne sortent pas des séances : ils sont saisis à la main et
         // vivent dans la progression du joueur.
-        totalPas: pasDuMois(progress?.pasJours, moisCourant),
+        totalPas: pasDuMoisTotal(progress?.pasJours, sessions, moisCourant),
         totalSets,
         sessionsCount: sessions.length,
         totalDuration,
@@ -264,9 +264,11 @@ export default function Group() {
         const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
         const exerciseVariety = new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId))).size;
 
-        const pasMembre = progressSnapMembre.exists()
-          ? pasDuMois((progressSnapMembre.data() as UserProgress).pasJours, moisEcoule)
-          : 0;
+        const pasMembre = pasDuMoisTotal(
+          progressSnapMembre.exists() ? (progressSnapMembre.data() as UserProgress).pasJours : undefined,
+          sessions,
+          moisEcoule
+        );
 
         return {
           uid: memberId,

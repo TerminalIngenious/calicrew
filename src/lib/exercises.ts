@@ -82,6 +82,7 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'hill-run', name: 'Course en côte', category: 'running' },
   { id: 'tempo-run', name: 'Tempo run', category: 'running' },
   { id: 'fast-walk', name: 'Marche rapide', category: 'running' },
+  { id: 'walk', name: 'Marche', category: 'running' },
   { id: 'velo-route', name: 'Vélo route', category: 'velo' },
   { id: 'vtt', name: 'VTT', category: 'velo' },
   { id: 'gravel', name: 'Gravel', category: 'velo' },
