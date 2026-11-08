@@ -193,7 +193,9 @@
   text-align: center;
   /* Un voile sous le bloc : la photo descend jusque-là, et un nom posé
      directement sur un t-shirt noir ou clair ne tient pas. */
-  background: linear-gradient(to top, rgba(3, 4, 2, 0.97) 55%, rgba(3, 4, 2, 0.8) 75%, transparent);
+  /* Opaque dès le prénom, et plus seulement presque : à 0,8 d'opacité, une
+     légende Snapchat se lisait encore derrière la ligne des statistiques. */
+  background: linear-gradient(to top, #030402 62%, rgba(3, 4, 2, 0.92) 82%, transparent);
   padding-top: 12cqw;
 }
 

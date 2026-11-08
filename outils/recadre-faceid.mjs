@@ -13,10 +13,15 @@ import path from 'node:path';
  */
 const PAIRES = [
   ['tristan',  'Tristan__Tristanchois - Professionnalisme.JPG', 'Tristan__Tristanchois - Shifumi Sensei.jpg'],
-  // Cadrage imposé : la capture Snapchat porte une légende en bas, qui
-  // dépassait du voile. On coupe au-dessus.
+  /*
+   * Cadrage imposé. Toute la largeur, parce que la tête y tient de justesse :
+   * elle fait 1170 px pour 1140 px de carte visible une fois le voile du bas
+   * déduit. On la centre donc dans cette bande, quitte à raser le haut des
+   * cheveux d'un pour cent. Et on descend assez pour que la légende Snapchat
+   * (1564→1666, mesurée) passe sous le voile au lieu d'être coupée.
+   */
   ['matteo',   'Mattéo__IMG_1309.png',
-               { f: 'Mattéo__drag-queen.jpg', crop: { left: 55, top: 340, width: 937, height: 1250 } }],
+               { f: 'Mattéo__drag-queen.jpg', crop: { left: 0, top: 265, width: 1125, height: 1500 } }],
   ['colinne',  'Colinne__IMG_4093.JPG',
                { f: 'Colinne__gene-asiatique.jpg', crop: { left: 330, top: 0, width: 615, height: 820 } }],
   ['mateo',    'Matéo__IMG_2299.JPG',                           'Matéo__IMG_2457.png'],
