@@ -114,7 +114,7 @@ const ART_PAR_DEFAUT: Record<Face, ArtFaceId> = {
 export const ART: Record<string, ArtFaceId> = {
   // Tristan
   'fid-tristan-a': { surnom: 'Bosseur', note: 84, stats: [72, 92, 82, 86, 23] },
-  'fid-tristan-b': { surnom: 'Shifumi Sensei', note: 59, stats: [62, 51, 56, 92, 86] },
+  'fid-tristan-b': { surnom: 'Maître Shifumi', note: 59, stats: [62, 51, 56, 92, 86] },
 
   // Mattéo
   'fid-matteo-a': { surnom: 'Chill Guy', note: 77, stats: [78, 76, 70, 74, 17] },
@@ -122,7 +122,7 @@ export const ART: Record<string, ArtFaceId> = {
 
   // Colinne
   'fid-colinne-a': { surnom: '', note: 86, stats: [90, 87, 79, 57, 23] },
-  'fid-colinne-b': { surnom: 'Sous Gêne Asiatique', note: 55, stats: [68, 44, 48, 88, 89] },
+  'fid-colinne-b': { surnom: 'Pipou', note: 55, stats: [68, 44, 48, 88, 89] },
 
   // Matéo
   'fid-mateo-a': { surnom: 'Sous Fête', note: 82, stats: [78, 79, 85, 80, 10] },
