@@ -2,10 +2,23 @@ import sharp from 'sharp';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
+/*
+ * Un slug, la photo de la Face A, celle de la Face B.
+ *
+ * Une entrée peut être un objet `{ f, crop }` au lieu d'un simple nom de
+ * fichier : `crop` impose la fenêtre de découpe et court-circuite la
+ * détection. Utile quand le visage est si haut dans l'image qu'aucun
+ * glissement ne peut le descendre à la bonne hauteur — il faut alors
+ * resserrer, et c'est un choix de cadrage, pas un calcul.
+ */
 const PAIRES = [
   ['tristan',  'Tristan__Tristanchois - Professionnalisme.JPG', 'Tristan__Tristanchois - Shifumi Sensei.jpg'],
-  ['matteo',   'Mattéo__IMG_1309.png',                          'Mattéo__Matteo dev - aura farming.png'],
-  ['colinne',  'Colinne__IMG_4093.JPG',                         'Colinne__Folie.png'],
+  // Cadrage imposé : la capture Snapchat porte une légende en bas, qui
+  // dépassait du voile. On coupe au-dessus.
+  ['matteo',   'Mattéo__IMG_1309.png',
+               { f: 'Mattéo__drag-queen.jpg', crop: { left: 55, top: 340, width: 937, height: 1250 } }],
+  ['colinne',  'Colinne__IMG_4093.JPG',
+               { f: 'Colinne__gene-asiatique.jpg', crop: { left: 330, top: 0, width: 615, height: 820 } }],
   ['mateo',    'Matéo__IMG_2299.JPG',                           'Matéo__IMG_2457.png'],
   ['marcus',   'Marcus__Le M - 0 gravité.JPG',                  'Marcus__Le M - Demonic form.PNG'],
   ['lucas',    'Lucas__LW - Ciao Energy.JPG',                   'Lucas__LW - 0_ travail.JPG'],
@@ -21,7 +34,10 @@ const RATIO = 3 / 4;
  *  milieu : le bas est mangé par le voile qui porte le prénom. */
 const CIBLE_Y = 0.42;
 
-const fichiers = PAIRES.flatMap(([, a, b]) => [a, b]).filter(Boolean);
+const nomDe = (e) => (typeof e === 'string' ? e : e?.f);
+const cropDe = (e) => (typeof e === 'string' ? null : e?.crop);
+
+const fichiers = PAIRES.flatMap(([, a, b]) => [a, b]).filter(Boolean).map(nomDe);
 const infos = new Map();
 for (const ligne of execFileSync(detecteur, fichiers.map((f) => path.join(src, f)),
     { encoding: 'utf8', maxBuffer: 1 << 24 }).trim().split('\n')) {
@@ -30,8 +46,10 @@ for (const ligne of execFileSync(detecteur, fichiers.map((f) => path.join(src, f
 }
 
 for (const [slug, a, b] of PAIRES) {
-  for (const [face, fichier] of [['a', a], ['b', b]]) {
-    if (!fichier) continue;
+  for (const [face, entree] of [['a', a], ['b', b]]) {
+    if (!entree) continue;
+    const fichier = nomDe(entree);
+    const impose = cropDe(entree);
     const i = infos.get(path.basename(fichier));
     const { w, h, kind } = i;
 
@@ -54,8 +72,9 @@ for (const [slug, a, b] of PAIRES) {
       cy = (i.y + i.fh * 0.12) * h;
     }
 
-    const left = Math.max(0, Math.min(w - cw, Math.round(cx - cw / 2)));
-    const top = Math.max(0, Math.min(h - ch, Math.round(cy - ch * CIBLE_Y)));
+    let left = Math.max(0, Math.min(w - cw, Math.round(cx - cw / 2)));
+    let top = Math.max(0, Math.min(h - ch, Math.round(cy - ch * CIBLE_Y)));
+    if (impose) ({ left, top, width: cw, height: ch } = impose);
 
     const out = path.join(dest, `${slug}-${face}.webp`);
     const r = await sharp(path.join(src, fichier))
@@ -66,7 +85,7 @@ for (const [slug, a, b] of PAIRES) {
       .toFile(out);
     console.log(
       `${slug}-${face}`.padEnd(11),
-      kind.padEnd(7),
+      impose ? 'imposé ' : kind.padEnd(7),
       `| source ${w}×${h} → fenêtre ${cw}×${ch} à (${left},${top})`,
       `| ${Math.round(r.size / 1024)} ko`
     );

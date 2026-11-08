@@ -143,7 +143,9 @@
 .fc2-note {
   z-index: 3;
   position: absolute;
-  top: 8cqw;
+  /* Assez bas pour laisser passer FACEID : à 8cqw, le chiffre montait sur la
+     marque et la rendait illisible dès que la photo était claire. */
+  top: 10.8cqw;
   left: 5cqw;
   font-family: 'CF Anton', system-ui, sans-serif;
   font-size: 21cqw;
