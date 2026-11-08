@@ -1,23 +1,25 @@
 /* ──────────────────────────────────────────────────────────────────────────
    Event FaceID
    ──────────────────────────────────────────────────────────────────────────
-   Le reste de l'app est orange sur bleu nuit. Ici tout est vert sur noir, et
-   c'est délibéré : un event doit se reconnaître avant d'être lu. Le registre
+   Ici tout est vert sur noir, et c'est le vert des cartes Face A — le même
+   que celui dont l'app entière s'habille pendant les trois semaines. Il y en
+   avait deux, un émeraude pour la page et un citron pour les cartes : posés
+   côte à côte ils se lisaient comme une erreur. Le registre
    est celui du scanner biométrique — grille, balayage, crochets de visée,
    chiffres sur deux positions — ce qui tombe bien pour un fichier de
    portraits, et ce qui prolonge le « Casier judiciaire » de la saison 1.
    ────────────────────────────────────────────────────────────────────────── */
 
 .fid-page {
-  --fid-vert: #2fe08a;
-  --fid-vert-sourd: #1b7f52;
-  --fid-fond: #04130c;
-  --fid-carte: #082018;
-  --fid-trait: rgba(47, 224, 138, 0.22);
+  --fid-vert: #b6ff00;
+  --fid-vert-sourd: #6f8f1a;
+  --fid-fond: #0c1104;
+  --fid-carte: #161d09;
+  --fid-trait: rgba(182, 255, 0, 0.22);
 
   position: relative;
   background: var(--fid-fond);
-  color: #d8f5e6;
+  color: #e9f6cd;
   isolation: isolate;
 }
 
@@ -44,9 +46,9 @@
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(47, 224, 138, 0.16) 48%,
-    rgba(47, 224, 138, 0.3) 50%,
-    rgba(47, 224, 138, 0.16) 52%,
+    rgba(182, 255, 0, 0.16) 48%,
+    rgba(182, 255, 0, 0.3) 50%,
+    rgba(182, 255, 0, 0.16) 52%,
     transparent 100%
   );
   height: 46vh;
@@ -149,7 +151,7 @@
 
 .fid-jauge {
   height: 4px;
-  background: rgba(47, 224, 138, 0.14);
+  background: rgba(182, 255, 0, 0.14);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -158,7 +160,7 @@
   display: block;
   height: 100%;
   background: var(--fid-vert);
-  box-shadow: 0 0 12px rgba(47, 224, 138, 0.7);
+  box-shadow: 0 0 12px rgba(182, 255, 0, 0.7);
   transition: width 0.5s ease;
 }
 
@@ -178,8 +180,8 @@
   width: 100%;
   margin-bottom: 1.5rem;
   padding: 1rem 1.1rem;
-  background: linear-gradient(135deg, rgba(47, 224, 138, 0.16), rgba(47, 224, 138, 0.04));
-  border: 1px solid rgba(47, 224, 138, 0.45);
+  background: linear-gradient(135deg, rgba(182, 255, 0, 0.16), rgba(182, 255, 0, 0.04));
+  border: 1px solid rgba(182, 255, 0, 0.45);
   border-radius: var(--radius);
   color: var(--fid-vert);
   text-align: left;
@@ -189,8 +191,8 @@
 }
 
 @keyframes fid-respire {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(47, 224, 138, 0.3); }
-  50% { box-shadow: 0 0 22px 2px rgba(47, 224, 138, 0.28); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(182, 255, 0, 0.3); }
+  50% { box-shadow: 0 0 22px 2px rgba(182, 255, 0, 0.28); }
 }
 
 .fid-slot:disabled { opacity: 0.6; }
@@ -212,8 +214,8 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem 1.1rem;
-  background: linear-gradient(135deg, rgba(47, 224, 138, 0.2), rgba(47, 224, 138, 0.05));
-  border: 1px solid rgba(47, 224, 138, 0.5);
+  background: linear-gradient(135deg, rgba(182, 255, 0, 0.2), rgba(182, 255, 0, 0.05));
+  border: 1px solid rgba(182, 255, 0, 0.5);
   border-radius: var(--radius);
 }
 
@@ -271,7 +273,7 @@
   overflow: hidden;
 }
 
-.fid-quest.done { border-color: rgba(47, 224, 138, 0.5); }
+.fid-quest.done { border-color: rgba(182, 255, 0, 0.5); }
 .fid-quest.claimed { opacity: 0.55; }
 
 /* Le ruban d'angle : une bande à 45° qui recouvre le coin supérieur droit. */
@@ -282,7 +284,7 @@
   width: 124px;
   padding: 0.18rem 0;
   background: var(--fid-vert);
-  color: #04130c;
+  color: #0c1104;
   font-size: 0.6rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -307,7 +309,7 @@
 .fid-quest-jauge {
   height: 3px;
   margin-top: 0.3rem;
-  background: rgba(47, 224, 138, 0.14);
+  background: rgba(182, 255, 0, 0.14);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -340,7 +342,7 @@
   background: var(--fid-vert);
   border: none;
   border-radius: var(--radius-sm);
-  color: #04130c;
+  color: #0c1104;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -359,7 +361,7 @@
 .fid-fiche {
   padding: 0.6rem;
   background: rgba(8, 32, 24, 0.6);
-  border: 1px solid rgba(47, 224, 138, 0.12);
+  border: 1px solid rgba(182, 255, 0, 0.12);
   border-radius: var(--radius);
 }
 
@@ -396,15 +398,15 @@
 .fid-card {
   position: relative;
   padding: 0;
-  background: var(--fid-carte, #082018);
-  border: 1px solid rgba(47, 224, 138, 0.25);
+  background: var(--fid-carte, #161d09);
+  border: 1px solid rgba(182, 255, 0, 0.25);
   border-radius: 10px;
   overflow: hidden;
 }
 
 .fid-card.owned {
-  border-color: rgba(47, 224, 138, 0.6);
-  box-shadow: 0 0 18px rgba(47, 224, 138, 0.12);
+  border-color: rgba(182, 255, 0, 0.6);
+  box-shadow: 0 0 18px rgba(182, 255, 0, 0.12);
 }
 
 /*
@@ -427,7 +429,7 @@
   position: absolute;
   width: 10px;
   height: 10px;
-  border: 2px solid #2fe08a;
+  border: 2px solid #b6ff00;
   opacity: 0.8;
 }
 
@@ -439,7 +441,7 @@
 .fid-card-visuel {
   position: relative;
   aspect-ratio: 3 / 4;
-  background: #04130c;
+  background: #0c1104;
   overflow: hidden;
 }
 
@@ -453,7 +455,7 @@
 .fid-silhouette {
   width: 100%;
   height: 100%;
-  fill: rgba(47, 224, 138, 0.14);
+  fill: rgba(182, 255, 0, 0.14);
   /* Remontée et rétrécie : le voile qui porte la mention couvre le bas de la
      case, et les épaules disparaissaient dessous. */
   transform: translateY(-12%) scale(0.8);
@@ -468,7 +470,7 @@
   flex-direction: column;
   gap: 1px;
   padding: 1.1rem 0.3rem 0.35rem;
-  background: linear-gradient(to top, #04130c 45%, transparent);
+  background: linear-gradient(to top, #0c1104 45%, transparent);
   text-align: center;
 }
 
@@ -527,9 +529,9 @@
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(47, 224, 138, 0.45),
+    rgba(182, 255, 0, 0.45),
     rgba(234, 255, 244, 0.8),
-    rgba(47, 224, 138, 0.45),
+    rgba(182, 255, 0, 0.45),
     transparent
   );
   animation: fid-scan 1.1s ease-out forwards;
@@ -595,7 +597,7 @@
      bande claire qui passe dessus. */
   background:
     linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.22) 48%, transparent 58%),
-    linear-gradient(160deg, #34f29a 0%, #12a765 38%, #065c39 72%, #1ed189 100%);
+    linear-gradient(160deg, #34f29a 0%, #12a765 38%, #065c39 72%, #c2f53a 100%);
   border-radius: 6px 6px 12px 12px;
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(255, 255, 255, 0.1);
 }
@@ -618,7 +620,7 @@
 .fid-sachet-logo {
   width: 54%;
   fill: none;
-  stroke: #04130c;
+  stroke: #0c1104;
   stroke-width: 5;
   stroke-linecap: round;
   opacity: 0.75;
@@ -628,7 +630,7 @@
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-  color: #04130c;
+  color: #0c1104;
 }
 
 .fid-sachet-sous {
@@ -636,14 +638,14 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(4, 19, 12, 0.6);
+  color: rgba(12, 17, 4, 0.6);
 }
 
 .fid-sachet-lueur {
   position: absolute;
   inset: -18%;
   z-index: -1;
-  background: radial-gradient(circle, rgba(47, 224, 138, 0.35) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(182, 255, 0, 0.35) 0%, transparent 65%);
 }
 
 /* La déchirure : le haut se détache, le reste s'ouvre et le flash passe. */
@@ -689,7 +691,7 @@
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #2fe08a;
+  color: #b6ff00;
 }
 
 .fid-recap-cartes {
@@ -712,16 +714,16 @@
   width: 100%;
   margin: 1.25rem 0;
   padding: 1.1rem 1.2rem;
-  background: linear-gradient(150deg, #1ed189 0%, #0f9c5e 45%, #06663e 100%);
+  background: linear-gradient(150deg, #c2f53a 0%, #8ec400 45%, #5a8200 100%);
   border: none;
   border-radius: 16px;
-  color: #04130c;
+  color: #0c1104;
   text-align: left;
   cursor: pointer;
   box-shadow:
-    0 14px 0 -2px #044a2d,
+    0 14px 0 -2px #3f5c00,
     0 16px 28px rgba(0, 0, 0, 0.5),
-    0 0 36px rgba(47, 224, 138, 0.25),
+    0 0 36px rgba(182, 255, 0, 0.25),
     inset 0 2px 0 rgba(255, 255, 255, 0.35);
   transform: perspective(700px) rotateX(5deg) translateY(0);
   transition: transform 0.4s cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 0.25s ease;
@@ -737,7 +739,7 @@
   animation: none;
   transform: perspective(700px) rotateX(5deg) translateY(8px) scale(0.97);
   box-shadow:
-    0 4px 0 -2px #044a2d,
+    0 4px 0 -2px #3f5c00,
     0 6px 12px rgba(0, 0, 0, 0.5),
     inset 0 2px 0 rgba(255, 255, 255, 0.2);
   transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
@@ -750,7 +752,7 @@
   font-weight: 800;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(4, 19, 12, 0.65);
+  color: rgba(12, 17, 4, 0.65);
 }
 
 .fid-entree-titre {
@@ -762,15 +764,15 @@
 .fid-entree-sous {
   font-size: 0.74rem;
   font-weight: 600;
-  color: rgba(4, 19, 12, 0.7);
+  color: rgba(12, 17, 4, 0.7);
 }
 
 .fid-entree-pastille {
   margin-left: auto;
   padding: 0.2rem 0.5rem;
-  background: #04130c;
+  background: #0c1104;
   border-radius: 999px;
-  color: #2fe08a;
+  color: #b6ff00;
   font-size: 0.7rem;
   font-weight: 800;
 }
@@ -969,4 +971,13 @@
 .fid-shelf-fleche {
   flex-shrink: 0;
   color: var(--text-muted);
+}
+
+/* L'emplacement sans carte : la monture seule.
+   Pas de silhouette ici — les vignettes se chevauchent de vingt pixels, et
+   trois têtes à moitié recouvertes faisaient une tache verte illisible. */
+.fid-shelf-vignette.vide {
+  border-style: dashed;
+  border-color: rgba(182, 255, 0, 0.25);
+  background: #11150b;
 }

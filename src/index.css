@@ -7805,6 +7805,24 @@ body {
   color: #0a0b09;
 }
 
+/* Cinq dégradés finissent sur un orange écrit en dur plutôt que sur
+   --accent-light : repeints, ils partaient en vert pour revenir à l'orange
+   au milieu du bouton. */
+:root[data-season="faceid"] .bp-tab.active,
+:root[data-season="faceid"] .bp-card-reveal-close,
+:root[data-season="faceid"] .bp-quest-claim,
+:root[data-season="faceid"] .quest-next-btn,
+:root[data-season="faceid"] .quest-confirm-ok {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+}
+
+/* La barre d'XP a son propre orange et son halo, tous deux écrits en dur. */
+:root[data-season="faceid"] .bp-hero-xp-fill {
+  background: linear-gradient(90deg, var(--accent), #e0ff8a, var(--accent));
+  background-size: 200% 100%;
+  box-shadow: 0 0 8px rgba(182, 255, 0, 0.4);
+}
+
 .fid-decor {
   position: fixed;
   inset: 0;

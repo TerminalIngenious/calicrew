@@ -61,12 +61,12 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   faceid: {
     titre: 'FaceID',
     soustitre: 'Fichier complet',
-    from: '#9bf7cb',
-    mid: '#2fe08a',
-    to: '#0a6b40',
-    coreFrom: '#073a26',
-    coreTo: '#04130c',
-    glow: 'rgba(47, 224, 138, 0.5)',
+    from: '#e4ff9e',
+    mid: '#b6ff00',
+    to: '#5a8200',
+    coreFrom: '#2b3d05',
+    coreTo: '#0c1104',
+    glow: 'rgba(182, 255, 0, 0.5)',
   },
 };
 

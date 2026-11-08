@@ -24,9 +24,12 @@ export default function FaceIdShelf({
   const possedees = nbPossedees(fid);
   if (possedees === 0 && !evenementEnCours()) return null;
 
-  // Les trois dernières obtenues, par ordre du fichier : une affiche, pas un
-  // inventaire — le fichier complet est à un clic.
+  // Trois cartes obtenues, par ordre du fichier : une affiche, pas un
+  // inventaire — le fichier complet est à un clic. Avant la première, trois
+  // emplacements vides, pour que le bandeau garde sa forme le jour de
+  // l'ouverture plutôt que de laisser le texte au bord.
   const apercu = CARTES.filter((c) => (fid.cartes[c.id] || 0) > 0).slice(0, 3);
+  const vides = 3 - apercu.length;
 
   return (
     <section className="section">
@@ -34,6 +37,9 @@ export default function FaceIdShelf({
         <div className="fid-shelf-vignettes" aria-hidden="true">
           {apercu.map((c) => (
             <img key={c.id} src={c.image} alt="" className="fid-shelf-vignette" />
+          ))}
+          {Array.from({ length: vides }, (_, i) => (
+            <span key={`vide-${i}`} className="fid-shelf-vignette vide" />
           ))}
         </div>
         <div className="fid-shelf-texte">

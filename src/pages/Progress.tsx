@@ -18,6 +18,15 @@ import Loader from '../components/Loader';
 import PersonalRecords from '../components/PersonalRecords';
 import { Trophy, Zap, Clock, Dumbbell } from 'lucide-react';
 import { exerciseReps, exerciseTotal, getUnit, unitLabel, totalReps, sessionSets } from '../lib/stats';
+import { getSeasonalTheme } from '../lib/seasonalTheme';
+
+/*
+ * La courbe suit l'habillage du moment.
+ *
+ * Recharts prend une couleur, pas une variable CSS : l'orange était écrit en
+ * dur et restait seul en orange au milieu d'une page repeinte.
+ */
+const COULEUR_COURBE = getSeasonalTheme() === 'faceid' ? '#b6ff00' : '#ff6b35';
 
 export default function Progress() {
   const { user } = useAuth();
@@ -183,9 +192,9 @@ export default function Progress() {
                         <Line
                           type="monotone"
                           dataKey="volume"
-                          stroke="#ff6b35"
+                          stroke={COULEUR_COURBE}
                           strokeWidth={2}
-                          dot={{ fill: '#ff6b35', r: 4 }}
+                          dot={{ fill: COULEUR_COURBE, r: 4 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
