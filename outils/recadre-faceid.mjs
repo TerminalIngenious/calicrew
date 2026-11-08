@@ -5,23 +5,29 @@ import path from 'node:path';
 /*
  * Un slug, la photo de la Face A, celle de la Face B.
  *
- * Une entrée peut être un objet `{ f, crop }` au lieu d'un simple nom de
- * fichier : `crop` impose la fenêtre de découpe et court-circuite la
- * détection. Utile quand le visage est si haut dans l'image qu'aucun
- * glissement ne peut le descendre à la bonne hauteur — il faut alors
- * resserrer, et c'est un choix de cadrage, pas un calcul.
+ * Une entrée peut être un objet `{ f, crop, contain }` au lieu d'un simple
+ * nom de fichier. `crop` impose la fenêtre de découpe et court-circuite la
+ * détection — utile quand le visage est si haut dans l'image qu'aucun
+ * glissement ne peut le descendre à la bonne hauteur. `contain` fait rentrer
+ * cette fenêtre en entier au lieu de la rogner, en laissant des bandes
+ * transparentes sur les côtés : le fond du scanner s'y voit, et une tête qui
+ * ne tient pas dans un format 3/4 tient quand même sur la carte.
  */
 const PAIRES = [
   ['tristan',  'Tristan__Tristanchois - Professionnalisme.JPG', 'Tristan__Tristanchois - Shifumi Sensei.jpg'],
   /*
-   * Cadrage imposé. Toute la largeur, parce que la tête y tient de justesse :
-   * elle fait 1170 px pour 1140 px de carte visible une fois le voile du bas
-   * déduit. On la centre donc dans cette bande, quitte à raser le haut des
-   * cheveux d'un pour cent. Et on descend assez pour que la légende Snapchat
-   * (1564→1666, mesurée) passe sous le voile au lieu d'être coupée.
+   * Gros plan : la tête fait 1170 px de haut pour 1125 de large, elle ne peut
+   * pas tenir dans un format 3/4 sans qu'on rogne les cheveux ou qu'on noie
+   * les lèvres sous le prénom. On la fait donc rentrer en entier, avec deux
+   * bandes transparentes de 43 px sur les côtés où la grille du scanner
+   * continue. La fenêtre est calée pour que les lèvres tombent à 58 % de la
+   * carte : le prénom commence à 63 %, et c'est le rouge à lèvres qui fait
+   * la carte. La légende Snapchat reste dans le champ : la voir ne gêne
+   * personne, et vouloir la cacher coûtait la moitié de la tête.
    */
   ['matteo',   'Mattéo__IMG_1309.png',
-               { f: 'Mattéo__drag-queen.jpg', crop: { left: 0, top: 265, width: 1125, height: 1500 } }],
+               { f: 'Mattéo__drag-queen.jpg', contain: true,
+                 crop: { left: 0, top: 187, width: 1125, height: 1660 } }],
   ['colinne',  'Colinne__IMG_4093.JPG',
                { f: 'Colinne__gene-asiatique.jpg', crop: { left: 330, top: 0, width: 615, height: 820 } }],
   ['mateo',    'Matéo__IMG_2299.JPG',                           'Matéo__IMG_2457.png'],
@@ -41,6 +47,7 @@ const CIBLE_Y = 0.42;
 
 const nomDe = (e) => (typeof e === 'string' ? e : e?.f);
 const cropDe = (e) => (typeof e === 'string' ? null : e?.crop);
+const containDe = (e) => (typeof e === 'string' ? false : !!e?.contain);
 
 const fichiers = PAIRES.flatMap(([, a, b]) => [a, b]).filter(Boolean).map(nomDe);
 const infos = new Map();
@@ -55,6 +62,7 @@ for (const [slug, a, b] of PAIRES) {
     if (!entree) continue;
     const fichier = nomDe(entree);
     const impose = cropDe(entree);
+    const contain = containDe(entree);
     const i = infos.get(path.basename(fichier));
     const { w, h, kind } = i;
 
@@ -85,12 +93,16 @@ for (const [slug, a, b] of PAIRES) {
     const r = await sharp(path.join(src, fichier))
       .rotate()
       .extract({ left, top, width: cw, height: ch })
-      .resize(900, 1200)
-      .webp({ quality: 80 })
+      .resize(900, 1200, contain
+        // Fond transparent et non noir : les bandes laissent voir la grille
+        // et l'empreinte de la carte, au lieu d'y coller deux barres.
+        ? { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }
+        : undefined)
+      .webp({ quality: 80, alphaQuality: 90 })
       .toFile(out);
     console.log(
       `${slug}-${face}`.padEnd(11),
-      impose ? 'imposé ' : kind.padEnd(7),
+      (impose ? 'imposé' : kind).padEnd(7) + (contain ? ' entier' : ''),
       `| source ${w}×${h} → fenêtre ${cw}×${ch} à (${left},${top})`,
       `| ${Math.round(r.size / 1024)} ko`
     );

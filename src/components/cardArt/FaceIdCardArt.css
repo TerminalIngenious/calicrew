@@ -193,10 +193,16 @@
   text-align: center;
   /* Un voile sous le bloc : la photo descend jusque-là, et un nom posé
      directement sur un t-shirt noir ou clair ne tient pas. */
-  /* Opaque dès le prénom, et plus seulement presque : à 0,8 d'opacité, une
-     légende Snapchat se lisait encore derrière la ligne des statistiques. */
-  background: linear-gradient(to top, #030402 62%, rgba(3, 4, 2, 0.92) 82%, transparent);
-  padding-top: 12cqw;
+  /*
+   * Opaque dès le prénom, et un dégradé court.
+   *
+   * Il montait douze points plus haut et commençait à s'assombrir au tiers
+   * de la carte : sur un gros plan, la bouche disparaissait dedans alors
+   * qu'elle est souvent ce qu'il y a de plus drôle. Il ne mord plus que sur
+   * le menton.
+   */
+  background: linear-gradient(to top, #030402 72%, rgba(3, 4, 2, 0.88) 90%, transparent);
+  padding-top: 5cqw;
 }
 
 .fc2-nom {
