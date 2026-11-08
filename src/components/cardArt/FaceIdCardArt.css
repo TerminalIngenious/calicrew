@@ -194,15 +194,27 @@
   /* Un voile sous le bloc : la photo descend jusque-là, et un nom posé
      directement sur un t-shirt noir ou clair ne tient pas. */
   /*
-   * Opaque dès le prénom, et un dégradé court.
+   * Un dégradé long et doux, jamais une barre.
    *
-   * Il montait douze points plus haut et commençait à s'assombrir au tiers
-   * de la carte : sur un gros plan, la bouche disparaissait dedans alors
-   * qu'elle est souvent ce qu'il y a de plus drôle. Il ne mord plus que sur
-   * le menton.
+   * Il devenait franchement opaque aux trois quarts, et cette rupture se
+   * lisait comme un bandeau noir collé sous le prénom. Cinq paliers rendent
+   * la descente continue : on ne voit plus où elle commence, seulement que
+   * le bas s'assombrit.
+   *
+   * La lisibilité ne repose donc plus sur le voile seul mais aussi sur les
+   * ombres portées des textes, juste en dessous — c'est ce qui permet de
+   * baisser le voile sans que le prénom s'efface sur une photo claire.
    */
-  background: linear-gradient(to top, #030402 72%, rgba(3, 4, 2, 0.88) 90%, transparent);
-  padding-top: 5cqw;
+  background: linear-gradient(
+    to top,
+    rgba(3, 4, 2, 0.94) 0%,
+    rgba(3, 4, 2, 0.88) 28%,
+    rgba(3, 4, 2, 0.72) 48%,
+    rgba(3, 4, 2, 0.44) 68%,
+    rgba(3, 4, 2, 0.18) 85%,
+    transparent 100%
+  );
+  padding-top: 7cqw;
 }
 
 .fc2-nom {
@@ -213,7 +225,7 @@
   letter-spacing: -0.01em;
   color: #fff;
   text-transform: uppercase;
-  text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.9);
+  text-shadow: 0 0.3cqw 1.2cqw rgba(0, 0, 0, 0.95), 0 0 2.5cqw rgba(0, 0, 0, 0.8);
 }
 
 .fc2-surnom {
@@ -226,6 +238,7 @@
   letter-spacing: 0.01em;
   color: var(--fc-accent);
   text-transform: uppercase;
+  text-shadow: 0 0.2cqw 1cqw rgba(0, 0, 0, 0.95), 0 0 2cqw rgba(0, 0, 0, 0.75);
 }
 
 /* ── Les statistiques ── */
@@ -253,8 +266,9 @@
   font-size: 2.9cqw;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.78);
   white-space: nowrap;
+  text-shadow: 0 0 1.2cqw rgba(0, 0, 0, 0.9);
 }
 
 .fc2-stat-ico {
@@ -268,6 +282,7 @@
   font-size: 7cqw;
   line-height: 1;
   color: #fff;
+  text-shadow: 0 0.2cqw 1cqw rgba(0, 0, 0, 0.95);
 }
 
 .fc2-logo {
