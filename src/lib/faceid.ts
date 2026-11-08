@@ -5,7 +5,7 @@ export type { FaceIdProgress };
 /**
  * Event FaceID — 9 au 30 novembre 2026.
  *
- * Treize membres du groupe, deux cartes chacun, vingt-six cartes à
+ * Douze membres du groupe, deux cartes chacun, vingt-quatre cartes à
  * rassembler en trois semaines. Tout est à part du pass : ni le même set de
  * cartes, ni les mêmes coffres, ni le même écran. C'est voulu — un event qui
  * ressemble au reste de l'app n'est plus un event.
@@ -47,7 +47,6 @@ export const MEMBRES: MembreFaceId[] = [
   { slug: 'johan', nom: 'Johan' },
   { slug: 'jimmy', nom: 'Jimmy' },
   { slug: 'hugo', nom: 'Hugo' },
-  { slug: 'entony', nom: 'Entony' },
   { slug: 'clement', nom: 'Clément' },
   { slug: 'bastien', nom: 'Bastien' },
   { slug: 'alexandre', nom: 'Alexandre' },
@@ -149,10 +148,6 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-hugo-a': { surnom: 'Vacancier', note: 77, stats: [78, 79, 70, 58, 26] },
   'fid-hugo-b': { surnom: 'Batman Form', note: 56, stats: [47, 56, 57, 92, 86] },
 
-  // Entony
-  'fid-entony-a': { surnom: '', note: 83, stats: [83, 92, 73, 85, 13] },
-  'fid-entony-b': { surnom: '', note: 63, stats: [63, 61, 57, 98, 97] },
-
   // Clément
   'fid-clement-a': { surnom: '', note: 81, stats: [90, 85, 69, 71, 20] },
   'fid-clement-b': { surnom: 'Très Gros Plan', note: 55, stats: [60, 54, 46, 89, 96] },
@@ -166,7 +161,7 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-alexandre-b': { surnom: '', note: 55, stats: [52, 45, 50, 86, 91] },
 };
 
-/** Les vingt-six cartes, dans l'ordre du trombinoscope. */
+/** Les vingt-quatre cartes, dans l'ordre du trombinoscope. */
 export const CARTES: CarteFaceId[] = MEMBRES.flatMap((m, i) =>
   (['a', 'b'] as Face[]).map((face, j) => {
     const id = `fid-${m.slug}-${face}`;
@@ -223,10 +218,10 @@ export const CARTES_PAR_BOOSTER = 3;
 /**
  * Les boosters offerts à la première visite.
  *
- * Deux et non un : à vingt-six cartes il en faut neuf pour tout rassembler,
- * et neuf missions seules ne laissaient aucune marge — une mission ratée et
- * la collection restait incomplète. Deux à l'ouverture ramènent la marge à
- * deux, et six cartes d'un coup font comprendre l'event en une minute.
+ * Deux et non un : à vingt-quatre cartes il en faut huit pour tout
+ * rassembler, et neuf missions seules ne laissaient qu'une mission de marge.
+ * Deux à l'ouverture portent la marge à trois, et six cartes d'un coup font
+ * comprendre l'event en une minute.
  */
 export const BOOSTERS_OUVERTURE = 2;
 
@@ -234,7 +229,7 @@ export const BOOSTERS_OUVERTURE = 2;
  * Le contenu d'un booster.
  *
  * Tirage sans remise dans ce qui manque, et non au hasard parmi les
- * vingt-six : à taux égal avec doublons, rassembler les vingt-six
+ * vingt-quatre : à taux égal avec doublons, rassembler les vingt-quatre
  * demanderait une trentaine de boosters en moyenne — et quarante pour un
  * joueur sur dix. Impossible à distribuer en trois semaines, et surtout
  * pénible : passé la moitié, neuf ouvertures sur dix ne donneraient que des
@@ -372,7 +367,7 @@ export const BADGE_ID = 'event-faceid';
  *
  * Il rejoint les badges de classement du profil, mais il n'a ni podium ni
  * groupe : on ne le gagne pas en finissant devant quelqu'un, mais en allant
- * au bout des vingt-six. `category` et `rank` ne sont là que parce que le
+ * au bout des vingt-quatre. `category` et `rank` ne sont là que parce que le
  * type est partagé — rien ne les lit pour un badge d'événement.
  */
 export function badgeFaceId(maintenant = Date.now()): RankBadge {

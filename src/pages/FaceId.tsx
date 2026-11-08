@@ -73,7 +73,7 @@ export default function FaceId() {
   }, [user, progress, enCours, fid]);
 
   /**
-   * Le badge de fin, dès que les vingt-six sont là.
+   * Le badge de fin, dès que les vingt-quatre sont là.
    *
    * Posé ici et non dans un cron : c'est le seul endroit qui sait, à la
    * seconde près, que la collection vient d'être bouclée — et la seule
@@ -153,7 +153,7 @@ export default function FaceId() {
       </header>
 
       <p className="fid-pitch">
-        Treize d'entre nous, deux portraits chacun. Vingt-six cartes à
+        Douze d'entre nous, deux portraits chacun. Vingt-quatre cartes à
         rassembler avant le 30 novembre — et aucune ne s'achète : elles sortent
         toutes des boosters.
       </p>
@@ -179,7 +179,7 @@ export default function FaceId() {
           <div>
             <span className="fid-fini-titre">Fichier complet</span>
             <span className="fid-fini-sous">
-              Les vingt-six visages sont identifiés. Le badge FaceID est dans ton profil.
+              Les vingt-quatre visages sont identifiés. Le badge FaceID est dans ton profil.
             </span>
           </div>
         </div>

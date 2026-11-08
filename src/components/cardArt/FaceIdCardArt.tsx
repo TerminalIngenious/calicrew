@@ -7,9 +7,9 @@ import './FaceIdCardArt.css';
 /**
  * La carte de l'event FaceID, dessinée plutôt qu'affichée en image.
  *
- * Même parti pris que pour la saison 2 : vingt-six images livrées à la
+ * Même parti pris que pour la saison 2 : vingt-quatre images livrées à la
  * main ne seraient jamais tout à fait au même gabarit, et ça se verrait dans
- * une grille de vingt-six. Dessinée, la carte est identique au pixel près
+ * une grille de vingt-quatre. Dessinée, la carte est identique au pixel près
  * d'une personne à l'autre, nette à n'importe quel zoom, et corriger une
  * statistique ne demande pas de refaire un fichier.
  *
