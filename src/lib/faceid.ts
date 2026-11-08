@@ -137,7 +137,7 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-lucas-b': { surnom: '0% Travail', note: 65, stats: [65, 60, 59, 91, 91] },
 
   // Johan
-  'fid-johan-a': { surnom: '', note: 87, stats: [86, 89, 89, 69, 8] },
+  'fid-johan-a': { surnom: 'Entrepreneur Entreprenant', note: 87, stats: [86, 89, 89, 69, 8] },
   'fid-johan-b': { surnom: 'Colère', note: 54, stats: [59, 48, 48, 90, 96] },
 
   // Jimmy
