@@ -55,7 +55,7 @@ Explosivité, Ego, Excuses**. La dernière s'inverse d'une face à l'autre —
 c'est elle qui fait la blague.
 
 Une carte absente de la table prend des valeurs par défaut, pour que la mise
-en page reste vérifiable avant que les vingt-quatre soient écrites.
+en page reste vérifiable avant que les vingt-six soient écrites.
 
 ## Pendant que tout n'est pas là
 

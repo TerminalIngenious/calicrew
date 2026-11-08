@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import type { CarteFaceId } from '../../lib/faceid';
-import { STATS } from '../../lib/faceid';
+import { STATS, TOTAL_CARTES } from '../../lib/faceid';
 import './fonts.css';
 import './FaceIdCardArt.css';
 
 /**
  * La carte de l'event FaceID, dessinée plutôt qu'affichée en image.
  *
- * Même parti pris que pour la saison 2 : vingt-quatre images livrées à la
+ * Même parti pris que pour la saison 2 : vingt-six images livrées à la
  * main ne seraient jamais tout à fait au même gabarit, et ça se verrait dans
- * une grille de vingt-quatre. Dessinée, la carte est identique au pixel près
+ * une grille de vingt-six. Dessinée, la carte est identique au pixel près
  * d'une personne à l'autre, nette à n'importe quel zoom, et corriger une
  * statistique ne demande pas de refaire un fichier.
  *
@@ -43,7 +43,7 @@ export default function FaceIdCardArt({ carte }: { carte: CarteFaceId }) {
           <div className="fc2-haut">
             <span className="fc2-marque">FACE<em>ID</em></span>
             <span className="fc2-numero">
-              {String(carte.numero).padStart(3, '0')}/024
+              {String(carte.numero).padStart(3, '0')}/{String(TOTAL_CARTES).padStart(3, '0')}
             </span>
           </div>
 
@@ -55,7 +55,9 @@ export default function FaceIdCardArt({ carte }: { carte: CarteFaceId }) {
 
           <div className="fc2-bas">
             <span className="fc2-nom">{carte.nom}</span>
-            <span className="fc2-surnom">{carte.surnom}</span>
+            {/* Pas de ligne vide en attendant : une carte sans surnom se
+                contente de son prénom. */}
+            {carte.surnom && <span className="fc2-surnom">{carte.surnom}</span>}
 
             <div className="fc2-stats">
               {STATS.map((nom, i) => (

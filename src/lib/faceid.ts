@@ -5,7 +5,7 @@ export type { FaceIdProgress };
 /**
  * Event FaceID — 9 au 30 novembre 2026.
  *
- * Douze membres du groupe, deux cartes chacun, vingt-quatre cartes à
+ * Treize membres du groupe, deux cartes chacun, vingt-six cartes à
  * rassembler en trois semaines. Tout est à part du pass : ni le même set de
  * cartes, ni les mêmes coffres, ni le même écran. C'est voulu — un event qui
  * ressemble au reste de l'app n'est plus un event.
@@ -36,18 +36,21 @@ export interface MembreFaceId {
  * On peut corriger un prénom quand on veut, jamais un slug.
  */
 export const MEMBRES: MembreFaceId[] = [
+  { slug: 'tristan', nom: 'Tristan' },
   { slug: 'matteo', nom: 'Mattéo' },
+  { slug: 'colinne', nom: 'Colinne' },
+  // Mattéo et Matéo sont deux personnes différentes : deux slugs, et surtout
+  // pas de correction orthographique bien intentionnée.
+  { slug: 'mateo', nom: 'Matéo' },
+  { slug: 'marcus', nom: 'Marcus' },
   { slug: 'lucas', nom: 'Lucas' },
-  { slug: 'membre-03', nom: 'Membre 3' },
-  { slug: 'membre-04', nom: 'Membre 4' },
-  { slug: 'membre-05', nom: 'Membre 5' },
-  { slug: 'membre-06', nom: 'Membre 6' },
-  { slug: 'membre-07', nom: 'Membre 7' },
-  { slug: 'membre-08', nom: 'Membre 8' },
-  { slug: 'membre-09', nom: 'Membre 9' },
-  { slug: 'membre-10', nom: 'Membre 10' },
-  { slug: 'membre-11', nom: 'Membre 11' },
-  { slug: 'membre-12', nom: 'Membre 12' },
+  { slug: 'johan', nom: 'Johan' },
+  { slug: 'jimmy', nom: 'Jimmy' },
+  { slug: 'hugo', nom: 'Hugo' },
+  { slug: 'entony', nom: 'Entony' },
+  { slug: 'clement', nom: 'Clément' },
+  { slug: 'bastien', nom: 'Bastien' },
+  { slug: 'alexandre', nom: 'Alexandre' },
 ];
 
 export type Face = 'a' | 'b';
@@ -91,16 +94,43 @@ export interface ArtFaceId {
   stats: number[];
 }
 
+/*
+ * Les valeurs d'attente.
+ *
+ * Le surnom est vide et non inventé : une carte sans surnom n'en affiche
+ * pas, alors qu'un surnom bouche-trou se retrouverait sur le téléphone de
+ * tout le monde le temps que le vrai arrive.
+ */
 const ART_PAR_DEFAUT: Record<Face, ArtFaceId> = {
-  a: { surnom: 'Le Sage', note: 92, stats: [85, 90, 82, 88, 21] },
-  b: { surnom: 'Le Gros Râleur', note: 66, stats: [62, 70, 67, 91, 93] },
+  a: { surnom: '', note: 80, stats: [70, 70, 70, 70, 30] },
+  b: { surnom: '', note: 70, stats: [60, 60, 60, 80, 80] },
 };
 
+/**
+ * Ce qui est imprimé sur chaque carte, à compléter au fur et à mesure.
+ *
+ * Les notes et les statistiques restent à écrire : celles qui s'affichent
+ * aujourd'hui sont des valeurs d'attente, identiques pour tout le monde.
+ */
 export const ART: Record<string, ArtFaceId> = {
-  // 'fid-matteo-a': { surnom: 'Le Sage', note: 92, stats: [85, 90, 82, 88, 21] },
+  'fid-tristan-a': { surnom: 'Bosseur', note: 80, stats: [70, 70, 70, 70, 30] },
+
+  'fid-matteo-a': { surnom: 'Chill Guy', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-matteo-b': { surnom: 'Mode Randonneur', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-mateo-a': { surnom: 'Sous fête', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-mateo-b': { surnom: 'Sous alcool', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-marcus-a': { surnom: 'Restau Chill', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-marcus-b': { surnom: 'Demonic Form', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-lucas-a': { surnom: 'Ciao Energy', note: 80, stats: [70, 70, 70, 70, 30] },
+
+  'fid-bastien-a': { surnom: 'Mewing', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-bastien-b': { surnom: 'Kawai', note: 70, stats: [60, 60, 60, 80, 80] },
 };
 
-/** Les vingt-quatre cartes, dans l'ordre du trombinoscope. */
+/** Les vingt-six cartes, dans l'ordre du trombinoscope. */
 export const CARTES: CarteFaceId[] = MEMBRES.flatMap((m, i) =>
   (['a', 'b'] as Face[]).map((face, j) => {
     const id = `fid-${m.slug}-${face}`;
@@ -155,10 +185,20 @@ export function collectionComplete(p: FaceIdProgress): boolean {
 export const CARTES_PAR_BOOSTER = 3;
 
 /**
+ * Les boosters offerts à la première visite.
+ *
+ * Deux et non un : à vingt-six cartes il en faut neuf pour tout rassembler,
+ * et neuf missions seules ne laissaient aucune marge — une mission ratée et
+ * la collection restait incomplète. Deux à l'ouverture ramènent la marge à
+ * deux, et six cartes d'un coup font comprendre l'event en une minute.
+ */
+export const BOOSTERS_OUVERTURE = 2;
+
+/**
  * Le contenu d'un booster.
  *
  * Tirage sans remise dans ce qui manque, et non au hasard parmi les
- * vingt-quatre : à taux égal avec doublons, rassembler les vingt-quatre
+ * vingt-six : à taux égal avec doublons, rassembler les vingt-six
  * demanderait une trentaine de boosters en moyenne — et quarante pour un
  * joueur sur dix. Impossible à distribuer en trois semaines, et surtout
  * pénible : passé la moitié, neuf ouvertures sur dix ne donneraient que des
@@ -207,8 +247,8 @@ function melange<T>(liste: T[]): T[] {
  *
  * L'event court jusqu'au 30, mais la semaine du 30 ne dure qu'un jour : y
  * poser des quêtes hebdomadaires reviendrait à les offrir ou à les rendre
- * impossibles. Trois semaines, trois quêtes chacune, plus le booster
- * d'ouverture : dix boosters pour huit nécessaires.
+ * impossibles. Trois semaines, trois missions chacune, plus les boosters
+ * d'ouverture : onze pour neuf nécessaires.
  */
 export const SEMAINES: number[] = [
   FACEID_DEBUT,
@@ -296,7 +336,7 @@ export const BADGE_ID = 'event-faceid';
  *
  * Il rejoint les badges de classement du profil, mais il n'a ni podium ni
  * groupe : on ne le gagne pas en finissant devant quelqu'un, mais en allant
- * au bout des vingt-quatre. `category` et `rank` ne sont là que parce que le
+ * au bout des vingt-six. `category` et `rank` ne sont là que parce que le
  * type est partagé — rien ne les lit pour un badge d'événement.
  */
 export function badgeFaceId(maintenant = Date.now()): RankBadge {

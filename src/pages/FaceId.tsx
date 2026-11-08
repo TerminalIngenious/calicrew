@@ -16,7 +16,7 @@ import {
   CARTES, MEMBRES, TOTAL_CARTES, SEMAINES,
   ajoute, collectionComplete, evenementEnCours, joursRestants, lisFaceId,
   nbPossedees, questsDeSemaine, semaineCourante, tireBooster,
-  BADGE_ID, badgeFaceId,
+  BADGE_ID, badgeFaceId, BOOSTERS_OUVERTURE,
 } from '../lib/faceid';
 import type { Quest } from '../types';
 import './FaceId.css';
@@ -50,7 +50,7 @@ export default function FaceId() {
   const semaine = semaineCourante(maintenant);
 
   /**
-   * Le booster d'ouverture.
+   * Les boosters d'ouverture.
    *
    * Donné à la première visite pendant l'event, et pas au lancement de
    * l'app : personne ne doit découvrir l'event par un chiffre qui a bougé
@@ -64,7 +64,7 @@ export default function FaceId() {
     // lui, le booster d'ouverture était donné deux fois.
     if (bienvenueEnvoyee.current) return;
     bienvenueEnvoyee.current = true;
-    const donne = { ...fid, boosters: fid.boosters + 1, bienvenue: true };
+    const donne = { ...fid, boosters: fid.boosters + BOOSTERS_OUVERTURE, bienvenue: true };
     setDoc(doc(db, 'userProgress', user.uid), { faceid: donne }, { merge: true })
       .catch((err) => {
         bienvenueEnvoyee.current = false;
@@ -73,7 +73,7 @@ export default function FaceId() {
   }, [user, progress, enCours, fid]);
 
   /**
-   * Le badge de fin, dès que les vingt-quatre sont là.
+   * Le badge de fin, dès que les vingt-six sont là.
    *
    * Posé ici et non dans un cron : c'est le seul endroit qui sait, à la
    * seconde près, que la collection vient d'être bouclée — et la seule
@@ -153,7 +153,7 @@ export default function FaceId() {
       </header>
 
       <p className="fid-pitch">
-        Douze d'entre nous, deux portraits chacun. Vingt-quatre cartes à
+        Treize d'entre nous, deux portraits chacun. Vingt-six cartes à
         rassembler avant le 30 novembre — et aucune ne s'achète : elles sortent
         toutes des boosters.
       </p>
@@ -179,7 +179,7 @@ export default function FaceId() {
           <div>
             <span className="fid-fini-titre">Fichier complet</span>
             <span className="fid-fini-sous">
-              Les vingt-quatre visages sont identifiés. Le badge FaceID est dans ton profil.
+              Les vingt-six visages sont identifiés. Le badge FaceID est dans ton profil.
             </span>
           </div>
         </div>
