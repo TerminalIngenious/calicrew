@@ -119,7 +119,7 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-matteo-a': { surnom: 'Chill Guy', note: 80, stats: [70, 70, 70, 70, 30] },
   'fid-matteo-b': { surnom: 'Mode Randonneur', note: 70, stats: [60, 60, 60, 80, 80] },
 
-  'fid-colinne-b': { surnom: 'Folie', note: 70, stats: [60, 60, 60, 80, 80] },
+  'fid-colinne-b': { surnom: 'Sous Gêne Asiatique', note: 70, stats: [60, 60, 60, 80, 80] },
 
   'fid-mateo-a': { surnom: 'Sous Fête', note: 80, stats: [70, 70, 70, 70, 30] },
   'fid-mateo-b': { surnom: 'Sous Alcool', note: 70, stats: [60, 60, 60, 80, 80] },
