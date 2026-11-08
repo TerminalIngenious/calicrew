@@ -68,21 +68,52 @@
   height: 100%;
 }
 
-/* La photo est détourée : elle se pose sur le fond, elle ne le remplace pas.
-   Ancrée en bas, elle garde la même ligne d'épaules d'une carte à l'autre. */
+/*
+ * La photo occupe toute la carte.
+ *
+ * Elle devait être détourée et se poser sur le fond du scanner ; les photos
+ * fournies ne le sont pas, et un rectangle photo flottant au milieu d'une
+ * grille faisait collage, pas carte. Elle prend donc toute la surface, et
+ * c'est le scanner qui passe par-dessus.
+ */
 .fc2-photo {
   position: absolute;
-  inset: 12cqw 0 14cqw;
+  inset: 0;
   width: 100%;
-  height: auto;
-  max-height: calc(100% - 26cqw);
-  object-fit: contain;
-  object-position: bottom center;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+/*
+ * Le scanner par-dessus la photo, pas dessous.
+ *
+ * `screen` n'éclaircit que là où le motif est présent : la grille et
+ * l'empreinte s'impriment sur l'image sans la voiler, et restent lisibles
+ * aussi bien sur un fond clair que sur un fond noir.
+ */
+.fc2-scanner {
+  z-index: 1;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+/* Un voile sombre en haut : la marque et le numéro sont blancs, et une photo
+   de ciel les effaçait. */
+.fc2-fond::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 32cqw;
+  background: linear-gradient(to bottom, rgba(3, 4, 2, 0.8), transparent);
+  pointer-events: none;
 }
 
 /* ── Le bandeau du haut ── */
 
 .fc2-haut {
+  z-index: 3;
   position: absolute;
   top: 3.2cqw;
   left: 5cqw;
@@ -110,6 +141,7 @@
 /* ── La note ── */
 
 .fc2-note {
+  z-index: 3;
   position: absolute;
   top: 8cqw;
   left: 5cqw;
@@ -127,6 +159,7 @@
 /* ── Le tampon ── */
 
 .fc2-tampon {
+  z-index: 3;
   position: absolute;
   right: -2cqw;
   top: 44cqw;
@@ -147,15 +180,19 @@
 /* ── Le bas de la carte ── */
 
 .fc2-bas {
+  z-index: 3;
   position: absolute;
-  left: 4cqw;
-  right: 4cqw;
-  bottom: 3cqw;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-left: 4cqw;
+  padding-right: 4cqw;
+  padding-bottom: 3cqw;
   text-align: center;
   /* Un voile sous le bloc : la photo descend jusque-là, et un nom posé
      directement sur un t-shirt noir ou clair ne tient pas. */
-  background: linear-gradient(to top, rgba(3, 4, 2, 0.96) 60%, transparent);
-  padding-top: 7cqw;
+  background: linear-gradient(to top, rgba(3, 4, 2, 0.97) 55%, rgba(3, 4, 2, 0.8) 75%, transparent);
+  padding-top: 12cqw;
 }
 
 .fc2-nom {

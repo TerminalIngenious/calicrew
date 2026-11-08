@@ -27,9 +27,12 @@ registerRoute(
 
 // Les cartes ne sont pas précachées : elles sont immuables et trop lourdes
 // pour être rechargées à chaque déploiement. Première consultation = mise en
-// cache, ensuite elles sortent du cache et fonctionnent hors ligne.
+// cache, ensuite elles sortent du cache et fonctionnent hors ligne. Les
+// portraits de l'event suivent la même règle, pour la même raison.
 registerRoute(
-  ({ url, request }) => request.destination === 'image' && url.pathname.startsWith('/cards/'),
+  ({ url, request }) =>
+    request.destination === 'image' &&
+    (url.pathname.startsWith('/cards/') || url.pathname.startsWith('/faceid/')),
   new CacheFirst({
     cacheName: 'card-images',
     plugins: [

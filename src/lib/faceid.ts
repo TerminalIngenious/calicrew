@@ -114,17 +114,28 @@ const ART_PAR_DEFAUT: Record<Face, ArtFaceId> = {
  */
 export const ART: Record<string, ArtFaceId> = {
   'fid-tristan-a': { surnom: 'Bosseur', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-tristan-b': { surnom: 'Shifumi Sensei', note: 70, stats: [60, 60, 60, 80, 80] },
 
   'fid-matteo-a': { surnom: 'Chill Guy', note: 80, stats: [70, 70, 70, 70, 30] },
   'fid-matteo-b': { surnom: 'Mode Randonneur', note: 70, stats: [60, 60, 60, 80, 80] },
 
-  'fid-mateo-a': { surnom: 'Sous fête', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-mateo-b': { surnom: 'Sous alcool', note: 70, stats: [60, 60, 60, 80, 80] },
+  'fid-colinne-b': { surnom: 'Folie', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-mateo-a': { surnom: 'Sous Fête', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-mateo-b': { surnom: 'Sous Alcool', note: 70, stats: [60, 60, 60, 80, 80] },
 
   'fid-marcus-a': { surnom: 'Restau Chill', note: 80, stats: [70, 70, 70, 70, 30] },
   'fid-marcus-b': { surnom: 'Demonic Form', note: 70, stats: [60, 60, 60, 80, 80] },
 
   'fid-lucas-a': { surnom: 'Ciao Energy', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-lucas-b': { surnom: '0% Travail', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-johan-b': { surnom: 'Colère', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-hugo-a': { surnom: 'Vacancier', note: 80, stats: [70, 70, 70, 70, 30] },
+  'fid-hugo-b': { surnom: 'Batman Form', note: 70, stats: [60, 60, 60, 80, 80] },
+
+  'fid-clement-b': { surnom: 'Très Gros Plan', note: 70, stats: [60, 60, 60, 80, 80] },
 
   'fid-bastien-a': { surnom: 'Mewing', note: 80, stats: [70, 70, 70, 70, 30] },
   'fid-bastien-b': { surnom: 'Kawai', note: 70, stats: [60, 60, 60, 80, 80] },
