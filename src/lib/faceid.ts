@@ -113,32 +113,57 @@ const ART_PAR_DEFAUT: Record<Face, ArtFaceId> = {
  * aujourd'hui sont des valeurs d'attente, identiques pour tout le monde.
  */
 export const ART: Record<string, ArtFaceId> = {
-  'fid-tristan-a': { surnom: 'Bosseur', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-tristan-b': { surnom: 'Shifumi Sensei', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Tristan
+  'fid-tristan-a': { surnom: 'Bosseur', note: 84, stats: [72, 92, 82, 86, 23] },
+  'fid-tristan-b': { surnom: 'Shifumi Sensei', note: 59, stats: [62, 51, 56, 92, 86] },
 
-  'fid-matteo-a': { surnom: 'Chill Guy', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-matteo-b': { surnom: 'Drag Queen', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Mattéo
+  'fid-matteo-a': { surnom: 'Chill Guy', note: 77, stats: [78, 76, 70, 74, 17] },
+  'fid-matteo-b': { surnom: 'Drag Queen', note: 64, stats: [54, 65, 64, 83, 93] },
 
-  'fid-colinne-b': { surnom: 'Sous Gêne Asiatique', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Colinne
+  'fid-colinne-a': { surnom: '', note: 86, stats: [90, 87, 79, 57, 23] },
+  'fid-colinne-b': { surnom: 'Sous Gêne Asiatique', note: 55, stats: [68, 44, 48, 88, 89] },
 
-  'fid-mateo-a': { surnom: 'Sous Fête', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-mateo-b': { surnom: 'Sous Alcool', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Matéo
+  'fid-mateo-a': { surnom: 'Sous Fête', note: 82, stats: [78, 79, 85, 80, 10] },
+  'fid-mateo-b': { surnom: 'Sous Alcool', note: 59, stats: [64, 50, 57, 90, 95] },
 
-  'fid-marcus-a': { surnom: 'Restau Chill', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-marcus-b': { surnom: 'Demonic Form', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Marcus
+  'fid-marcus-a': { surnom: 'Restau Chill', note: 78, stats: [75, 93, 69, 78, 29] },
+  'fid-marcus-b': { surnom: 'Demonic Form', note: 57, stats: [56, 55, 51, 82, 88] },
 
-  'fid-lucas-a': { surnom: 'Ciao Energy', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-lucas-b': { surnom: '0% Travail', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Lucas
+  'fid-lucas-a': { surnom: 'Ciao Energy', note: 76, stats: [82, 71, 72, 60, 22] },
+  'fid-lucas-b': { surnom: '0% Travail', note: 65, stats: [65, 60, 59, 91, 91] },
 
-  'fid-johan-b': { surnom: 'Colère', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Johan
+  'fid-johan-a': { surnom: '', note: 87, stats: [86, 89, 89, 69, 8] },
+  'fid-johan-b': { surnom: 'Colère', note: 54, stats: [59, 48, 48, 90, 96] },
 
-  'fid-hugo-a': { surnom: 'Vacancier', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-hugo-b': { surnom: 'Batman Form', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Jimmy
+  'fid-jimmy-a': { surnom: '', note: 85, stats: [89, 75, 88, 70, 28] },
+  'fid-jimmy-b': { surnom: '', note: 61, stats: [54, 59, 67, 91, 93] },
 
-  'fid-clement-b': { surnom: 'Très Gros Plan', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Hugo
+  'fid-hugo-a': { surnom: 'Vacancier', note: 77, stats: [78, 79, 70, 58, 26] },
+  'fid-hugo-b': { surnom: 'Batman Form', note: 56, stats: [47, 56, 57, 92, 86] },
 
-  'fid-bastien-a': { surnom: 'Mewing', note: 80, stats: [70, 70, 70, 70, 30] },
-  'fid-bastien-b': { surnom: 'Kawai', note: 70, stats: [60, 60, 60, 80, 80] },
+  // Entony
+  'fid-entony-a': { surnom: '', note: 83, stats: [83, 92, 73, 85, 13] },
+  'fid-entony-b': { surnom: '', note: 63, stats: [63, 61, 57, 98, 97] },
+
+  // Clément
+  'fid-clement-a': { surnom: '', note: 81, stats: [90, 85, 69, 71, 20] },
+  'fid-clement-b': { surnom: 'Très Gros Plan', note: 55, stats: [60, 54, 46, 89, 96] },
+
+  // Bastien
+  'fid-bastien-a': { surnom: 'Mewing', note: 86, stats: [83, 87, 78, 72, 30] },
+  'fid-bastien-b': { surnom: 'Kawai', note: 67, stats: [65, 63, 63, 98, 93] },
+
+  // Alexandre
+  'fid-alexandre-a': { surnom: '', note: 73, stats: [69, 75, 73, 84, 14] },
+  'fid-alexandre-b': { surnom: '', note: 55, stats: [52, 45, 50, 86, 91] },
 };
 
 /** Les vingt-six cartes, dans l'ordre du trombinoscope. */
