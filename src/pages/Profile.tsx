@@ -19,6 +19,7 @@ import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pe
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import SeasonShelf from '../components/SeasonShelf';
+import FaceIdShelf from '../components/FaceIdShelf';
 import type { SeasonShelfEntry } from '../components/SeasonShelf';
 
 /** « 29 novembre » — la date d'ouverture annoncée sur un bandeau verrouillé. */
@@ -375,6 +376,14 @@ export default function Profile() {
           lisaient comme une seule liste. Le trait dit que ce sont deux
           choses différentes. */}
       {badges.length > 0 && <hr className="profile-trait" />}
+
+      {/* L'event a son propre bandeau, au-dessus des saisons : ses cartes ne
+          sont pas des cartes de saison, et pendant trois semaines c'est la
+          collection qu'on vient regarder en premier. */}
+      <FaceIdShelf
+        faceid={progress?.faceid}
+        onOpen={isOwnProfile ? () => navigate('/faceid') : undefined}
+      />
 
       <section className="section">
         <SeasonShelf

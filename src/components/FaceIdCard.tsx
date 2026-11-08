@@ -20,6 +20,7 @@ export default function FaceIdCard({
   revele = false,
   anonyme = false,
   taille = 'normale',
+  onClick,
 }: {
   carte: CarteFaceId;
   possedee: boolean;
@@ -28,6 +29,8 @@ export default function FaceIdCard({
   /** Masque le nom : on ne sait pas encore qui c'est. */
   anonyme?: boolean;
   taille?: 'normale' | 'grande';
+  /** Rend l'emplacement cliquable. Absent, il reste une simple vignette. */
+  onClick?: () => void;
 }) {
   return (
     <div
@@ -36,7 +39,11 @@ export default function FaceIdCard({
         possedee ? 'owned illustree' : 'locked',
         revele ? 'reveal' : '',
         taille === 'grande' ? 'big' : '',
+        onClick ? 'cliquable' : '',
       ].filter(Boolean).join(' ')}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
     >
       {possedee ? (
         <div className="fid-card-visuel">

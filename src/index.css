@@ -2322,6 +2322,28 @@ body {
   transform-origin: 100px 60px;
 }
 
+/* Le logo de l'event : les crochets pulsent, la ligne de scan descend. */
+.loader-fid-crochets {
+  animation: loader-fid-pulse 2.4s ease-in-out infinite;
+  transform-origin: 60px 60px;
+}
+
+.loader-fid-scan {
+  animation: loader-fid-scan 1.8s ease-in-out infinite;
+}
+
+@keyframes loader-fid-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes loader-fid-scan {
+  0% { transform: translateY(10px); opacity: 0; }
+  15% { opacity: 0.9; }
+  85% { opacity: 0.9; }
+  100% { transform: translateY(108px); opacity: 0; }
+}
+
 @keyframes pullup-attempt {
   0% { transform: translateY(0); }
   30% { transform: translateY(-12px); }
@@ -7725,4 +7747,152 @@ body {
   font-size: 0.75rem;
   line-height: 1.4;
   color: var(--text-muted);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Habillage de l'event FaceID — 9 au 30 novembre
+
+   Même principe qu'Octobre Rose : une surcharge de --accent repeint tout ce
+   qui s'en sert. Le vert est celui des cartes Face A, pour que l'app et
+   l'event aient la même couleur exactement.
+
+   Ce qui ne change PAS, comme pour les autres habillages : or/argent/bronze
+   du podium, raretés des cartes, rouge de danger. Le vert de validation, lui,
+   est déjà vert — il passe sur le vert de l'event pour qu'il n'y ait pas
+   deux verts différents à l'écran.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root[data-season="faceid"] {
+  --accent: #b6ff00;
+  --accent-light: #d2ff5c;
+  --accent-green: #b6ff00;
+}
+
+:root[data-season="faceid"] body {
+  background:
+    radial-gradient(90% 55% at 50% 0%, rgba(182, 255, 0, 0.1) 0%, transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* Le vert est très clair : du blanc dessus tombe à 1.2:1, contre 2.8:1 pour
+   l'orange de tous les jours. Tout ce qui est rempli d'accent et porte du
+   texte repasse donc en noir, ce qui monte à 16:1. Les barres, interrupteurs
+   et jauges ne sont pas listés : ils n'ont rien à lire. */
+:root[data-season="faceid"] .primary-btn,
+:root[data-season="faceid"] .layout-switch-btn.active,
+:root[data-season="faceid"] .leaderboard-avatar,
+:root[data-season="faceid"] .weight-type-btn.active,
+:root[data-season="faceid"] .unit-btn.active,
+:root[data-season="faceid"] .member-modal-view-btn,
+:root[data-season="faceid"] .search-go,
+:root[data-season="faceid"] .trade-card-pick-count,
+:root[data-season="faceid"] .amrap-validate-btn,
+:root[data-season="faceid"] .bp-tab.active,
+:root[data-season="faceid"] .bp-card-reveal-close,
+:root[data-season="faceid"] .bp-quest-claim,
+:root[data-season="faceid"] .quest-next-btn,
+:root[data-season="faceid"] .quest-pick-counter,
+:root[data-season="faceid"] .quest-check.checked,
+:root[data-season="faceid"] .quest-confirm-ok,
+:root[data-season="faceid"] .collection-card-count,
+:root[data-season="faceid"] .profile-avatar,
+:root[data-season="faceid"] .avatar-picker-default,
+:root[data-season="faceid"] .chat-bubble.mine,
+:root[data-season="faceid"] .chat-send-btn,
+:root[data-season="faceid"] .lp-btn-primaire,
+:root[data-season="faceid"] .fid-quest-btn {
+  color: #0a0b09;
+}
+
+.fid-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fid-decor-lueur {
+  position: absolute;
+  inset: -20% 0 auto 0;
+  height: 60vh;
+  background: radial-gradient(ellipse at 50% 0%, rgba(182, 255, 0, 0.12), transparent 70%);
+}
+
+.fid-decor-grille {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(182, 255, 0, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(182, 255, 0, 0.18) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.3;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 8%, transparent 70%);
+}
+
+.fid-decor-balayage {
+  position: absolute;
+  inset: auto 0 auto 0;
+  height: 40vh;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(182, 255, 0, 0.07) 48%,
+    rgba(182, 255, 0, 0.14) 50%,
+    rgba(182, 255, 0, 0.07) 52%,
+    transparent 100%
+  );
+  animation: fid-decor-balaye 9s linear infinite;
+}
+
+@keyframes fid-decor-balaye {
+  from { transform: translateY(-45vh); }
+  to { transform: translateY(100vh); }
+}
+
+/* Les crochets de visée aux quatre angles de l'écran. Ils s'arrêtent sous la
+   barre de navigation et sous l'encoche : collés aux bords, ils passaient
+   derrière l'une et l'autre. */
+.fid-decor-crochet {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(182, 255, 0, 0.45);
+}
+
+.fid-decor-crochet.tl {
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 10px;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 6px 0 0 0;
+}
+
+.fid-decor-crochet.tr {
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: 10px;
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 6px 0 0;
+}
+
+.fid-decor-crochet.bl {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
+  left: 10px;
+  border-right: 0;
+  border-top: 0;
+  border-radius: 0 0 0 6px;
+}
+
+.fid-decor-crochet.br {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
+  right: 10px;
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 6px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fid-decor-balayage { animation: none; }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, setDoc, arrayUnion } from 'firebase/firestore';
-import { ArrowLeft, Package, Check } from 'lucide-react';
+import { ArrowLeft, Package, Check, X } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProgress } from '../lib/useUserProgress';
@@ -10,6 +10,7 @@ import { questValue } from '../lib/quests';
 import Loader from '../components/Loader';
 import BottomNav from '../components/BottomNav';
 import FaceIdCard from '../components/FaceIdCard';
+import FaceIdCardArt from '../components/cardArt/FaceIdCardArt';
 import BoosterOpening from '../components/BoosterOpening';
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import {
@@ -18,6 +19,7 @@ import {
   nbPossedees, questsDeSemaine, semaineCourante, tireBooster,
   BADGE_ID, badgeFaceId, BOOSTERS_OUVERTURE,
 } from '../lib/faceid';
+import type { CarteFaceId } from '../lib/faceid';
 import type { Quest } from '../types';
 import './FaceId.css';
 
@@ -38,6 +40,7 @@ export default function FaceId() {
   const { sessions } = useUserSessions();
   const [ouverture, setOuverture] = useState<string[] | null>(null);
   const [occupe, setOccupe] = useState(false);
+  const [apercu, setApercu] = useState<CarteFaceId | null>(null);
   // L'heure est lue une fois à l'ouverture de la page : lue à chaque rendu,
   // elle ferait dire autre chose au même écran selon le moment où React
   // décide de le recalculer.
@@ -248,20 +251,42 @@ export default function FaceId() {
               <div key={m.slug} className={`fid-fiche ${connu ? 'connu' : ''}`}>
                 <span className="fid-fiche-nom">{connu ? m.nom : '— — —'}</span>
                 <div className="fid-fiche-paire">
-                  {paire.map((c) => (
-                    <FaceIdCard
-                      key={c.id}
-                      carte={c}
-                      possedee={(fid.cartes[c.id] || 0) > 0}
-                      anonyme={!connu}
-                    />
-                  ))}
+                  {paire.map((c) => {
+                    const possedee = (fid.cartes[c.id] || 0) > 0;
+                    return (
+                      <FaceIdCard
+                        key={c.id}
+                        carte={c}
+                        possedee={possedee}
+                        anonyme={!connu}
+                        // Seules les cartes obtenues s'ouvrent : agrandir une
+                        // case vide ne montrerait qu'une silhouette en grand.
+                        onClick={possedee ? () => setApercu(c) : undefined}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             );
           })}
         </div>
       </section>
+
+      {apercu && (
+        <div className="fid-apercu" onClick={() => setApercu(null)}>
+          <div className="fid-apercu-carte" onClick={(e) => e.stopPropagation()}>
+            <button className="fid-apercu-fermer" onClick={() => setApercu(null)} aria-label="Fermer">
+              <X size={18} />
+            </button>
+            <FaceIdCardArt carte={apercu} />
+            {(fid.cartes[apercu.id] || 0) > 1 && (
+              <span className="fid-apercu-doublons">
+                ×{fid.cartes[apercu.id]} dans ton fichier
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {ouverture && <BoosterOpening ids={ouverture} onFini={() => setOuverture(null)} />}
 

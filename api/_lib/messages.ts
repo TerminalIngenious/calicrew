@@ -184,3 +184,23 @@ export const ECHANGE_REPONSE = [
 export function auHasard<T>(liste: T[]): T {
   return liste[Math.floor(Math.random() * liste.length)];
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// L'event FaceID
+// ──────────────────────────────────────────────────────────────────────────
+// Quatre notifications en trois semaines, à date fixe : elles ne tournent
+// donc pas. Chacune est écrite pour son matin et ne sera lue qu'une fois.
+
+/** Lundi 9 novembre, 10h : l'event s'ouvre. */
+export const FACEID_LANCEMENT =
+  'Vingt-quatre visages sont dans la nature. Deux boosters t\'attendent pour commencer le fichier.';
+
+/** Les bascules de semaine, dans l'ordre. */
+export const FACEID_SEMAINE = [
+  'Trois nouvelles missions, trois boosters à aller chercher. Celles de la semaine dernière sont perdues.',
+  'Dernière série de missions. Après, il n\'y a plus de boosters à gagner.',
+];
+
+/** La veille de la fin des missions. */
+export const FACEID_DERNIER_JOUR =
+  'Dernier jour pour boucler les missions. Le fichier ferme demain soir, complet ou non.';

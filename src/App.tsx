@@ -33,6 +33,7 @@ import type { ReactNode } from 'react';
 import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
+import FaceIdDecor from './components/FaceIdDecor';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
@@ -176,6 +177,7 @@ function AppContent() {
       )}
       {season === 'halloween' && <HalloweenDecor />}
       {season === 'pink' && <PinkDecor />}
+      {season === 'faceid' && <FaceIdDecor />}
       <Suspense fallback={<div className="page loading"><Loader /></div>}>
         <Routes>
           <Route path="/login" element={<Login />} />
