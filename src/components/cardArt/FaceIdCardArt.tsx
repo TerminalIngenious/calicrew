@@ -60,10 +60,10 @@ export default function FaceIdCardArt({ carte }: { carte: CarteFaceId }) {
             {carte.surnom && <span className="fc2-surnom">{carte.surnom}</span>}
 
             <div className="fc2-stats">
-              {STATS.map((nom, i) => (
+              {(carte.libelles ?? STATS).map((nom, i) => (
                 <div key={nom} className="fc2-stat">
                   <span className="fc2-stat-nom">{nom}</span>
-                  <StatIcon index={i} />
+                  <StatIcon nom={nom} />
                   <span className="fc2-stat-val">{carte.stats[i] ?? 0}</span>
                 </div>
               ))}
@@ -128,10 +128,13 @@ function Scanner() {
 }
 
 /** Les cinq pictogrammes, dans l'ordre de STATS. */
-function StatIcon({ index }: { index: number }) {
+function StatIcon({ nom }: { nom: string }) {
   const commun = { className: 'fc2-stat-ico', viewBox: '0 0 24 24', 'aria-hidden': true } as const;
-  switch (index) {
-    case 0: // Gainage : une planche sur les avant-bras.
+  // Sur le nom et non sur la position : une carte qui remplace une
+  // statistique garderait sinon le dessin de celle d'avant, et « Beauté »
+  // s'afficherait sous un calendrier.
+  switch (nom) {
+    case 'Gainage': // Une planche sur les avant-bras.
       return (
         <svg {...commun} fill="currentColor">
           <circle cx="5" cy="11" r="2.1" />
@@ -139,7 +142,7 @@ function StatIcon({ index }: { index: number }) {
           <path d="M3 17h6l-1 2H3z" />
         </svg>
       );
-    case 1: // Régularité : un calendrier.
+    case 'Régularité': // Un calendrier.
       return (
         <svg {...commun} fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -148,17 +151,33 @@ function StatIcon({ index }: { index: number }) {
           <circle cx="15.5" cy="14.5" r="1.3" fill="currentColor" stroke="none" />
         </svg>
       );
-    case 2: // Explosivité : l'éclair.
+    case 'Explosivité': // L'éclair.
       return (
         <svg {...commun} fill="currentColor">
           <path d="M13.2 2 4 13.6h6.1L9.4 22 20 10.1h-6.4z" />
         </svg>
       );
-    case 3: // Ego : la couronne.
+    case 'Ego': // La couronne.
       return (
         <svg {...commun} fill="currentColor">
           <path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z" />
           <rect x="5" y="20" width="14" height="2" rx="1" />
+        </svg>
+      );
+    case 'Beauté': // L'étincelle.
+      return (
+        <svg {...commun} fill="currentColor">
+          <path d="M12 2l2.1 5.6L20 9.7l-5.9 2.1L12 17.4l-2.1-5.6L4 9.7l5.9-2.1z" />
+          <path d="M18.5 15l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9z" />
+        </svg>
+      );
+    case 'Drôle': // Le sourire.
+      return (
+        <svg {...commun} fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="9.5" />
+          <path d="M7.5 13.5a5 5 0 0 0 9 0" strokeLinecap="round" />
+          <circle cx="9" cy="9.5" r="1.3" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="9.5" r="1.3" fill="currentColor" stroke="none" />
         </svg>
       );
     default: // Excuses : la bulle qui parle.

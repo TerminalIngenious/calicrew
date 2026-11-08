@@ -72,6 +72,8 @@ export interface CarteFaceId {
   note: number;
   /** Les cinq valeurs, dans l'ordre de STATS. */
   stats: number[];
+  /** Libellés propres à la carte, quand elle ne suit pas STATS. */
+  libelles?: string[];
 }
 
 /**
@@ -91,6 +93,15 @@ export interface ArtFaceId {
   surnom: string;
   note: number;
   stats: number[];
+  /*
+   * Les cinq libellés, quand la carte remplace ceux de STATS.
+   *
+   * Une personne peut avoir une blague qui lui est propre et qui ne tient
+   * pas dans « Explosivité ». Les deux faces changent alors ensemble : lire
+   * les mêmes lignes de part et d'autre est ce qui rend la comparaison
+   * drôle.
+   */
+  libelles?: string[];
 }
 
 /*
@@ -111,6 +122,9 @@ const ART_PAR_DEFAUT: Record<Face, ArtFaceId> = {
  * Les notes et les statistiques restent à écrire : celles qui s'affichent
  * aujourd'hui sont des valeurs d'attente, identiques pour tout le monde.
  */
+/** Colinne échange Régularité et Explosivité contre Beauté et Drôle. */
+const COLINNE_STATS = ['Gainage', 'Beauté', 'Drôle', 'Ego', 'Excuses'];
+
 export const ART: Record<string, ArtFaceId> = {
   // Tristan
   'fid-tristan-a': { surnom: 'Bosseur', note: 84, stats: [72, 92, 82, 86, 23] },
@@ -121,8 +135,10 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-matteo-b': { surnom: 'Drag Queen', note: 64, stats: [54, 65, 64, 83, 93] },
 
   // Colinne
-  'fid-colinne-a': { surnom: 'Pipou', note: 86, stats: [90, 87, 79, 57, 23] },
-  'fid-colinne-b': { surnom: 'Sous Gêne Asiatique', note: 55, stats: [68, 44, 48, 88, 89] },
+  'fid-colinne-a': { surnom: 'Pipou', note: 86, stats: [90, 98, 100, 57, 23],
+                     libelles: COLINNE_STATS },
+  'fid-colinne-b': { surnom: 'Sous Gêne Asiatique', note: 55, stats: [68, 12, 97, 88, 89],
+                     libelles: COLINNE_STATS },
 
   // Matéo
   'fid-mateo-a': { surnom: 'Sous Fête', note: 82, stats: [78, 79, 85, 80, 10] },
@@ -176,6 +192,7 @@ export const CARTES: CarteFaceId[] = MEMBRES.flatMap((m, i) =>
       surnom: art.surnom,
       note: art.note,
       stats: art.stats,
+      libelles: art.libelles,
     };
   })
 );
