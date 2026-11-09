@@ -186,6 +186,30 @@ export const ART: Record<string, ArtFaceId> = {
   // Alexandre
   'fid-alexandre-a': { surnom: '', note: 73, stats: [69, 75, 73, 84, 14] },
   'fid-alexandre-b': { surnom: '', note: 55, stats: [52, 45, 50, 86, 91] },
+
+  // Elias
+  'fid-elias-a': { surnom: 'Dormeur', note: 79, stats: [76, 82, 74, 63, 24] },
+  'fid-elias-b': { surnom: 'Randonnée', note: 61, stats: [66, 57, 60, 85, 90] },
+
+  // Marina
+  'fid-marina-a': { surnom: 'Mog', note: 80, stats: [77, 83, 76, 70, 21] },
+  'fid-marina-b': { surnom: 'Solide sur les appuis', note: 62, stats: [74, 55, 58, 84, 89] },
+
+  // Enthony
+  'fid-enthony-a': { surnom: 'CEO', note: 85, stats: [81, 88, 83, 80, 12] },
+  'fid-enthony-b': { surnom: 'Allumer le feu', note: 60, stats: [58, 54, 62, 95, 87] },
+
+  // Boris
+  'fid-boris-a': { surnom: 'Je sais', note: 83, stats: [80, 85, 79, 76, 18] },
+  'fid-boris-b': { surnom: 'Mangeur d\'âme', note: 58, stats: [57, 52, 55, 94, 88] },
+
+  // Maddy
+  'fid-maddy-a': { surnom: 'Baddies', note: 82, stats: [78, 84, 80, 81, 16] },
+  'fid-maddy-b': { surnom: 'Sarouel', note: 59, stats: [60, 53, 57, 88, 92] },
+
+  // Kathiana
+  'fid-kathiana-a': { surnom: 'Queen', note: 84, stats: [79, 86, 81, 83, 19] },
+  'fid-kathiana-b': { surnom: 'Rockstar', note: 63, stats: [61, 58, 66, 93, 85] },
 };
 
 /** Les trente-six cartes, dans l'ordre du trombinoscope. */
