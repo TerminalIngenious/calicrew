@@ -112,7 +112,17 @@ export default function BattlePass() {
       const ref = doc(db, 'userProgress', user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        const stored = snap.data() as UserProgress;
+        /*
+         * Les valeurs par défaut d'abord, le document par-dessus.
+         *
+         * Un document de progression n'est pas toujours né ici : la créatine,
+         * les records, l'event et le cron d'ambiance l'écrivent en `merge` et
+         * peuvent donc le créer avec un seul champ. Pris tel quel, il arrivait
+         * dans cette page sans `questsClaimed` ni `chestsToOpen`, et le rendu
+         * s'arrêtait net sur un écran blanc — la page ne s'ouvrait plus du
+         * tout pour la personne concernée.
+         */
+        const stored = { ...DEFAULT_PROGRESS, ...(snap.data() as Partial<UserProgress>) };
         // Nouvelle saison : le pass repart de zéro, la collection reste.
         if (season && needsSeasonReset(stored, season.id)) {
           const fresh = startNewSeason(stored, season.id);
