@@ -57,7 +57,7 @@ export const MEMBRES: MembreFaceId[] = [
   { slug: 'alexandre', nom: 'Alexandre' },
   { slug: 'elias', nom: 'Elias' },
   { slug: 'marina', nom: 'Marina' },
-  { slug: 'enthony', nom: 'Enthony' },
+  { slug: 'enthony', nom: 'Ento' },
   { slug: 'boris', nom: 'Boris' },
   { slug: 'maddy', nom: 'Maddy' },
   { slug: 'kathiana', nom: 'Kathiana' },
@@ -195,7 +195,7 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-marina-a': { surnom: 'Mog', note: 80, stats: [77, 83, 76, 70, 21] },
   'fid-marina-b': { surnom: 'Solide sur les appuis', note: 62, stats: [74, 55, 58, 84, 89] },
 
-  // Enthony
+  // Ento
   'fid-enthony-a': { surnom: 'CEO', note: 85, stats: [81, 88, 83, 80, 12] },
   'fid-enthony-b': { surnom: 'Allumer le feu', note: 60, stats: [58, 54, 62, 95, 87] },
 
