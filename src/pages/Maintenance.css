@@ -1,0 +1,162 @@
+/*
+ * L'écran de maintenance, habillé comme l'event FaceID.
+ *
+ * Un mur de visages qui défile derrière un panneau de scan : le message
+ * passe mieux quand l'attente ressemble à quelque chose. Tout est en
+ * couleurs écrites en dur, sans variable de thème : cet écran s'affiche
+ * avant le reste de l'app et ne doit dépendre de rien.
+ */
+.mnt {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0a0b09;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Le mur */
+.mnt-mur {
+  position: absolute;
+  inset: -10% -2%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mnt-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* La hauteur est double (la colonne est écrite deux fois), donc la boucle
+     se joue sur -50% : la copie prend exactement la place de l'originale. */
+  animation: mnt-defile 46s linear infinite;
+}
+
+.mnt-colonne-1 { animation-duration: 38s; animation-direction: reverse; }
+.mnt-colonne-2 { animation-duration: 54s; }
+
+.mnt-colonne img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 10px;
+  filter: grayscale(0.7) brightness(0.55) contrast(1.1);
+}
+
+@keyframes mnt-defile {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+
+/* Le voile vert par-dessus le mur, sinon le panneau est illisible */
+.mnt-voile {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(70% 50% at 50% 50%, rgba(10, 11, 9, 0.95) 0%, rgba(10, 11, 9, 0.75) 55%, rgba(10, 11, 9, 0.9) 100%),
+    linear-gradient(rgba(182, 255, 0, 0.07), rgba(182, 255, 0, 0.07));
+}
+
+.mnt-balayage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(rgba(182, 255, 0, 0) 0%, rgba(182, 255, 0, 0.16) 50%, rgba(182, 255, 0, 0) 100%);
+  animation: mnt-scan 5.5s ease-in-out infinite;
+}
+
+@keyframes mnt-scan {
+  0%, 100% { transform: translateY(-140px); }
+  50% { transform: translateY(100vh); }
+}
+
+/* Le panneau */
+.mnt-panneau {
+  position: relative;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  padding: 1.75rem 1.5rem 1.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(182, 255, 0, 0.3);
+  background: rgba(12, 17, 4, 0.82);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.mnt-logo { display: block; margin: 0 auto 0.75rem; }
+
+.mnt-logo-scan {
+  animation: mnt-logo-scan 2.4s ease-in-out infinite;
+}
+
+@keyframes mnt-logo-scan {
+  0%, 100% { transform: translateY(10px); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  50% { transform: translateY(108px); }
+}
+
+.mnt-kicker {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b6ff00;
+  margin-bottom: 0.35rem;
+}
+
+.mnt-panneau h1 {
+  font-size: 1.5rem;
+  color: #e9f6cd;
+  margin: 0 0 0.75rem;
+}
+
+.mnt-message {
+  min-height: 2.6em;
+  font-size: 0.9rem;
+  color: #c2f53a;
+  margin: 0 0 1rem;
+  animation: mnt-apparait 0.4s ease;
+}
+
+@keyframes mnt-apparait {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.mnt-barre {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(182, 255, 0, 0.15);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+/* Une barre qui va et vient : elle dit « ça travaille », pas « il reste 40 % ». */
+.mnt-barre-fill {
+  width: 38%;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #6f8f1a, #b6ff00, #6f8f1a);
+  animation: mnt-barre 1.8s ease-in-out infinite;
+}
+
+@keyframes mnt-barre {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(290%); }
+}
+
+.mnt-pied {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(233, 246, 205, 0.6);
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mnt-colonne, .mnt-balayage, .mnt-barre-fill, .mnt-logo-scan { animation: none; }
+}

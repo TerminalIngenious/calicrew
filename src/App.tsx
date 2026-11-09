@@ -34,21 +34,12 @@ import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
 import FaceIdDecor from './components/FaceIdDecor';
+import MaintenanceScreen from './components/MaintenanceScreen';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
-const MAINTENANCE = false;
+const MAINTENANCE = true;
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
-
-function MaintenanceScreen() {
-  return (
-    <div className="maintenance-screen">
-      <img src="/cards/s1-trump-wall.png" alt="" className="maintenance-img" />
-      <h1>On construit le mur</h1>
-      <p>L'app revient plus forte que tes tractions. Patience.</p>
-    </div>
-  );
-}
 
 /**
  * Intro de saison.
