@@ -25,16 +25,24 @@ registerRoute(
   })
 );
 
-// Les cartes ne sont pas précachées : elles sont immuables et trop lourdes
-// pour être rechargées à chaque déploiement. Première consultation = mise en
-// cache, ensuite elles sortent du cache et fonctionnent hors ligne. Les
-// portraits de l'event suivent la même règle, pour la même raison.
+/*
+ * Les cartes ne sont pas précachées : elles sont immuables et trop lourdes
+ * pour être rechargées à chaque déploiement. Première consultation = mise en
+ * cache, ensuite elles sortent du cache et fonctionnent hors ligne. Les
+ * portraits de l'event suivent la même règle, pour la même raison.
+ *
+ * Le « v2 » du nom est là parce que les portraits, eux, n'étaient pas
+ * immuables : l'event a été agrandi en cours de route et quatorze photos ont
+ * été recadrées à la même adresse. Avec CacheFirst, qui les avait déjà
+ * ouvertes gardait l'ancienne version quatre-vingt-dix jours. Changer de nom
+ * de cache est la seule façon de repartir proprement.
+ */
 registerRoute(
   ({ url, request }) =>
     request.destination === 'image' &&
     (url.pathname.startsWith('/cards/') || url.pathname.startsWith('/faceid/')),
   new CacheFirst({
-    cacheName: 'card-images',
+    cacheName: 'card-images-v2',
     plugins: [
       new ExpirationPlugin({
         maxEntries: 400,
@@ -67,6 +75,9 @@ self.addEventListener('activate', (event) => {
       // que les précaches de Workbox, alors on le supprime explicitement :
       // sans ça, le problème survivrait à la mise à jour.
       await caches.delete('firestore-cache');
+      // L'ancien cache d'images, remplacé par card-images-v2 : il contient des
+      // portraits d'avant le recadrage.
+      await caches.delete('card-images');
       await self.clients.claim();
     })()
   );
