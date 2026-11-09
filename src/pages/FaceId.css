@@ -696,7 +696,7 @@
   transition: background 0.15s ease;
 }
 
-.fid-entree svg { color: #30d158; }
+.fid-entree svg { color: var(--accent); }
 
 .fid-entree:active {
   background: var(--bg-card-hover);
@@ -726,7 +726,7 @@
 .fid-entree-pastille {
   margin-left: auto;
   padding: 0.2rem 0.55rem;
-  background: #30d158;
+  background: var(--accent);
   border-radius: 999px;
   color: #000;
   font-size: 0.72rem;
@@ -918,7 +918,7 @@
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: #30d158;
+  background: var(--accent);
 }
 
 .fid-shelf-fleche {

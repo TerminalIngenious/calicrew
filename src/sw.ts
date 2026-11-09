@@ -90,6 +90,8 @@ interface PushPayload {
   body: string;
   tag?: string;
   url?: string;
+  /** Icône envoyée par le serveur, quand la notif n'est pas une notif ordinaire. */
+  icon?: string;
 }
 
 self.addEventListener('push', (event: PushEvent) => {
@@ -103,8 +105,10 @@ self.addEventListener('push', (event: PushEvent) => {
   event.waitUntil(
     self.registration.showNotification(payload.title, {
       body: payload.body,
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      // Sans icône envoyée, celle de l'app. L'event envoie la sienne : le
+      // même logo, en vert.
+      icon: payload.icon || '/icon-192.png',
+      badge: payload.icon || '/icon-192.png',
       tag: payload.tag || 'calicrew',
       data: { url: payload.url || '/' },
     })

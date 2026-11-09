@@ -3,6 +3,15 @@ import { getDb, configureWebPush, isAuthorized, sendTo, getDayKey } from '../_li
 import { lisAbonnements } from '../_lib/groupe.js';
 import { FACEID_LANCEMENT, FACEID_SEMAINE, FACEID_DERNIER_JOUR } from '../_lib/messages.js';
 
+/*
+ * Le logo de l'app, en vert.
+ *
+ * Pas un autre dessin : pendant l'event l'app elle-même passe au vert, et
+ * une notification qui arrive avec une marque inconnue ne se rattache à
+ * rien. Même logo, autre couleur.
+ */
+const ICONE = '/icon-vert-192.png';
+
 /**
  * Les rendez-vous de l'event FaceID.
  *
@@ -45,6 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: rdv.texte,
       tag: rdv.tag,
       url: '/faceid',
+      icon: ICONE,
     }))
   );
 

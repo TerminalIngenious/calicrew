@@ -25,6 +25,9 @@
   --text-muted: #8e8e93;
   --accent: #ff9f0a;
   --accent-light: #ffb340;
+  /* Les composantes de l'accent, pour les voiles en rgba() : une teinte
+     écrite en dur restait orange au milieu d'une app repeinte. */
+  --accent-rgb: 255, 159, 10;
   --accent-green: #30d158;
   --accent-gold: #ffd60a;
   --accent-silver: #d1d1d6;
@@ -362,7 +365,7 @@ body {
 }
 
 .session-badge.partial {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   color: var(--accent);
 }
 
@@ -518,7 +521,7 @@ body {
 }
 
 .exercise-chip.selected {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -922,7 +925,7 @@ body {
   margin-left: auto;
   padding: 0.15rem 0.45rem;
   border-radius: 99px;
-  background: rgba(255, 107, 53, 0.14);
+  background: rgba(var(--accent-rgb), 0.14);
   color: var(--accent);
   font-size: 0.65rem;
   font-weight: 700;
@@ -1068,7 +1071,7 @@ body {
 
 .leaderboard-row.me {
   border-color: var(--accent);
-  background: rgba(255, 107, 53, 0.05);
+  background: rgba(var(--accent-rgb), 0.05);
 }
 
 .rank {
@@ -1410,7 +1413,7 @@ body {
 }
 
 .time-picker-arrow:active {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-color: var(--accent);
 }
 
@@ -2320,12 +2323,24 @@ body {
 }
 
 .sort-tab.active {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-color: var(--accent);
   color: var(--accent);
 }
 
 /* Loader */
+/*
+ * L'écran de chargement.
+ *
+ * Le logo prend la couleur d'accent, donc il verdit de lui-même pendant
+ * l'event. Il apparaît au lieu d'être là d'un coup : une attente qui commence
+ * par une image qui se pose se remarque moins qu'une image qui surgit.
+ *
+ * La traction est une seule courbe et non une suite de paliers. La version
+ * précédente enchaînait cinq valeurs à la main, ce qui donnait une saccade
+ * à chaque étape ; ici la montée est lente et tendue, la descente plus
+ * rapide, et c'est la courbe d'accélération qui fait le mouvement.
+ */
 .loader-screen {
   display: flex;
   flex-direction: column;
@@ -2335,39 +2350,25 @@ body {
   gap: 1rem;
 }
 
+.loader-svg {
+  color: var(--accent);
+  animation: loader-pose 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes loader-pose {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
 .loader-svg .loader-person {
-  animation: pullup-attempt 1.5s ease-in-out infinite;
   transform-origin: 100px 60px;
+  animation: loader-traction 2.1s cubic-bezier(0.37, 0, 0.2, 1) infinite;
 }
 
-/* Le logo de l'event : les crochets pulsent, la ligne de scan descend. */
-.loader-fid-crochets {
-  animation: loader-fid-pulse 2.4s ease-in-out infinite;
-  transform-origin: 60px 60px;
-}
-
-.loader-fid-scan {
-  animation: loader-fid-scan 1.8s ease-in-out infinite;
-}
-
-@keyframes loader-fid-pulse {
-  0%, 100% { opacity: 0.45; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.04); }
-}
-
-@keyframes loader-fid-scan {
-  0% { transform: translateY(10px); opacity: 0; }
-  15% { opacity: 0.9; }
-  85% { opacity: 0.9; }
-  100% { transform: translateY(108px); opacity: 0; }
-}
-
-@keyframes pullup-attempt {
-  0% { transform: translateY(0); }
-  30% { transform: translateY(-12px); }
-  50% { transform: translateY(-8px); }
-  70% { transform: translateY(-15px); }
-  85% { transform: translateY(-5px); }
+@keyframes loader-traction {
+  0%   { transform: translateY(0); }
+  45%  { transform: translateY(-16px); }
+  55%  { transform: translateY(-16px); }
   100% { transform: translateY(0); }
 }
 
@@ -2396,13 +2397,25 @@ body {
 }
 
 .loader-bar-indeterminate {
-  width: 40%;
-  animation: loader-slide 1.2s ease-in-out infinite;
+  width: 35%;
+  animation: loader-slide 1.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 @keyframes loader-slide {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(395%); }
+}
+
+/* Une attente ne justifie pas de faire bouger un écran pour qui a demandé
+   qu'on arrête. */
+@media (prefers-reduced-motion: reduce) {
+  .loader-svg,
+  .loader-svg .loader-person,
+  .loader-bar-indeterminate {
+    animation: none;
+  }
+
+  .loader-bar-indeterminate { width: 100%; }
 }
 
 /* Recap session */
@@ -2503,7 +2516,7 @@ body {
 }
 
 .recap-exercise-badge.partial {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   color: var(--accent);
 }
 
@@ -2656,7 +2669,7 @@ body {
 }
 
 .category-chip.active {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -2963,7 +2976,7 @@ body {
 .pending-badge {
   font-size: 0.75rem;
   color: var(--accent);
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   padding: 0.3rem 0.6rem;
   border-radius: 12px;
   font-weight: 500;
@@ -3147,7 +3160,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 70% 20%, rgba(255, 107, 53, 0.15) 0%, transparent 60%),
+  background: radial-gradient(ellipse at 70% 20%, rgba(var(--accent-rgb), 0.15) 0%, transparent 60%),
               radial-gradient(ellipse at 20% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
 }
 
@@ -3252,16 +3265,8 @@ body {
 .bp-hero-xp-fill {
   height: 100%;
   background: var(--accent);
-  background-size: 200% 100%;
   border-radius: 4px;
-  transition: width 0.6s ease;
-  animation: xpShimmer 2s linear infinite;
-  box-shadow: 0 0 8px rgba(255, 107, 53, 0.4);
-}
-
-@keyframes xpShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Tabs */
@@ -3295,7 +3300,7 @@ body {
 .bp-tab.active {
   background: var(--accent);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.3);
 }
 
 .bp-tab-badge {
@@ -3400,9 +3405,11 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Un coffre à ouvrir respire au lieu de s'auréoler : un halo qui clignote
+   derrière un bouton est le genre de détail qui fait bon marché. */
 @keyframes chestPulse {
-  0%, 100% { box-shadow: 0 0 0 transparent; }
-  50% { box-shadow: 0 0 12px rgba(255, 107, 53, 0.2); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
 
 /* Chest Opening Animation */
@@ -3668,7 +3675,7 @@ body {
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.3);
 }
 
 @keyframes cardRevealPop {
@@ -3704,8 +3711,8 @@ body {
 }
 
 .bp-quest-ready {
-  border-color: rgba(255, 107, 53, 0.4);
-  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.1);
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.1);
 }
 
 .bp-quest-claimed {
@@ -3808,13 +3815,13 @@ body {
   font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 2px 6px rgba(var(--accent-rgb), 0.3);
   animation: claimGlow 1.5s ease-in-out infinite;
 }
 
 @keyframes claimGlow {
-  0%, 100% { box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3); }
-  50% { box-shadow: 0 2px 12px rgba(255, 107, 53, 0.5); }
+  0%, 100% { box-shadow: 0 2px 6px rgba(var(--accent-rgb), 0.3); }
+  50% { box-shadow: 0 2px 12px rgba(var(--accent-rgb), 0.5); }
 }
 
 .bp-quest-xp-tag {
@@ -3867,11 +3874,11 @@ body {
 }
 
 .bp-track-row.reached {
-  background: rgba(255, 107, 53, 0.04);
+  background: rgba(var(--accent-rgb), 0.04);
 }
 
 .bp-track-row.current {
-  background: rgba(255, 107, 53, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
@@ -3971,7 +3978,7 @@ body {
 
 .sport-chip.active {
   border-color: var(--accent);
-  background: rgba(255, 107, 53, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
 }
 
@@ -4182,8 +4189,8 @@ body {
   gap: 0.6rem;
   padding: 0.85rem 1rem;
   border-radius: var(--radius);
-  border: 1px solid rgba(255, 138, 92, 0.25);
-  background: linear-gradient(135deg, rgba(255, 138, 92, 0.07), transparent);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), transparent);
   color: var(--accent);
 }
 
@@ -4287,8 +4294,8 @@ body {
   padding: 0.75rem 1rem;
   margin-bottom: 0.75rem;
   border-radius: var(--radius);
-  border: 1px solid rgba(255, 138, 92, 0.25);
-  background: linear-gradient(135deg, rgba(255, 138, 92, 0.08), transparent);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.08), transparent);
   color: var(--accent);
 }
 
@@ -4313,8 +4320,8 @@ body {
 }
 
 .bp-daily-quest {
-  border: 1px solid rgba(255, 138, 92, 0.25);
-  background: linear-gradient(135deg, rgba(255, 138, 92, 0.07), transparent);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), transparent);
 }
 
 .bp-daily-quest.bp-quest-claimed {
@@ -5091,7 +5098,7 @@ body {
   right: 0;
   top: 50%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.28), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.28), transparent);
   transform: scaleX(0);
   opacity: 0;
 }
@@ -5555,8 +5562,8 @@ body {
 }
 
 .rewards-rank-me {
-  background: rgba(255, 107, 53, 0.1);
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
 }
 
 .rewards-rank-pos {
@@ -6950,7 +6957,7 @@ body {
   }
 
   .nav-btn.active {
-    background: rgba(255, 107, 53, 0.12);
+    background: rgba(var(--accent-rgb), 0.12);
   }
 
   /* ── Le contenu occupe la fenêtre ── */
@@ -7122,7 +7129,7 @@ body {
 
 .exo-raccourci.amrap {
   color: var(--accent);
-  border-color: rgba(255, 107, 53, 0.4);
+  border-color: rgba(var(--accent-rgb), 0.4);
 }
 
 .exo-search {
@@ -7185,7 +7192,7 @@ body {
 }
 
 .exo-filter.active {
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -7544,8 +7551,8 @@ body {
   gap: 0.85rem;
   margin-bottom: 1.25rem;
   padding: 1rem;
-  background: rgba(255, 107, 53, 0.08);
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   border-radius: var(--radius);
 }
 
@@ -7555,7 +7562,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 2.25rem;
-  background: rgba(255, 107, 53, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   border-radius: 50%;
   color: var(--accent);
 }
@@ -7710,8 +7717,8 @@ body {
   width: 100%;
   margin-bottom: 0.75rem;
   padding: 0.75rem 0.9rem;
-  background: rgba(255, 107, 53, 0.08);
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   border-radius: var(--radius);
   color: var(--accent);
   text-align: left;
@@ -7770,4 +7777,30 @@ body {
 .lp-btn-primaire,
 .fid-quest-btn {
   color: #000;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Habillage de l'event FaceID — 9 au 30 novembre
+   ──────────────────────────────────────────────────────────────────────────
+   Une seule chose change : la couleur d'accent. Pas de quadrillage, pas de
+   halo, pas de dégradé — la première version en avait, et c'est de là que
+   venait l'impression d'une démonstration plutôt que d'un outil.
+
+   Le vert est exactement celui des cartes Face A. Un vert de l'app et un
+   vert de l'event, côte à côte, se lisent comme une erreur.
+
+   Ce qui ne bouge pas, comme pour les autres habillages : or, argent et
+   bronze du podium, raretés des cartes, rouge de danger. Le vert de
+   validation passe sur celui de l'event, pour qu'il n'y ait pas deux verts
+   à l'écran.
+
+   Le texte posé sur l'accent est déjà en noir pour toute l'app : du blanc
+   sur ce vert tombe à 1,2:1, totalement illisible.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root[data-season="faceid"] {
+  --accent: #b6ff00;
+  --accent-light: #d2ff5c;
+  --accent-green: #b6ff00;
+  --accent-rgb: 182, 255, 0;
 }

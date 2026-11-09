@@ -39,6 +39,8 @@ export interface Payload {
   body: string;
   tag?: string;
   url?: string;
+  /** Icône de la notif. Omise, le service worker met celle de l'app. */
+  icon?: string;
 }
 
 /**
