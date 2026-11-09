@@ -27,7 +27,7 @@ const MESSAGES = [
   'Attribution des surnoms. Personne n\'a son mot à dire.',
   'Mesure des egos. Le serveur a chaud.',
   'Vérification des excuses. Beaucoup de données.',
-  'Cinq visages de plus à faire rentrer dans le fichier.',
+  'Six visages de plus à faire rentrer dans le fichier.',
 ];
 
 export default function MaintenanceScreen() {
@@ -77,7 +77,7 @@ export default function MaintenanceScreen() {
         <div className="mnt-barre"><div className="mnt-barre-fill" /></div>
 
         <p className="mnt-pied">
-          Cinq têtes de plus arrivent dans l'event.<br />
+          Six têtes de plus arrivent dans l'event.<br />
           Personne ne perd ses cartes. Revenez dans un moment.
         </p>
       </div>
