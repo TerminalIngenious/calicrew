@@ -193,7 +193,7 @@ export function auHasard<T>(liste: T[]): T {
 
 /** Lundi 9 novembre, 10h : l'event s'ouvre. */
 export const FACEID_LANCEMENT =
-  'Vingt-quatre visages sont dans la nature. Deux boosters t\'attendent pour commencer le fichier.';
+  'Trente-quatre visages sont dans la nature. Deux boosters t\'attendent pour commencer le fichier.';
 
 /** Les bascules de semaine, dans l'ordre. */
 export const FACEID_SEMAINE = [

@@ -367,4 +367,6 @@ export interface FaceIdProgress {
   boosters: number;
   questsPrises: string[];
   bienvenue?: boolean;
+  /** Le booster offert à l'agrandissement de l'event, donné une seule fois. */
+  rattrapage?: boolean;
 }

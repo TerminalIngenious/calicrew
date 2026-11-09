@@ -5,7 +5,7 @@ export type { FaceIdProgress };
 /**
  * Event FaceID — 9 au 30 novembre 2026.
  *
- * Douze membres du groupe, deux cartes chacun, vingt-quatre cartes à
+ * Dix-sept membres du groupe, deux cartes chacun, trente-quatre cartes à
  * rassembler en trois semaines. Tout est à part du pass : ni le même set de
  * cartes, ni les mêmes coffres, ni le même écran. C'est voulu — un event qui
  * ressemble au reste de l'app n'est plus un event.
@@ -30,10 +30,15 @@ export interface MembreFaceId {
 /**
  * Le trombinoscope.
  *
- * À compléter avec les douze vrais prénoms. L'ordre fixe l'ordre d'affichage
- * et, surtout, les identifiants des cartes : le changer après le lancement
- * ferait pointer les collections déjà constituées sur les mauvaises têtes.
- * On peut corriger un prénom quand on veut, jamais un slug.
+ * L'ordre fixe l'ordre d'affichage et, surtout, le numéro imprimé sur les
+ * cartes. On peut corriger un prénom quand on veut, jamais un slug : il sert
+ * d'identifiant de carte, et le changer ferait pointer les collections déjà
+ * constituées sur les mauvaises têtes.
+ *
+ * Les cinq derniers sont arrivés après le lancement, et c'est pour ça qu'ils
+ * sont à la fin plutôt qu'à leur place alphabétique : ajoutés au milieu, ils
+ * auraient décalé les numéros de tous les suivants, déjà imprimés sur des
+ * cartes distribuées.
  */
 export const MEMBRES: MembreFaceId[] = [
   { slug: 'tristan', nom: 'Tristan' },
@@ -50,6 +55,11 @@ export const MEMBRES: MembreFaceId[] = [
   { slug: 'clement', nom: 'Clément' },
   { slug: 'bastien', nom: 'Bastien' },
   { slug: 'alexandre', nom: 'Alexandre' },
+  { slug: 'elias', nom: 'Elias' },
+  { slug: 'marina', nom: 'Marina' },
+  { slug: 'enthony', nom: 'Enthony' },
+  { slug: 'boris', nom: 'Boris' },
+  { slug: 'maddy', nom: 'Maddy' },
 ];
 
 export type Face = 'a' | 'b';
@@ -62,7 +72,7 @@ export interface CarteFaceId {
   slug: string;
   nom: string;
   face: Face;
-  /** Numéro imprimé sur la carte, de 1 à 24. */
+  /** Numéro imprimé sur la carte, de 1 à 34. */
   numero: number;
   /** La photo détourée. Absente tant qu'elle n'est pas fournie. */
   image: string;
@@ -177,7 +187,7 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-alexandre-b': { surnom: '', note: 55, stats: [52, 45, 50, 86, 91] },
 };
 
-/** Les vingt-quatre cartes, dans l'ordre du trombinoscope. */
+/** Les trente-quatre cartes, dans l'ordre du trombinoscope. */
 export const CARTES: CarteFaceId[] = MEMBRES.flatMap((m, i) =>
   (['a', 'b'] as Face[]).map((face, j) => {
     const id = `fid-${m.slug}-${face}`;
@@ -217,6 +227,7 @@ export function lisFaceId(brut: FaceIdProgress | undefined): FaceIdProgress {
     boosters: brut?.boosters || 0,
     questsPrises: brut?.questsPrises || [],
     bienvenue: brut?.bienvenue,
+    rattrapage: brut?.rattrapage,
   };
 }
 
@@ -230,27 +241,45 @@ export function collectionComplete(p: FaceIdProgress): boolean {
 
 // ── Boosters ──
 
-export const CARTES_PAR_BOOSTER = 3;
+/**
+ * Le nombre de cartes par sachet.
+ *
+ * Trois au lancement, quand le fichier comptait vingt-quatre visages. Passé
+ * à trente-quatre, trois ne suffisait plus : il aurait fallu douze boosters
+ * pour onze distribuables, donc une collection impossible à boucler. Quatre
+ * ramène le nécessaire à neuf et rend sa marge à l'event.
+ */
+export const CARTES_PAR_BOOSTER = 4;
 
 /**
  * Les boosters offerts à la première visite.
  *
- * Deux et non un : à vingt-quatre cartes il en faut huit pour tout
- * rassembler, et neuf missions seules ne laissaient qu'une mission de marge.
- * Deux à l'ouverture portent la marge à trois, et six cartes d'un coup font
- * comprendre l'event en une minute.
+ * Deux et non un : huit cartes d'un coup font comprendre l'event en une
+ * minute, là où un seul sachet laisse sur sa faim.
  */
 export const BOOSTERS_OUVERTURE = 2;
+
+/**
+ * Le booster de rattrapage, donné une fois à tout le monde.
+ *
+ * L'event s'est agrandi en cours de route : cinq personnes de plus, dix
+ * cartes de plus, alors que les boosters d'ouverture étaient déjà ouverts
+ * pour la plupart. Sans lui, qui avait ouvert ses deux sachets à trois
+ * cartes se retrouvait avec vingt-huit cartes à trouver pour neuf missions,
+ * soit zéro marge. Avec lui, tout le monde retrouve les trois missions de
+ * marge d'avant l'agrandissement, quel que soit le moment où il est entré.
+ */
+export const BOOSTERS_RATTRAPAGE = 1;
 
 /**
  * Le contenu d'un booster.
  *
  * Tirage sans remise dans ce qui manque, et non au hasard parmi les
- * vingt-quatre : à taux égal avec doublons, rassembler les vingt-quatre
- * demanderait une trentaine de boosters en moyenne — et quarante pour un
- * joueur sur dix. Impossible à distribuer en trois semaines, et surtout
- * pénible : passé la moitié, neuf ouvertures sur dix ne donneraient que des
- * doublons. Ici, huit boosters suffisent, pour tout le monde.
+ * trente-quatre : à taux égal avec doublons, tout rassembler demanderait
+ * cent quarante cartes en moyenne. Impossible à distribuer en trois
+ * semaines, et surtout pénible : passé la moitié, neuf ouvertures sur dix ne
+ * donneraient que des doublons. Ici, neuf boosters suffisent, pour tout le
+ * monde.
  *
  * Une fois la collection complète, le tirage reprend sur l'ensemble : les
  * boosters suivants ne donnent plus que des doublons, qui ne servent qu'à
@@ -295,8 +324,9 @@ function melange<T>(liste: T[]): T[] {
  *
  * L'event court jusqu'au 30, mais la semaine du 30 ne dure qu'un jour : y
  * poser des quêtes hebdomadaires reviendrait à les offrir ou à les rendre
- * impossibles. Trois semaines, trois missions chacune, plus les boosters
- * d'ouverture : onze pour neuf nécessaires.
+ * impossibles. Trois semaines, trois missions chacune, plus les deux
+ * boosters d'ouverture et celui de rattrapage : douze pour neuf
+ * nécessaires.
  */
 export const SEMAINES: number[] = [
   FACEID_DEBUT,
@@ -384,7 +414,7 @@ export const BADGE_ID = 'event-faceid';
  *
  * Il rejoint les badges de classement du profil, mais il n'a ni podium ni
  * groupe : on ne le gagne pas en finissant devant quelqu'un, mais en allant
- * au bout des vingt-quatre. `category` et `rank` ne sont là que parce que le
+ * au bout des trente-quatre. `category` et `rank` ne sont là que parce que le
  * type est partagé — rien ne les lit pour un badge d'événement.
  */
 export function badgeFaceId(maintenant = Date.now()): RankBadge {
