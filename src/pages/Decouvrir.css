@@ -130,9 +130,11 @@
   transform: translateY(-1px);
 }
 
+/* Noir et non blanc : l'orange du système est une couleur claire, du blanc
+   dessus devient illisible. */
 .lp-btn-primaire {
   background: var(--accent);
-  color: #fff;
+  color: #000;
 }
 
 .lp-btn-primaire:hover {

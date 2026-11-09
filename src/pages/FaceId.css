@@ -1,13 +1,15 @@
 /* ──────────────────────────────────────────────────────────────────────────
    Event FaceID
    ──────────────────────────────────────────────────────────────────────────
-   Ici tout est vert sur noir, et c'est le vert des cartes Face A — le même
-   que celui dont l'app entière s'habille pendant les trois semaines. Il y en
-   avait deux, un émeraude pour la page et un citron pour les cartes : posés
-   côte à côte ils se lisaient comme une erreur. Le registre
-   est celui du scanner biométrique — grille, balayage, crochets de visée,
-   chiffres sur deux positions — ce qui tombe bien pour un fichier de
-   portraits, et ce qui prolonge le « Casier judiciaire » de la saison 1.
+   Le vert est celui des cartes Face A, et il ne sort pas de cette page :
+   l'app a repris une identité unique, l'event garde la sienne chez lui.
+
+   La grille et le balayage du scanner ont été retirés. L'intention était de
+   prolonger le « Casier judiciaire » de la saison 1, mais un quadrillage
+   lumineux qui défile derrière le texte est devenu le signe d'une interface
+   fabriquée à la va-vite. Il reste les crochets de visée sur les cartes, les
+   numéros sur trois positions et le vert : de quoi tenir le registre sans
+   faire clignoter l'écran.
    ────────────────────────────────────────────────────────────────────────── */
 
 .fid-page {
@@ -21,44 +23,6 @@
   background: var(--fid-fond);
   color: #e9f6cd;
   isolation: isolate;
-}
-
-/* La grille et le balayage sont posés derrière tout le contenu et ne doivent
-   jamais intercepter un geste. */
-.fid-grille,
-.fid-balayage {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.fid-grille {
-  background-image:
-    linear-gradient(var(--fid-trait) 1px, transparent 1px),
-    linear-gradient(90deg, var(--fid-trait) 1px, transparent 1px);
-  background-size: 38px 38px;
-  opacity: 0.35;
-  mask-image: radial-gradient(ellipse at 50% 0%, #000 10%, transparent 75%);
-}
-
-.fid-balayage {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(182, 255, 0, 0.16) 48%,
-    rgba(182, 255, 0, 0.3) 50%,
-    rgba(182, 255, 0, 0.16) 52%,
-    transparent 100%
-  );
-  height: 46vh;
-  inset: auto 0 auto 0;
-  animation: fid-balaye 7s linear infinite;
-}
-
-@keyframes fid-balaye {
-  from { transform: translateY(-50vh); }
-  to { transform: translateY(100vh); }
 }
 
 /* ── En-tête ── */
@@ -706,6 +670,15 @@
    doigt. Le dépassement de la courbe au-delà de 1 fait tout l'effet ressort :
    la dalle revient plus haut que sa position avant de se poser. */
 
+/*
+ * L'entrée de l'event, dans la page du pass.
+ *
+ * C'était une dalle verte en relief qui respirait et s'enfonçait sous le
+ * doigt. Elle attirait l'œil, et c'est bien le problème : au milieu d'écrans
+ * sobres, elle était la seule chose à faire du bruit. Ici c'est une ligne de
+ * la page comme les autres, et c'est le vert de l'icône qui dit que l'event
+ * est là.
+ */
 .fid-entree {
   position: relative;
   display: flex;
@@ -713,68 +686,51 @@
   gap: 0.9rem;
   width: 100%;
   margin: 1.25rem 0;
-  padding: 1.1rem 1.2rem;
-  background: linear-gradient(150deg, #c2f53a 0%, #8ec400 45%, #5a8200 100%);
+  padding: 1rem 1.1rem;
+  background: var(--bg-card);
   border: none;
-  border-radius: 16px;
-  color: #0c1104;
+  border-radius: var(--radius);
+  color: var(--text);
   text-align: left;
   cursor: pointer;
-  box-shadow:
-    0 14px 0 -2px #3f5c00,
-    0 16px 28px rgba(0, 0, 0, 0.5),
-    0 0 36px rgba(182, 255, 0, 0.25),
-    inset 0 2px 0 rgba(255, 255, 255, 0.35);
-  transform: perspective(700px) rotateX(5deg) translateY(0);
-  transition: transform 0.4s cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 0.25s ease;
-  animation: fid-entree-flotte 4s ease-in-out infinite;
+  transition: background 0.15s ease;
 }
 
-@keyframes fid-entree-flotte {
-  0%, 100% { transform: perspective(700px) rotateX(5deg) translateY(0); }
-  50% { transform: perspective(700px) rotateX(5deg) translateY(-5px); }
-}
+.fid-entree svg { color: #30d158; }
 
 .fid-entree:active {
-  animation: none;
-  transform: perspective(700px) rotateX(5deg) translateY(8px) scale(0.97);
-  box-shadow:
-    0 4px 0 -2px #3f5c00,
-    0 6px 12px rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.2);
-  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+  background: var(--bg-card-hover);
 }
 
 .fid-entree-texte { display: flex; flex-direction: column; gap: 0.15rem; }
 
 .fid-entree-kicker {
   font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(12, 17, 4, 0.65);
+  color: var(--text-muted);
 }
 
 .fid-entree-titre {
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .fid-entree-sous {
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: rgba(12, 17, 4, 0.7);
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
 .fid-entree-pastille {
   margin-left: auto;
-  padding: 0.2rem 0.5rem;
-  background: #0c1104;
+  padding: 0.2rem 0.55rem;
+  background: #30d158;
   border-radius: 999px;
-  color: #b6ff00;
-  font-size: 0.7rem;
-  font-weight: 800;
+  color: #000;
+  font-size: 0.72rem;
+  font-weight: 600;
 }
 
 /* ── Ordinateur ── */
@@ -797,10 +753,9 @@
   }
 }
 
-/* Une ligne de balayage permanente et un sachet qui flotte sont exactement ce
-   que le réglage « animations réduites » demande de couper. */
+/* Un sachet qui flotte est exactement ce que le réglage « animations
+   réduites » demande de couper. */
 @media (prefers-reduced-motion: reduce) {
-  .fid-balayage,
   .fid-slot,
   .fid-sachet,
   .fid-entree {
@@ -890,11 +845,9 @@
   /* Un <button> ne prend pas la couleur de texte de la page : sans ça le
      titre sortait en gris système, presque noir sur le fond sombre. */
   color: var(--text);
-  border: 1px solid rgba(182, 255, 0, 0.28);
-  border-radius: 16px;
-  background:
-    linear-gradient(135deg, rgba(182, 255, 0, 0.1), transparent 60%),
-    var(--card);
+  border: none;
+  border-radius: var(--radius);
+  background: var(--bg-card);
 }
 
 .fid-shelf:disabled {
@@ -912,9 +865,9 @@
   height: 50px;
   object-fit: cover;
   object-position: center 28%;
-  border: 1px solid rgba(182, 255, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 5px;
-  background: #0d0f0a;
+  background: var(--bg-card-hover);
 }
 
 /* Les trois se chevauchent comme des cartes en main : alignées, elles
@@ -936,16 +889,16 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #b6ff00;
+  color: var(--text-muted);
 }
 
 .fid-shelf-titre {
   font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .fid-shelf-compte {
@@ -965,7 +918,7 @@
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: #b6ff00;
+  background: #30d158;
 }
 
 .fid-shelf-fleche {
@@ -978,6 +931,6 @@
    trois têtes à moitié recouvertes faisaient une tache verte illisible. */
 .fid-shelf-vignette.vide {
   border-style: dashed;
-  border-color: rgba(182, 255, 0, 0.25);
-  background: #11150b;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: var(--bg-card-hover);
 }

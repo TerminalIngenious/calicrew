@@ -4,22 +4,36 @@
   box-sizing: border-box;
 }
 
+/*
+ * La palette.
+ *
+ * Des gris neutres et non plus un bleu nuit : une teinte dans le fond se
+ * retrouve dans chaque surface, et c'est elle qui donnait à l'app son air de
+ * maquette. Les valeurs sont celles du mode sombre d'iOS — fond noir,
+ * surfaces à deux niveaux de gris, séparateurs à peine visibles. Sur un écran
+ * OLED le noir ne s'affiche pas, donc une carte posée dessus flotte toute
+ * seule sans avoir besoin d'un contour ni d'une ombre.
+ *
+ * L'orange reste la couleur de l'app, mais c'est celui du système plutôt
+ * qu'un orange saturé : il tient la lecture sur fond noir sans vibrer.
+ */
 :root {
-  --bg: #0a0a1a;
-  --bg-card: #141428;
-  --bg-card-hover: #1a1a35;
-  --text: #e0e0e0;
-  --text-muted: #888;
-  --accent: #ff6b35;
-  --accent-light: #ff8a5c;
-  --accent-green: #4ecdc4;
-  --accent-gold: #ffd700;
-  --accent-silver: #c0c0c0;
-  --accent-bronze: #cd7f32;
-  --border: #2a2a4a;
-  --danger: #ff4757;
-  --radius: 12px;
-  --radius-sm: 8px;
+  --bg: #000000;
+  --bg-card: #1c1c1e;
+  --bg-card-hover: #2c2c2e;
+  --text: #f5f5f7;
+  --text-muted: #8e8e93;
+  --accent: #ff9f0a;
+  --accent-light: #ffb340;
+  --accent-green: #30d158;
+  --accent-gold: #ffd60a;
+  --accent-silver: #d1d1d6;
+  --accent-bronze: #c08457;
+  --border: #2c2c2e;
+  --danger: #ff453a;
+  /* Les rayons d'iOS : 14 pour une carte, 10 pour ce qui est posé dedans. */
+  --radius: 14px;
+  --radius-sm: 10px;
   /* Hauteur occupée par la barre de navigation : son padding haut, un
      .nav-btn (icône + label), son padding bas, et la safe-area de l'iPhone. */
   --nav-height: calc(4.25rem + env(safe-area-inset-bottom, 0px));
@@ -31,6 +45,9 @@ body {
   color: var(--text);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  /* L'approche légèrement négative est ce qui fait tenir les grands titres
+     ensemble plutôt que de les laisser s'étaler. */
+  letter-spacing: -0.01em;
 }
 
 #root {
@@ -66,8 +83,9 @@ body {
 }
 
 .page-header h1 {
-  font-size: 1.3rem;
+  font-size: 1.75rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 /* Buttons */
@@ -574,7 +592,7 @@ body {
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  background: var(--accent);
   border-radius: 20px;
   transition: width 0.3s ease;
 }
@@ -1081,7 +1099,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  background: var(--accent);
   color: white;
   font-size: 0.9rem;
   font-weight: 700;
@@ -3233,7 +3251,7 @@ body {
 
 .bp-hero-xp-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), #ff9a5c, var(--accent));
+  background: var(--accent);
   background-size: 200% 100%;
   border-radius: 4px;
   transition: width 0.6s ease;
@@ -3275,7 +3293,7 @@ body {
 }
 
 .bp-tab.active {
-  background: linear-gradient(135deg, var(--accent), #ff8a5c);
+  background: var(--accent);
   color: #fff;
   box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
@@ -3642,7 +3660,7 @@ body {
 
 .bp-card-reveal-close {
   margin-top: 1.25rem;
-  background: linear-gradient(135deg, var(--accent), #ff8a5c);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -3782,7 +3800,7 @@ body {
 }
 
 .bp-quest-claim {
-  background: linear-gradient(135deg, var(--accent), #ff8a5c);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -3962,7 +3980,7 @@ body {
   width: calc(100% - 2rem);
   margin: 1.5rem auto 1rem;
   padding: 0.85rem;
-  background: linear-gradient(135deg, var(--accent), #ff8a5c);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius);
@@ -4110,7 +4128,7 @@ body {
 .quest-confirm-ok {
   flex: 1;
   padding: 0.65rem;
-  background: linear-gradient(135deg, var(--accent), #ff8a5c);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius);
@@ -4801,7 +4819,7 @@ body {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  background: var(--accent);
   color: white;
   font-size: 1.5rem;
   font-weight: 700;
@@ -4917,7 +4935,7 @@ body {
 .avatar-picker-default {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  background: var(--accent);
   color: white;
   font-size: 1.5rem;
   font-weight: 700;
@@ -6965,7 +6983,7 @@ body {
   }
 
   .page-header h1 {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
   /* Les séances tiennent sur deux colonnes : une liste d'une seule ligne par
@@ -7720,168 +7738,36 @@ body {
   color: var(--text-muted);
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   Habillage de l'event FaceID — 9 au 30 novembre
-
-   Même principe qu'Octobre Rose : une surcharge de --accent repeint tout ce
-   qui s'en sert. Le vert est celui des cartes Face A, pour que l'app et
-   l'event aient la même couleur exactement.
-
-   Ce qui ne change PAS, comme pour les autres habillages : or/argent/bronze
-   du podium, raretés des cartes, rouge de danger. Le vert de validation, lui,
-   est déjà vert — il passe sur le vert de l'event pour qu'il n'y ait pas
-   deux verts différents à l'écran.
-   ────────────────────────────────────────────────────────────────────────── */
-
-:root[data-season="faceid"] {
-  --accent: #b6ff00;
-  --accent-light: #d2ff5c;
-  --accent-green: #b6ff00;
-}
-
-:root[data-season="faceid"] body {
-  background:
-    radial-gradient(90% 55% at 50% 0%, rgba(182, 255, 0, 0.1) 0%, transparent 70%),
-    var(--bg);
-  background-attachment: fixed;
-}
-
-/* Le vert est très clair : du blanc dessus tombe à 1.2:1, contre 2.8:1 pour
-   l'orange de tous les jours. Tout ce qui est rempli d'accent et porte du
-   texte repasse donc en noir, ce qui monte à 16:1. Les barres, interrupteurs
-   et jauges ne sont pas listés : ils n'ont rien à lire. */
-:root[data-season="faceid"] .primary-btn,
-:root[data-season="faceid"] .layout-switch-btn.active,
-:root[data-season="faceid"] .leaderboard-avatar,
-:root[data-season="faceid"] .weight-type-btn.active,
-:root[data-season="faceid"] .unit-btn.active,
-:root[data-season="faceid"] .member-modal-view-btn,
-:root[data-season="faceid"] .search-go,
-:root[data-season="faceid"] .trade-card-pick-count,
-:root[data-season="faceid"] .amrap-validate-btn,
-:root[data-season="faceid"] .bp-tab.active,
-:root[data-season="faceid"] .bp-card-reveal-close,
-:root[data-season="faceid"] .bp-quest-claim,
-:root[data-season="faceid"] .quest-next-btn,
-:root[data-season="faceid"] .quest-pick-counter,
-:root[data-season="faceid"] .quest-check.checked,
-:root[data-season="faceid"] .quest-confirm-ok,
-:root[data-season="faceid"] .collection-card-count,
-:root[data-season="faceid"] .profile-avatar,
-:root[data-season="faceid"] .avatar-picker-default,
-:root[data-season="faceid"] .chat-bubble.mine,
-:root[data-season="faceid"] .chat-send-btn,
-:root[data-season="faceid"] .lp-btn-primaire,
-:root[data-season="faceid"] .fid-quest-btn {
-  color: #0a0b09;
-}
-
-/* Cinq dégradés finissent sur un orange écrit en dur plutôt que sur
-   --accent-light : repeints, ils partaient en vert pour revenir à l'orange
-   au milieu du bouton. */
-:root[data-season="faceid"] .bp-tab.active,
-:root[data-season="faceid"] .bp-card-reveal-close,
-:root[data-season="faceid"] .bp-quest-claim,
-:root[data-season="faceid"] .quest-next-btn,
-:root[data-season="faceid"] .quest-confirm-ok {
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-}
-
-/* La barre d'XP a son propre orange et son halo, tous deux écrits en dur. */
-:root[data-season="faceid"] .bp-hero-xp-fill {
-  background: linear-gradient(90deg, var(--accent), #e0ff8a, var(--accent));
-  background-size: 200% 100%;
-  box-shadow: 0 0 8px rgba(182, 255, 0, 0.4);
-}
-
-.fid-decor {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.fid-decor-lueur {
-  position: absolute;
-  inset: -20% 0 auto 0;
-  height: 60vh;
-  background: radial-gradient(ellipse at 50% 0%, rgba(182, 255, 0, 0.12), transparent 70%);
-}
-
-.fid-decor-grille {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(182, 255, 0, 0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(182, 255, 0, 0.18) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: 0.3;
-  mask-image: radial-gradient(ellipse at 50% 0%, #000 8%, transparent 70%);
-}
-
-.fid-decor-balayage {
-  position: absolute;
-  inset: auto 0 auto 0;
-  height: 40vh;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(182, 255, 0, 0.07) 48%,
-    rgba(182, 255, 0, 0.14) 50%,
-    rgba(182, 255, 0, 0.07) 52%,
-    transparent 100%
-  );
-  animation: fid-decor-balaye 9s linear infinite;
-}
-
-@keyframes fid-decor-balaye {
-  from { transform: translateY(-45vh); }
-  to { transform: translateY(100vh); }
-}
-
-/* Les crochets de visée aux quatre angles de l'écran. Ils s'arrêtent sous la
-   barre de navigation et sous l'encoche : collés aux bords, ils passaient
-   derrière l'une et l'autre. */
-.fid-decor-crochet {
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border: 2px solid rgba(182, 255, 0, 0.45);
-}
-
-.fid-decor-crochet.tl {
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
-  left: 10px;
-  border-right: 0;
-  border-bottom: 0;
-  border-radius: 6px 0 0 0;
-}
-
-.fid-decor-crochet.tr {
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
-  right: 10px;
-  border-left: 0;
-  border-bottom: 0;
-  border-radius: 0 6px 0 0;
-}
-
-.fid-decor-crochet.bl {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
-  left: 10px;
-  border-right: 0;
-  border-top: 0;
-  border-radius: 0 0 0 6px;
-}
-
-.fid-decor-crochet.br {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
-  right: 10px;
-  border-left: 0;
-  border-top: 0;
-  border-radius: 0 0 6px 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fid-decor-balayage { animation: none; }
+/*
+ * Ce qui est posé sur un aplat d'accent s'écrit en noir.
+ *
+ * L'orange du système est une couleur claire : du blanc dessus tombe à
+ * 2,1:1, sous le seuil de lisibilité, alors que le noir y tient à 10:1.
+ * La liste ne contient que les surfaces remplies d'accent qui portent du
+ * texte ou une icône.
+ */
+.primary-btn,
+.layout-switch-btn.active,
+.leaderboard-avatar,
+.weight-type-btn.active,
+.unit-btn.active,
+.member-modal-view-btn,
+.search-go,
+.trade-card-pick-count,
+.amrap-validate-btn,
+.bp-tab.active,
+.bp-card-reveal-close,
+.bp-quest-claim,
+.quest-next-btn,
+.quest-pick-counter,
+.quest-check.checked,
+.quest-confirm-ok,
+.collection-card-count,
+.profile-avatar,
+.avatar-picker-default,
+.chat-bubble.mine,
+.chat-send-btn,
+.lp-btn-primaire,
+.fid-quest-btn {
+  color: #000;
 }

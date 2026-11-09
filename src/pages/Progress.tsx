@@ -18,20 +18,26 @@ import Loader from '../components/Loader';
 import PersonalRecords from '../components/PersonalRecords';
 import { Trophy, Zap, Clock, Dumbbell } from 'lucide-react';
 import { exerciseReps, exerciseTotal, getUnit, unitLabel, totalReps, sessionSets } from '../lib/stats';
-import { getSeasonalTheme } from '../lib/seasonalTheme';
 
 /*
- * La courbe suit l'habillage du moment.
+ * La couleur de la courbe.
  *
- * Recharts prend une couleur, pas une variable CSS : l'orange était écrit en
- * dur et restait seul en orange au milieu d'une page repeinte.
+ * Recharts prend une couleur, pas une variable CSS, donc elle est lue sur la
+ * page au lieu d'être recopiée : une valeur écrite ici en dur finissait
+ * toujours par survivre à un changement de palette et à se retrouver seule
+ * d'une autre couleur que le reste.
  */
-const COULEUR_COURBE = getSeasonalTheme() === 'faceid' ? '#b6ff00' : '#ff6b35';
+function couleurAccent(): string {
+  return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#ff9f0a';
+}
 
 export default function Progress() {
   const { user } = useAuth();
   const { sessions, loading } = useUserSessions();
   const [selectedExercise, setSelectedExercise] = useState<string>('all');
+  // Lue une fois au montage : la palette ne change pas en cours de route, et
+  // getComputedStyle pendant le rendu rendrait le composant impur.
+  const [COULEUR_COURBE] = useState(couleurAccent);
 
   const sortedSessions = useMemo(
     () => [...sessions].sort((a, b) => a.createdAt - b.createdAt),

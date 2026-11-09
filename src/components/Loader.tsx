@@ -1,9 +1,16 @@
-import { getSeasonalTheme } from '../lib/seasonalTheme';
+import { evenementEnCours } from '../lib/faceid';
 
 export default function Loader() {
-  // Pendant l'event, c'est son signe qui tourne et pas la barre de traction :
-  // l'app s'ouvre déjà sur FaceID, autant que le tout premier écran le dise.
-  const faceid = getSeasonalTheme() === 'faceid';
+  /*
+   * Pendant l'event, c'est son signe qui tourne et pas la barre de traction.
+   *
+   * La question est posée à l'event lui-même et non aux habillages
+   * saisonniers : l'event ne repeint plus l'app, mais il reste le sujet du
+   * mois, et le premier écran a le droit de le dire. Le signe est dessiné
+   * dans la couleur de l'app, pas dans le vert des cartes — c'est le même
+   * produit qui s'ouvre, event ou pas.
+   */
+  const faceid = evenementEnCours();
 
   return (
     <div className={`loader-screen ${faceid ? 'faceid' : ''}`}>
@@ -46,14 +53,14 @@ function LogoCaliCrew() {
 function LogoFaceId() {
   return (
     <svg viewBox="0 0 120 120" width="120" height="120" className="loader-svg loader-faceid">
-      <g className="loader-fid-crochets" stroke="#b6ff00" strokeWidth={8} strokeLinecap="round" fill="none">
+      <g className="loader-fid-crochets" stroke="var(--accent)" strokeWidth={8} strokeLinecap="round" fill="none">
         <path d="M8 36V16a8 8 0 018-8h20M84 8h20a8 8 0 018 8v20M112 84v20a8 8 0 01-8 8H84M36 112H16a8 8 0 01-8-8V84" />
       </g>
-      <g fill="#b6ff00">
+      <g fill="var(--accent)">
         <circle cx="60" cy="51" r="15" />
         <path d="M33 100c0-15 12-24 27-24s27 9 27 24z" />
       </g>
-      <rect className="loader-fid-scan" x="8" y="0" width="104" height="3" rx="1.5" fill="#eaffb0" />
+      <rect className="loader-fid-scan" x="8" y="0" width="104" height="3" rx="1.5" fill="var(--accent-light)" />
     </svg>
   );
 }

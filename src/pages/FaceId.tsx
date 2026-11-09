@@ -16,7 +16,7 @@ import RankBadgeIcon from '../components/RankBadgeIcon';
 import {
   CARTES, MEMBRES, TOTAL_CARTES, SEMAINES,
   ajoute, collectionComplete, evenementEnCours, joursRestants, lisFaceId,
-  nbPossedees, questsDeSemaine, semaineCourante, tireBooster,
+  nbPossedees, questsDeSemaine, semaineCourante, tireBooster, CARTES_PAR_BOOSTER,
   BADGE_ID, badgeFaceId, BOOSTERS_OUVERTURE, BOOSTERS_RATTRAPAGE,
 } from '../lib/faceid';
 import type { CarteFaceId } from '../lib/faceid';
@@ -166,8 +166,6 @@ export default function FaceId() {
 
   return (
     <div className="page fid-page">
-      <div className="fid-grille" aria-hidden="true" />
-      <div className="fid-balayage" aria-hidden="true" />
 
       <header className="fid-header">
         <button className="fid-retour" onClick={() => navigate('/battlepass')} aria-label="Retour">
@@ -180,7 +178,7 @@ export default function FaceId() {
       </header>
 
       <p className="fid-pitch">
-        Douze d'entre nous, deux portraits chacun. Vingt-quatre cartes à
+        Dix-huit d'entre nous, deux portraits chacun. Trente-six cartes à
         rassembler avant le 30 novembre — et aucune ne s'achète : elles sortent
         toutes des boosters.
       </p>
@@ -219,7 +217,7 @@ export default function FaceId() {
             <span className="fid-slot-titre">
               {fid.boosters} booster{fid.boosters > 1 ? 's' : ''} à ouvrir
             </span>
-            <span className="fid-slot-sous">3 cartes à l'intérieur</span>
+            <span className="fid-slot-sous">{CARTES_PAR_BOOSTER} cartes à l'intérieur</span>
           </div>
         </button>
       )}
