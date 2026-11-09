@@ -37,7 +37,7 @@ import MaintenanceScreen from './components/MaintenanceScreen';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
-const MAINTENANCE = true;
+const MAINTENANCE = false;
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
 
 /**
