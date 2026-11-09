@@ -53,49 +53,41 @@ export default function FaceId() {
   const semaine = semaineCourante(maintenant);
 
   /**
-   * Les boosters d'ouverture.
+   * Les boosters offerts : ceux d'ouverture, ceux du rattrapage, ou les deux.
    *
-   * Donné à la première visite pendant l'event, et pas au lancement de
-   * l'app : personne ne doit découvrir l'event par un chiffre qui a bougé
-   * tout seul sur un écran qu'il n'a pas ouvert.
+   * Un seul effet et une seule écriture, alors qu'il y a deux cadeaux
+   * distincts. Séparés, les deux effets partaient du même instantané de la
+   * progression et calculaient chacun `boosters + 2` à partir de zéro : la
+   * seconde écriture écrasait la première, et qui découvrait l'event en
+   * trouvait deux au lieu de quatre. Ça ne se voyait que chez les nouveaux
+   * venus, c'est-à-dire précisément les six personnes ajoutées en cours de
+   * route.
+   *
+   * Donnés à la première visite de l'event, et pas au lancement de l'app :
+   * personne ne doit découvrir l'event par un chiffre qui a bougé tout seul
+   * sur un écran qu'il n'a pas ouvert.
    */
-  const bienvenueEnvoyee = useRef(false);
+  const cadeauxEnvoyes = useRef(false);
   useEffect(() => {
-    if (!user || !progress || !enCours || fid.bienvenue) return;
+    if (!user || !progress || !enCours) return;
+    const ouverture = fid.bienvenue ? 0 : BOOSTERS_OUVERTURE;
+    const rattrapage = fid.rattrapage ? 0 : BOOSTERS_RATTRAPAGE;
+    if (ouverture + rattrapage === 0) return;
     // Le garde-fou n'est pas du zèle : React monte les effets deux fois en
     // développement, et l'écriture ne se voit qu'au retour du serveur. Sans
-    // lui, le booster d'ouverture était donné deux fois.
-    if (bienvenueEnvoyee.current) return;
-    bienvenueEnvoyee.current = true;
-    const donne = { ...fid, boosters: fid.boosters + BOOSTERS_OUVERTURE, bienvenue: true };
+    // lui, les boosters étaient donnés deux fois.
+    if (cadeauxEnvoyes.current) return;
+    cadeauxEnvoyes.current = true;
+    const donne = {
+      ...fid,
+      boosters: fid.boosters + ouverture + rattrapage,
+      bienvenue: true,
+      rattrapage: true,
+    };
     setDoc(doc(db, 'userProgress', user.uid), { faceid: donne }, { merge: true })
       .catch((err) => {
-        bienvenueEnvoyee.current = false;
-        console.error('Booster d\'ouverture impossible :', err);
-      });
-  }, [user, progress, enCours, fid]);
-
-  /**
-   * Le booster de rattrapage de l'agrandissement.
-   *
-   * Un effet à part de celui d'ouverture, et non une condition ajoutée
-   * dedans : les deux n'ont pas la même raison d'être ni la même durée de
-   * vie. Celui-ci disparaîtra avec son drapeau une fois l'event terminé,
-   * l'autre reste.
-   *
-   * Il tombe aussi pour qui découvre l'event aujourd'hui : il arrive après
-   * l'agrandissement, mais il a autant de cartes à trouver que les autres.
-   */
-  const rattrapageEnvoye = useRef(false);
-  useEffect(() => {
-    if (!user || !progress || !enCours || fid.rattrapage) return;
-    if (rattrapageEnvoye.current) return;
-    rattrapageEnvoye.current = true;
-    const donne = { ...fid, boosters: fid.boosters + BOOSTERS_RATTRAPAGE, rattrapage: true };
-    setDoc(doc(db, 'userProgress', user.uid), { faceid: donne }, { merge: true })
-      .catch((err) => {
-        rattrapageEnvoye.current = false;
-        console.error('Booster de rattrapage impossible :', err);
+        cadeauxEnvoyes.current = false;
+        console.error('Boosters offerts impossibles :', err);
       });
   }, [user, progress, enCours, fid]);
 
