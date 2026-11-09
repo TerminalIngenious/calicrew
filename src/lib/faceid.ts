@@ -50,7 +50,7 @@ export const MEMBRES: MembreFaceId[] = [
   { slug: 'marcus', nom: 'Marcus' },
   { slug: 'lucas', nom: 'Lucas' },
   { slug: 'johan', nom: 'Johan' },
-  { slug: 'jimmy', nom: 'Jimmy' },
+  { slug: 'jimmy', nom: 'Jirodamy' },
   { slug: 'hugo', nom: 'Hugo' },
   { slug: 'clement', nom: 'Clément' },
   { slug: 'bastien', nom: 'Bastien' },
@@ -167,16 +167,16 @@ export const ART: Record<string, ArtFaceId> = {
   'fid-johan-a': { surnom: 'Entrepreneur Entreprenant', note: 87, stats: [86, 89, 89, 69, 8] },
   'fid-johan-b': { surnom: 'Colère', note: 54, stats: [59, 48, 48, 90, 96] },
 
-  // Jimmy
-  'fid-jimmy-a': { surnom: '', note: 85, stats: [89, 75, 88, 70, 28] },
-  'fid-jimmy-b': { surnom: '', note: 61, stats: [54, 59, 67, 91, 93] },
+  // Jirodamy
+  'fid-jimmy-a': { surnom: 'Tête dans le mur', note: 85, stats: [89, 75, 88, 70, 28] },
+  'fid-jimmy-b': { surnom: 'Grinch', note: 61, stats: [54, 59, 67, 91, 93] },
 
   // Hugo
   'fid-hugo-a': { surnom: 'Vacancier', note: 77, stats: [78, 79, 70, 58, 26] },
   'fid-hugo-b': { surnom: 'Batman Form', note: 56, stats: [47, 56, 57, 92, 86] },
 
   // Clément
-  'fid-clement-a': { surnom: '', note: 81, stats: [90, 85, 69, 71, 20] },
+  'fid-clement-a': { surnom: 'Le Roi Burger', note: 81, stats: [90, 85, 69, 71, 20] },
   'fid-clement-b': { surnom: 'Très Gros Plan', note: 55, stats: [60, 54, 46, 89, 96] },
 
   // Bastien
