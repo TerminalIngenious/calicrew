@@ -204,3 +204,25 @@ export const FACEID_SEMAINE = [
 /** La veille de la fin des missions. */
 export const FACEID_DERNIER_JOUR =
   'Dernier jour pour boucler les missions. Le fichier ferme demain soir, complet ou non.';
+
+// ──────────────────────────────────────────────────────────────────────────
+// Le rappel des pas, 21h
+// ──────────────────────────────────────────────────────────────────────────
+// Même principe que la créatine : une liste, un texte par jour, le même pour
+// tout le monde. 21h parce que la journée de marche est finie et que le
+// chiffre du podomètre ne bougera plus — le noter plus tôt revient à en
+// perdre une partie.
+
+export const PAS_MESSAGES = [
+  'Tes pas de la journée, c\'est maintenant ou jamais.',
+  'Le podomètre a compté toute la journée. À toi de recopier.',
+  'Combien de pas aujourd\'hui ? Personne ne le saura si tu ne le notes pas.',
+  'Ouvre ton téléphone, regarde le chiffre, recopie-le. Trente secondes.',
+  'Les pas non notés ne rapportent rien. C\'est bête, mais c\'est comme ça.',
+  'Journée finie, podomètre arrêté. Le chiffre t\'attend.',
+  'Marcher, c\'est bien. Le noter, c\'est mieux.',
+  'Ton podomètre a bossé toute la journée. Fais-lui l\'honneur de le lire.',
+  'Au-delà de 3 000 pas, chacun compte. Encore faut-il les noter.',
+  'Dernier appel pour les pas du jour.',
+];
+
