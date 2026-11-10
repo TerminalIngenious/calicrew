@@ -8,6 +8,7 @@ import { getCardArt } from '../lib/cardsS2Art';
 import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
 import { questValue } from '../lib/quests';
+import { kmDesPas } from '../lib/pas';
 import FaceIdButton from '../components/FaceIdButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
@@ -193,8 +194,23 @@ export default function BattlePass() {
     setConfirmModal(false);
   }
 
-  function getQuestValue(quest: Quest, scope = weekSessions): number {
-    return questValue(quest, scope);
+  /*
+   * Les kilomètres déduits du podomètre, sur la même fenêtre que les séances
+   * comptées. La semaine et le jour n'ont pas les mêmes bornes, donc chacun
+   * a les siennes : passer les kilomètres de la semaine à une quête du jour
+   * la validerait sept fois trop vite.
+   */
+  const kmSemaine = useMemo(
+    () => kmDesPas(progress.pasJours, weekStart, weekStart + 7 * 24 * 60 * 60 * 1000),
+    [progress.pasJours, weekStart]
+  );
+  const kmJour = useMemo(
+    () => kmDesPas(progress.pasJours, dayStart, dayStart + 24 * 60 * 60 * 1000),
+    [progress.pasJours, dayStart]
+  );
+
+  function getQuestValue(quest: Quest, scope = weekSessions, km = kmSemaine): number {
+    return questValue(quest, scope, km);
   }
 
   function isQuestClaimed(questId: string): boolean {
@@ -212,7 +228,7 @@ export default function BattlePass() {
       ? getArchiveQuest(previousSeason)
       : null;
 
-  const dailyValue = getQuestValue(dailyQuest, daySessions);
+  const dailyValue = getQuestValue(dailyQuest, daySessions, kmJour);
   const dailyDone = dailyValue >= dailyQuest.target;
   const dailyClaimed = (progress.questsClaimed[dailyQuest.id] || 0) >= dayStart;
 

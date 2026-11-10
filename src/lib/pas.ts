@@ -35,6 +35,54 @@ export function pasXp(pas: number): number {
   return Math.max(0, Math.floor((pas - PAS_SEUIL) / PAS_PAR_XP));
 }
 
+/**
+ * La longueur d'un pas, en mètres.
+ *
+ * Une valeur unique pour tout le monde : la longueur d'un pas dépend de la
+ * taille et de l'allure, mais la demander à chacun ferait un réglage de plus
+ * à remplir pour une précision dont personne n'a besoin ici. 0,75 m est la
+ * moyenne adulte habituelle ; l'écart réel va de 0,70 à 0,80, soit moins de
+ * 7 % sur le total.
+ */
+export const METRES_PAR_PAS = 0.75;
+
+/**
+ * Les pas d'une journée convertis en kilomètres.
+ *
+ * Le seuil des 3 000 pas s'applique ici comme pour l'XP, et pour la même
+ * raison : ce sont les pas de la vie courante. Sans lui, une quête « parcours
+ * 10 km à pied » se validerait toute seule en une semaine d'existence
+ * ordinaire, sans que personne ait marché pour.
+ */
+export function pasKm(pas: number): number {
+  return (Math.max(0, pas - PAS_SEUIL) * METRES_PAR_PAS) / 1000;
+}
+
+/**
+ * Les kilomètres marchés entre deux instants, d'après les pas notés.
+ *
+ * On avance de jour en date plutôt qu'en ajoutant vingt-quatre heures : les
+ * deux nuits de changement d'heure font des journées de 23 et 25 heures, et
+ * un pas de 24 h y saute ou répète une clé.
+ *
+ * La fenêtre d'une quête commence à 10 h et non à minuit, alors que les pas
+ * sont comptés par jour calendaire. Les journées retenues sont donc celles
+ * que la fenêtre traverse : pour une semaine qui s'ouvre le lundi à 10 h,
+ * les sept jours du lundi au dimanche.
+ */
+export function kmDesPas(
+  jours: Record<string, number> | undefined,
+  debut: number,
+  fin: number
+): number {
+  if (!jours) return 0;
+  let total = 0;
+  for (const d = new Date(debut); d.getTime() < fin; d.setDate(d.getDate() + 1)) {
+    total += pasKm(jours[dayKey(d)] || 0);
+  }
+  return total;
+}
+
 /** Les pas qu'il reste à faire avant le prochain XP. */
 export function prochainPalier(pas: number): number {
   if (pas < PAS_SEUIL) return PAS_SEUIL - pas;

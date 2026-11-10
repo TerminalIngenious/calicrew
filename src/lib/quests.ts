@@ -8,8 +8,13 @@ import { totalReps, exerciseReps, exerciseSeconds } from './stats';
  * type, et sa propre page : plutôt que d'en recopier le barème, les deux
  * écrans lisent la même fonction. Une règle de comptage qui existe en deux
  * exemplaires finit toujours par diverger.
+ *
+ * `kmMarches` est la distance déduite du podomètre sur la même période. Elle
+ * n'entre que dans les quêtes de distance : les pas d'une journée ne sont ni
+ * une séance ni du temps d'entraînement, et compter un trajet jusqu'au
+ * travail comme une sortie de course n'aurait aucun sens.
  */
-export function questValue(quest: Quest, scope: Session[]): number {
+export function questValue(quest: Quest, scope: Session[], kmMarches = 0): number {
   switch (quest.type) {
     case 'sessions':
       return scope.length;
@@ -35,12 +40,15 @@ export function questValue(quest: Quest, scope: Session[]): number {
         .reduce((sum, s) => sum + (s.duration || 0), 0);
     case 'running_distance':
       // En kilomètres, et sur toute la catégorie running : courir, marcher
-      // vite ou marcher comptent pareil pour une distance.
+      // vite ou marcher comptent pareil pour une distance. Les pas notés
+      // s'y ajoutent, convertis en distance — ces quêtes sont écrites
+      // « parcours X km à pied » et sont les seules qu'un marcheur peut
+      // aller chercher.
       return scope.reduce(
         (sum, s) => sum + (s.exercises || [])
           .filter((ex) => ex.exerciseCategory === 'running')
           .reduce((eSum, ex) => eSum + (ex.runDistance || 0), 0),
-        0
+        kmMarches
       );
     case 'exercise_reps':
       return scope.reduce(

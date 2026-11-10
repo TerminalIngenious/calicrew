@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Footprints, Check } from 'lucide-react';
-import { usePas, pasXp, PAS_SEUIL, prochainPalier } from '../lib/pas';
+import { usePas, pasXp, pasKm, PAS_SEUIL, prochainPalier } from '../lib/pas';
 
 /**
  * La saisie des pas du jour, sur l'accueil.
@@ -86,7 +86,7 @@ export default function PasCard() {
       <span className="pas-card-bareme">
         {valide && valeur > 0
           ? xp > 0
-            ? `${xp} XP — encore ${prochainPalier(valeur)} pas pour le prochain`
+            ? `${xp} XP et ${pasKm(valeur).toFixed(1).replace('.', ',')} km — encore ${prochainPalier(valeur)} pas pour le prochain XP`
             : `Les ${PAS_SEUIL.toLocaleString('fr-FR')} premiers pas sont ceux de la vie courante. Plus que ${(PAS_SEUIL - valeur).toLocaleString('fr-FR')}.`
           : `250 pas = 1 XP, au-delà des ${PAS_SEUIL.toLocaleString('fr-FR')} premiers`}
       </span>
@@ -94,7 +94,8 @@ export default function PasCard() {
       {/* Sinon on se demande pourquoi le classement affiche plus de pas que
           ce qu'on a tapé. */}
       <span className="pas-card-bareme">
-        Tes marches loguées en séance comptent aussi dans le classement.
+        Tes marches loguées en séance comptent aussi dans le classement, et
+        tes pas comptent dans les quêtes de distance.
       </span>
     </div>
   );
