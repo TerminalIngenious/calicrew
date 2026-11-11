@@ -7820,20 +7820,34 @@ body {
   margin-bottom: 1.25rem;
 }
 
+/* L'en-tête est le bouton : c'est le titre qu'on a envie de toucher pour
+   changer d'échelle, pas un onglet posé à côté. */
 .cal-entete {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  width: 100%;
+  padding: 0;
   margin-bottom: 0.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
 .cal-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
+
+.cal-entete:active .cal-titre { color: var(--text); }
 
 .cal-total {
   font-size: 0.78rem;
@@ -7908,3 +7922,44 @@ body {
 
 .cal-legende span:first-child { margin-right: 0.15rem; }
 .cal-legende span:last-child { margin-left: 0.15rem; }
+
+/* ── Vue mois ──
+   Sept colonnes qui se partagent la largeur, assez larges pour porter le
+   numéro du jour. C'est ce que la vue année ne peut pas faire : à douze
+   pixels la case n'a de place pour rien. */
+
+.cal-mois-grille {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-jour-nom {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding-bottom: 0.1rem;
+}
+
+.cal-case-mois {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  /* Le numéro reste lisible sur les cinq fonds : gris foncé quand la case
+     est vide, noir dès que l'accent arrive dessous. */
+  color: var(--text-muted);
+}
+
+.cal-case-mois.n1,
+.cal-case-mois.n2 { color: var(--text); }
+
+.cal-case-mois.n3,
+.cal-case-mois.n4 { color: #000; }
+
+.cal-case-mois.futur { color: rgba(255, 255, 255, 0.18); }

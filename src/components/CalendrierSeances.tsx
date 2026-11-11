@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { Session } from '../types';
 import { dayKey } from '../lib/creatine';
 
@@ -41,13 +42,24 @@ function lundiDe(date: Date): Date {
 const MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
               'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
 
+const JOURS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
 export default function CalendrierSeances({ sessions }: { sessions: Session[] }) {
   // L'heure est lue une fois au montage : lue à chaque rendu, elle ferait
   // changer la grille au milieu d'une journée passée à minuit.
   const [maintenant] = useState(() => Date.now());
+  /*
+   * Deux lectures de la même chose, et le titre fait l'interrupteur.
+   *
+   * L'année montre la forme d'ensemble, les séries et les trous ; le mois
+   * montre où on en est maintenant, avec les dates lisibles. Mettre les deux
+   * l'une sous l'autre aurait doublé la hauteur d'un écran qui doit
+   * s'ouvrir sur le bouton « Nouvelle séance ».
+   */
+  const [vue, setVue] = useState<'annee' | 'mois'>('annee');
   const piste = useRef<HTMLDivElement>(null);
 
-  const { colonnes, total } = useMemo(() => {
+  const { colonnes, total, mois, totalMois, titreMois } = useMemo(() => {
     const parJour = new Map<string, { minutes: number; seances: number }>();
     for (const s of sessions) {
       if (!s.completed) continue;
@@ -97,45 +109,108 @@ export default function CalendrierSeances({ sessions }: { sessions: Session[] })
       }
       colonnes.push({ mois: moisColonne, jours });
     }
-    return { colonnes, total };
+
+    // Le mois en cours : une grille de sept colonnes, du lundi au dimanche.
+    const ref = new Date(maintenant);
+    const premier = new Date(ref.getFullYear(), ref.getMonth(), 1);
+    const dernier = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate();
+    // Le décalage du 1er : getDay() compte à partir du dimanche, la grille
+    // commence au lundi.
+    const decalage = (premier.getDay() + 6) % 7;
+    const mois: ({ cle: string; jour: number; n: number; futur: boolean; titre: string } | null)[] =
+      Array(decalage).fill(null);
+    let totalMois = 0;
+    for (let d = 1; d <= dernier; d++) {
+      const date = new Date(ref.getFullYear(), ref.getMonth(), d);
+      const cle = dayKey(date);
+      const donnee = parJour.get(cle);
+      if (donnee) totalMois += donnee.seances;
+      mois.push({
+        cle,
+        jour: d,
+        n: donnee ? niveau(donnee.minutes, donnee.seances) : 0,
+        futur: date.getTime() > maintenant,
+        titre: donnee
+          ? `${donnee.seances} séance${donnee.seances > 1 ? 's' : ''}` +
+            (donnee.minutes > 0 ? `, ${donnee.minutes} min` : '')
+          : '',
+      });
+    }
+    const titreMois = `${MOIS[ref.getMonth()]} ${ref.getFullYear()}`;
+
+    return { colonnes, total, mois, totalMois, titreMois };
   }, [sessions, maintenant]);
 
   // La grille s'ouvre sur la semaine en cours : elle est à droite, et une
   // piste qui démarre sur l'année dernière donne l'impression d'un trou.
+  // Refait à chaque retour sur la vue année, sinon la piste rouvre là où
+  // elle avait été laissée après un aller-retour par le mois.
   useEffect(() => {
+    if (vue !== 'annee') return;
     const el = piste.current;
     if (el) el.scrollLeft = el.scrollWidth;
-  }, [colonnes]);
+  }, [colonnes, vue]);
 
   return (
     <section className="cal">
-      <div className="cal-entete">
-        <span className="cal-titre">Ton année</span>
-        <span className="cal-total">{total} séance{total > 1 ? 's' : ''}</span>
-      </div>
+      <button
+        type="button"
+        className="cal-entete"
+        onClick={() => setVue((v) => (v === 'annee' ? 'mois' : 'annee'))}
+        aria-label={vue === 'annee' ? 'Voir le mois' : 'Voir l\'année'}
+      >
+        <span className="cal-titre">
+          {vue === 'annee' ? 'Ton année' : `Ton mois · ${titreMois}`}
+          <ChevronDown size={13} />
+        </span>
+        <span className="cal-total">
+          {vue === 'annee' ? total : totalMois} séance{(vue === 'annee' ? total : totalMois) > 1 ? 's' : ''}
+        </span>
+      </button>
 
-      <div className="cal-piste" ref={piste}>
-        <div className="cal-grille">
-          <div className="cal-mois">
-            {colonnes.map((c, i) => (
-              <span key={i} className="cal-mois-case">{c.mois !== null ? MOIS[c.mois] : ''}</span>
-            ))}
-          </div>
-          <div className="cal-cases">
-            {colonnes.map((c, i) => (
-              <div key={i} className="cal-colonne">
-                {c.jours.map((j) => (
-                  <span
-                    key={j.cle}
-                    className={`cal-case n${j.n} ${j.futur ? 'futur' : ''}`}
-                    title={j.titre}
-                  />
-                ))}
-              </div>
-            ))}
+      {vue === 'annee' ? (
+        <div className="cal-piste" ref={piste}>
+          <div className="cal-grille">
+            <div className="cal-mois">
+              {colonnes.map((c, i) => (
+                <span key={i} className="cal-mois-case">{c.mois !== null ? MOIS[c.mois] : ''}</span>
+              ))}
+            </div>
+            <div className="cal-cases">
+              {colonnes.map((c, i) => (
+                <div key={i} className="cal-colonne">
+                  {c.jours.map((j) => (
+                    <span
+                      key={j.cle}
+                      className={`cal-case n${j.n} ${j.futur ? 'futur' : ''}`}
+                      title={j.titre}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="cal-mois-grille">
+          {JOURS.map((j, i) => (
+            <span key={i} className="cal-jour-nom">{j}</span>
+          ))}
+          {mois.map((j, i) =>
+            j === null ? (
+              <span key={`vide-${i}`} />
+            ) : (
+              <span
+                key={j.cle}
+                className={`cal-case cal-case-mois n${j.n} ${j.futur ? 'futur' : ''}`}
+                title={j.titre}
+              >
+                {j.jour}
+              </span>
+            )
+          )}
+        </div>
+      )}
 
       <div className="cal-legende">
         <span>Moins</span>
