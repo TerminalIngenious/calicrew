@@ -34,6 +34,7 @@ import Loader from './components/Loader';
 import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
 import MaintenanceScreen from './components/MaintenanceScreen';
+import BadgeDeblocage from './components/BadgeDeblocage';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
@@ -165,6 +166,10 @@ function AppContent() {
       {showSplash && currentSeason && (
         <SeasonSplash season={currentSeason} onDone={handleSplashDone} />
       )}
+      {/* Au-dessus des routes : un badge peut tomber sur n'importe quelle
+          page, et l'annoncer à la prochaine visite de l'accueil reviendrait
+          à ne pas l'annoncer. */}
+      {user && <BadgeDeblocage />}
       {season === 'halloween' && <HalloweenDecor />}
       {season === 'pink' && <PinkDecor />}
       <Suspense fallback={<div className="page loading"><Loader /></div>}>

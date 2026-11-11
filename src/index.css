@@ -7965,3 +7965,120 @@ body {
 .cal-case-mois.n4 { color: #000; }
 
 .cal-case-mois.futur { color: rgba(255, 255, 255, 0.18); }
+
+/* ── Annonce d'un badge débloqué ──
+   Au-dessus de tout, y compris de la barre de navigation : c'est le seul
+   moment où l'app demande qu'on s'arrête une seconde. */
+
+.deblocage {
+  position: fixed;
+  inset: 0;
+  /* Au-dessus des feuilles et des modales, qui montent à 1000 : un badge
+     gagné pendant qu'une feuille est ouverte doit passer devant. L'intro de
+     saison reste au-dessus, elle prend l'écran entier. */
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.88);
+  cursor: pointer;
+  animation: deblocage-fond 0.35s ease both;
+}
+
+@keyframes deblocage-fond {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* La lueur derrière le badge, qui s'ouvre puis respire. */
+.deblocage-halo {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.22) 0%, transparent 65%);
+  animation: deblocage-halo 0.9s cubic-bezier(0.16, 1, 0.3, 1) both,
+             deblocage-souffle 3.5s ease-in-out 0.9s infinite;
+}
+
+@keyframes deblocage-halo {
+  from { transform: scale(0.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes deblocage-souffle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.deblocage-contenu {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.deblocage-kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  animation: deblocage-monte 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+/* Le badge arrive en dépassant sa taille avant de se poser : c'est ce
+   dépassement qui fait qu'on le voit « atterrir » plutôt qu'apparaître. */
+.deblocage-badge {
+  margin: 0.75rem 0;
+  animation: deblocage-pose 0.75s cubic-bezier(0.2, 1.5, 0.4, 1) 0.1s both;
+}
+
+@keyframes deblocage-pose {
+  from { transform: scale(0.2) rotate(-25deg); opacity: 0; }
+  60% { opacity: 1; }
+  to { transform: none; opacity: 1; }
+}
+
+.deblocage-titre {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  animation: deblocage-monte 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+.deblocage-sous {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  animation: deblocage-monte 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both;
+}
+
+.deblocage-suite {
+  margin-top: 1.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  animation: deblocage-monte 0.5s ease 1.1s both;
+}
+
+@keyframes deblocage-monte {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Une annonce reste une annonce sans les mouvements : tout s'affiche, rien
+   ne bouge. */
+@media (prefers-reduced-motion: reduce) {
+  .deblocage,
+  .deblocage-halo,
+  .deblocage-kicker,
+  .deblocage-badge,
+  .deblocage-titre,
+  .deblocage-sous,
+  .deblocage-suite {
+    animation: none;
+  }
+}

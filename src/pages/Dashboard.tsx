@@ -18,7 +18,10 @@ import { getWeekStart } from '../lib/passes';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
 import { useCreatine } from '../lib/creatine';
 import { useUserProgress } from '../lib/useUserProgress';
-import { badgeCreatine, idBadgeCreatine, PALIERS_CREATINE } from '../lib/badges';
+import {
+  badgeAcquisPourId, idBadgeCreatine, idBadgePasJour, idBadgePasTotal,
+  PALIERS_CREATINE, PALIERS_PAS_JOUR, PALIERS_PAS_TOTAL,
+} from '../lib/badges';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { amrapTitle } from '../lib/amrap';
@@ -32,36 +35,48 @@ export default function Dashboard() {
   const { progress } = useUserProgress(user?.uid);
 
   /**
-   * Les badges de créatine, posés dès que le compteur atteint un palier.
+   * Les badges qui se gagnent en atteignant quelque chose : créatine et pas.
    *
-   * Ici et pas dans un cron : c'est le seul endroit qui connaît le streak à
-   * la seconde près, et le badge doit arriver pendant que la personne
+   * Ici et pas dans un cron : c'est le seul endroit qui connaît le compteur
+   * à la seconde près, et le badge doit arriver pendant que la personne
    * regarde l'écran où elle vient de cocher.
    *
-   * Plusieurs paliers peuvent tomber d'un coup. Quelqu'un qui prend sa
-   * créatine depuis un an avant que ces badges existent les reçoit tous les
-   * quatre à sa prochaine ouverture, et non le dernier seulement : il a bien
-   * passé les trois autres en chemin.
+   * Un seul effet et une seule écriture pour les deux familles. Séparés, ils
+   * partaient du même instantané et le second arrivait sur un document que
+   * le premier n'avait pas encore modifié.
+   *
+   * Plusieurs paliers peuvent tomber d'un coup. Quelqu'un qui marche depuis
+   * des mois avant que ces badges existent les reçoit tous à sa prochaine
+   * ouverture, et non le dernier seulement : il a bien passé les autres en
+   * chemin.
    */
   const badgesEnvoyes = useRef(new Set<string>());
   useEffect(() => {
     if (!user || !progress || creatine.loading) return;
+
+    const jours = progress.pasJours || {};
+    const valeurs = Object.values(jours);
+    const meilleurJour = valeurs.reduce((max, v) => Math.max(max, v), 0);
+    const cumul = valeurs.reduce((somme, v) => somme + v, 0);
+
+    const merites = [
+      ...PALIERS_CREATINE.filter((j) => creatine.streak >= j).map(idBadgeCreatine),
+      ...PALIERS_PAS_JOUR.filter((p) => meilleurJour >= p).map(idBadgePasJour),
+      ...PALIERS_PAS_TOTAL.filter((p) => cumul >= p).map(idBadgePasTotal),
+    ];
+
     const acquis = new Set((progress.badges || []).map((b) => b.id));
-    const aDonner = PALIERS_CREATINE.filter(
-      (j) => creatine.streak >= j &&
-        !acquis.has(idBadgeCreatine(j)) &&
-        !badgesEnvoyes.current.has(idBadgeCreatine(j))
-    );
+    const aDonner = merites.filter((id) => !acquis.has(id) && !badgesEnvoyes.current.has(id));
     if (aDonner.length === 0) return;
 
-    // Marqué avant l'écriture : le temps qu'elle revienne, l'effet peut
-    // rejouer et donner le badge une deuxième fois.
-    for (const j of aDonner) badgesEnvoyes.current.add(idBadgeCreatine(j));
+    // Marqués avant l'écriture : le temps qu'elle revienne, l'effet peut
+    // rejouer et donner les mêmes badges une deuxième fois.
+    for (const id of aDonner) badgesEnvoyes.current.add(id);
     updateDoc(doc(db, 'userProgress', user.uid), {
-      badges: arrayUnion(...aDonner.map((j) => badgeCreatine(j))),
+      badges: arrayUnion(...aDonner.map((id) => badgeAcquisPourId(id))),
     }).catch((err) => {
-      for (const j of aDonner) badgesEnvoyes.current.delete(idBadgeCreatine(j));
-      console.error('Badge créatine impossible :', err);
+      for (const id of aDonner) badgesEnvoyes.current.delete(id);
+      console.error('Badge impossible :', err);
     });
   }, [user, progress, creatine.loading, creatine.streak]);
 

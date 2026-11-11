@@ -42,8 +42,8 @@ export default function RankBadgeIcon({
       >
         <div className="rank-badge-frame">
           <div className="rank-badge-core">
-            {style.glyphe === 'creatine'
-              ? <GlypheCreatine size={size * 0.44} />
+            {style.glyphe === 'creatine' ? <GlypheCreatine size={size * 0.44} />
+              : style.glyphe === 'pas' ? <GlyphePas size={size * 0.46} />
               : <GlypheFaceId size={size * 0.42} />}
           </div>
         </div>
@@ -106,6 +106,27 @@ function GlypheCreatine({ size }: { size: number }) {
         strokeLinecap="round"
         opacity={0.55}
       />
+    </svg>
+  );
+}
+
+/**
+ * Deux empreintes, comme l'icône de la carte des pas.
+ *
+ * Décalées l'une par rapport à l'autre : alignées, elles se lisaient comme
+ * deux taches et non comme une marche.
+ */
+function GlyphePas({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 120 120" aria-hidden="true" fill="currentColor">
+      <g transform="translate(6 2) rotate(-8 30 60)">
+        <ellipse cx="30" cy="62" rx="15" ry="24" />
+        <ellipse cx="30" cy="31" rx="12" ry="10" />
+      </g>
+      <g transform="translate(-6 -2) rotate(8 86 60)">
+        <ellipse cx="86" cy="58" rx="15" ry="24" />
+        <ellipse cx="86" cy="89" rx="12" ry="10" />
+      </g>
     </svg>
   );
 }
