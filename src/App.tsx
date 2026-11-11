@@ -35,6 +35,7 @@ import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
 import MaintenanceScreen from './components/MaintenanceScreen';
 import BadgeDeblocage from './components/BadgeDeblocage';
+import LimiteChargement from './components/LimiteChargement';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
@@ -172,31 +173,33 @@ function AppContent() {
       {user && <BadgeDeblocage />}
       {season === 'halloween' && <HalloweenDecor />}
       {season === 'pink' && <PinkDecor />}
-      <Suspense fallback={<div className="page loading"><Loader /></div>}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          {/* La vitrine est publique, et surtout servie par le même domaine que
-              l'app : c'est ce qui permet à son bouton d'installer réellement
-              CaliCrew. Depuis un autre domaine, le navigateur refuserait. */}
-          <Route path="/decouvrir" element={<Decouvrir />} />
-          <Route path="/telecharger" element={<Decouvrir />} />
-          <Route path="/" element={<Racine />} />
-          <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
-          <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
-          <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-          <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
-          <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
-          <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
-          <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
-          <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
-          <Route path="/faceid" element={<ProtectedRoute><FaceId /></ProtectedRoute>} />
-          <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
-          <Route path="/badges/:uid" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
-          <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        </Routes>
-      </Suspense>
+      <LimiteChargement>
+        <Suspense fallback={<div className="page loading"><Loader /></div>}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            {/* La vitrine est publique, et surtout servie par le même domaine que
+                l'app : c'est ce qui permet à son bouton d'installer réellement
+                CaliCrew. Depuis un autre domaine, le navigateur refuserait. */}
+            <Route path="/decouvrir" element={<Decouvrir />} />
+            <Route path="/telecharger" element={<Decouvrir />} />
+            <Route path="/" element={<Racine />} />
+            <Route path="/session/new" element={<ProtectedRoute><NewSession /></ProtectedRoute>} />
+            <Route path="/session/:id" element={<ProtectedRoute><LiveSession /></ProtectedRoute>} />
+            <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+            <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
+            <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
+            <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
+            <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+            <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+            <Route path="/faceid" element={<ProtectedRoute><FaceId /></ProtectedRoute>} />
+            <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
+            <Route path="/badges/:uid" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
+            <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/profile/:uid" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          </Routes>
+        </Suspense>
+      </LimiteChargement>
     </>
   );
 }

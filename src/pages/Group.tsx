@@ -12,8 +12,12 @@ import {
   doc,
   arrayUnion,
   arrayRemove,
+  getDocsFromCache,
+  getDocFromCache,
 } from 'firebase/firestore';
+import type { DocumentReference, DocumentSnapshot, Query, QuerySnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { passeCache } from '../lib/lectureCache';
 import { getCardsBySet, getCardById, getCardDisplayName, getAllCurrentCards, RARITY_COLORS } from '../lib/cards';
 import { getCurrentSeason } from '../lib/passes';
 import { totalReps as sumReps } from '../lib/stats';
@@ -121,23 +125,50 @@ export default function Group() {
 
   const loadGroups = useCallback(async () => {
     if (!user) return;
+    const q = query(
+      collection(db, 'groups'),
+      where('memberIds', 'array-contains', user.uid)
+    );
+    const choisi = (g: GroupType[]) =>
+      selectedGroup ? g.find((gr) => gr.id === selectedGroup.id) || g[0] : g[0];
+
+    /*
+     * Cette page était la plus lente de l'app, et de loin : le classement lit
+     * tous les comptes, puis les séances et la progression de chaque membre.
+     * À dix-huit, cela fait une quarantaine d'allers-retours avant le premier
+     * pixel, et rien à l'écran pendant ce temps.
+     *
+     * On peint donc d'abord le classement tel que l'appareil le connaît, puis
+     * on relit le serveur. Les échanges, les récompenses du mois et les noms
+     * en attente ne retiennent plus l'affichage : ils arrivent après, chacun
+     * à son rythme.
+     */
+    await passeCache(async () => {
+      const snap = await getDocsFromCache(q);
+      if (snap.empty) throw new Error('aucun groupe en cache');
+      const g = snap.docs.map((d) => ({ id: d.id, ...d.data() } as GroupType));
+      const current = choisi(g);
+      await loadLeaderboard(current, true);
+      setGroups(g);
+      setSelectedGroup(current);
+      setLoading(false);
+    });
+
     try {
-      const q = query(
-        collection(db, 'groups'),
-        where('memberIds', 'array-contains', user.uid)
-      );
       const snap = await getDocs(q);
       const g = snap.docs.map((d) => ({ id: d.id, ...d.data() } as GroupType));
       setGroups(g);
-      if (g.length > 0) {
-        const current = selectedGroup ? g.find((gr) => gr.id === selectedGroup.id) || g[0] : g[0];
-        setSelectedGroup(current);
-        await loadLeaderboard(current);
-        await loadTrades(current);
-        await checkMonthlyRewards(current);
-        if (current.pendingIds?.length > 0 && current.createdBy === user.uid) {
-          await loadPendingNames(current.pendingIds);
-        }
+      if (g.length === 0) return;
+      const current = choisi(g);
+      setSelectedGroup(current);
+      await loadLeaderboard(current);
+      setLoading(false);
+
+      // Le reste ne bloque plus l'écran.
+      loadTrades(current).catch((err) => console.error('Échanges indisponibles :', err));
+      checkMonthlyRewards(current).catch((err) => console.error('Récompenses indisponibles :', err));
+      if (current.pendingIds?.length > 0 && current.createdBy === user.uid) {
+        loadPendingNames(current.pendingIds).catch(() => {});
       }
     } catch (err) {
       console.error('Erreur chargement groupes:', err);
@@ -162,14 +193,32 @@ export default function Group() {
     setPendingNames(names);
   }
 
-  async function loadLeaderboard(group: GroupType) {
+  async function loadLeaderboard(group: GroupType, depuisCache = false) {
+    const lisDocs = (q: Query): Promise<QuerySnapshot> =>
+      depuisCache ? getDocsFromCache(q) : getDocs(q);
+    // En cache, un membre dont la progression n'a jamais été lue sur cet
+    // appareil ne doit pas faire tomber tout le classement : il arrive
+    // simplement sans ses pas, que la passe serveur rétablira.
+    const lisDoc = async (ref: DocumentReference): Promise<DocumentSnapshot | null> => {
+      if (!depuisCache) return getDoc(ref);
+      try {
+        return await getDocFromCache(ref);
+      } catch {
+        return null;
+      }
+    };
+
     const [usersSnap, ...rest] = await Promise.all([
-      getDocs(collection(db, 'users')),
+      lisDocs(collection(db, 'users')),
       ...group.memberIds.flatMap((memberId) => [
-        getDocs(query(collection(db, 'sessions'), where('userId', '==', memberId))),
-        getDoc(doc(db, 'userProgress', memberId)),
+        lisDocs(query(collection(db, 'sessions'), where('userId', '==', memberId))),
+        lisDoc(doc(db, 'userProgress', memberId)),
       ]),
     ]);
+
+    // Sans les noms, le classement n'a rien à montrer : mieux vaut renoncer à
+    // la passe cache et laisser le serveur répondre.
+    if (depuisCache && usersSnap.empty) throw new Error('comptes absents du cache');
 
     const userMap = new Map<string, string>();
     usersSnap.docs.forEach((d) => {
@@ -184,11 +233,11 @@ export default function Group() {
     const moisCourant = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`;
 
     const entries: LeaderboardEntry[] = group.memberIds.map((memberId, i) => {
-      const sessionSnap = rest[i * 2] as Awaited<ReturnType<typeof getDocs>>;
-      const progressSnap = rest[i * 2 + 1] as Awaited<ReturnType<typeof getDoc>>;
+      const sessionSnap = rest[i * 2] as QuerySnapshot;
+      const progressSnap = rest[i * 2 + 1] as DocumentSnapshot | null;
       const allSessions = sessionSnap.docs.map((d) => d.data() as Session);
       const sessions = allSessions.filter((s) => s.createdAt >= monthStartMs);
-      const progress = progressSnap.exists() ? (progressSnap.data() as UserProgress) : null;
+      const progress = progressSnap?.exists() ? (progressSnap.data() as UserProgress) : null;
 
       const totalReps = sumReps(sessions);
       const totalSets = sessions.reduce(

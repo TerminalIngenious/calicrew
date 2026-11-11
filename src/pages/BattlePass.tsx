@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { passeCache, docEnCache } from '../lib/lectureCache';
 import { db } from '../lib/firebase';
 import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, questsParDefaut, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
 import { getCardArt } from '../lib/cardsS2Art';
@@ -109,8 +110,17 @@ export default function BattlePass() {
     //
     // Le `finally` est ce qui manquait : sans lui, la moindre erreur laissait
     // l'écran de chargement tourner sans fin.
+    const ref = doc(db, 'userProgress', user.uid);
+
+    // La passe cache ne fait qu'afficher : la décision de saison, elle, reste
+    // au bloc suivant, sur la version du serveur.
+    await passeCache(async () => {
+      const snap = await docEnCache(ref);
+      setProgress({ ...DEFAULT_PROGRESS, ...(snap.data() as Partial<UserProgress>) });
+      setLoading(false);
+    });
+
     try {
-      const ref = doc(db, 'userProgress', user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
         /*

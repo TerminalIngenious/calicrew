@@ -3,6 +3,7 @@ import { useAuth, MAX_DISPLAY_NAME } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, getDocs, collection, query, where, limit, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { passeCache, docsEnCache } from '../lib/lectureCache';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
 import { useUserProgress } from '../lib/useUserProgress';
@@ -105,10 +106,22 @@ export default function Profile() {
       console.error('Profil indisponible :', err);
     }
 
+    // Sur son propre profil, le nom et les séances viennent déjà du contexte :
+    // la page n'a aucune raison d'attendre la requête des programmes, qui ne
+    // remplit qu'un encart tout en bas.
+    if (isOwnProfile) setLoading(false);
+
+    const progQuery = isOwnProfile
+      ? query(collection(db, 'programs'), where('createdBy', '==', targetUid))
+      : query(collection(db, 'programs'), where('createdBy', '==', targetUid), where('isPublic', '==', true));
+
+    await passeCache(async () => {
+      const snap = await docsEnCache(progQuery);
+      setPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+      setLoading(false);
+    });
+
     try {
-      const progQuery = isOwnProfile
-        ? query(collection(db, 'programs'), where('createdBy', '==', targetUid))
-        : query(collection(db, 'programs'), where('createdBy', '==', targetUid), where('isPublic', '==', true));
       const progSnap = await getDocs(progQuery);
       setPrograms(progSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
     } catch {

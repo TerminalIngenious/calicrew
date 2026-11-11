@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { passeCache, docsEnCache } from '../lib/lectureCache';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import type { Program, ProgramExercise, Exercise, WeightType, SetUnit } from '../types';
@@ -31,6 +32,14 @@ export default function Programs() {
 
   const load = useCallback(async () => {
     if (!user) return;
+    const mesProgrammes = query(collection(db, 'programs'), where('createdBy', '==', user.uid));
+
+    await passeCache(async () => {
+      const snap = await docsEnCache(mesProgrammes);
+      setPrograms(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Program)));
+      setLoading(false);
+    });
+
     try {
       const [progSnap, exoSnap] = await Promise.all([
         getDocs(query(collection(db, 'programs'), where('createdBy', '==', user.uid))),
