@@ -2867,10 +2867,50 @@ body {
   font-size: 0.95rem;
 }
 
+.amrap-exercise-row + .amrap-exercise-row {
+  border-top: 1px solid var(--border);
+}
+
 .amrap-ex-reps {
   font-weight: 700;
   color: var(--accent);
-  min-width: 35px;
+  min-width: 42px;
+}
+
+/* Le nom pousse le total contre le bord droit : les sommes s'alignent en
+   colonne, lisibles d'un coup d'œil entre deux rounds. */
+.amrap-ex-nom {
+  flex: 1;
+}
+
+.amrap-ex-total {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.amrap-exercises-reminder h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.amrap-reminder-total {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.amrap-round-corrections {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+/* Dans la carte rouge de fin de temps, une barre verte pleine disait le
+   contraire du chrono. */
+.amrap-countdown.ending .progress-bar {
+  background: var(--danger);
 }
 
 /* Group picker */

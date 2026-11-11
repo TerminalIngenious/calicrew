@@ -455,10 +455,14 @@ export default function LiveSession() {
               </div>
             ) : null}
             <div className="recap-stats-row" style={{ marginTop: '0.75rem' }}>
-              <div className="recap-mini-stat">
-                <span className="recap-mini-value">{displayRounds * repsPerRound(session.exercises)}</span>
-                <span>reps totales</span>
-              </div>
+              {/* Un circuit qui ne tient qu'en secondes affichait « 0 reps
+                  totales » à côté de ses minutes de gainage. */}
+              {repsPerRound(session.exercises) > 0 && (
+                <div className="recap-mini-stat">
+                  <span className="recap-mini-value">{displayRounds * repsPerRound(session.exercises)}</span>
+                  <span>reps totales</span>
+                </div>
+              )}
               {roundTotals(session.exercises, displayRounds).map((t, i) => (
                 <div key={i} className="recap-mini-stat">
                   <span className="recap-mini-value">{t.total}</span>
@@ -631,6 +635,11 @@ export default function LiveSession() {
     const amrapTotal = session.amrapDuration || 1200;
     const remaining = Math.max(0, amrapTotal - elapsed);
     const amrapProgress = ((amrapTotal - remaining) / amrapTotal) * 100;
+    const tempsEcoule = remaining === 0;
+    // Le chrono de l'en-tête se fige à la fin du temps : un AMRAP de 20 min
+    // qui affiche 21:34 parce qu'on a mis une minute à ranger son téléphone
+    // n'a aucun sens — et c'est ce chiffre qui part dans le récap.
+    const chrono = tempsEcoule ? amrapTotal : elapsed;
 
     return (
       <div className="page">
@@ -641,7 +650,7 @@ export default function LiveSession() {
           <h1>{amrapTitle(session.amrapName)}</h1>
           <div className="session-timer">
             <Timer size={16} />
-            <span>{formatTime(elapsed)}</span>
+            <span>{formatTime(chrono)}</span>
           </div>
         </header>
 
@@ -658,32 +667,54 @@ export default function LiveSession() {
             <span className="amrap-round-count">{amrapRounds}</span>
             <span className="amrap-round-count-label">round{amrapRounds > 1 ? 's' : ''}</span>
           </div>
-          <button className="amrap-validate-btn" onClick={addAmrapRound}>
-            <Check size={24} /> Round complété !
-          </button>
-          {amrapRounds > 0 && (
-            <button className="amrap-undo-btn" onClick={removeAmrapRound}>
-              Annuler le dernier
+          {/* Une fois le temps écoulé, valider un round n'est plus l'action
+              attendue : le gros bouton vert disparaît au profit du Terminer
+              du bas, et il ne reste que de quoi corriger un oubli. */}
+          {tempsEcoule ? (
+            <span className="amrap-round-detail">Chrono terminé. Valide ta séance en bas.</span>
+          ) : (
+            <button className="amrap-validate-btn" onClick={addAmrapRound}>
+              <Check size={24} /> Round complété !
             </button>
           )}
-          <span className="amrap-round-detail">
-            {amrapRounds * repsPerRound(session.exercises)} reps
-            {amrapRounds > 0 && ` — ${roundTotals(session.exercises, amrapRounds)
-              .map((t) => `${t.total} ${t.unit === 'sec' ? 's de ' : ''}${t.name}`)
-              .join(' + ')}`}
-          </span>
+          <div className="amrap-round-corrections">
+            {tempsEcoule && (
+              <button className="amrap-undo-btn" onClick={addAmrapRound}>
+                Ajouter un round
+              </button>
+            )}
+            {amrapRounds > 0 && (
+              <button className="amrap-undo-btn" onClick={removeAmrapRound}>
+                Annuler le dernier
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Le détail par exercice vit ici et non sous le compteur : il tenait
+            sur trois lignes de gris minuscule qui répétaient le circuit déjà
+            affiché juste en dessous. Chaque ligne porte sa propre somme. */}
         <div className="amrap-exercises-reminder">
-          <h3>1 round =</h3>
-          {session.exercises.map((ex, i) => (
-            <div key={`${ex.exerciseId}-${i}`} className="amrap-exercise-row">
-              <span className="amrap-ex-reps">
-                {ex.unit === 'seconds' ? `${ex.targetReps} s` : `${ex.targetReps}×`}
-              </span>
-              <span>{ex.exerciseName}</span>
-            </div>
-          ))}
+          <h3>
+            <span>1 round =</span>
+            {amrapRounds > 0 && <span className="amrap-reminder-total">Total</span>}
+          </h3>
+          {session.exercises.map((ex, i) => {
+            const enSecondes = getUnit(ex) === 'seconds';
+            return (
+              <div key={`${ex.exerciseId}-${i}`} className="amrap-exercise-row">
+                <span className="amrap-ex-reps">
+                  {enSecondes ? `${ex.targetReps} s` : `${ex.targetReps}\u00d7`}
+                </span>
+                <span className="amrap-ex-nom">{ex.exerciseName}</span>
+                {amrapRounds > 0 && (
+                  <span className="amrap-ex-total">
+                    {ex.targetReps * amrapRounds}{enSecondes ? ' s' : ''}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <button className="finish-btn floating-btn" onClick={() => setShowFinish(true)}>
