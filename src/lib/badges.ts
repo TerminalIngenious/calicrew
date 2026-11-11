@@ -47,6 +47,10 @@ const MONTHS = [
 export interface EventBadgeStyle {
   titre: string;
   soustitre: string;
+  /** Le dessin au cœur du badge. */
+  glyphe: 'faceid' | 'creatine';
+  /** Sa couleur. Écrite en dur, elle restait verte sur tous les badges. */
+  encre: string;
   /** Monture : trois tons, comme un métal. */
   from: string;
   mid: string;
@@ -61,6 +65,8 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   faceid: {
     titre: 'FaceID',
     soustitre: 'Fichier complet',
+    glyphe: 'faceid',
+    encre: '#5cf5ab',
     from: '#e4ff9e',
     mid: '#b6ff00',
     to: '#5a8200',
@@ -68,7 +74,89 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
     coreTo: '#0c1104',
     glow: 'rgba(182, 255, 0, 0.5)',
   },
+
+  /*
+   * Les paliers de créatine.
+   *
+   * Un seul bleu qui s'approfondit de palier en palier, et non quatre
+   * couleurs sans rapport : posés côte à côte dans le profil, ils doivent se
+   * lire comme une progression et pas comme quatre récompenses
+   * indépendantes. Le dernier vire au blanc froid — c'est le seul qui sort
+   * de la famille, parce qu'une année entière mérite de ne ressembler à
+   * aucun des autres.
+   */
+  'creatine-7': {
+    titre: 'Créatine',
+    soustitre: '7 jours d\u2019affilée',
+    glyphe: 'creatine',
+    encre: '#9fd4ff',
+    from: '#cfe9ff', mid: '#7fc1f2', to: '#2f6d9e',
+    coreFrom: '#0e2434', coreTo: '#06131d',
+    glow: 'rgba(127, 193, 242, 0.45)',
+  },
+  'creatine-30': {
+    titre: 'Créatine',
+    soustitre: 'Un mois d\u2019affilée',
+    glyphe: 'creatine',
+    encre: '#8ec8ff',
+    from: '#a8d8ff', mid: '#3f9ae8', to: '#15507f',
+    coreFrom: '#0a1f33', coreTo: '#04101b',
+    glow: 'rgba(63, 154, 232, 0.5)',
+  },
+  'creatine-100': {
+    titre: 'Créatine',
+    soustitre: 'Cent jours d\u2019affilée',
+    glyphe: 'creatine',
+    encre: '#b6bdff',
+    from: '#c3cbff', mid: '#5c6cf0', to: '#262d94',
+    coreFrom: '#121642', coreTo: '#070a21',
+    glow: 'rgba(92, 108, 240, 0.55)',
+  },
+  'creatine-365': {
+    titre: 'Créatine',
+    soustitre: 'Une année d\u2019affilée',
+    glyphe: 'creatine',
+    encre: '#eaf4ff',
+    from: '#ffffff', mid: '#dbe9f7', to: '#8aa6bd',
+    coreFrom: '#1b2530', coreTo: '#0a0f14',
+    glow: 'rgba(219, 233, 247, 0.6)',
+  },
 };
+
+/**
+ * Les paliers, du plus court au plus long.
+ *
+ * L'ordre compte : on attribue en remontant la liste, pour que quelqu'un qui
+ * arrive avec quatre cents jours au compteur reçoive les quatre d'un coup
+ * plutôt que le dernier seulement.
+ */
+export const PALIERS_CREATINE = [7, 30, 100, 365] as const;
+
+export function idBadgeCreatine(jours: number): string {
+  return `creatine-${jours}`;
+}
+
+/**
+ * Le badge d'un palier de créatine.
+ *
+ * `category`, `rank` et `monthKey` ne veulent rien dire ici — le type est
+ * partagé avec les badges de classement, qui eux ont un podium et un mois.
+ */
+export function badgeCreatine(jours: number, maintenant = Date.now()): RankBadge {
+  const id = idBadgeCreatine(jours);
+  return {
+    id,
+    kind: 'event',
+    eventId: id,
+    category: 'reps',
+    rank: 0,
+    monthKey: '',
+    seasonId: '',
+    seasonName: 'Créatine',
+    groupName: '',
+    earnedAt: maintenant,
+  };
+}
 
 export function estEvenement(badge: RankBadge): boolean {
   return badge.kind === 'event';

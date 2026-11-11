@@ -7289,8 +7289,10 @@ body {
 
 /* Un badge d'événement a le cœur sombre : son dessin doit s'allumer dessus,
    pas s'y fondre comme une icône blanche sur fond coloré. */
+/* L'encre du glyphe appartient au badge : la même pour tous, la goutte de
+   la créatine sortait verte. */
 .rank-badge.event .rank-badge-core {
-  color: #5cf5ab;
+  color: var(--badge-encre, #5cf5ab);
 }
 
 /* Trait de séparation dans le profil. */

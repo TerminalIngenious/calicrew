@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
@@ -17,6 +17,10 @@ import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
 import { useCreatine } from '../lib/creatine';
+import { useUserProgress } from '../lib/useUserProgress';
+import { badgeCreatine, idBadgeCreatine, PALIERS_CREATINE } from '../lib/badges';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { amrapTitle } from '../lib/amrap';
 import Loader from '../components/Loader';
 
@@ -25,6 +29,41 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { sessions, loading } = useUserSessions();
   const creatine = useCreatine();
+  const { progress } = useUserProgress(user?.uid);
+
+  /**
+   * Les badges de créatine, posés dès que le compteur atteint un palier.
+   *
+   * Ici et pas dans un cron : c'est le seul endroit qui connaît le streak à
+   * la seconde près, et le badge doit arriver pendant que la personne
+   * regarde l'écran où elle vient de cocher.
+   *
+   * Plusieurs paliers peuvent tomber d'un coup. Quelqu'un qui prend sa
+   * créatine depuis un an avant que ces badges existent les reçoit tous les
+   * quatre à sa prochaine ouverture, et non le dernier seulement : il a bien
+   * passé les trois autres en chemin.
+   */
+  const badgesEnvoyes = useRef(new Set<string>());
+  useEffect(() => {
+    if (!user || !progress || creatine.loading) return;
+    const acquis = new Set((progress.badges || []).map((b) => b.id));
+    const aDonner = PALIERS_CREATINE.filter(
+      (j) => creatine.streak >= j &&
+        !acquis.has(idBadgeCreatine(j)) &&
+        !badgesEnvoyes.current.has(idBadgeCreatine(j))
+    );
+    if (aDonner.length === 0) return;
+
+    // Marqué avant l'écriture : le temps qu'elle revienne, l'effet peut
+    // rejouer et donner le badge une deuxième fois.
+    for (const j of aDonner) badgesEnvoyes.current.add(idBadgeCreatine(j));
+    updateDoc(doc(db, 'userProgress', user.uid), {
+      badges: arrayUnion(...aDonner.map((j) => badgeCreatine(j))),
+    }).catch((err) => {
+      for (const j of aDonner) badgesEnvoyes.current.delete(idBadgeCreatine(j));
+      console.error('Badge créatine impossible :', err);
+    });
+  }, [user, progress, creatine.loading, creatine.streak]);
 
   const recentSessions = useMemo(() => sessions.slice(0, 5), [sessions]);
 
