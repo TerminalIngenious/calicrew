@@ -62,4 +62,15 @@ export function watchForUpdates(): void {
   });
   window.addEventListener('focus', cherche);
   window.setInterval(cherche, 30 * 60 * 1000);
+
+  /*
+   * Et une fois au démarrage.
+   *
+   * Tous les déclencheurs ci-dessus supposent qu'on quitte l'app et qu'on y
+   * revient. Au lancement à froid, la page est déjà visible et a déjà le
+   * focus : aucun ne se déclenche, et on dépendait entièrement du script
+   * d'enregistrement posé dans la page. Une vérification de plus ne coûte
+   * rien et rend le rattrapage certain.
+   */
+  cherche();
 }
