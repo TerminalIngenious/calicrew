@@ -2723,6 +2723,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  /* Sans cette marge, « 1 round = » venait se coller sous le chrono. */
+  margin-bottom: 1rem;
 }
 
 .amrap-time-display {
@@ -6190,11 +6192,21 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  /* Sur un très petit écran la ligne passe à deux étages plutôt que de
+     déborder : rien ne doit sortir de la fenêtre. */
+  flex-wrap: wrap;
 }
 
-.amrap-item-value {
+/*
+ * Le champ de valeur doit battre `.modal-card input`, qui le mettait à 100 %
+ * de la ligne : le sélecteur d'unité et la corbeille se retrouvaient poussés
+ * hors de l'écran. D'où le sélecteur en deux parties, et non `.amrap-item-value`
+ * seul, qui perdait l'arbitrage.
+ */
+.amrap-item-row .amrap-item-value {
+  flex: 0 0 4.5rem;
   width: 4.5rem;
-  flex-shrink: 0;
+  min-width: 0;
   padding: 0.5rem 0.6rem;
   margin: 0;
   background: var(--bg-card);
@@ -6207,16 +6219,26 @@ body {
   outline: none;
 }
 
-.amrap-item-value:focus {
+.amrap-item-row .amrap-item-value:focus {
   border-color: var(--accent);
 }
 
 .amrap-item-row .unit-picker {
-  flex: 1;
+  /* Base volontairement basse : à 320 px de large, une base plus généreuse
+     renvoyait la corbeille sur une ligne à elle toute seule. */
+  flex: 1 1 5rem;
+  min-width: 0;
 }
 
 .amrap-item-row .unit-btn {
   flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.4rem;
+  white-space: nowrap;
+}
+
+.amrap-item-row .icon-btn {
+  flex: 0 0 auto;
 }
 
 .amrap-add-item {
