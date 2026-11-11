@@ -7804,3 +7804,107 @@ body {
   --accent-green: #b6ff00;
   --accent-rgb: 182, 255, 0;
 }
+
+/* ── Calendrier de l'année ──
+   Sept lignes, une colonne par semaine. La taille des cases est la seule
+   variable : tout le reste en découle, y compris les étiquettes de mois qui
+   doivent tomber pile sur leur colonne.
+
+   La couleur est l'accent de l'app en transparence croissante, pas cinq
+   teintes écrites à la main : la grille suit l'habillage du moment sans
+   qu'on ait à y penser. */
+
+.cal {
+  --cal-case: 12px;
+  --cal-ecart: 3px;
+  margin-bottom: 1.25rem;
+}
+
+.cal-entete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.cal-titre {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cal-total {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* La piste déborde volontairement : une année ne tient pas sur un téléphone,
+   et réduire les cases pour l'y faire entrer les rendrait illisibles. */
+.cal-piste {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cal-piste::-webkit-scrollbar { display: none; }
+
+.cal-grille {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--cal-ecart);
+}
+
+.cal-mois,
+.cal-cases {
+  display: flex;
+  gap: var(--cal-ecart);
+}
+
+.cal-mois-case {
+  width: var(--cal-case);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  /* L'étiquette est plus large que sa colonne : elle déborde sur les
+     suivantes au lieu de les écarter. */
+  overflow: visible;
+}
+
+.cal-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cal-ecart);
+}
+
+.cal-case {
+  display: block;
+  width: var(--cal-case);
+  height: var(--cal-case);
+  border-radius: 3px;
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.cal-case.n1 { background: rgba(var(--accent-rgb), 0.3); }
+.cal-case.n2 { background: rgba(var(--accent-rgb), 0.55); }
+.cal-case.n3 { background: rgba(var(--accent-rgb), 0.8); }
+.cal-case.n4 { background: var(--accent); }
+
+/* Les jours qui n'ont pas encore eu lieu : la semaine en cours est entière,
+   et ses jours à venir ne doivent pas se lire comme des jours manqués. */
+.cal-case.futur { background: transparent; }
+
+.cal-legende {
+  display: flex;
+  align-items: center;
+  gap: var(--cal-ecart);
+  margin-top: 0.6rem;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.cal-legende span:first-child { margin-right: 0.15rem; }
+.cal-legende span:last-child { margin-left: 0.15rem; }

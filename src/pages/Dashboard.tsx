@@ -9,6 +9,7 @@ import SeasonalBadge from '../components/SeasonalBadge';
 import PinkRibbon from '../components/PinkRibbon';
 import NotifGate from '../components/NotifGate';
 import PasCard from '../components/PasCard';
+import CalendrierSeances from '../components/CalendrierSeances';
 import { getSeasonalTheme } from '../lib/seasonalTheme';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -82,6 +83,10 @@ export default function Dashboard() {
               <span className="stat-label">Reps</span>
             </div>
           </div>
+
+          {/* Après les chiffres de la semaine et avant les gestes du jour :
+              c'est le recul, pas une action à faire. */}
+          <CalendrierSeances sessions={sessions} />
 
           <button
             type="button"
