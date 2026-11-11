@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const results = await Promise.all(
     restants.map((a) =>
       sendTo(a, {
-        title: 'CaliCrew',
+        title: 'Note tes pas 👟',
         body: messageDuJour(PAS_MESSAGES, getDayNumber()),
         tag: 'pas',
         url: '/',

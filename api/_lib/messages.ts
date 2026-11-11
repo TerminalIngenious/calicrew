@@ -214,15 +214,17 @@ export const FACEID_DERNIER_JOUR =
 // perdre une partie.
 
 export const PAS_MESSAGES = [
-  'Tes pas de la journée, c\'est maintenant ou jamais.',
-  'Le podomètre a compté toute la journée. À toi de recopier.',
-  'Combien de pas aujourd\'hui ? Personne ne le saura si tu ne le notes pas.',
-  'Ouvre ton téléphone, regarde le chiffre, recopie-le. Trente secondes.',
-  'Les pas non notés ne rapportent rien. C\'est bête, mais c\'est comme ça.',
-  'Journée finie, podomètre arrêté. Le chiffre t\'attend.',
-  'Marcher, c\'est bien. Le noter, c\'est mieux.',
-  'Ton podomètre a bossé toute la journée. Fais-lui l\'honneur de le lire.',
-  'Au-delà de 3 000 pas, chacun compte. Encore faut-il les noter.',
-  'Dernier appel pour les pas du jour.',
+  'Ouvre CaliCrew et note tes pas du jour. Ton podomètre a bossé, sois correct.',
+  'Tes pas du jour ne sont pas notés. Ton podomètre fait semblant de rien, mais il est vexé.',
+  'Combien de pas aujourd\u2019hui ? Note-les dans CaliCrew, sinon officiellement tu n\u2019as pas bougé.',
+  'Regarde ton podomètre, recopie le chiffre dans CaliCrew. Trente secondes, même en marchant.',
+  'Pas notés = pas comptés. Deux secondes de travail pour des kilomètres de gloire.',
+  'Note tes pas dans CaliCrew. Oui, même les 400 pas du frigo au canapé.',
+  'Il te reste une mission aujourd\u2019hui : noter tes pas. Elle se fait assis.',
+  'Ton podomètre a tout vu, tout compté, et attend que tu le recopies dans CaliCrew.',
+  'Note tes pas avant de dormir, c\u2019est plus simple que de t\u2019en souvenir demain.',
+  'Dernier appel pour les pas du jour. Après, ils deviennent des pas fantômes.',
+  'Tu as marché. Bravo. Maintenant ouvre CaliCrew et prouve-le.',
+  'Rappel : les pas se notent dans CaliCrew. La marche ne se déclare pas elle-même.',
 ];
 
