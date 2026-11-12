@@ -2717,13 +2717,12 @@ body {
   transform: translateX(18px);
 }
 
-/* AMRAP time picker */
+/* Le chrono de l'éditeur de programmes, qui règle une durée d'AMRAP. */
 .amrap-time-picker {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  /* Sans cette marge, « 1 round = » venait se coller sous le chrono. */
   margin-bottom: 1rem;
 }
 
@@ -2738,100 +2737,206 @@ body {
   justify-content: center;
 }
 
-/* AMRAP live */
-.amrap-countdown {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  text-align: center;
-  margin-bottom: 1rem;
+/*
+ * AMRAP en cours.
+ *
+ * L'écran est fait pour être lu à bout de bras, en sueur : un cadran qui se
+ * vide, un compteur énorme, et une zone de frappe qui occupe la moitié de
+ * l'écran. Le détail des totaux n'y est pas — il ne sert à rien entre deux
+ * tours, il attend le récap.
+ */
+.amrap-live {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  min-height: 100dvh;
+  padding-bottom: 6rem;
 }
 
-.amrap-countdown.ending {
-  border-color: var(--danger);
-  background: rgba(255, 71, 87, 0.08);
+.amrap-live-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
-.amrap-countdown-label {
-  display: block;
-  font-size: 0.85rem;
+.amrap-live-nom {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.amrap-live-temps {
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-bottom: 0.25rem;
+  font-variant-numeric: tabular-nums;
 }
 
-.amrap-countdown-value {
+.amrap-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.amrap-zone:active:not(.fini) .amrap-frappe {
+  transform: scale(0.985);
+}
+
+.amrap-cadran {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+.amrap-cadran svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* L'arc démarre en haut et tourne dans le sens des aiguilles. */
+  transform: rotate(-90deg);
+}
+
+.amrap-cadran-fond {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+
+.amrap-cadran-arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s linear;
+}
+
+.amrap-cadran.ending .amrap-cadran-arc {
+  stroke: var(--danger);
+}
+
+.amrap-cadran-centre {
+  text-align: center;
+}
+
+.amrap-cadran-valeur {
   display: block;
-  font-size: 3rem;
+  font-size: 3.6rem;
   font-weight: 800;
-  color: var(--accent);
   line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
-.amrap-countdown.ending .amrap-countdown-value {
+.amrap-cadran.ending .amrap-cadran-valeur {
   color: var(--danger);
 }
 
-.amrap-round-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.amrap-round-label {
+.amrap-cadran-label {
   display: block;
-  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
 }
 
-.amrap-round-count-row {
+.amrap-compteur {
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
-.amrap-round-count {
-  font-size: 4.5rem;
+.amrap-compteur b {
+  font-size: 5rem;
   font-weight: 800;
-  color: var(--accent);
   line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
-.amrap-round-count-label {
-  font-size: 1.2rem;
+.amrap-compteur span {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--text-muted);
-  font-weight: 500;
 }
 
-.amrap-validate-btn {
-  width: 100%;
-  padding: 1.1rem;
+.amrap-frappe {
+  display: grid;
+  place-items: center;
+  gap: 0.2rem;
+  min-height: 110px;
+  padding: 1rem;
+  border-radius: 22px;
   background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  color: #000;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  transition: transform 0.12s ease;
 }
 
-.amrap-validate-btn:active {
-  transform: scale(0.97);
+.amrap-frappe small {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.62;
+}
+
+/* Le temps écoulé : plus rien à valider, la zone redevient un simple écriteau. */
+.amrap-zone.fini {
+  cursor: default;
+}
+
+.amrap-zone.fini .amrap-frappe {
+  min-height: 0;
+  padding: 0.9rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.amrap-circuit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.amrap-pastille {
+  padding: 0.3rem 0.65rem;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.amrap-pastille b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.amrap-corrections {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
 }
 
 .amrap-undo-btn {
-  display: block;
-  margin: 0.5rem auto 0;
   background: none;
   border: none;
   color: var(--text-muted);
@@ -2840,79 +2945,62 @@ body {
   text-decoration: underline;
 }
 
-.amrap-round-detail {
+/*
+ * Le score d'un AMRAP terminé.
+ *
+ * Un AMRAP ne se raconte pas en séries : il se raconte en tours. Le nombre
+ * passe donc devant, et le détail suit en lignes, une par exercice.
+ */
+.amrap-score {
+  text-align: center;
+  padding: 1.25rem 0 0.5rem;
+}
+
+.amrap-score b {
   display: block;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 0.75rem;
-}
-
-.amrap-exercises-reminder {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem;
-  margin-bottom: 5rem;
-}
-
-.amrap-exercises-reminder h3 {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
-}
-
-.amrap-exercise-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0;
-  font-size: 0.95rem;
-}
-
-.amrap-exercise-row + .amrap-exercise-row {
-  border-top: 1px solid var(--border);
-}
-
-.amrap-ex-reps {
-  font-weight: 700;
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
   color: var(--accent);
-  min-width: 42px;
-}
-
-/* Le nom pousse le total contre le bord droit : les sommes s'alignent en
-   colonne, lisibles d'un coup d'œil entre deux rounds. */
-.amrap-ex-nom {
-  flex: 1;
-}
-
-.amrap-ex-total {
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: var(--text);
 }
 
-.amrap-exercises-reminder h3 {
+.amrap-score span {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.amrap-detail-ligne {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.92rem;
 }
 
-.amrap-reminder-total {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.amrap-detail-ligne em {
+  font-style: normal;
+  color: var(--text-muted);
+  /* Les totaux arrivent en minuscules du calcul : la majuscule se remet ici. */
+  text-transform: capitalize;
 }
 
-.amrap-round-corrections {
-  display: flex;
-  justify-content: center;
-  gap: 1.25rem;
+.amrap-detail-circuit {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
-/* Dans la carte rouge de fin de temps, une barre verte pleine disait le
-   contraire du chrono. */
-.amrap-countdown.ending .progress-bar {
-  background: var(--danger);
+.amrap-detail-ligne b {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Group picker */
@@ -6146,109 +6234,203 @@ body {
   color: var(--text-muted);
 }
 
-.amrap-presets {
-  display: flex;
-  flex-wrap: wrap;
+/*
+ * Les choix se prennent, ils ne se règlent pas.
+ *
+ * Un WOD connu et une durée ronde couvrent la quasi-totalité des cas : on
+ * les pose en boutons, un geste chacun, plutôt qu'en liste déroulante et en
+ * chrono qu'il fallait monter minute par minute depuis vingt.
+ */
+.amrap-raccourcis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.4rem;
   margin-bottom: 1rem;
 }
 
-.amrap-preset-chip {
-  padding: 0.35rem 0.8rem;
-  border-radius: 99px;
+.amrap-choix {
+  padding: 0.7rem 0.2rem;
+  border-radius: 14px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.amrap-preset-chip:active {
+.amrap-choix.actif {
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--accent);
 }
 
-.amrap-items {
+.modal-card input.amrap-nom {
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Le réglage fin, pour les durées qui ne sont pas rondes. */
+.amrap-reglage {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: -0.5rem 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
 }
 
-.amrap-item {
-  padding: 0.6rem;
-  background: var(--bg);
+.amrap-reglage span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 4.5rem;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.amrap-reglage button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
 }
 
-.amrap-item-exercise {
+.amrap-lignes {
   margin-bottom: 0.5rem;
 }
 
-.amrap-item-row {
+.amrap-ligne {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  /* Sur un très petit écran la ligne passe à deux étages plutôt que de
-     déborder : rien ne doit sortir de la fenêtre. */
-  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--border);
 }
 
 /*
- * Le champ de valeur doit battre `.modal-card input`, qui le mettait à 100 %
- * de la ligne : le sélecteur d'unité et la corbeille se retrouvaient poussés
- * hors de l'écran. D'où le sélecteur en deux parties, et non `.amrap-item-value`
- * seul, qui perdait l'arbitrage.
+ * La valeur garde sa largeur quoi qu'il arrive.
+ *
+ * `.modal-card input` impose 100 % à tout champ d'une fenêtre : sans ces
+ * deux classes pour l'emporter, l'unité et la corbeille repartaient hors de
+ * l'écran, comme avant.
  */
-.amrap-item-row .amrap-item-value {
-  flex: 0 0 4.5rem;
-  width: 4.5rem;
+.amrap-ligne .amrap-ligne-valeur {
+  flex: 0 0 3.4rem;
+  width: 3.4rem;
   min-width: 0;
-  padding: 0.5rem 0.6rem;
   margin: 0;
+  padding: 0.45rem 0.2rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   color: var(--text);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
   text-align: center;
+  font-variant-numeric: tabular-nums;
   outline: none;
 }
 
-.amrap-item-row .amrap-item-value:focus {
+.amrap-ligne .amrap-ligne-valeur:focus {
   border-color: var(--accent);
 }
 
-.amrap-item-row .unit-picker {
-  /* Base volontairement basse : à 320 px de large, une base plus généreuse
-     renvoyait la corbeille sur une ligne à elle toute seule. */
-  flex: 1 1 5rem;
-  min-width: 0;
-}
-
-.amrap-item-row .unit-btn {
+/* Le nom prend la place qui reste : c'est lui qu'on lit, pas la monture. */
+.amrap-ligne-nom {
   flex: 1;
   min-width: 0;
-  padding: 0.5rem 0.4rem;
-  white-space: nowrap;
+  padding: 0.3rem 0;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
 }
 
-.amrap-item-row .icon-btn {
+.amrap-ligne-unite {
   flex: 0 0 auto;
+  padding: 0.25rem 0.55rem;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
 }
 
-.amrap-add-item {
+.amrap-ligne-retirer {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.amrap-ajouter {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
   width: 100%;
+  padding: 0.75rem;
   margin-bottom: 1rem;
+  border-top: 1px solid var(--border);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
 }
+
+.amrap-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.amrap-actions button {
+  padding: 0.95rem;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.amrap-annuler {
+  flex: 1;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.amrap-lancer {
+  flex: 2;
+  border: none;
+  background: var(--accent);
+}
+
+.amrap-lancer:disabled {
+  opacity: 0.6;
+}
+
 
 /* ── Poids par série & ajout d'exercice en séance ── */
 
@@ -7825,7 +8007,9 @@ body {
 .member-modal-view-btn,
 .search-go,
 .trade-card-pick-count,
-.amrap-validate-btn,
+.amrap-frappe,
+.amrap-choix.actif,
+.amrap-lancer,
 .bp-tab.active,
 .bp-card-reveal-close,
 .bp-quest-claim,

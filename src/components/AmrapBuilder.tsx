@@ -26,6 +26,9 @@ const BY_CATEGORY = (() => {
 
 const DEFAULT_ITEM: AmrapItem = { exerciseId: 'pull-ups', value: 5, unit: 'reps' };
 
+/** Les durées qu'on choisit vraiment. Le reste se règle à la minute en dessous. */
+const DUREES = [10, 15, 20, 30];
+
 function itemFrom(exerciseId: string, value: number, unit?: SetUnit): AmrapItem {
   const ex = DEFAULT_EXERCISES.find((e) => e.id === exerciseId);
   return {
@@ -117,53 +120,81 @@ export default function AmrapBuilder({
           Un maximum de rounds du circuit dans le temps imparti.
         </p>
 
-        <span className="pr-field-label">WOD de référence</span>
-        <div className="amrap-presets">
+        <span className="pr-field-label">Raccourcis</span>
+        <div className="amrap-raccourcis">
           {AMRAP_PRESETS.map((p) => (
-            <button key={p.id} className="amrap-preset-chip" onClick={() => applyPreset(p.id)}>
+            <button
+              key={p.id}
+              className={`amrap-choix ${name === p.name ? 'actif' : ''}`}
+              onClick={() => applyPreset(p.id)}
+            >
               {p.name}
             </button>
           ))}
+          {/* « Libre » ne remet que le nom à zéro : on part souvent d'un WOD
+              connu qu'on retouche, et perdre son circuit en cliquant ici
+              serait la pire surprise possible. */}
+          <button
+            className={`amrap-choix ${name === '' ? 'actif' : ''}`}
+            onClick={() => setName('')}
+          >
+            Libre
+          </button>
         </div>
 
-        <label className="pr-field-label" htmlFor="amrap-name">Nom (optionnel)</label>
         <input
           id="amrap-name"
+          className="amrap-nom"
           type="text"
-          placeholder="AMRAP"
+          placeholder="Nom (optionnel)"
           maxLength={30}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <span className="pr-field-label">Durée</span>
-        <div className="amrap-time-picker">
+        <div className="amrap-raccourcis">
+          {DUREES.map((m) => (
+            <button
+              key={m}
+              className={`amrap-choix ${minutes === m ? 'actif' : ''}`}
+              onClick={() => setMinutes(m)}
+            >
+              {m} min
+            </button>
+          ))}
+        </div>
+        <div className="amrap-reglage">
           <button
-            className="time-picker-arrow"
             aria-label="Moins une minute"
             onClick={() => setMinutes((m) => Math.max(AMRAP_MIN_MINUTES, m - 1))}
           >
-            <Minus size={18} />
+            <Minus size={14} />
           </button>
-          <div className="amrap-time-display">
-            <Timer size={18} />
-            <span>{minutes} min</span>
-          </div>
+          <span><Timer size={13} /> {minutes} min</span>
           <button
-            className="time-picker-arrow"
             aria-label="Plus une minute"
             onClick={() => setMinutes((m) => Math.min(AMRAP_MAX_MINUTES, m + 1))}
           >
-            <Plus size={18} />
+            <Plus size={14} />
           </button>
         </div>
 
-        <span className="pr-field-label">1 round =</span>
-        <div className="amrap-items">
+        <span className="pr-field-label">Le circuit</span>
+        <div className="amrap-lignes">
           {items.map((item, i) => (
-            <div key={i} className="amrap-item">
+            <div key={i} className="amrap-ligne">
+              <input
+                className="amrap-ligne-valeur"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                aria-label={`Valeur de l'exercice ${i + 1}`}
+                value={item.value}
+                onChange={(e) => updateItem(i, { value: Number(e.target.value) })}
+              />
               <select
-                className="pr-select amrap-item-exercise"
+                className="amrap-ligne-nom"
                 value={item.exerciseId}
                 aria-label={`Exercice ${i + 1}`}
                 onChange={(e) => pickExercise(i, e.target.value)}
@@ -176,54 +207,40 @@ export default function AmrapBuilder({
                   </optgroup>
                 ))}
               </select>
-
-              <div className="amrap-item-row">
-                <input
-                  className="amrap-item-value"
-                  type="number"
-                  inputMode="numeric"
-                  min="1"
-                  aria-label={`Valeur de l'exercice ${i + 1}`}
-                  value={item.value}
-                  onChange={(e) => updateItem(i, { value: Number(e.target.value) })}
-                />
-                <div className="unit-picker">
-                  {([['reps', 'Reps'], ['seconds', 'Sec']] as [SetUnit, string][]).map(([u, label]) => (
-                    <button
-                      key={u}
-                      className={`unit-btn ${item.unit === u ? 'active' : ''}`}
-                      onClick={() => updateItem(i, { unit: u })}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {items.length > 1 && (
-                  <button
-                    className="icon-btn"
-                    aria-label={`Retirer l'exercice ${i + 1}`}
-                    onClick={() => removeItem(i)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
+              {/* Une seule pastille qui bascule, plutôt que deux boutons :
+                  l'unité n'a que deux états et la ligne n'a pas la place. */}
+              <button
+                className="amrap-ligne-unite"
+                aria-label={`Unité de l'exercice ${i + 1} : ${item.unit === 'seconds' ? 'secondes' : 'répétitions'}`}
+                onClick={() => updateItem(i, { unit: item.unit === 'seconds' ? 'reps' : 'seconds' })}
+              >
+                {item.unit === 'seconds' ? 'sec' : 'reps'}
+              </button>
+              {items.length > 1 && (
+                <button
+                  className="amrap-ligne-retirer"
+                  aria-label={`Retirer l'exercice ${i + 1}`}
+                  onClick={() => removeItem(i)}
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
             </div>
           ))}
         </div>
 
         {items.length < AMRAP_MAX_ITEMS && (
-          <button className="secondary-btn small amrap-add-item" onClick={addItem}>
-            <Plus size={16} /> Ajouter un exercice
+          <button className="amrap-ajouter" onClick={addItem}>
+            <Plus size={15} /> Ajouter un exercice
           </button>
         )}
 
         {error && <p className="pr-form-error">{error}</p>}
 
-        <div className="modal-actions">
-          <button className="secondary-btn" onClick={onClose}>Annuler</button>
-          <button className="primary-btn" onClick={start} disabled={starting}>
-            {starting ? 'Lancement…' : 'Lancer'}
+        <div className="amrap-actions">
+          <button className="amrap-annuler" onClick={onClose}>Annuler</button>
+          <button className="amrap-lancer" onClick={start} disabled={starting}>
+            {starting ? 'Lancement…' : `Lancer ${minutes} min`}
           </button>
         </div>
       </div>
