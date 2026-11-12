@@ -17,7 +17,7 @@ export default function FaceIdShelf({
   onOpen,
 }: {
   faceid?: FaceIdProgress;
-  /** Absent sur le profil de quelqu'un d'autre : sa page n'est pas la tienne. */
+  /** Ouvre la collection de l'event — celle du joueur dont c'est le profil. */
   onOpen?: () => void;
 }) {
   const fid = lisFaceId(faceid);

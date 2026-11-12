@@ -934,3 +934,17 @@
   border-color: rgba(255, 255, 255, 0.14);
   background: var(--bg-card-hover);
 }
+
+/*
+ * La collection seule, telle qu'on l'ouvre depuis un profil.
+ *
+ * Deux colonnes comme dans le fichier : les cartes gardent la largeur à
+ * laquelle elles ont été dessinées, et une personne dont on a les deux faces
+ * les voit toujours voisines.
+ */
+.fid-cartes-grille {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  padding: 0 1rem 6rem;
+}

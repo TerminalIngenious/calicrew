@@ -395,7 +395,7 @@ export default function Profile() {
           collection qu'on vient regarder en premier. */}
       <FaceIdShelf
         faceid={progress?.faceid}
-        onOpen={isOwnProfile ? () => navigate('/faceid') : undefined}
+        onOpen={() => navigate(isOwnProfile ? '/faceid/cartes' : `/faceid/cartes/${targetUid}`)}
       />
 
       <section className="section">
