@@ -45,9 +45,9 @@ function Trait({ encre, children }: { encre: string; children: ReactNode }) {
 }
 
 /** La paire, à l'échelle du centième. */
-function Empreintes({ encre }: { encre: string }) {
+function Empreintes({ encre, pose = 'translate(-9 -8) scale(4.3)' }: { encre: string; pose?: string }) {
   return (
-    <g transform="translate(-9 -8) scale(4.3)">
+    <g transform={pose}>
       <Trait encre={encre}>
         <path d={PIED_GAUCHE} />
         <path d={PIED_DROIT} />
@@ -76,20 +76,18 @@ function Glyphe({ palier, e }: { palier: number; e: EncresGlyphe }) {
     case 0:
       return <Empreintes encre={e.encre} />;
 
-    // 15 000 : la chaussure. On n'est plus sorti en savates.
+    // 15 000 : les mêmes pieds, et deux chevrons qui montent.
+    //
+    // C'était une chaussure, qu'on lisait comme une part de gâteau : de
+    // profil et sans pied dedans, une chaussure n'est qu'un coin arrondi.
+    // Les chevrons, eux, ne disent qu'une chose — c'est au-dessus.
     case 1:
       return (
         <g>
-          <path
-            d="M6 82c0-17 10-27 25-33l11-5c4-2 9 0 11 4l8 14 25 14c7 4 11 10 11 19v5H6z"
-            fill={e.encre}
-          />
-          <path d="M2 82h96a4 4 0 014 5v3a10 10 0 01-10 10H14A12 12 0 012 88z" fill={e.accent} />
-          {/* Les lacets creusés dans le ton du cœur : en clair sur un corps
-              clair, ils disparaissaient et la chaussure faisait bloc. */}
-          <g stroke={e.creux} strokeWidth="5" strokeLinecap="round" opacity="0.75">
-            <path d="M31 62l15 8M40 50l15 8M49 38l14 8" />
+          <g stroke={e.accent} strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none">
+            <path d="M6 54l16-16 16 16M6 86l16-16 16 16" />
           </g>
+          <Empreintes encre={e.encre} pose="translate(40 -6) scale(4.6)" />
         </g>
       );
 
