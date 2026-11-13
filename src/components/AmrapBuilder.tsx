@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Minus, Timer, X, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Check, Plus, Minus, Timer, X, Trash2 } from 'lucide-react';
 import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
 import {
   AMRAP_MAX_ITEMS, AMRAP_MAX_MINUTES, AMRAP_MIN_MINUTES, AMRAP_PRESETS,
@@ -24,7 +24,8 @@ const BY_CATEGORY = (() => {
   return [...map.entries()];
 })();
 
-const DEFAULT_ITEM: AmrapItem = { exerciseId: 'pull-ups', value: 5, unit: 'reps' };
+/** Les catégories dans l'ordre du catalogue, pour les onglets du sélecteur. */
+const CATEGORIES = BY_CATEGORY.map(([cat]) => cat as Exercise['category']);
 
 /** Les durées qu'on choisit vraiment. Le reste se règle à la minute en dessous. */
 const DUREES = [10, 15, 20, 30];
@@ -48,9 +49,16 @@ export default function AmrapBuilder({
   useScrollLock(true);
   const [name, setName] = useState('');
   const [minutes, setMinutes] = useState(20);
-  const [items, setItems] = useState<AmrapItem[]>([DEFAULT_ITEM]);
+  const [items, setItems] = useState<AmrapItem[]>([]);
+  const [filtre, setFiltre] = useState<Exercise['category']>(CATEGORIES[0]);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const catalogue = useMemo(
+    () => BY_CATEGORY.find(([cat]) => cat === filtre)?.[1] || [],
+    [filtre]
+  );
+  const complet = items.length >= AMRAP_MAX_ITEMS;
 
   function applyPreset(presetId: string) {
     const preset = AMRAP_PRESETS.find((p) => p.id === presetId);
@@ -65,16 +73,23 @@ export default function AmrapBuilder({
     setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...patch } : it)));
   }
 
-  function pickExercise(index: number, exerciseId: string) {
-    // Changer d'exercice réaligne l'unité sur ce que l'exercice suggère.
-    setItems((prev) =>
-      prev.map((it, i) => (i === index ? itemFrom(exerciseId, it.value) : it))
-    );
-  }
-
-  function addItem() {
-    if (items.length >= AMRAP_MAX_ITEMS) return;
-    setItems((prev) => [...prev, DEFAULT_ITEM]);
+  /**
+   * La pastille ajoute ou retire : c'est le même geste que pour une séance
+   * classique. Le dérouleur d'avant obligeait à ajouter une ligne vide, puis
+   * à l'ouvrir pour y chercher l'exercice — deux gestes et un catalogue
+   * invisible tant qu'on n'avait pas déplié.
+   */
+  function toggleExercise(exerciseId: string) {
+    setError(null);
+    setItems((prev) => {
+      const dedans = prev.findIndex((it) => it.exerciseId === exerciseId);
+      if (dedans >= 0) return prev.filter((_, i) => i !== dedans);
+      if (prev.length >= AMRAP_MAX_ITEMS) return prev;
+      const ex = DEFAULT_EXERCISES.find((e) => e.id === exerciseId);
+      // Une durée par défaut en secondes, un nombre de répétitions sinon :
+      // cinq secondes de gainage n'auraient aucun sens.
+      return [...prev, itemFrom(exerciseId, ex?.defaultUnit === 'seconds' ? 30 : 5)];
+    });
   }
 
   function removeItem(index: number) {
@@ -181,58 +196,85 @@ export default function AmrapBuilder({
         </div>
 
         <span className="pr-field-label">Le circuit</span>
-        <div className="amrap-lignes">
-          {items.map((item, i) => (
-            <div key={i} className="amrap-ligne">
-              <input
-                className="amrap-ligne-valeur"
-                type="number"
-                inputMode="numeric"
-                min="1"
-                aria-label={`Valeur de l'exercice ${i + 1}`}
-                value={item.value}
-                onChange={(e) => updateItem(i, { value: Number(e.target.value) })}
-              />
-              <select
-                className="amrap-ligne-nom"
-                value={item.exerciseId}
-                aria-label={`Exercice ${i + 1}`}
-                onChange={(e) => pickExercise(i, e.target.value)}
-              >
-                {BY_CATEGORY.map(([cat, list]) => (
-                  <optgroup key={cat} label={CATEGORY_LABELS[cat as Exercise['category']] || cat}>
-                    {list.map((ex) => (
-                      <option key={ex.id} value={ex.id}>{ex.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              {/* Une seule pastille qui bascule, plutôt que deux boutons :
-                  l'unité n'a que deux états et la ligne n'a pas la place. */}
-              <button
-                className="amrap-ligne-unite"
-                aria-label={`Unité de l'exercice ${i + 1} : ${item.unit === 'seconds' ? 'secondes' : 'répétitions'}`}
-                onClick={() => updateItem(i, { unit: item.unit === 'seconds' ? 'reps' : 'seconds' })}
-              >
-                {item.unit === 'seconds' ? 'sec' : 'reps'}
-              </button>
-              {items.length > 1 && (
-                <button
-                  className="amrap-ligne-retirer"
-                  aria-label={`Retirer l'exercice ${i + 1}`}
-                  onClick={() => removeItem(i)}
-                >
-                  <Trash2 size={15} />
-                </button>
-              )}
-            </div>
+        {items.length === 0 ? (
+          <p className="amrap-vide">Touche un exercice ci-dessous pour le mettre dans le circuit.</p>
+        ) : (
+          <div className="amrap-lignes">
+            {items.map((item, i) => {
+              const nom = DEFAULT_EXERCISES.find((e) => e.id === item.exerciseId)?.name
+                || item.exerciseId;
+              return (
+                <div key={item.exerciseId} className="amrap-ligne">
+                  <input
+                    className="amrap-ligne-valeur"
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    aria-label={`Valeur de ${nom}`}
+                    value={item.value}
+                    onChange={(e) => updateItem(i, { value: Number(e.target.value) })}
+                  />
+                  <span className="amrap-ligne-nom">{nom}</span>
+                  {/* Une seule pastille qui bascule, plutôt que deux boutons :
+                      l'unité n'a que deux états et la ligne n'a pas la place. */}
+                  <button
+                    className="amrap-ligne-unite"
+                    aria-label={`Unité de ${nom} : ${item.unit === 'seconds' ? 'secondes' : 'répétitions'}`}
+                    onClick={() => updateItem(i, { unit: item.unit === 'seconds' ? 'reps' : 'seconds' })}
+                  >
+                    {item.unit === 'seconds' ? 'sec' : 'reps'}
+                  </button>
+                  <button
+                    className="amrap-ligne-retirer"
+                    aria-label={`Retirer ${nom}`}
+                    onClick={() => removeItem(i)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Le catalogue s'affiche comme dans « Choisis tes exercices » : les
+            mêmes onglets, les mêmes pastilles. Deux écrans pour le même geste
+            n'avaient pas à se ressembler si peu. */}
+        <div className="amrap-filtres">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              className={`amrap-filtre ${filtre === cat ? 'actif' : ''}`}
+              onClick={() => setFiltre(cat)}
+            >
+              {CATEGORY_LABELS[cat] || cat}
+            </button>
           ))}
         </div>
 
-        {items.length < AMRAP_MAX_ITEMS && (
-          <button className="amrap-ajouter" onClick={addItem}>
-            <Plus size={15} /> Ajouter un exercice
-          </button>
+        <div className="amrap-catalogue">
+          {catalogue.map((ex) => {
+            const choisi = items.some((it) => it.exerciseId === ex.id);
+            return (
+              <button
+                key={ex.id}
+                className={`amrap-exo ${choisi ? 'choisi' : ''}`}
+                // Plein, on laisse retirer mais plus ajouter : sinon le clic
+                // ne fait rien et on croit l'app cassée.
+                disabled={complet && !choisi}
+                onClick={() => toggleExercise(ex.id)}
+              >
+                {ex.name}
+                {choisi && <Check size={14} />}
+              </button>
+            );
+          })}
+        </div>
+
+        {complet && (
+          <p className="amrap-plein">
+            {AMRAP_MAX_ITEMS} exercices, c'est le maximum pour un circuit.
+          </p>
         )}
 
         {error && <p className="pr-form-error">{error}</p>}

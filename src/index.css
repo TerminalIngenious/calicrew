@@ -6350,11 +6350,11 @@ body {
   flex: 1;
   min-width: 0;
   padding: 0.3rem 0;
-  background: transparent;
-  border: none;
   color: var(--text);
   font-size: 0.95rem;
-  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .amrap-ligne-unite {
@@ -6383,22 +6383,90 @@ body {
   cursor: pointer;
 }
 
-.amrap-ajouter {
+.amrap-vide {
+  margin: 0 0 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+/* Les onglets de catégories, comme sur « Choisis tes exercices ». */
+.amrap-filtres {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  margin: 0.9rem 0 0.7rem;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.amrap-filtres::-webkit-scrollbar {
+  display: none;
+}
+
+.amrap-filtre {
+  flex-shrink: 0;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.amrap-filtre.actif {
+  background: rgba(var(--accent-rgb), 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/*
+ * Le catalogue a sa propre hauteur et son propre défilement : sans ça, la
+ * fenêtre s'allongeait d'une catégorie à l'autre et le bouton « Lancer »
+ * partait hors de vue selon l'onglet ouvert.
+ */
+.amrap-catalogue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  max-height: 11rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-bottom: 1rem;
+  padding-right: 0.15rem;
+}
+
+.amrap-exo {
+  padding: 0.5rem 0.85rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border-top: 1px solid var(--border);
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
-  background: transparent;
-  color: var(--text-muted);
+  gap: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text);
+  font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
+}
+
+.amrap-exo.choisi {
+  background: rgba(var(--accent-rgb), 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.amrap-exo:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.amrap-plein {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
 .amrap-actions {
