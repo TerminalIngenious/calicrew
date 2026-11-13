@@ -62,14 +62,15 @@ export interface EventBadgeStyle {
 }
 
 /**
- * L'habillage complet des badges de créatine.
+ * L'habillage complet d'un badge dessiné en SVG.
  *
- * Ils sont dessinés en SVG de bout en bout, et pas en icône monochrome posée
- * sur une monture CSS comme les autres : il leur faut donc plus de tons que
- * n'en porte EventBadgeStyle — le cœur en trois couleurs, l'encre du dessin,
- * et l'accent du détail qui tranche (l'éclair, les rayons, la couronne).
+ * Ces badges-là sont dessinés de bout en bout, et pas en icône monochrome
+ * posée sur une monture CSS comme les badges de classement : il leur faut
+ * donc plus de tons que n'en porte EventBadgeStyle — le cœur en trois
+ * couleurs, l'encre du dessin, et l'accent du détail qui tranche (l'éclair,
+ * les rayons, la couronne).
  */
-export interface PaletteCreatine {
+export interface PaletteBadge {
   id: string;
   /** Monture métallique : clair, médian, sombre. */
   m1: string; m2: string; m3: string;
@@ -83,7 +84,7 @@ export interface PaletteCreatine {
 }
 
 /** Du plus court au plus long : l'ordre donne le dessin de chaque palier. */
-export const PALETTE_CREATINE: PaletteCreatine[] = [
+export const PALETTE_CREATINE: PaletteBadge[] = [
   {
     id: 'creatine-7',
     m1: '#ebfdff', m2: '#67d8ef', m3: '#1b6c89',
@@ -115,6 +116,75 @@ export const PALETTE_CREATINE: PaletteCreatine[] = [
     g1: '#ffffff', g2: '#fff0bd',
     acc1: '#ffffff', acc2: '#ffe8a3',
     glow: 'rgba(245, 195, 59, 0.65)',
+  },
+];
+
+/**
+ * Les pas, en deux rampes.
+ *
+ * La journée reste verte — on l'a faite avec ses jambes, dans la journée —
+ * et le cumul part dans le cuivre puis le platine : un coup d'éclat et une
+ * habitude ne se comparent pas, et les voir côte à côte ne doit pas donner
+ * envie de les ranger sur la même échelle.
+ */
+export const PALETTE_PAS: PaletteBadge[] = [
+  {
+    id: 'pas-jour-10000',
+    m1: '#e9fff2', m2: '#5fe39a', m3: '#15774a',
+    c1: '#5ff0a8', c2: '#10a861', c3: '#053122',
+    g1: '#ffffff', g2: '#c8ffdf',
+    acc1: '#ffffff', acc2: '#9bffc9',
+    glow: 'rgba(95, 227, 154, 0.55)',
+  },
+  {
+    id: 'pas-jour-15000',
+    m1: '#e2ffe6', m2: '#4ade5f', m3: '#136b22',
+    c1: '#63f07a', c2: '#12a63a', c3: '#05300f',
+    g1: '#ffffff', g2: '#ccffd4',
+    acc1: '#ffe27a', acc2: '#ffb020',
+    glow: 'rgba(74, 222, 95, 0.6)',
+  },
+  {
+    id: 'pas-jour-20000',
+    m1: '#f2ffd6', m2: '#a3e635', m3: '#4d7314',
+    c1: '#bef264', c2: '#6aa80c', c3: '#223d03',
+    g1: '#ffffff', g2: '#eaffc4',
+    acc1: '#ffffff', acc2: '#d9ff8a',
+    glow: 'rgba(163, 230, 53, 0.6)',
+  },
+  {
+    id: 'pas-jour-30000',
+    m1: '#fbffd9', m2: '#d9f95a', m3: '#6b7d10',
+    c1: '#e6ff6b', c2: '#9fc90a', c3: '#2c3a02',
+    g1: '#ffffff', g2: '#f6ffd0',
+    acc1: '#ff9d3d', acc2: '#ff5c1a',
+    glow: 'rgba(217, 249, 90, 0.65)',
+  },
+  {
+    id: 'pas-total-100000',
+    m1: '#ffe6c9', m2: '#e0924a', m3: '#7d4315',
+    c1: '#f0a65c', c2: '#b45f16', c3: '#3a1c06',
+    g1: '#ffffff', g2: '#ffe7cc',
+    acc1: '#ffffff', acc2: '#ffd4a3',
+    glow: 'rgba(224, 146, 74, 0.55)',
+  },
+  {
+    id: 'pas-total-500000',
+    m1: '#ffd8c0', m2: '#e2602a', m3: '#7c2a0c',
+    c1: '#f4713a', c2: '#c13a10', c3: '#3d1004',
+    g1: '#ffffff', g2: '#ffdccb',
+    acc1: '#ffd27a', acc2: '#ffa23d',
+    glow: 'rgba(226, 96, 42, 0.6)',
+  },
+  {
+    /* Le platine, et non un or de plus : le million doit se distinguer au
+       premier regard du badge d'une année de créatine. */
+    id: 'pas-total-1000000',
+    m1: '#ffffff', m2: '#cfe0ec', m3: '#5d7183',
+    c1: '#b9d3e6', c2: '#5d7e99', c3: '#111e29',
+    g1: '#ffffff', g2: '#e4f1fb',
+    acc1: '#fff6d5', acc2: '#f5c33b',
+    glow: 'rgba(207, 224, 236, 0.6)',
   },
 ];
 
@@ -185,64 +255,66 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
    * Une journée et un cumul ne récompensent pas la même chose : l'une est un
    * coup d'éclat, l'autre une habitude. Deux familles de couleurs, donc, pour
    * qu'on ne cherche pas à les comparer — le vert pour la journée, le cuivre
-   * pour les kilomètres empilés.
+   * puis le platine pour les kilomètres empilés. L'habillage du dessin est
+   * dans PALETTE_PAS ; ces champs-ci servent ce qui entoure le badge et
+   * reprennent les mêmes tons.
    */
   'pas-jour-10000': {
     titre: '10 000 pas',
     soustitre: 'En une journée',
-    glyphe: 'pas', encre: '#9bf6c0',
-    from: '#b9f7d2', mid: '#4ad98a', to: '#17704a',
-    coreFrom: '#0b2a1c', coreTo: '#04120c',
-    glow: 'rgba(74, 217, 138, 0.45)',
+    glyphe: 'pas', encre: '#c8ffdf',
+    from: '#e9fff2', mid: '#5fe39a', to: '#15774a',
+    coreFrom: '#10a861', coreTo: '#053122',
+    glow: 'rgba(95, 227, 154, 0.55)',
   },
   'pas-jour-15000': {
     titre: '15 000 pas',
     soustitre: 'En une journée',
-    glyphe: 'pas', encre: '#8df3b4',
-    from: '#9bf0c2', mid: '#22c56f', to: '#0d5c38',
-    coreFrom: '#09241a', coreTo: '#030f0a',
-    glow: 'rgba(34, 197, 111, 0.5)',
+    glyphe: 'pas', encre: '#ccffd4',
+    from: '#e2ffe6', mid: '#4ade5f', to: '#136b22',
+    coreFrom: '#12a63a', coreTo: '#05300f',
+    glow: 'rgba(74, 222, 95, 0.6)',
   },
   'pas-jour-20000': {
     titre: '20 000 pas',
     soustitre: 'En une journée',
-    glyphe: 'pas', encre: '#b8f5a0',
-    from: '#cdf7a6', mid: '#78d93a', to: '#2f6b14',
-    coreFrom: '#13260a', coreTo: '#060f04',
-    glow: 'rgba(120, 217, 58, 0.5)',
+    glyphe: 'pas', encre: '#eaffc4',
+    from: '#f2ffd6', mid: '#a3e635', to: '#4d7314',
+    coreFrom: '#6aa80c', coreTo: '#223d03',
+    glow: 'rgba(163, 230, 53, 0.6)',
   },
   'pas-jour-30000': {
     titre: '30 000 pas',
     soustitre: 'En une journée',
-    glyphe: 'pas', encre: '#e8ffb0',
-    from: '#f0ffc4', mid: '#c2f53a', to: '#6f8f1a',
-    coreFrom: '#1f2a06', coreTo: '#0b1003',
-    glow: 'rgba(194, 245, 58, 0.55)',
+    glyphe: 'pas', encre: '#f6ffd0',
+    from: '#fbffd9', mid: '#d9f95a', to: '#6b7d10',
+    coreFrom: '#9fc90a', coreTo: '#2c3a02',
+    glow: 'rgba(217, 249, 90, 0.65)',
   },
 
   'pas-total-100000': {
     titre: '100 000 pas',
     soustitre: 'Depuis le début',
-    glyphe: 'pas', encre: '#ffd1a3',
-    from: '#ffd9b5', mid: '#e08a46', to: '#8a4717',
-    coreFrom: '#2b1708', coreTo: '#140a03',
-    glow: 'rgba(224, 138, 70, 0.45)',
+    glyphe: 'pas', encre: '#ffe7cc',
+    from: '#ffe6c9', mid: '#e0924a', to: '#7d4315',
+    coreFrom: '#b45f16', coreTo: '#3a1c06',
+    glow: 'rgba(224, 146, 74, 0.55)',
   },
   'pas-total-500000': {
     titre: '500 000 pas',
     soustitre: 'Depuis le début',
-    glyphe: 'pas', encre: '#ffc488',
-    from: '#ffcf9e', mid: '#d4722a', to: '#78380f',
-    coreFrom: '#2e1505', coreTo: '#150902',
-    glow: 'rgba(212, 114, 42, 0.5)',
+    glyphe: 'pas', encre: '#ffdccb',
+    from: '#ffd8c0', mid: '#e2602a', to: '#7c2a0c',
+    coreFrom: '#c13a10', coreTo: '#3d1004',
+    glow: 'rgba(226, 96, 42, 0.6)',
   },
   'pas-total-1000000': {
     titre: 'Un million de pas',
     soustitre: 'Depuis le début',
-    glyphe: 'pas', encre: '#ffe9c2',
-    from: '#fff1d6', mid: '#f0a94a', to: '#a05c16',
-    coreFrom: '#33200a', coreTo: '#160d03',
-    glow: 'rgba(240, 169, 74, 0.6)',
+    glyphe: 'pas', encre: '#e4f1fb',
+    from: '#ffffff', mid: '#cfe0ec', to: '#5d7183',
+    coreFrom: '#5d7e99', coreTo: '#111e29',
+    glow: 'rgba(207, 224, 236, 0.6)',
   },
 };
 

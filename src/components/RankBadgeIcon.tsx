@@ -2,6 +2,7 @@ import { Zap, Target, Clock, Footprints } from 'lucide-react';
 import type { RankBadge, RankCategory } from '../types';
 import { BADGE_CATEGORIES, BADGE_RANKS, estEvenement, eventStyle } from '../lib/badges';
 import BadgeCreatine from './BadgeCreatine';
+import BadgePas from './BadgePas';
 
 const CATEGORY_ICONS: Record<RankCategory, typeof Zap> = {
   reps: Zap,
@@ -27,9 +28,10 @@ export default function RankBadgeIcon({
   if (estEvenement(badge)) {
     const style = eventStyle(badge);
     if (!style) return null;
-    // La créatine a son propre dessin, en couleur et de bout en bout : la
-    // monture CSS et son cœur sombre ne savent pas le rendre.
+    // Créatine et pas ont leur propre dessin, en couleur et de bout en bout :
+    // la monture CSS et son cœur sombre ne savent pas les rendre.
     if (style.glyphe === 'creatine') return <BadgeCreatine id={badge.id} size={size} />;
+    if (style.glyphe === 'pas') return <BadgePas id={badge.id} size={size} />;
     return (
       <div
         className="rank-badge event"
@@ -46,9 +48,7 @@ export default function RankBadgeIcon({
       >
         <div className="rank-badge-frame">
           <div className="rank-badge-core">
-            {style.glyphe === 'pas'
-              ? <GlyphePas size={size * 0.46} />
-              : <GlypheFaceId size={size * 0.42} />}
+            <GlypheFaceId size={size * 0.42} />
           </div>
         </div>
       </div>
@@ -89,27 +89,6 @@ export default function RankBadgeIcon({
  * visée. C'est le même signe que sur le sachet de booster et aux coins des
  * cartes de l'event — on doit reconnaître d'où il vient sans lire le nom.
  */
-/**
- * Deux empreintes, comme l'icône de la carte des pas.
- *
- * Décalées l'une par rapport à l'autre : alignées, elles se lisaient comme
- * deux taches et non comme une marche.
- */
-function GlyphePas({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 120 120" aria-hidden="true" fill="currentColor">
-      <g transform="translate(6 2) rotate(-8 30 60)">
-        <ellipse cx="30" cy="62" rx="15" ry="24" />
-        <ellipse cx="30" cy="31" rx="12" ry="10" />
-      </g>
-      <g transform="translate(-6 -2) rotate(8 86 60)">
-        <ellipse cx="86" cy="58" rx="15" ry="24" />
-        <ellipse cx="86" cy="89" rx="12" ry="10" />
-      </g>
-    </svg>
-  );
-}
-
 function GlypheFaceId({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" aria-hidden="true" fill="none">
