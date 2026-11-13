@@ -61,6 +61,63 @@ export interface EventBadgeStyle {
   glow: string;
 }
 
+/**
+ * L'habillage complet des badges de créatine.
+ *
+ * Ils sont dessinés en SVG de bout en bout, et pas en icône monochrome posée
+ * sur une monture CSS comme les autres : il leur faut donc plus de tons que
+ * n'en porte EventBadgeStyle — le cœur en trois couleurs, l'encre du dessin,
+ * et l'accent du détail qui tranche (l'éclair, les rayons, la couronne).
+ */
+export interface PaletteCreatine {
+  id: string;
+  /** Monture métallique : clair, médian, sombre. */
+  m1: string; m2: string; m3: string;
+  /** Cœur : le haut lumineux, le bas profond. */
+  c1: string; c2: string; c3: string;
+  /** Encre du dessin. */
+  g1: string; g2: string;
+  /** L'accent, pour le détail qui tranche. */
+  acc1: string; acc2: string;
+  glow: string;
+}
+
+/** Du plus court au plus long : l'ordre donne le dessin de chaque palier. */
+export const PALETTE_CREATINE: PaletteCreatine[] = [
+  {
+    id: 'creatine-7',
+    m1: '#ebfdff', m2: '#67d8ef', m3: '#1b6c89',
+    c1: '#5ff0ff', c2: '#12a5c9', c3: '#063b55',
+    g1: '#ffffff', g2: '#b9f2ff',
+    acc1: '#ffffff', acc2: '#8ae8ff',
+    glow: 'rgba(63, 216, 239, 0.55)',
+  },
+  {
+    id: 'creatine-30',
+    m1: '#f0ebff', m2: '#a78bfa', m3: '#3f1d8f',
+    c1: '#a78bfa', c2: '#5b2fd4', c3: '#200a4d',
+    g1: '#ffffff', g2: '#ddd3ff',
+    acc1: '#ffe27a', acc2: '#ffb020',
+    glow: 'rgba(139, 92, 246, 0.6)',
+  },
+  {
+    id: 'creatine-100',
+    m1: '#ffe4f1', m2: '#f472b6', m3: '#8d1046',
+    c1: '#ff6fae', c2: '#d41e6a', c3: '#4c0524',
+    g1: '#ffffff', g2: '#ffd9e9',
+    acc1: '#ffd27a', acc2: '#ff7a3d',
+    glow: 'rgba(244, 114, 182, 0.6)',
+  },
+  {
+    id: 'creatine-365',
+    m1: '#fff8dc', m2: '#f5c33b', m3: '#8a5207',
+    c1: '#ffd34d', c2: '#e08a09', c3: '#44220a',
+    g1: '#ffffff', g2: '#fff0bd',
+    acc1: '#ffffff', acc2: '#ffe8a3',
+    glow: 'rgba(245, 195, 59, 0.65)',
+  },
+];
+
 export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   faceid: {
     titre: 'FaceID',
@@ -78,48 +135,48 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   /*
    * Les paliers de créatine.
    *
-   * Un seul bleu qui s'approfondit de palier en palier, et non quatre
-   * couleurs sans rapport : posés côte à côte dans le profil, ils doivent se
-   * lire comme une progression et pas comme quatre récompenses
-   * indépendantes. Le dernier vire au blanc froid — c'est le seul qui sort
-   * de la famille, parce qu'une année entière mérite de ne ressembler à
-   * aucun des autres.
+   * Quatre familles franches — aqua, indigo, magma, or — et non quatre bleus
+   * voisins : posés côte à côte dans le profil, les quatre doivent se
+   * distinguer au premier coup d'œil, et la rampe doit se lire comme une
+   * montée en valeur. L'habillage complet du dessin est dans
+   * PALETTE_CREATINE ; les champs ci-dessous servent ce qui entoure le badge
+   * (fenêtre de détail, animation de déblocage) et reprennent les mêmes tons.
    */
   'creatine-7': {
     titre: 'Créatine',
     soustitre: '7 jours d\u2019affilée',
     glyphe: 'creatine',
-    encre: '#9fd4ff',
-    from: '#cfe9ff', mid: '#7fc1f2', to: '#2f6d9e',
-    coreFrom: '#0e2434', coreTo: '#06131d',
-    glow: 'rgba(127, 193, 242, 0.45)',
+    encre: '#b9f2ff',
+    from: '#ebfdff', mid: '#67d8ef', to: '#1b6c89',
+    coreFrom: '#12a5c9', coreTo: '#063b55',
+    glow: 'rgba(63, 216, 239, 0.55)',
   },
   'creatine-30': {
     titre: 'Créatine',
     soustitre: 'Un mois d\u2019affilée',
     glyphe: 'creatine',
-    encre: '#8ec8ff',
-    from: '#a8d8ff', mid: '#3f9ae8', to: '#15507f',
-    coreFrom: '#0a1f33', coreTo: '#04101b',
-    glow: 'rgba(63, 154, 232, 0.5)',
+    encre: '#ddd3ff',
+    from: '#f0ebff', mid: '#a78bfa', to: '#3f1d8f',
+    coreFrom: '#5b2fd4', coreTo: '#200a4d',
+    glow: 'rgba(139, 92, 246, 0.6)',
   },
   'creatine-100': {
     titre: 'Créatine',
     soustitre: 'Cent jours d\u2019affilée',
     glyphe: 'creatine',
-    encre: '#b6bdff',
-    from: '#c3cbff', mid: '#5c6cf0', to: '#262d94',
-    coreFrom: '#121642', coreTo: '#070a21',
-    glow: 'rgba(92, 108, 240, 0.55)',
+    encre: '#ffd9e9',
+    from: '#ffe4f1', mid: '#f472b6', to: '#8d1046',
+    coreFrom: '#d41e6a', coreTo: '#4c0524',
+    glow: 'rgba(244, 114, 182, 0.6)',
   },
   'creatine-365': {
     titre: 'Créatine',
     soustitre: 'Une année d\u2019affilée',
     glyphe: 'creatine',
-    encre: '#eaf4ff',
-    from: '#ffffff', mid: '#dbe9f7', to: '#8aa6bd',
-    coreFrom: '#1b2530', coreTo: '#0a0f14',
-    glow: 'rgba(219, 233, 247, 0.6)',
+    encre: '#fff0bd',
+    from: '#fff8dc', mid: '#f5c33b', to: '#8a5207',
+    coreFrom: '#e08a09', coreTo: '#44220a',
+    glow: 'rgba(245, 195, 59, 0.65)',
   },
 
   /*

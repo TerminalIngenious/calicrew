@@ -1,6 +1,7 @@
 import { Zap, Target, Clock, Footprints } from 'lucide-react';
 import type { RankBadge, RankCategory } from '../types';
 import { BADGE_CATEGORIES, BADGE_RANKS, estEvenement, eventStyle } from '../lib/badges';
+import BadgeCreatine from './BadgeCreatine';
 
 const CATEGORY_ICONS: Record<RankCategory, typeof Zap> = {
   reps: Zap,
@@ -26,6 +27,9 @@ export default function RankBadgeIcon({
   if (estEvenement(badge)) {
     const style = eventStyle(badge);
     if (!style) return null;
+    // La créatine a son propre dessin, en couleur et de bout en bout : la
+    // monture CSS et son cœur sombre ne savent pas le rendre.
+    if (style.glyphe === 'creatine') return <BadgeCreatine id={badge.id} size={size} />;
     return (
       <div
         className="rank-badge event"
@@ -42,8 +46,8 @@ export default function RankBadgeIcon({
       >
         <div className="rank-badge-frame">
           <div className="rank-badge-core">
-            {style.glyphe === 'creatine' ? <GlypheCreatine size={size * 0.44} />
-              : style.glyphe === 'pas' ? <GlyphePas size={size * 0.46} />
+            {style.glyphe === 'pas'
+              ? <GlyphePas size={size * 0.46} />
               : <GlypheFaceId size={size * 0.42} />}
           </div>
         </div>
@@ -85,31 +89,6 @@ export default function RankBadgeIcon({
  * visée. C'est le même signe que sur le sachet de booster et aux coins des
  * cartes de l'event — on doit reconnaître d'où il vient sans lire le nom.
  */
-/**
- * La goutte de la créatine.
- *
- * Le même dessin que l'icône de la carte sur l'accueil : le badge doit se
- * rattacher sans effort au geste qui l'a fait gagner.
- */
-function GlypheCreatine({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 120 120" aria-hidden="true" fill="none">
-      <path
-        d="M60 10c18 24 30 39 30 54a30 30 0 01-60 0c0-15 12-30 30-54z"
-        fill="currentColor"
-      />
-      {/* Le reflet, en creux : une goutte pleine se lit comme une tache. */}
-      <path
-        d="M47 68a13 13 0 0013-13"
-        stroke="var(--cat-to, #000)"
-        strokeWidth={7}
-        strokeLinecap="round"
-        opacity={0.55}
-      />
-    </svg>
-  );
-}
-
 /**
  * Deux empreintes, comme l'icône de la carte des pas.
  *
