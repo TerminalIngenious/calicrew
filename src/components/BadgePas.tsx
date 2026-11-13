@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { PALETTE_PAS } from '../lib/badges';
 import BadgeHex, { type EncresGlyphe } from './BadgeHex';
 
@@ -21,37 +22,50 @@ export default function BadgePas({ id, size = 72 }: { id: string; size?: number 
   );
 }
 
-/** La paire d'empreintes, décalée : alignée, elle se lit comme deux taches. */
-function Empreintes({ fill }: { fill: string }) {
+/*
+ * Les pieds viennent de l'icône `Footprints` de lucide — exactement celle
+ * de la carte des pas sur l'accueil. Les empreintes dessinées à la main
+ * n'étaient pas les mêmes d'un badge à l'autre que sur l'écran où l'on
+ * compte ses pas, et deux pieds différents pour la même chose, ça se voit.
+ *
+ * Dessin au trait, dans sa grille d'origine de vingt-quatre : les
+ * composants ci-dessous le remettent à l'échelle du centième des autres
+ * dessins, pour qu'on puisse l'y composer sans calcul.
+ */
+const PIED_GAUCHE = 'M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z';
+const PIED_DROIT = 'M20 20v-2.38c0-1.12 1.03-2.12 1-4.62-.03-2.72-1.49-6-4.5-6C14.63 7 14 8.8 14 10.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z';
+
+/** Le trait de lucide, épaissi : à côté de dessins pleins, il s'effaçait. */
+function Trait({ encre, children }: { encre: string; children: ReactNode }) {
   return (
-    <g fill={fill} transform="scale(0.833)">
-      <g transform="translate(6 2) rotate(-8 30 60)">
-        <ellipse cx="30" cy="62" rx="15" ry="24" />
-        <ellipse cx="30" cy="31" rx="12" ry="10" />
-      </g>
-      <g transform="translate(-6 -2) rotate(8 86 60)">
-        <ellipse cx="86" cy="58" rx="15" ry="24" />
-        <ellipse cx="86" cy="89" rx="12" ry="10" />
-      </g>
+    <g stroke={encre} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none">
+      {children}
     </g>
   );
 }
 
-/**
- * Une seule empreinte, quand il y a autre chose autour.
- *
- * Avec les orteils détachés, et pas seulement une grosse ellipse surmontée
- * d'une petite : sans eux, le dessin se lisait comme une quille de bowling.
- */
-function Empreinte({ fill }: { fill: string }) {
+/** La paire, à l'échelle du centième. */
+function Empreintes({ encre }: { encre: string }) {
   return (
-    <g fill={fill}>
-      <path d="M34 56c0-13 7-21 16-21s16 8 16 21c0 8-3 12-3 19 0 11-5 19-13 19s-13-8-13-19c0-7-3-11-3-19z" />
-      <ellipse cx="28" cy="38" rx="6" ry="7.5" transform="rotate(-22 28 38)" />
-      <ellipse cx="39" cy="26" rx="6.5" ry="8" />
-      <ellipse cx="51" cy="22" rx="6.5" ry="8" />
-      <ellipse cx="62" cy="26" rx="6" ry="7.5" />
-      <ellipse cx="72" cy="38" rx="5.5" ry="7" transform="rotate(22 72 38)" />
+    <g transform="translate(-9 -8) scale(4.3)">
+      <Trait encre={encre}>
+        <path d={PIED_GAUCHE} />
+        <path d={PIED_DROIT} />
+        <path d="M16 17h4" />
+        <path d="M4 13h4" />
+      </Trait>
+    </g>
+  );
+}
+
+/** Un seul pied, quand il y a autre chose autour. */
+function Empreinte({ encre, pose }: { encre: string; pose: string }) {
+  return (
+    <g transform={pose}>
+      <Trait encre={encre}>
+        <path d={PIED_GAUCHE} />
+        <path d="M4 13h4" />
+      </Trait>
     </g>
   );
 }
@@ -60,7 +74,7 @@ function Glyphe({ palier, e }: { palier: number; e: EncresGlyphe }) {
   switch (palier) {
     // 10 000 : la paire d'empreintes. Le premier palier dit juste « tu as marché ».
     case 0:
-      return <Empreintes fill={e.encre} />;
+      return <Empreintes encre={e.encre} />;
 
     // 15 000 : la chaussure. On n'est plus sorti en savates.
     case 1:
@@ -84,9 +98,9 @@ function Glyphe({ palier, e }: { palier: number; e: EncresGlyphe }) {
       return (
         <g>
           <g stroke={e.accent} strokeWidth="6.5" strokeLinecap="round">
-            <path d="M6 32h18M2 52h16M8 72h20" />
+            <path d="M4 30h26M0 54h20M6 78h28" />
           </g>
-          <g transform="translate(16 0) scale(0.92) translate(0 4)"><Empreinte fill={e.encre} /></g>
+          <Empreinte encre={e.encre} pose="translate(27 -7) scale(5.6)" />
         </g>
       );
 
@@ -98,9 +112,7 @@ function Glyphe({ palier, e }: { palier: number; e: EncresGlyphe }) {
             d="M50 2c8 18 30 26 30 50a30 30 0 01-60 0c0-16 10-21 15-31 2 9 6 13 9 15-3-13-1-24 6-34z"
             fill={e.accent}
           />
-          <g transform="translate(50 62) scale(0.62) translate(-50 -52)">
-            <Empreinte fill={e.encre} />
-          </g>
+          <Empreinte encre={e.encre} pose="translate(32 35) scale(2.75)" />
         </g>
       );
 
