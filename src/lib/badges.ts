@@ -83,6 +83,23 @@ export interface PaletteBadge {
   glow: string;
 }
 
+/**
+ * Le badge de l'event FaceID.
+ *
+ * Le vert néon de l'event reste sur la monture — c'est sa signature, on la
+ * reconnaît du sachet de booster — mais le cœur part sur l'émeraude : les
+ * badges de pas à la journée sont déjà en vert-citron, et deux familles de
+ * la même teinte se confondraient dans le bandeau du profil.
+ */
+export const PALETTE_FACEID: PaletteBadge = {
+  id: 'event-faceid',
+  m1: '#f2ffc4', m2: '#b6ff00', m3: '#4f7400',
+  c1: '#2bf0a6', c2: '#0b9c70', c3: '#032a1c',
+  g1: '#ffffff', g2: '#d6fff0',
+  acc1: '#eaff8a', acc2: '#b6ff00',
+  glow: 'rgba(182, 255, 0, 0.55)',
+};
+
 /** Du plus court au plus long : l'ordre donne le dessin de chaque palier. */
 export const PALETTE_CREATINE: PaletteBadge[] = [
   {
@@ -193,13 +210,13 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
     titre: 'FaceID',
     soustitre: 'Fichier complet',
     glyphe: 'faceid',
-    encre: '#5cf5ab',
-    from: '#e4ff9e',
+    encre: '#d6fff0',
+    from: '#f2ffc4',
     mid: '#b6ff00',
-    to: '#5a8200',
-    coreFrom: '#2b3d05',
-    coreTo: '#0c1104',
-    glow: 'rgba(182, 255, 0, 0.5)',
+    to: '#4f7400',
+    coreFrom: '#0b9c70',
+    coreTo: '#032a1c',
+    glow: 'rgba(182, 255, 0, 0.55)',
   },
 
   /*

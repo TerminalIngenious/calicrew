@@ -121,11 +121,15 @@ export default function BadgeHex({
 
 const HEX = '50,1 93.5,25.5 93.5,74.5 50,99 6.5,74.5 6.5,25.5';
 
-/* La place laissée au dessin dans le cœur. Moins large que haute : un
-   hexagone pointe en haut se referme vite, et un dessin qui remplirait les
-   cinquante-six pixels du milieu mordrait sur la monture en haut et en bas. */
-const LARGEUR = 56;
-const HAUTEUR = 50;
+/* La place laissée au dessin dans le cœur.
+ *
+ * Le plus grand carré qui tient dans l'hexagone intérieur fait quarante-huit
+ * de côté : l'hexagone se referme vite en haut et en bas, et un dessin calé
+ * sur la largeur du milieu mordait sur la monture par ses quatre angles.
+ * Cinquante sur quarante-quatre, c'est ça plus une marge — un dessin doit
+ * respirer dans son cadre, pas le toucher. */
+const LARGEUR = 50;
+const HAUTEUR = 44;
 /* Avant la mesure : ce que faisait le cadre quand chaque dessin était censé
    remplir son carré de cent. */
 const POSE_DEFAUT = 'translate(50 50) scale(0.6) translate(-50 -50)';
