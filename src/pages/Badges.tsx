@@ -88,7 +88,10 @@ export default function Badges() {
                 <span className="badge-modal-metal">{eventStyle(selectedBadge)?.soustitre}</span>
                 <div className="badge-modal-meta">
                   <span>{eventStyle(selectedBadge)?.rubrique ?? 'Événement'}</span>
-                  <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
+                  {/* Créatine et pas n'ont pas de mois : ils ne se jouent pas
+                      du 1er au dernier jour comme un classement. Sans ce
+                      garde-fou, la fenêtre affichait « undefined ». */}
+                  {selectedBadge.monthKey && <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>}
                 </div>
               </>
             ) : (
