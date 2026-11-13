@@ -6221,10 +6221,9 @@ body {
 
 /* ── Constructeur d'AMRAP ── */
 
+/* La page laisse la place à la barre d'actions, qui reste collée en bas. */
 .amrap-builder {
-  max-height: 88dvh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  padding-bottom: 6rem;
 }
 
 .amrap-builder-intro {
@@ -6267,10 +6266,23 @@ body {
   border-color: var(--accent);
 }
 
-.modal-card input.amrap-nom {
+.amrap-nom {
+  width: 100%;
   margin-bottom: 1rem;
-  text-align: center;
+  padding: 0.8rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
   font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+
+.amrap-nom:focus {
+  border-color: var(--accent);
 }
 
 /* Le réglage fin, pour les durées qui ne sont pas rondes. */
@@ -6317,13 +6329,8 @@ body {
   border-top: 1px solid var(--border);
 }
 
-/*
- * La valeur garde sa largeur quoi qu'il arrive.
- *
- * `.modal-card input` impose 100 % à tout champ d'une fenêtre : sans ces
- * deux classes pour l'emporter, l'unité et la corbeille repartaient hors de
- * l'écran, comme avant.
- */
+/* La valeur garde sa largeur quoi qu'il arrive : laissée libre, elle
+   poussait l'unité et la corbeille hors de l'écran. */
 .amrap-ligne .amrap-ligne-valeur {
   flex: 0 0 3.4rem;
   width: 3.4rem;
@@ -6422,20 +6429,11 @@ body {
   color: var(--accent);
 }
 
-/*
- * Le catalogue a sa propre hauteur et son propre défilement : sans ça, la
- * fenêtre s'allongeait d'une catégorie à l'autre et le bouton « Lancer »
- * partait hors de vue selon l'onglet ouvert.
- */
 .amrap-catalogue {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  max-height: 11rem;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   margin-bottom: 1rem;
-  padding-right: 0.15rem;
 }
 
 .amrap-exo {
@@ -6469,9 +6467,18 @@ body {
   color: var(--text-muted);
 }
 
+/* Collée en bas de l'écran : la page peut descendre plus bas que lui, et le
+   bouton qui lance la séance n'a pas à se mériter au défilement. */
 .amrap-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
   display: flex;
   gap: 0.6rem;
+  padding: 0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
 }
 
 .amrap-actions button {

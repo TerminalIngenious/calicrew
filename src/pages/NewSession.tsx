@@ -26,7 +26,7 @@ export default function NewSession() {
   const { user } = useAuth();
   const { sessions } = useUserSessions();
   const navigate = useNavigate();
-  const [step, setStep] = useState<'select' | 'config'>('select');
+  const [step, setStep] = useState<'select' | 'config' | 'amrap'>('select');
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseConfigs, setExerciseConfigs] = useState<
     { exercise: Exercise; targetSets: number; targetTotal: number; unit: SetUnit; weighted: boolean; weight: number; weightType: WeightType }[]
@@ -51,7 +51,6 @@ export default function NewSession() {
   const [savingEdit, setSavingEdit] = useState(false);
   const [editModeCategory, setEditModeCategory] = useState<string | null>(null);
   const [selectedCustomExo, setSelectedCustomExo] = useState<Exercise | null>(null);
-  const [showAmrap, setShowAmrap] = useState(false);
   const [recherche, setRecherche] = useState('');
   /** Catégorie affichée. 'frequents' = les exercices que le joueur fait vraiment. */
   const [filtre, setFiltre] = useState<string>('frequents');
@@ -448,6 +447,13 @@ export default function NewSession() {
   const categorieAUnPerso =
     filtreActif !== 'frequents' && allExercises.some((e) => e.category === filtreActif && e.isCustom);
 
+  /* L'AMRAP a sa page, et non une fenêtre posée sur le catalogue : on y
+     choisit des exercices, une durée et un nom — c'est une préparation de
+     séance, pas une question à laquelle on répond en deux secondes. */
+  if (step === 'amrap') {
+    return <AmrapBuilder onClose={() => setStep('select')} onStart={startAmrap} />;
+  }
+
   if (step === 'select') {
     return (
       <div className="page">
@@ -463,7 +469,7 @@ export default function NewSession() {
             avec titres au-dessus du catalogue, et repoussaient d'autant ce que
             la page sert à faire : choisir des exercices. */}
         <div className="exo-raccourcis">
-          <button className="exo-raccourci amrap" onClick={() => setShowAmrap(true)}>
+          <button className="exo-raccourci amrap" onClick={() => setStep('amrap')}>
             <Zap size={16} />
             <span>AMRAP</span>
           </button>
@@ -475,10 +481,6 @@ export default function NewSession() {
             </button>
           ))}
         </div>
-
-        {showAmrap && (
-          <AmrapBuilder onClose={() => setShowAmrap(false)} onStart={startAmrap} />
-        )}
 
         <div className="exo-search">
           <Search size={16} />
