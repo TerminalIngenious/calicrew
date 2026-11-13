@@ -60,7 +60,7 @@ export default function Badges() {
                   de quand il avait été gagné. */}
               <span className="badge-cell-mois">
                 {estEvenement(badge)
-                  ? eventStyle(badge)?.evenement ?? 'Événement'
+                  ? eventStyle(badge)?.rubrique ?? 'Événement'
                   : badgeMonthLabel(badge.monthKey)}
               </span>
             </div>
@@ -87,7 +87,7 @@ export default function Badges() {
               <>
                 <span className="badge-modal-metal">{eventStyle(selectedBadge)?.soustitre}</span>
                 <div className="badge-modal-meta">
-                  <span>{eventStyle(selectedBadge)?.evenement ?? 'Événement'}</span>
+                  <span>{eventStyle(selectedBadge)?.rubrique ?? 'Événement'}</span>
                   <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
                 </div>
               </>

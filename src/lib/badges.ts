@@ -48,14 +48,13 @@ export interface EventBadgeStyle {
   titre: string;
   soustitre: string;
   /**
-   * Le nom de l'événement d'où vient le badge, quand il en a un.
+   * Ce qu'on a fait pour l'avoir, en un mot, sous le titre.
    *
-   * Les paliers de créatine et de pas ne viennent d'aucun événement : ils se
-   * gagnent toute l'année, et un « Événement » générique leur va très bien.
-   * Le badge FaceID, lui, ne se regagnera jamais — autant dire d'où il
-   * sort, sinon rien ne le rattache à l'event dans un an.
+   * Tous ces badges affichaient « Événement », ce qui n'est vrai que du
+   * seul badge FaceID : une série de jours de créatine ou un compteur de
+   * pas ne viennent d'aucun event, ils se gagnent toute l'année.
    */
-  evenement?: string;
+  rubrique: string;
   /** Le dessin au cœur du badge. */
   glyphe: 'faceid' | 'creatine' | 'pas';
   /** Sa couleur. Écrite en dur, elle restait verte sur tous les badges. */
@@ -216,9 +215,9 @@ export const PALETTE_PAS: PaletteBadge[] = [
 
 export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   faceid: {
-    titre: 'Fichier complet',
-    soustitre: 'Les trente-six cartes',
-    evenement: 'Event FaceID',
+    titre: 'FaceID',
+    soustitre: 'Fichier complet',
+    rubrique: 'Événement',
     glyphe: 'faceid',
     encre: '#d6fff0',
     from: '#f2ffc4',
@@ -242,6 +241,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'creatine-7': {
     titre: 'Créatine',
     soustitre: '7 jours d\u2019affilée',
+    rubrique: 'Régularité',
     glyphe: 'creatine',
     encre: '#b9f2ff',
     from: '#ebfdff', mid: '#67d8ef', to: '#1b6c89',
@@ -251,6 +251,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'creatine-30': {
     titre: 'Créatine',
     soustitre: 'Un mois d\u2019affilée',
+    rubrique: 'Régularité',
     glyphe: 'creatine',
     encre: '#ddd3ff',
     from: '#f0ebff', mid: '#a78bfa', to: '#3f1d8f',
@@ -260,6 +261,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'creatine-100': {
     titre: 'Créatine',
     soustitre: 'Cent jours d\u2019affilée',
+    rubrique: 'Régularité',
     glyphe: 'creatine',
     encre: '#ffd9e9',
     from: '#ffe4f1', mid: '#f472b6', to: '#8d1046',
@@ -269,6 +271,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'creatine-365': {
     titre: 'Créatine',
     soustitre: 'Une année d\u2019affilée',
+    rubrique: 'Régularité',
     glyphe: 'creatine',
     encre: '#fff0bd',
     from: '#fff8dc', mid: '#f5c33b', to: '#8a5207',
@@ -289,6 +292,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-jour-10000': {
     titre: '10 000 pas',
     soustitre: 'En une journée',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#c8ffdf',
     from: '#e9fff2', mid: '#5fe39a', to: '#15774a',
     coreFrom: '#10a861', coreTo: '#053122',
@@ -297,6 +301,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-jour-15000': {
     titre: '15 000 pas',
     soustitre: 'En une journée',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#ccffd4',
     from: '#e2ffe6', mid: '#4ade5f', to: '#136b22',
     coreFrom: '#12a63a', coreTo: '#05300f',
@@ -305,6 +310,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-jour-20000': {
     titre: '20 000 pas',
     soustitre: 'En une journée',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#eaffc4',
     from: '#f2ffd6', mid: '#a3e635', to: '#4d7314',
     coreFrom: '#6aa80c', coreTo: '#223d03',
@@ -313,6 +319,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-jour-30000': {
     titre: '30 000 pas',
     soustitre: 'En une journée',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#f6ffd0',
     from: '#fbffd9', mid: '#d9f95a', to: '#6b7d10',
     coreFrom: '#9fc90a', coreTo: '#2c3a02',
@@ -322,6 +329,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-total-100000': {
     titre: '100 000 pas',
     soustitre: 'Depuis le début',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#ffe7cc',
     from: '#ffe6c9', mid: '#e0924a', to: '#7d4315',
     coreFrom: '#b45f16', coreTo: '#3a1c06',
@@ -330,6 +338,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-total-500000': {
     titre: '500 000 pas',
     soustitre: 'Depuis le début',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#ffdccb',
     from: '#ffd8c0', mid: '#e2602a', to: '#7c2a0c',
     coreFrom: '#c13a10', coreTo: '#3d1004',
@@ -338,6 +347,7 @@ export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   'pas-total-1000000': {
     titre: 'Un million de pas',
     soustitre: 'Depuis le début',
+    rubrique: 'Objectif',
     glyphe: 'pas', encre: '#e4f1fb',
     from: '#ffffff', mid: '#cfe0ec', to: '#5d7183',
     coreFrom: '#5d7e99', coreTo: '#111e29',
