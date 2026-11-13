@@ -47,6 +47,15 @@ const MONTHS = [
 export interface EventBadgeStyle {
   titre: string;
   soustitre: string;
+  /**
+   * Le nom de l'événement d'où vient le badge, quand il en a un.
+   *
+   * Les paliers de créatine et de pas ne viennent d'aucun événement : ils se
+   * gagnent toute l'année, et un « Événement » générique leur va très bien.
+   * Le badge FaceID, lui, ne se regagnera jamais — autant dire d'où il
+   * sort, sinon rien ne le rattache à l'event dans un an.
+   */
+  evenement?: string;
   /** Le dessin au cœur du badge. */
   glyphe: 'faceid' | 'creatine' | 'pas';
   /** Sa couleur. Écrite en dur, elle restait verte sur tous les badges. */
@@ -207,8 +216,9 @@ export const PALETTE_PAS: PaletteBadge[] = [
 
 export const EVENT_BADGES: Record<string, EventBadgeStyle> = {
   faceid: {
-    titre: 'FaceID',
-    soustitre: 'Fichier complet',
+    titre: 'Fichier complet',
+    soustitre: 'Les trente-six cartes',
+    evenement: 'Event FaceID',
     glyphe: 'faceid',
     encre: '#d6fff0',
     from: '#f2ffc4',

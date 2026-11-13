@@ -59,7 +59,9 @@ export default function Badges() {
                   en cours. Un badge daté « Casier Judiciaire » ne disait rien
                   de quand il avait été gagné. */}
               <span className="badge-cell-mois">
-                {estEvenement(badge) ? 'Événement' : badgeMonthLabel(badge.monthKey)}
+                {estEvenement(badge)
+                  ? eventStyle(badge)?.evenement ?? 'Événement'
+                  : badgeMonthLabel(badge.monthKey)}
               </span>
             </div>
           ))}
@@ -85,7 +87,7 @@ export default function Badges() {
               <>
                 <span className="badge-modal-metal">{eventStyle(selectedBadge)?.soustitre}</span>
                 <div className="badge-modal-meta">
-                  <span>Événement</span>
+                  <span>{eventStyle(selectedBadge)?.evenement ?? 'Événement'}</span>
                   <span>{badgeMonthLabel(selectedBadge.monthKey)}</span>
                 </div>
               </>
