@@ -14,6 +14,7 @@ import FaceIdButton from '../components/FaceIdButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer, ChevronRight } from 'lucide-react';
+import PassTrack from '../components/PassTrack';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import Loader from '../components/Loader';
@@ -810,39 +811,11 @@ export default function BattlePass() {
       )}
 
       {tab === 'pass' && (
-        <div className="bp-track-table">
-          <div className="bp-track-header">
-            <div className="bp-track-col-lvl">Niv.</div>
-            <div className="bp-track-col-reward">Récompense</div>
-          </div>
-          {season.passLevels.map((lvl) => {
-            const reached = levelInfo.level >= lvl.level;
-            const isCurrent = levelInfo.level === lvl.level - 1;
-
-            const special = lvl.freeChest && lvl.freeChest !== 'commune';
-            const lvlChestColor = special ? RARITY_COLORS[lvl.freeChest!] : undefined;
-            const lvlChestLabel = special
-              ? `Coffre ${getRarityLabel(lvl.freeChest!, season.id)}`
-              : 'Coffre';
-
-            return (
-              <div
-                key={lvl.level}
-                className={`bp-track-row ${reached ? 'reached' : ''} ${isCurrent ? 'current' : ''} ${special ? 'special' : ''}`}
-              >
-                <div className="bp-track-col-lvl">
-                  <span className="bp-track-lvl-num">{reached ? <Check size={12} /> : lvl.level}</span>
-                </div>
-                <div className="bp-track-col-reward">
-                  <div className="bp-track-chest" style={lvlChestColor ? { color: lvlChestColor } : undefined}>
-                    <Package size={14} />
-                    <span>{lvlChestLabel}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <PassTrack
+          levels={season.passLevels}
+          currentLevel={levelInfo.level}
+          seasonId={season.id}
+        />
       )}
 
       <BottomNav />
