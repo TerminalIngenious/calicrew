@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Check, Info, X } from 'lucide-react';
 import { getRarityLabel } from '../lib/cards';
 import CoffrePass from './CoffrePass';
@@ -24,6 +24,20 @@ export default function PassTrack({
 }) {
   const [info, setInfo] = useState<CardRarity | null>(null);
 
+  /*
+   * On arrive sur son palier, pas sur le premier.
+   *
+   * Cent paliers font quatorze mille pixels : le joueur de niveau soixante
+   * ouvrait l'onglet sur le coffre du niveau 1, qu'il a gagné il y a deux
+   * mois, et devait dérouler la moitié de la page pour voir le prochain.
+   * Avant la peinture, pour qu'on ne voie pas la page sauter.
+   */
+  const prochainRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    prochainRef.current?.scrollIntoView({ block: 'center' });
+    // Au montage seulement : après, la position est au joueur.
+  }, []);
+
   return (
     <div className="bp-piste">
       {levels.map((lvl) => {
@@ -36,6 +50,7 @@ export default function PassTrack({
         return (
           <div
             key={lvl.level}
+            ref={prochain ? prochainRef : undefined}
             className={`bp-palier ${atteint ? 'atteint' : ''} ${prochain ? 'prochain' : ''}`}
           >
             <div className="bp-palier-niveau">
