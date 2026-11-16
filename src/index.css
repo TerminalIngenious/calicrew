@@ -8755,3 +8755,93 @@ body {
   font-weight: 700;
   color: #ff7a18;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   La bulle de pause
+   Elle prend le relais quand le chrono de pause sort de l'écran.
+   ────────────────────────────────────────────────────────────── */
+
+.rest-bulle {
+  position: fixed;
+  right: 0.9rem;
+  /* Au-dessus du bouton « Terminer », qui est déjà posé en bas. */
+  bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--bg-card);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  animation: rest-bulle-entree 0.18s ease-out;
+}
+
+/* Le cadran et le temps se superposent dans la même case de grille. */
+.rest-bulle svg,
+.rest-bulle-temps {
+  grid-area: 1 / 1;
+}
+
+.rest-bulle svg {
+  width: 64px;
+  height: 64px;
+  /* Le zéro de l'arc en haut, et non à trois heures. */
+  transform: rotate(-90deg);
+}
+
+.rest-bulle-fond {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 5;
+}
+
+.rest-bulle-arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  /* Pas d'animation sur le pointillé : il bouge déjà chaque seconde, et une
+     transition le ferait traîner derrière le chiffre. */
+}
+
+.rest-bulle-temps {
+  font-size: 0.86rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.rest-bulle.ending .rest-bulle-arc {
+  stroke: #ef4444;
+}
+
+.rest-bulle.ending .rest-bulle-temps {
+  color: #ef4444;
+}
+
+.rest-bulle.ending {
+  animation: rest-bulle-pulse 1s ease-in-out infinite;
+}
+
+@keyframes rest-bulle-entree {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes rest-bulle-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+/* Une animation qui pulse n'a rien d'informatif : le chiffre et la couleur
+   disent déjà la fin. */
+@media (prefers-reduced-motion: reduce) {
+  .rest-bulle,
+  .rest-bulle.ending {
+    animation: none;
+  }
+}

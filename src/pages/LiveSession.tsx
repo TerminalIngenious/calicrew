@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -30,6 +30,9 @@ function formatTime(seconds: number): string {
 /** Périmètre du cadran, pour animer l'arc par son pointillé. */
 const CIRCONFERENCE = 2 * Math.PI * 128;
 
+/** Idem pour la petite bulle de pause. */
+const ARC_BULLE = 2 * Math.PI * 25;
+
 export default function LiveSession() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -49,6 +52,10 @@ export default function LiveSession() {
   const [restTime, setRestTime] = useState(0);
   const [restRunning, setRestRunning] = useState(false);
   const [restDuration, setRestDuration] = useState(90); // par défaut 1:30
+  /** Le bloc de pause est-il à l'écran ? Sinon, la bulle prend le relais. */
+  const [restVisible, setRestVisible] = useState(true);
+  const restSectionRef = useRef<HTMLDivElement | null>(null);
+  const restObsRef = useRef<IntersectionObserver | null>(null);
   const [showRestSettings, setShowRestSettings] = useState(false);
   const restRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
@@ -107,6 +114,28 @@ export default function LiveSession() {
       if (data.completed) setFinished(true);
     }
   }
+
+  /*
+   * Une ref de rappel, et non un effet : le bloc de pause n'existe que dans
+   * la vue « séance en cours ». Un effet monté une fois ne saurait pas qu'on
+   * revient d'un récap ou d'un échauffement, et n'observerait plus rien.
+   */
+  const observeRest = useCallback((noeud: HTMLDivElement | null) => {
+    restObsRef.current?.disconnect();
+    restSectionRef.current = noeud;
+    if (!noeud) {
+      setRestVisible(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([entree]) => setRestVisible(entree.isIntersecting),
+      { threshold: 0 }
+    );
+    obs.observe(noeud);
+    restObsRef.current = obs;
+  }, []);
+
+  useEffect(() => () => restObsRef.current?.disconnect(), []);
 
   // Chrono de pause
   function startRest() {
@@ -819,7 +848,7 @@ export default function LiveSession() {
       </header>
 
       {/* Chrono de pause */}
-      <div className="rest-timer-section">
+      <div className="rest-timer-section" ref={observeRest}>
         <div className="rest-timer-row">
           {restRunning ? (
             <div className={`rest-timer-display ${restTime <= 5 ? 'ending' : ''}`}>
@@ -1068,6 +1097,31 @@ export default function LiveSession() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* La pause suit le défilement.
+
+          Avec huit exercices, le compte à rebours sort de l'écran dès qu'on
+          descend saisir ses séries : on pousse sa série sans savoir s'il
+          reste dix secondes ou une minute. La bulle ne paraît que dans ce
+          cas-là, et la ramener en haut suffit à la faire disparaître. */}
+      {restRunning && !restVisible && (
+        <button
+          className={`rest-bulle ${restTime <= 5 ? 'ending' : ''}`}
+          onClick={() => restSectionRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })}
+          aria-label={`Pause : ${formatTime(restTime)} restantes. Revenir au chrono.`}
+        >
+          <svg viewBox="0 0 56 56" aria-hidden="true">
+            <circle className="rest-bulle-fond" cx="28" cy="28" r="25" />
+            <circle
+              className="rest-bulle-arc"
+              cx="28" cy="28" r="25"
+              strokeDasharray={ARC_BULLE}
+              strokeDashoffset={ARC_BULLE * (1 - restTime / Math.max(1, restDuration))}
+            />
+          </svg>
+          <span className="rest-bulle-temps">{formatTime(restTime)}</span>
+        </button>
       )}
 
       <button className="finish-btn floating-btn" onClick={() => setShowFinish(true)}>
