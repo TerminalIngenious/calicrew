@@ -17,6 +17,7 @@ import { previensSeance } from '../lib/notify';
 /** Pas d'incrément : 5 s pour un isométrique, 1 rep sinon. */
 import Loader from '../components/Loader';
 import SetCard from '../components/SetCard';
+import EchauffementLive from '../components/EchauffementLive';
 
 function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -353,6 +354,20 @@ export default function LiveSession() {
     setShowFinish(false);
   }
 
+  async function passerEchauffement() {
+    if (!id) return;
+    const quand = Date.now();
+    // On écrit l'état avant la réponse du serveur : rester sur la page
+    // d'échauffement le temps d'un aller-retour donnerait l'impression que
+    // le bouton n'a pas marché.
+    setSession((prev) => (prev ? { ...prev, warmupDoneAt: quand } : prev));
+    try {
+      await updateDoc(doc(db, 'sessions', id), { warmupDoneAt: quand });
+    } catch (err) {
+      console.error('Erreur passage échauffement:', err);
+    }
+  }
+
   if (!session) return <div className="page loading"><Loader /></div>;
 
   // Running, vélo et sport co ont besoin du formulaire distance/temps : on ne
@@ -376,6 +391,24 @@ export default function LiveSession() {
   );
   const progress = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
   const displayDuration = session.duration && session.duration > 0 ? session.duration : elapsed;
+
+  /*
+   * L'échauffement passe avant tout le reste.
+   *
+   * Il fait partie de la séance : le chrono tourne déjà, et c'est le même
+   * document. On ne le revoit plus une fois passé — ni en rouvrant une
+   * séance terminée.
+   */
+  if (!finished && !session.completed && session.warmup?.length && !session.warmupDoneAt) {
+    return (
+      <EchauffementLive
+        items={session.warmup}
+        chrono={formatTime(elapsed)}
+        onRetour={() => navigate('/')}
+        onPasser={passerEchauffement}
+      />
+    );
+  }
 
   if (finished) {
     const totalReps = sessionReps(session);

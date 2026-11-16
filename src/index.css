@@ -8561,3 +8561,197 @@ body {
   line-height: 1.5;
   color: var(--text-muted);
 }
+
+/* ──────────────────────────────────────────────────────────────
+   L'échauffement
+   Un bloc replié au-dessus du catalogue, puis sa page en séance.
+   ────────────────────────────────────────────────────────────── */
+
+.ech-bloc {
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.ech-bloc.actif {
+  border-color: rgba(255, 122, 24, 0.5);
+}
+
+.ech-entete {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.ech-bloc.actif .ech-entete {
+  color: #ff7a18;
+}
+
+.ech-titre {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.ech-resume {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.ech-corps {
+  padding: 0 0.9rem 0.9rem;
+}
+
+.ech-familles {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.ech-famille {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ech-famille.actif {
+  border-color: #ff7a18;
+  background: rgba(255, 122, 24, 0.12);
+  color: #ff7a18;
+}
+
+.ech-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.4rem;
+}
+
+.ech-exo {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ech-exo.choisi {
+  border-color: #ff7a18;
+  background: rgba(255, 122, 24, 0.12);
+}
+
+/* La dose est poussée à droite et ne grandit pas : les noms sont de
+   longueurs très inégales, et sans ça les colonnes dansaient. */
+.ech-exo-nom {
+  flex: 1;
+  min-width: 0;
+}
+
+.ech-exo-dose {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ech-exo.choisi .ech-exo-dose {
+  color: #ff7a18;
+}
+
+/* ── La page d'échauffement, en séance ── */
+
+.ech-live {
+  padding-bottom: 6rem;
+}
+
+.ech-live-banniere {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(255, 122, 24, 0.4);
+  border-radius: var(--radius);
+  background: rgba(255, 122, 24, 0.1);
+  color: #ff7a18;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ech-live-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ech-live-ligne {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ech-live-ligne.fait {
+  opacity: 0.5;
+}
+
+.ech-live-ligne.fait .ech-live-nom {
+  text-decoration: line-through;
+}
+
+.ech-live-case {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 7px;
+  color: #0b0b14;
+}
+
+.ech-live-case.fait {
+  border-color: #ff7a18;
+  background: #ff7a18;
+}
+
+.ech-live-nom {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.ech-live-dose {
+  flex: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ff7a18;
+}

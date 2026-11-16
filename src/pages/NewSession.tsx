@@ -7,10 +7,13 @@ import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
 import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason } from '../lib/passes';
 import { buildAmrapExercises } from '../lib/amrap';
+import {
+  EXOS_ECHAUFFEMENT, FAMILLES, doseLabel, dureeEstimee, echauffementSuggere, enItem,
+} from '../lib/echauffement';
 import AmrapBuilder from '../components/AmrapBuilder';
 import type { AmrapItem } from '../components/AmrapBuilder';
-import type { Exercise, ExerciseLog, WeightType, Program, SetUnit, UserProgress } from '../types';
-import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2, Search, Star } from 'lucide-react';
+import type { Exercise, ExerciseLog, WeightType, Program, SetUnit, UserProgress, WarmupItem } from '../types';
+import { ArrowLeft, Plus, Minus, Check, X, Zap, Timer, Weight, Mountain, Route, Gauge, ClipboardList, Pencil, Trash2, Search, Star, Flame } from 'lucide-react';
 
 /** Enlève accents et casse : « Développé » se trouve en tapant « developpe ». */
 function sansAccent(texte: string): string {
@@ -55,6 +58,9 @@ export default function NewSession() {
   /** Catégorie affichée. 'frequents' = les exercices que le joueur fait vraiment. */
   const [filtre, setFiltre] = useState<string>('frequents');
   const [myPrograms, setMyPrograms] = useState<Program[]>([]);
+  /** L'échauffement. Vide tant qu'on ne l'a pas activé. */
+  const [echauffement, setEchauffement] = useState<WarmupItem[]>([]);
+  const [familleEch, setFamilleEch] = useState<(typeof FAMILLES)[number]['cle']>('cardio');
 
   useEffect(() => {
     if (user) {
@@ -101,6 +107,7 @@ export default function NewSession() {
         amrapDuration: (prog.amrapMinutes || 20) * 60,
         amrapRounds: 0,
         amrapName: prog.name,
+        ...(echauffement.length > 0 ? { warmup: echauffement } : {}),
       });
       navigate(`/session/${docRef.id}`);
       return;
@@ -131,6 +138,7 @@ export default function NewSession() {
       createdAt: now,
       startedAt: now,
       duration: 0,
+      ...(echauffement.length > 0 ? { warmup: echauffement } : {}),
     });
     navigate(`/session/${docRef.id}`);
   }
@@ -231,11 +239,30 @@ export default function NewSession() {
       mode: 'amrap',
       amrapDuration: minutes * 60,
       amrapRounds: 0,
+      ...(echauffement.length > 0 ? { warmup: echauffement } : {}),
     };
     if (name) payload.amrapName = name;
 
     const docRef = await addDoc(collection(db, 'sessions'), payload);
     navigate(`/session/${docRef.id}`);
+  }
+
+  /*
+   * L'échauffement part avec la séance, dans le même document — et non dans
+   * une séance à part : son temps court dans le chrono de la séance, et le
+   * récap de la journée en compte une, pas deux. Les quatre lancements de
+   * cette page le recopient donc dans leur payload.
+   */
+  function toggleEchauffement() {
+    setEchauffement((prev) => (prev.length > 0 ? [] : echauffementSuggere()));
+  }
+
+  function toggleExoEchauffement(id: string) {
+    setEchauffement((prev) => {
+      if (prev.some((it) => it.id === id)) return prev.filter((it) => it.id !== id);
+      const exo = EXOS_ECHAUFFEMENT.find((e) => e.id === id);
+      return exo ? [...prev, enItem(exo)] : prev;
+    });
   }
 
   function toggleExercise(ex: Exercise) {
@@ -374,6 +401,8 @@ export default function NewSession() {
     }
 
     if (isTimeOnly) {
+      // Pas d'échauffement sur un log : il n'y a pas de séance à lancer,
+      // on enregistre une sortie déjà faite.
       const docRef = await addDoc(collection(db, 'sessions'), {
         userId: user!.uid,
         date: new Date().toISOString().split('T')[0],
@@ -393,6 +422,7 @@ export default function NewSession() {
         createdAt: now,
         startedAt: now,
         duration: 0,
+        ...(echauffement.length > 0 ? { warmup: echauffement } : {}),
       });
       navigate(`/session/${docRef.id}`);
     }
@@ -480,6 +510,56 @@ export default function NewSession() {
               <em>{prog.exercises.length} exos</em>
             </button>
           ))}
+        </div>
+
+        {/* L'échauffement se décide avant de choisir ses exercices, parce
+            qu'il passe avant eux dans la séance. Fermé, il ne prend qu'une
+            ligne : on ne le subit pas quand on n'en veut pas. */}
+        <div className={`ech-bloc ${echauffement.length > 0 ? 'actif' : ''}`}>
+          <button className="ech-entete" onClick={toggleEchauffement}>
+            <Flame size={16} />
+            <span className="ech-titre">Échauffement</span>
+            <span className="ech-resume">
+              {echauffement.length > 0
+                ? `${echauffement.length} exo${echauffement.length > 1 ? 's' : ''} · ~${dureeEstimee(echauffement)} min`
+                : 'Non'}
+            </span>
+            <span className={`toggle ${echauffement.length > 0 ? 'active' : ''}`}>
+              <span className="toggle-knob" />
+            </span>
+          </button>
+
+          {echauffement.length > 0 && (
+            <div className="ech-corps">
+              <div className="ech-familles">
+                {FAMILLES.map((f) => (
+                  <button
+                    key={f.cle}
+                    className={`ech-famille ${familleEch === f.cle ? 'actif' : ''}`}
+                    onClick={() => setFamilleEch(f.cle)}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+              <div className="ech-grille">
+                {EXOS_ECHAUFFEMENT.filter((e) => e.famille === familleEch).map((exo) => {
+                  const choisi = echauffement.some((it) => it.id === exo.id);
+                  return (
+                    <button
+                      key={exo.id}
+                      className={`ech-exo ${choisi ? 'choisi' : ''}`}
+                      onClick={() => toggleExoEchauffement(exo.id)}
+                    >
+                      <span className="ech-exo-nom">{exo.nom}</span>
+                      <span className="ech-exo-dose">{doseLabel(enItem(exo))}</span>
+                      {choisi && <Check size={13} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="exo-search">

@@ -67,6 +67,23 @@ export interface Session {
    * passer au suivant. Les données ne changent pas, seul l'ordre d'affichage.
    */
   layout?: 'exercise' | 'circuit';
+  /**
+   * L'échauffement, à part des exercices.
+   *
+   * Il fait partie de la séance — on le lance avec elle, son temps court
+   * dans son chrono — mais pas de ses chiffres : trente secondes de cercles
+   * de bras n'ont rien à faire dans les reps, l'XP ou les records.
+   */
+  warmup?: WarmupItem[];
+  /** Le moment où on est passé à la séance. Absent : l'échauffement reste. */
+  warmupDoneAt?: number;
+}
+
+export interface WarmupItem {
+  id: string;
+  name: string;
+  value: number;
+  unit: 'reps' | 'seconds';
 }
 
 // ── Programs ──
