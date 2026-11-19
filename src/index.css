@@ -8845,3 +8845,75 @@ body {
     animation: none;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────
+   Séance oubliée ouverte
+   Le rattrapage de durée, dans la fenêtre « Terminer la séance ».
+   ────────────────────────────────────────────────────────────── */
+
+.oubli-bloc {
+  margin-bottom: 1rem;
+}
+
+.oubli-intro {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.oubli-intro strong {
+  color: #f59e0b;
+}
+
+.oubli-choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.oubli-option {
+  flex: 1 1 auto;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oubli-option.actif {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent);
+}
+
+.oubli-libre {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Largeur fixe : ce champ ne demande que deux ou trois chiffres, et la règle
+   `.modal-card input { width: 100% }` l'étirait sur toute la fenêtre. */
+.oubli-libre input {
+  width: 6.5rem;
+}
+
+.oubli-libre span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.oubli-recap {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.oubli-recap strong {
+  color: var(--accent);
+}

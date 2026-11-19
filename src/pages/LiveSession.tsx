@@ -33,6 +33,19 @@ const CIRCONFERENCE = 2 * Math.PI * 128;
 /** Idem pour la petite bulle de pause. */
 const ARC_BULLE = 2 * Math.PI * 25;
 
+/*
+ * Au-delà de trois heures, on ne demande plus l'heure : on demande la durée.
+ *
+ * La durée d'une séance est son heure de fin moins son heure de départ. Qui
+ * oublie d'appuyer sur « Terminer » et s'en souvient le surlendemain inscrit
+ * donc cinquante-trois heures d'entraînement — c'est arrivé, et ça fausse le
+ * classement du mois comme les succès de durée. Trois heures est au-dessus
+ * de toute vraie séance et bien en dessous d'un oubli.
+ */
+const SEANCE_OUBLIEE = 3 * 3600;
+const DUREES_OUBLI = [30, 45, 60, 90, 120];
+const DUREE_OUBLI_DEFAUT = 60;
+
 export default function LiveSession() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -74,6 +87,9 @@ export default function LiveSession() {
   const [newExSets, setNewExSets] = useState(4);
   const [newExTarget, setNewExTarget] = useState(10);
   const [showFinish, setShowFinish] = useState(false);
+  /** La durée rattrapée, en minutes, quand la séance a été oubliée ouverte. */
+  const [dureeOubli, setDureeOubli] = useState(DUREE_OUBLI_DEFAUT);
+  const [dureeLibre, setDureeLibre] = useState('');
   const [finished, setFinished] = useState(false);
 
   useEffect(() => {
@@ -350,8 +366,19 @@ export default function LiveSession() {
 
   async function finishSession() {
     if (!session || !id) return;
-    const duration = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
+    const brut = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
     const isAmrapSession = session.mode === 'amrap';
+    /*
+     * Un AMRAP dure le temps qu'on lui a donné, point. Son chrono se fige
+     * déjà à la fin du temps à l'écran ; sa durée enregistrée doit en faire
+     * autant, sinon un AMRAP de vingt minutes laissé ouvert une nuit en
+     * compte douze heures.
+     */
+    const duration = isAmrapSession
+      ? Math.min(brut, session.amrapDuration || brut)
+      : brut > SEANCE_OUBLIEE
+        ? dureeOubli * 60
+        : brut;
     // Un AMRAP ne logue rien pendant l'effort : on matérialise ici les tours
     // en séries, sinon ses reps ne compteraient ni dans les classements ni
     // dans les quêtes.
@@ -1132,9 +1159,52 @@ export default function LiveSession() {
         <div className="modal-overlay">
           <div className="modal-card">
             <h3>Terminer la séance ?</h3>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
-              Durée : {formatTime(elapsed)} • {completedSets}/{totalSets} séries faites
-            </p>
+            {elapsed > SEANCE_OUBLIEE ? (
+              /* On n'enregistre pas le chrono sans demander : il dit le temps
+                 passé depuis le départ, pas celui passé à s'entraîner. */
+              <div className="oubli-bloc">
+                <p className="oubli-intro">
+                  Cette séance tourne depuis <strong>{formatTime(elapsed)}</strong>.
+                  Tu as sûrement oublié de la terminer — elle a duré combien ?
+                </p>
+                <div className="oubli-choix">
+                  {DUREES_OUBLI.map((m) => (
+                    <button
+                      key={m}
+                      className={`oubli-option ${dureeOubli === m && !dureeLibre ? 'actif' : ''}`}
+                      onClick={() => { setDureeOubli(m); setDureeLibre(''); }}
+                    >
+                      {m < 60 ? `${m} min` : m % 60 === 0 ? `${m / 60} h` : `${Math.floor(m / 60)} h ${m % 60}`}
+                    </button>
+                  ))}
+                </div>
+                <div className="oubli-libre">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min="1"
+                    max="300"
+                    placeholder="Autre"
+                    value={dureeLibre}
+                    onChange={(e) => {
+                      setDureeLibre(e.target.value);
+                      const m = parseInt(e.target.value, 10);
+                      // Une saisie vide ou absurde ne doit pas effacer le
+                      // choix précédent : on garde la dernière valeur valide.
+                      if (Number.isFinite(m) && m > 0 && m <= 300) setDureeOubli(m);
+                    }}
+                  />
+                  <span>min</span>
+                </div>
+                <p className="oubli-recap">
+                  Enregistré : <strong>{dureeOubli} min</strong> • {completedSets}/{totalSets} séries faites
+                </p>
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Durée : {formatTime(elapsed)} • {completedSets}/{totalSets} séries faites
+              </p>
+            )}
             <label className="no-reward-row">
               <input
                 type="checkbox"
