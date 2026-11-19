@@ -7,35 +7,42 @@
  * contourne les règles — d'où la prudence : il n'écrit rien sans --ecrire,
  * et il montre toujours ce qu'il s'apprête à changer.
  *
- * Usage :
- *   npx vercel env pull .env.admin --environment=production
- *   node --env-file=.env.admin outils/corrige-duree.mjs <sessionId> <minutes>
- *   node --env-file=.env.admin outils/corrige-duree.mjs <sessionId> <minutes> --ecrire
+ * La clé vient d'un fichier, et non de l'environnement : Vercel marque la
+ * sienne comme sensible, et `vercel env pull` la redescend vide. Il faut
+ * donc en générer une dans la console Firebase — Paramètres du projet,
+ * Comptes de service, « Générer une nouvelle clé privée ». Les clés
+ * déjà émises continuent de fonctionner, Vercel n'est pas touché.
  *
- * Pense à supprimer .env.admin après : il contient la clé du compte de
- * service, qui ouvre toute la base.
+ * Usage :
+ *   node outils/corrige-duree.mjs <sessionId> <minutes> --compte <cle.json>
+ *   node outils/corrige-duree.mjs <sessionId> <minutes> --compte <cle.json> --ecrire
+ *
+ * Pense à supprimer le fichier de clé après : il ouvre toute la base.
  */
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { readFile } from 'node:fs/promises';
 
 const [, , sessionId, minutesArg, ...flags] = process.argv;
 const ecrire = flags.includes('--ecrire');
 const minutes = Number(minutesArg);
+const chemin = flags.includes('--compte') ? flags[flags.indexOf('--compte') + 1] : null;
 
-if (!sessionId || !Number.isFinite(minutes) || minutes <= 0) {
-  console.error('Usage : node outils/corrige-duree.mjs <sessionId> <minutes> [--ecrire]');
+if (!sessionId || !Number.isFinite(minutes) || minutes <= 0 || !chemin) {
+  console.error('Usage : node outils/corrige-duree.mjs <sessionId> <minutes> --compte <cle.json> [--ecrire]');
   process.exit(1);
 }
 
-const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
-if (!raw) {
-  console.error('FIREBASE_SERVICE_ACCOUNT manquant. Fais d’abord :');
-  console.error('  npx vercel env pull .env.admin --environment=production');
-  console.error('puis relance avec  node --env-file=.env.admin …');
+let compte;
+try {
+  compte = JSON.parse(await readFile(chemin, 'utf8'));
+} catch (err) {
+  console.error(`Clé illisible (${chemin}) : ${err.message}`);
+  console.error('Génère-la dans la console Firebase : Paramètres du projet › Comptes de service.');
   process.exit(1);
 }
 
-if (getApps().length === 0) initializeApp({ credential: cert(JSON.parse(raw)) });
+if (getApps().length === 0) initializeApp({ credential: cert(compte) });
 const db = getFirestore();
 
 const ref = db.collection('sessions').doc(sessionId);
