@@ -5,317 +5,560 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CaliCrew — Données</title>
 <style>
-  /* Les tons de l'app, pour ne pas avoir l'impression de changer d'outil. */
-  :root {
-    --bg: #0b0b14;
-    --carte: #16161f;
-    --bord: #26263a;
-    --texte: #f2f2f7;
-    --gris: #8a8a9e;
-    --accent: #b6ff00;
-    --alerte: #f59e0b;
-    --rouge: #ef4444;
+/* ──────────────────────────────────────────────────────────────────────
+   Jetons.
+
+   Les couleurs de séries viennent d'une palette validée : bandes de
+   clarté, plancher de chroma, séparation pour les daltonismes et
+   contraste sur la surface, vérifiés dans les deux modes. On ne les
+   retouche pas à l'œil — et on n'en ajoute pas une neuvième.
+   ────────────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  --plan:        #f2f2f7;
+  --surface:     #ffffff;
+  --ink:         #0b0b0b;
+  --ink-2:       #52514e;
+  --ink-3:       #898781;
+  --trait:       rgba(11, 11, 11, 0.10);
+  --grille:      #e1e0d9;
+  --axe:         #c3c2b7;
+  --survol:      rgba(11, 11, 11, 0.04);
+
+  --s1: #2a78d6;  /* bleu    */
+  --s2: #eb6834;  /* orange  */
+  --s3: #1baf7a;  /* aqua    */
+  --s4: #eda100;  /* jaune   */
+  --s5: #e87ba4;  /* magenta */
+
+  --bien:     #0ca30c;
+  --attention:#fab219;
+  --grave:    #ec835a;
+  --critique: #d03b3b;
+
+  --r: 14px;
+  --ombre: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+}
+
+/* Le mode sombre est choisi, pas inversé : ce sont les mêmes teintes
+   re-calées pour la surface sombre, validées comme un ensemble. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --plan:    #000000;
+    --surface: #1c1c1e;
+    --ink:     #f0efec;
+    --ink-2:   #c3c2b7;
+    --ink-3:   #898781;
+    --trait:   rgba(255, 255, 255, 0.10);
+    --grille:  #2c2c2a;
+    --axe:     #383835;
+    --survol:  rgba(255, 255, 255, 0.06);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+    --ombre: none;
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    padding: 2rem 1.5rem 4rem;
-    background: var(--bg);
-    color: var(--texte);
-    font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  }
-  .page { max-width: 1100px; margin: 0 auto; }
-  header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem; }
-  h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.02em; }
-  .maj { font-size: 0.8rem; color: var(--gris); }
-  button {
-    margin-left: auto; padding: 0.45rem 0.9rem;
-    border: 1px solid var(--bord); border-radius: 8px;
-    background: transparent; color: var(--texte);
-    font: inherit; font-size: 0.85rem; cursor: pointer;
-  }
-  button:hover { border-color: var(--accent); color: var(--accent); }
-  h2 {
-    margin: 2rem 0 0.75rem; font-size: 0.75rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1px; color: var(--gris);
-  }
-  .tuiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; }
-  .tuile { padding: 1rem 1.1rem; border: 1px solid var(--bord); border-radius: 12px; background: var(--carte); }
-  .tuile .v { display: block; font-size: 2rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
-  .tuile .l { display: block; margin-top: 0.15rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gris); }
-  .tuile .s { display: block; margin-top: 0.3rem; font-size: 0.78rem; color: var(--accent); }
-  /* Le tableau des membres a neuf colonnes : sur une fenêtre étroite il
-     déborde, et mieux vaut le faire défiler que tronquer la dernière. */
-  .bloc { padding: 1rem; border: 1px solid var(--bord); border-radius: 12px; background: var(--carte); overflow-x: auto; }
-  /* Seul le tableau des membres impose une largeur : les autres ont trois
-     colonnes et tiennent dans une demi-page. */
-  .bloc.large table { min-width: 620px; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  th {
-    padding: 0.5rem 0.6rem; text-align: left; font-size: 0.68rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.6px; color: var(--gris);
-    border-bottom: 1px solid var(--bord); cursor: pointer; user-select: none;
-  }
-  th:hover { color: var(--accent); }
-  td { padding: 0.5rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
-  td.n { text-align: right; font-variant-numeric: tabular-nums; }
-  tr.muet { opacity: 0.45; }
-  .sous { display: block; font-size: 0.72rem; color: var(--gris); }
-  .puce { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 99px; font-size: 0.68rem; font-weight: 700; }
-  .puce.alerte { background: rgba(245,158,11,0.15); color: var(--alerte); }
-  .puce.ok { background: rgba(182,255,0,0.12); color: var(--accent); }
-  code { font-size: 0.72rem; color: var(--gris); user-select: all; }
-  .barre-piste { display: block; height: 9px; border-radius: 99px; background: rgba(255,255,255,0.07); overflow: hidden; }
-  .barre-plein { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
-  .vide { color: var(--gris); font-size: 0.85rem; }
-  .deux { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 780px) { .deux { grid-template-columns: 1fr; } }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plan: #000000; --surface: #1c1c1e;
+  --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #898781;
+  --trait: rgba(255,255,255,0.10); --grille: #2c2c2a; --axe: #383835;
+  --survol: rgba(255,255,255,0.06);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+  --ombre: none;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 0 5rem;
+  background: var(--plan);
+  color: var(--ink);
+  font: 15px/1.47 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 1120px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* ── Barre du haut ── */
+.barre {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem; padding: 1.1rem 0 0.9rem;
+  background: color-mix(in srgb, var(--plan) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--trait);
+}
+.titre { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.021em; }
+.etat { font-size: 0.8rem; color: var(--ink-3); }
+.actions { margin-left: auto; display: flex; gap: 0.5rem; }
+
+button {
+  padding: 0.42rem 0.85rem;
+  border: 1px solid var(--trait); border-radius: 980px;
+  background: var(--surface); color: var(--ink);
+  font: inherit; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: background .15s;
+}
+button:hover { background: var(--survol); }
+button[aria-pressed="true"] { background: var(--s1); border-color: var(--s1); color: #fff; }
+
+/* ── Navigation par sections ── */
+.segments {
+  display: flex; gap: 2px; margin-bottom: 1.5rem; padding: 2px;
+  border-radius: 10px; background: var(--survol);
+  overflow-x: auto; scrollbar-width: none;
+}
+.segments::-webkit-scrollbar { display: none; }
+.segment {
+  flex: 1; min-width: max-content; padding: 0.42rem 0.9rem;
+  border: 0; border-radius: 8px; background: transparent;
+  color: var(--ink-2); font-size: 0.83rem; font-weight: 500;
+}
+.segment[aria-selected="true"] {
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,.1); font-weight: 600;
+}
+
+h2 {
+  margin: 2rem 0 0.9rem;
+  font-size: 1.05rem; font-weight: 650; letter-spacing: -0.014em;
+}
+h2:first-child { margin-top: 0; }
+.legende-h2 { margin-left: 0.5rem; font-size: 0.8rem; font-weight: 400; color: var(--ink-3); }
+
+.carte {
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--trait); border-radius: var(--r);
+  background: var(--surface); box-shadow: var(--ombre);
+}
+
+/* ── Tuiles de chiffres ── */
+.tuiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 0.75rem; }
+.tuile { padding: 1.05rem 1.15rem; border: 1px solid var(--trait); border-radius: var(--r); background: var(--surface); box-shadow: var(--ombre); }
+.tuile-l { display: block; font-size: 0.78rem; font-weight: 500; color: var(--ink-2); }
+.tuile-v { display: block; margin-top: 0.3rem; font-size: 2.1rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.028em; }
+.tuile-s { display: block; margin-top: 0.3rem; font-size: 0.78rem; color: var(--ink-3); }
+
+/* ── Graphiques ── */
+.grille-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 820px) { .grille-2 { grid-template-columns: 1fr; } }
+
+.graphe { position: relative; }
+.graphe svg { display: block; width: 100%; overflow: visible; }
+.graphe .barre-fut { fill: transparent; }
+.graphe .barre-fut:hover { fill: var(--survol); }
+
+.legende { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 0.7rem; font-size: 0.78rem; color: var(--ink-2); }
+.legende span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.pastille { width: 9px; height: 9px; border-radius: 3px; }
+
+.infobulle {
+  position: fixed; z-index: 50; pointer-events: none;
+  padding: 0.45rem 0.6rem; border-radius: 9px;
+  border: 1px solid var(--trait);
+  background: var(--surface); box-shadow: 0 6px 24px rgba(0,0,0,.18);
+  font-size: 0.78rem; white-space: nowrap; opacity: 0; transition: opacity .1s;
+}
+.infobulle strong { display: block; font-size: 0.82rem; }
+.infobulle em { font-style: normal; color: var(--ink-3); }
+
+/* ── Tableaux ── */
+.defile { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+th {
+  position: sticky; top: 0;
+  padding: 0.55rem 0.7rem; text-align: left; white-space: nowrap;
+  background: var(--surface);
+  font-size: 0.73rem; font-weight: 600; color: var(--ink-3);
+  border-bottom: 1px solid var(--trait); cursor: pointer; user-select: none;
+}
+th:hover { color: var(--ink); }
+th.n, td.n { text-align: right; font-variant-numeric: tabular-nums; }
+td { padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--trait); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+.sous { display: block; font-size: 0.74rem; color: var(--ink-3); }
+tr.muet td { opacity: 0.5; }
+.large table { min-width: 680px; }
+
+.etiq {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.1rem 0.45rem; border-radius: 6px;
+  font-size: 0.7rem; font-weight: 600;
+}
+.etiq.bien      { background: color-mix(in srgb, var(--bien) 15%, transparent); color: var(--bien); }
+.etiq.attention { background: color-mix(in srgb, var(--attention) 22%, transparent); color: #8a5d00; }
+.etiq.critique  { background: color-mix(in srgb, var(--critique) 15%, transparent); color: var(--critique); }
+/* Sur fond sombre, l'ambre se lit tel quel ; sur fond clair il lui faut
+   une encre plus sombre que la pastille. */
+:root[data-theme="dark"] .etiq.attention { color: var(--attention); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .etiq.attention { color: var(--attention); }
+}
+
+code { font: 0.73rem ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink-3); user-select: all; }
+.vide { margin: 0.4rem 0; color: var(--ink-3); font-size: 0.86rem; }
+a { color: var(--s1); }
+.pile > * + * { margin-top: 0.5rem; }
 </style>
 </head>
 <body>
 <div class="page">
-  <header>
-    <h1>CaliCrew</h1>
-    <span class="maj" id="maj">chargement…</span>
-    <button id="recharger">Recharger</button>
-  </header>
-  <div id="corps"><p class="vide">Lecture de la base…</p></div>
+  <div class="barre">
+    <h1 class="titre">CaliCrew</h1>
+    <span class="etat" id="etat">chargement…</span>
+    <div class="actions">
+      <button id="tableaux" aria-pressed="false" title="Afficher les chiffres sous chaque graphique">Chiffres</button>
+      <button id="theme" title="Clair ou sombre">Thème</button>
+      <button id="recharger">Recharger</button>
+    </div>
+  </div>
+  <div id="corps"><p class="vide">Lecture…</p></div>
 </div>
+<div class="infobulle" id="bulle"></div>
 
 <script type="module">
 const $ = (id) => document.getElementById(id);
-const nb = (n) => (n ?? 0).toLocaleString('fr-FR');
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nb = (n) => (n ?? 0).toLocaleString('fr-FR');
 
 function heures(sec) {
   const h = Math.floor(sec / 3600);
   const m = Math.round((sec % 3600) / 60);
   return h > 0 ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`;
 }
-
 function depuis(t) {
   if (!t) return 'jamais';
   const j = Math.floor((Date.now() - t) / 86400000);
-  if (j <= 0) return "aujourd'hui";
-  if (j === 1) return 'hier';
-  return `il y a ${j} j`;
+  return j <= 0 ? "aujourd'hui" : j === 1 ? 'hier' : `il y a ${j} j`;
 }
-
 const date = (t) => (t ? new Date(t).toLocaleDateString('fr-FR') : '—');
 
-/**
- * Un histogramme en SVG, sans bibliothèque.
- *
- * Le viewBox fait la mise à l'échelle : la hauteur des barres est calculée
- * dans un repère de 100, et le SVG s'étire à la largeur disponible.
- */
-function histogramme(donnees, cleValeur, cleLabel, unLabelSur = 1) {
-  const maxi = Math.max(1, ...donnees.map((d) => d[cleValeur]));
-  const largeur = 100 / donnees.length;
-  const barres = donnees.map((d, i) => {
-    const h = (d[cleValeur] / maxi) * 82;
-    const x = i * largeur;
-    const titre = `${d[cleLabel]} — ${d[cleValeur]}`;
-    return `<rect x="${x + largeur * 0.15}" y="${88 - h}" width="${largeur * 0.7}" height="${Math.max(h, d[cleValeur] ? 0.8 : 0)}"
-      rx="0.6" fill="var(--accent)"><title>${esc(titre)}</title></rect>` +
-      (i % unLabelSur === 0
-        ? `<text x="${x + largeur / 2}" y="97" font-size="3" fill="#8a8a9e" text-anchor="middle">${esc(d[cleLabel])}</text>`
-        : '');
-  }).join('');
-  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:170px">
-    <line x1="0" y1="88" x2="100" y2="88" stroke="#26263a" stroke-width="0.3"/>
-    ${barres}
-    <text x="0.5" y="6" font-size="3.4" fill="#8a8a9e">max ${maxi}</text>
-  </svg>`;
-}
+/* ──────────────────────────────────────────────────────────────────────
+   Le graphique en barres.
 
-function tuile(v, l, s) {
-  return `<div class="tuile"><span class="v">${v}</span><span class="l">${esc(l)}</span>${s ? `<span class="s">${esc(s)}</span>` : ''}</div>`;
-}
+   Dessiné en SVG dans un repère en pixels, et non en pourcentages : un
+   viewBox étiré déformerait le rayon des coins et l'épaisseur du texte.
+   Chaque barre a une zone de survol pleine hauteur — viser une barre de
+   trois pixels de haut serait impossible autrement.
+   ────────────────────────────────────────────────────────────────────── */
+function barres({ donnees, serie, teinte, labels, etiquettes = false, hauteur = 150 }) {
+  const L = 560, P = { h: 10, b: 22, g: 30, d: 4 };
+  const traceH = hauteur - P.h - P.b;
+  const traceL = L - P.g - P.d;
+  const maxi = Math.max(1, ...donnees.map((d) => d[serie]));
+  // Une échelle qui s'arrête pile sur le maximum donne des graduations
+  // bancales : on monte au multiple rond juste au-dessus.
+  const pas = maxi <= 5 ? 1 : maxi <= 20 ? 5 : maxi <= 60 ? 10 : 50;
+  const haut = Math.ceil(maxi / pas) * pas;
+  const pasX = traceL / donnees.length;
+  const largeur = Math.max(3, Math.min(pasX - 3, 34));
 
-let stats = null;
-let triMembres = { cle: 'derniere', sens: -1 };
+  const grille = [];
+  for (let v = 0; v <= haut; v += pas) {
+    const y = P.h + traceH - (v / haut) * traceH;
+    grille.push(`<line x1="${P.g}" y1="${y}" x2="${L - P.d}" y2="${y}" stroke="var(--grille)" stroke-width="1"/>
+      <text x="${P.g - 7}" y="${y + 3.5}" text-anchor="end" font-size="9.5" fill="var(--ink-3)">${v}</text>`);
+  }
 
-function rendu() {
-  const s = stats;
-  const part = Math.round((s.actifs30 / Math.max(1, s.inscrits)) * 100);
-
-  const membres = [...s.membres].sort((a, b) => {
-    const [x, y] = [a[triMembres.cle], b[triMembres.cle]];
-    if (typeof x === 'string') return triMembres.sens * x.localeCompare(y);
-    return triMembres.sens * ((x || 0) - (y || 0));
+  const marques = donnees.map((d, i) => {
+    const v = d[serie];
+    const h = (v / haut) * traceH;
+    const x = P.g + i * pasX + (pasX - largeur) / 2;
+    const y = P.h + traceH - h;
+    // Les coins hauts arrondis, le pied carré : la barre est ancrée à sa
+    // ligne de base, elle ne flotte pas.
+    const barre = v > 0
+      ? `<path d="M${x} ${y + Math.min(4, h)} a4 4 0 0 1 4 -4 h${largeur - 8} a4 4 0 0 1 4 4 v${Math.max(0, h - Math.min(4, h))} h${-largeur} z" fill="${teinte}"/>`
+      : '';
+    const etiq = etiquettes && v > 0
+      ? `<text x="${x + largeur / 2}" y="${y - 4}" text-anchor="middle" font-size="9.5" font-weight="600" fill="var(--ink-2)">${v}</text>`
+      : '';
+    const label = labels(d, i);
+    const axe = label
+      ? `<text x="${x + largeur / 2}" y="${hauteur - 6}" text-anchor="middle" font-size="9.5" fill="var(--ink-3)">${esc(label)}</text>`
+      : '';
+    return `${barre}${etiq}${axe}
+      <rect class="barre-fut" x="${P.g + i * pasX}" y="${P.h}" width="${pasX}" height="${traceH}"
+        data-bulle="${esc(d.bulle)}" rx="3"/>`;
   });
 
-  const maxiExo = Math.max(1, ...s.topExercices.map((e) => e.seances));
+  return `<div class="graphe"><svg viewBox="0 0 ${L} ${hauteur}" role="img">
+    ${grille.join('')}
+    <line x1="${P.g}" y1="${P.h + traceH}" x2="${L - P.d}" y2="${P.h + traceH}" stroke="var(--axe)" stroke-width="1"/>
+    ${marques.join('')}
+  </svg></div>`;
+}
 
-  $('corps').innerHTML = `
+function tableauDe(donnees, colonnes) {
+  return `<div class="defile" data-tableau hidden><table>
+    <thead><tr>${colonnes.map((c) => `<th class="${c.n ? 'n' : ''}">${esc(c.t)}</th>`).join('')}</tr></thead>
+    <tbody>${donnees.map((d) => `<tr>${colonnes.map((c) => `<td class="${c.n ? 'n' : ''}">${esc(c.v(d))}</td>`).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+const tuile = (l, v, s) =>
+  `<div class="tuile"><span class="tuile-l">${esc(l)}</span><span class="tuile-v">${v}</span>${s ? `<span class="tuile-s">${esc(s)}</span>` : ''}</div>`;
+
+let stats = null;
+let onglet = 'resume';
+let tri = { cle: 'derniere', sens: -1 };
+
+const ONGLETS = [
+  ['resume', "Résumé"],
+  ['activite', 'Activité'],
+  ['membres', 'Membres'],
+  ['sport', 'Sport'],
+  ['alertes', 'Alertes'],
+];
+
+function vueResume(s) {
+  const part = Math.round((s.actifs30 / Math.max(1, s.inscrits)) * 100);
+  return `
     <div class="tuiles">
-      ${tuile(nb(s.inscrits), 'Inscrits', `+${s.inscrits7} cette semaine`)}
-      ${tuile(nb(s.actifs7), 'Actifs sur 7 j', `${s.actifsJour} aujourd'hui`)}
-      ${tuile(nb(s.seances7), 'Séances sur 7 j', `${s.seancesJour} aujourd'hui`)}
-      ${tuile(part + ' %', 'Actifs sur 30 j', `${s.actifs30} / ${s.inscrits} inscrits`)}
+      ${tuile('Inscrits', nb(s.inscrits), s.inscrits7 ? `+${s.inscrits7} cette semaine` : 'aucun nouveau cette semaine')}
+      ${tuile('Actifs sur 7 jours', nb(s.actifs7), `${s.actifsJour} aujourd'hui`)}
+      ${tuile('Séances sur 7 jours', nb(s.seances7), `${s.seancesJour} aujourd'hui`)}
+      ${tuile('Part active sur 30 j', part + ' %', `${s.actifs30} membres sur ${s.inscrits}`)}
     </div>
 
-    <h2>Séances par jour, 30 derniers jours</h2>
-    <div class="bloc">${histogramme(s.parJour, 'seances', 'jour', 3)}</div>
+    <h2>Séances par jour<span class="legende-h2">30 derniers jours</span></h2>
+    <div class="carte">
+      ${barres({
+        donnees: s.parJour.map((d) => ({ ...d, bulle: `${d.jour}|${d.seances} séance${d.seances > 1 ? 's' : ''} · ${d.membres} membre${d.membres > 1 ? 's' : ''}` })),
+        serie: 'seances', teinte: 'var(--s1)',
+        labels: (d, i) => (i % 5 === 0 ? d.jour : ''),
+      })}
+      ${tableauDe(s.parJour, [{ t: 'Jour', v: (d) => d.jour }, { t: 'Séances', n: 1, v: (d) => d.seances }, { t: 'Membres', n: 1, v: (d) => d.membres }])}
+    </div>
 
-    <div class="deux">
-      <div>
-        <h2>Par semaine, 12 dernières</h2>
-        <div class="bloc">${histogramme(s.parSemaine, 'seances', 'semaine', 2)}</div>
-      </div>
+    <h2>Depuis le début</h2>
+    <div class="tuiles">
+      ${tuile('Séances', nb(s.seancesTotal))}
+      ${tuile('Répétitions', nb(s.repsTotal))}
+      ${tuile('Temps cumulé', heures(s.dureeTotal))}
+      ${tuile('Groupes', nb(s.groupes.length), s.groupes.map((g) => g.nom).join(', '))}
+    </div>`;
+}
+
+function vueActivite(s) {
+  return `
+    <h2>Séances par semaine<span class="legende-h2">12 dernières</span></h2>
+    <div class="carte">
+      ${barres({
+        donnees: s.parSemaine.map((d) => ({ ...d, bulle: `Semaine du ${d.semaine}|${d.seances} séances · ${d.membres} membres` })),
+        serie: 'seances', teinte: 'var(--s2)', etiquettes: true, hauteur: 170,
+        labels: (d) => d.semaine,
+      })}
+      ${tableauDe(s.parSemaine, [{ t: 'Semaine du', v: (d) => d.semaine }, { t: 'Séances', n: 1, v: (d) => d.seances }, { t: 'Membres', n: 1, v: (d) => d.membres }])}
+    </div>
+
+    <h2>Membres actifs par semaine</h2>
+    <div class="carte">
+      ${barres({
+        donnees: s.parSemaine.map((d) => ({ ...d, bulle: `Semaine du ${d.semaine}|${d.membres} membre${d.membres > 1 ? 's' : ''}` })),
+        serie: 'membres', teinte: 'var(--s3)', etiquettes: true, hauteur: 170,
+        labels: (d) => d.semaine,
+      })}
+    </div>
+
+    <div class="grille-2">
       <div>
         <h2>Heure de la journée</h2>
-        <div class="bloc">${histogramme(s.parHeure.map((h) => ({ ...h, l: h.heure + 'h' })), 'seances', 'l', 3)}</div>
-      </div>
-    </div>
-
-    <div class="deux">
-      <div>
-        <h2>Jour de la semaine</h2>
-        <div class="bloc">${histogramme(s.parJourSemaine.map((j) => ({ ...j, l: j.nom.slice(0, 3) })), 'seances', 'l')}</div>
-      </div>
-      <div>
-        <h2>Depuis le début</h2>
-        <div class="tuiles">
-          ${tuile(nb(s.seancesTotal), 'Séances')}
-          ${tuile(nb(s.repsTotal), 'Reps')}
-          ${tuile(heures(s.dureeTotal), 'Temps cumulé')}
-          ${tuile(nb(s.seances30), 'Séances sur 30 j')}
+        <div class="carte">
+          ${barres({
+            donnees: s.parHeure.map((d) => ({ ...d, bulle: `${d.heure} h|${d.seances} séances` })),
+            serie: 'seances', teinte: 'var(--s1)',
+            labels: (d) => (d.heure % 4 === 0 ? d.heure + 'h' : ''),
+          })}
         </div>
       </div>
+      <div>
+        <h2>Jour de la semaine</h2>
+        <div class="carte">
+          ${barres({
+            donnees: s.parJourSemaine.map((d) => ({ ...d, bulle: `${d.nom}|${d.seances} séances` })),
+            serie: 'seances', teinte: 'var(--s4)', etiquettes: true,
+            labels: (d) => d.nom.slice(0, 3),
+          })}
+        </div>
+      </div>
+    </div>`;
+}
+
+const COLONNES = [
+  ['nom', 'Membre'], ['seances', 'Séances'], ['seances7', '7 j'], ['reps', 'Reps'],
+  ['duree', 'Temps'], ['xp', 'XP'], ['cartes', 'Cartes'], ['derniere', 'Dernière'], ['inscrit', 'Inscrit'],
+];
+
+function vueMembres(s) {
+  const liste = [...s.membres].sort((a, b) => {
+    const [x, y] = [a[tri.cle], b[tri.cle]];
+    return typeof x === 'string' ? tri.sens * x.localeCompare(y) : tri.sens * ((x || 0) - (y || 0));
+  });
+  return `
+    <h2>Les membres<span class="legende-h2">${s.inscrits} comptes · clique une colonne pour trier</span></h2>
+    <div class="carte large defile">
+      <table><thead><tr>${COLONNES.map(([c, t]) =>
+        `<th class="${c === 'nom' ? '' : 'n'}" data-tri="${c}">${esc(t)}${tri.cle === c ? (tri.sens === -1 ? ' ↓' : ' ↑') : ''}</th>`).join('')}</tr></thead>
+      <tbody>${liste.map((m) => `
+        <tr class="${m.seances === 0 ? 'muet' : ''}">
+          <td>${esc(m.nom)}
+            <span class="sous">${m.homonyme ? esc(m.email) + ' · ' : ''}${esc(m.groupes.join(', ') || 'aucun groupe')}</span></td>
+          <td class="n">${m.seances}</td>
+          <td class="n">${m.seances7 || '—'}</td>
+          <td class="n">${nb(m.reps)}</td>
+          <td class="n">${heures(m.duree)}</td>
+          <td class="n">${nb(m.xp)}</td>
+          <td class="n">${m.cartes}</td>
+          <td class="n">${esc(depuis(m.derniere))}</td>
+          <td class="n">${date(m.inscrit)}</td>
+        </tr>`).join('')}</tbody></table>
+    </div>`;
+}
+
+function vueSport(s) {
+  const maxi = Math.max(1, ...s.topExercices.map((e) => e.seances));
+  return `
+    <h2>Exercices les plus pratiqués</h2>
+    <div class="carte">
+      <table><tbody>${s.topExercices.map((e) => `
+        <tr>
+          <td style="width:34%">${esc(e.nom)}</td>
+          <td><span style="display:block;height:9px;border-radius:99px;background:var(--survol)">
+            <span style="display:block;height:100%;width:${(e.seances / maxi) * 100}%;border-radius:99px;background:var(--s1)"></span></span></td>
+          <td class="n" style="width:5rem">${e.seances}</td>
+          <td class="n" style="width:6rem"><span class="sous">${nb(e.reps)} reps</span></td>
+        </tr>`).join('')}</tbody></table>
     </div>
 
-    <h2>Alertes</h2>
-    <div class="bloc">
-      ${bloc('Séances d’une durée impossible', s.aberrantes, (a) =>
-        `<tr><td>${esc(a.nom)}<span class="sous">${esc(a.date)}</span></td>
-         <td class="n"><span class="puce alerte">${a.heures} h</span></td>
-         <td class="n"><code>${esc(a.id)}</code></td></tr>`,
-        'Personne n’a oublié de terminer une séance.')}
-      ${bloc('Inscrits sans aucune séance', s.fantomes, (m) =>
-        `<tr><td>${esc(m.nom)}<span class="sous">${esc(m.email)}</span></td>
-         <td class="n">inscrit ${date(m.inscrit)}</td><td></td></tr>`,
-        'Tout le monde a essayé au moins une fois.')}
-      ${bloc('Comptes dans aucun groupe', s.horsGroupe, (m) =>
-        `<tr><td>${esc(m.nom)}<span class="sous">${esc(m.email)}</span></td>
-         <td class="n">${m.seances} séance${m.seances > 1 ? 's' : ''}</td>
-         <td class="n">${esc(depuis(m.derniere))}</td></tr>`,
-        'Tout le monde est rattaché à un groupe.')}
-      ${bloc('Endormis depuis plus de 14 jours', s.endormis, (m) =>
-        `<tr><td>${esc(m.nom)}<span class="sous">${esc(m.groupes.join(', ') || 'aucun groupe')}</span></td>
-         <td class="n">${m.seances} séances</td>
-         <td class="n">${esc(depuis(m.derniere))}</td></tr>`,
-        'Personne n’a décroché.')}
-    </div>
-
-    <h2>Les membres</h2>
-    <div class="bloc large">
+    <h2>Volume par membre</h2>
+    <div class="carte large defile">
       <table>
-        <thead><tr>
-          ${enTete('nom', 'Membre')}
-          ${enTete('seances', 'Séances')}
-          ${enTete('seances7', '7 j')}
-          ${enTete('reps', 'Reps')}
-          ${enTete('duree', 'Temps')}
-          ${enTete('xp', 'XP')}
-          ${enTete('cartes', 'Cartes')}
-          ${enTete('derniere', 'Dernière')}
-          ${enTete('inscrit', 'Inscrit')}
-        </tr></thead>
-        <tbody>
-          ${membres.map((m) => `
-            <tr class="${m.seances === 0 ? 'muet' : ''}">
-              <td>${esc(m.nom)}<span class="sous">${esc(m.groupes.join(', ') || 'aucun groupe')}</span></td>
-              <td class="n">${m.seances}</td>
-              <td class="n">${m.seances7 || ''}</td>
-              <td class="n">${nb(m.reps)}</td>
-              <td class="n">${heures(m.duree)}</td>
-              <td class="n">${nb(m.xp)}</td>
-              <td class="n">${m.cartes}</td>
-              <td class="n">${esc(depuis(m.derniere))}</td>
-              <td class="n">${date(m.inscrit)}</td>
-            </tr>`).join('')}
-        </tbody>
+        <thead><tr><th>Membre</th><th class="n">Reps</th><th class="n">Temps</th><th class="n">Séances</th></tr></thead>
+        <tbody>${[...s.membres].filter((m) => m.seances > 0).sort((a, b) => b.reps - a.reps).map((m) => `
+          <tr><td>${esc(m.nom)}${m.homonyme ? `<span class="sous">${esc(m.email)}</span>` : ''}</td>
+            <td class="n">${nb(m.reps)}</td><td class="n">${heures(m.duree)}</td><td class="n">${m.seances}</td></tr>`).join('')}</tbody>
       </table>
     </div>
 
-    <div class="deux">
-      <div>
-        <h2>Exercices les plus faits</h2>
-        <div class="bloc">
-          <table><tbody>
-            ${s.topExercices.map((e) => `
-              <tr>
-                <td style="width:38%">${esc(e.nom)}</td>
-                <td><span class="barre-piste"><span class="barre-plein" style="width:${(e.seances / maxiExo) * 100}%"></span></span></td>
-                <td class="n" style="width:4rem">${e.seances}</td>
-              </tr>`).join('')}
-          </tbody></table>
-        </div>
-      </div>
-      <div>
-        <h2>Groupes</h2>
-        <div class="bloc">
-          <table>
-            <thead><tr><th>Nom</th><th>Membres</th><th>Créé par</th></tr></thead>
-            <tbody>
-              ${s.groupes.map((g) => `
-                <tr>
-                  <td>${esc(g.nom)}<span class="sous">code ${esc(g.code)}</span></td>
-                  <td class="n">${g.membres}${g.enAttente ? ` <span class="puce alerte">+${g.enAttente}</span>` : ''}</td>
-                  <td class="n">${esc(g.createur)}<span class="sous">${date(g.cree)}</span></td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
+    <h2>Groupes</h2>
+    <div class="carte defile">
+      <table>
+        <thead><tr><th>Nom</th><th class="n">Membres</th><th class="n">En attente</th><th class="n">Créé par</th></tr></thead>
+        <tbody>${s.groupes.map((g) => `
+          <tr><td>${esc(g.nom)}<span class="sous">code ${esc(g.code)}</span></td>
+            <td class="n">${g.membres}</td>
+            <td class="n">${g.enAttente ? `<span class="etiq attention">${g.enAttente}</span>` : '—'}</td>
+            <td class="n">${esc(g.createur)}<span class="sous">${date(g.cree)}</span></td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
 
-  for (const th of document.querySelectorAll('th[data-cle]')) {
+function alerte(titre, lignes, ligne, siVide) {
+  if (!lignes.length) {
+    return `<h2>${esc(titre)}<span class="legende-h2"><span class="etiq bien">✓ rien à signaler</span></span></h2>
+      <p class="vide">${esc(siVide)}</p>`;
+  }
+  return `<h2>${esc(titre)}<span class="legende-h2"><span class="etiq critique">⚠ ${lignes.length}</span></span></h2>
+    <div class="carte defile"><table><tbody>${lignes.map(ligne).join('')}</tbody></table></div>`;
+}
+
+function vueAlertes(s) {
+  return `
+    ${alerte("Séances d'une durée impossible", s.aberrantes, (a) => `
+      <tr><td>${esc(a.nom)}<span class="sous">${esc(a.date)}</span></td>
+        <td class="n"><span class="etiq critique">${a.heures} h</span></td>
+        <td class="n"><code>${esc(a.id)}</code></td></tr>`,
+      "Personne n'a oublié de terminer une séance.")}
+
+    ${alerte('Cartes inconnues dans les collections', s.cartesInconnues || [], (c) => `
+      <tr><td>${esc(c.qui)}</td><td class="n"><code>${esc(c.id)}</code></td>
+        <td class="n">${c.n} ex.</td></tr>`,
+      "Aucune carte étrangère à une saison.")}
+
+    ${alerte('Inscrits sans aucune séance', s.fantomes, (m) => `
+      <tr><td>${esc(m.nom)}<span class="sous">${esc(m.email)}</span></td>
+        <td class="n">inscrit ${date(m.inscrit)}</td></tr>`,
+      'Tout le monde a essayé au moins une fois.')}
+
+    ${alerte('Comptes dans aucun groupe', s.horsGroupe, (m) => `
+      <tr><td>${esc(m.nom)}<span class="sous">${esc(m.email)}</span></td>
+        <td class="n">${m.seances} séance${m.seances > 1 ? 's' : ''}</td>
+        <td class="n">${esc(depuis(m.derniere))}</td></tr>`,
+      'Tout le monde est rattaché à un groupe.')}
+
+    ${alerte('Endormis depuis plus de 14 jours', s.endormis, (m) => `
+      <tr><td>${esc(m.nom)}<span class="sous">${esc(m.groupes.join(', ') || 'aucun groupe')}</span></td>
+        <td class="n">${m.seances} séances</td>
+        <td class="n">${esc(depuis(m.derniere))}</td></tr>`,
+      'Personne n’a décroché.')}`;
+}
+
+const VUES = { resume: vueResume, activite: vueActivite, membres: vueMembres, sport: vueSport, alertes: vueAlertes };
+
+function rendu() {
+  const alertesN = stats.aberrantes.length + (stats.cartesInconnues || []).length + stats.fantomes.length;
+  $('corps').innerHTML = `
+    <div class="segments" role="tablist">
+      ${ONGLETS.map(([c, t]) => `<button class="segment" role="tab" aria-selected="${onglet === c}" data-onglet="${c}">
+        ${esc(t)}${c === 'alertes' && alertesN ? ` (${alertesN})` : ''}</button>`).join('')}
+    </div>
+    ${VUES[onglet](stats)}`;
+
+  for (const b of document.querySelectorAll('[data-onglet]')) {
+    b.onclick = () => { onglet = b.dataset.onglet; rendu(); };
+  }
+  for (const th of document.querySelectorAll('[data-tri]')) {
     th.onclick = () => {
-      const cle = th.dataset.cle;
-      triMembres = { cle, sens: triMembres.cle === cle ? -triMembres.sens : -1 };
+      const cle = th.dataset.tri;
+      tri = { cle, sens: tri.cle === cle ? -tri.sens : -1 };
       rendu();
     };
   }
-}
-
-function enTete(cle, label) {
-  const fleche = triMembres.cle === cle ? (triMembres.sens === -1 ? ' ↓' : ' ↑') : '';
-  return `<th data-cle="${cle}">${esc(label)}${fleche}</th>`;
-}
-
-function bloc(titre, lignes, ligne, siVide) {
-  if (!lignes.length) {
-    return `<p class="vide"><span class="puce ok">OK</span> ${esc(titre)} — ${esc(siVide)}</p>`;
+  if ($('tableaux').getAttribute('aria-pressed') === 'true') {
+    for (const t of document.querySelectorAll('[data-tableau]')) t.hidden = false;
   }
-  return `<p class="vide"><span class="puce alerte">${lignes.length}</span> ${esc(titre)}</p>
-    <table><tbody>${lignes.map(ligne).join('')}</tbody></table>`;
+  poseBulles();
 }
 
-/*
- * Deux façons d'obtenir les chiffres, pour une seule page.
- *
- * En local, le serveur de `npm run data` répond sur /api/stats sans rien
- * demander : il n'écoute que sur la boucle locale, personne d'autre ne peut
- * l'atteindre. En ligne, la même page est servie par Vercel, où /api/stats
- * n'existe pas : on bascule alors sur /api/data, qui exige le jeton du
- * compte créateur — la réponse contient les adresses des inscrits.
- */
+/* L'infobulle est unique et suit la souris : une par barre ferait neuf
+   cents nœuds sur la vue Activité. */
+function poseBulles() {
+  const bulle = $('bulle');
+  for (const zone of document.querySelectorAll('[data-bulle]')) {
+    zone.onmouseenter = () => {
+      const [titre, detail] = zone.dataset.bulle.split('|');
+      bulle.innerHTML = `<strong>${esc(titre)}</strong><em>${esc(detail)}</em>`;
+      bulle.style.opacity = '1';
+    };
+    zone.onmousemove = (e) => {
+      bulle.style.left = Math.min(e.clientX + 14, innerWidth - bulle.offsetWidth - 8) + 'px';
+      bulle.style.top = (e.clientY - bulle.offsetHeight - 10) + 'px';
+    };
+    zone.onmouseleave = () => { bulle.style.opacity = '0'; };
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Deux façons d'obtenir les chiffres, pour une seule page.
+
+   En local, le serveur de `npm run data` répond sur /api/stats sans rien
+   demander : il n'écoute que sur la boucle locale. En ligne, cette route
+   n'existe pas et on bascule sur /api/data, qui exige le jeton du compte
+   créateur — la réponse contient les adresses des inscrits.
+   ────────────────────────────────────────────────────────────────────── */
 async function lisLocal() {
   try {
     const r = await fetch('/api/stats');
     return r.ok ? await r.json() : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 /* La configuration du client, déjà publique : elle est inlinée dans le
    bundle de l'app à chaque build. La recopier ici n'expose rien de neuf. */
-const CONF = {'apiKey': 'AIzaSyCATSP6aBcjWxwcaz1b0CJVcjJo73BcB9E', 'authDomain': 'calicrew-ec042.firebaseapp.com', 'projectId': 'calicrew-ec042', 'appId': '1:1096910093780:web:a4d5f5f2b080079e71aa41'};
+const CONF = {"apiKey": "AIzaSyCATSP6aBcjWxwcaz1b0CJVcjJo73BcB9E", "authDomain": "calicrew-ec042.firebaseapp.com", "projectId": "calicrew-ec042", "appId": "1:1096910093780:web:a4d5f5f2b080079e71aa41"};
 
 async function lisEnLigne() {
   const [{ initializeApp }, { getAuth, onAuthStateChanged }] = await Promise.all([
@@ -323,8 +566,7 @@ async function lisEnLigne() {
     import('https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js'),
   ]);
   const auth = getAuth(initializeApp(CONF));
-  // La page est sur le même domaine que l'app : si tu y es connecté, la
-  // session est déjà là et il n'y a aucun mot de passe à redemander.
+  // Même domaine que l'app : si tu y es connecté, la session est déjà là.
   const user = await new Promise((res) => {
     const stop = onAuthStateChanged(auth, (u) => { stop(); res(u); });
   });
@@ -333,29 +575,39 @@ async function lisEnLigne() {
     e.lien = true;
     throw e;
   }
-  const r = await fetch('/api/data', {
-    headers: { Authorization: 'Bearer ' + (await user.getIdToken()) },
-  });
+  const r = await fetch('/api/data', { headers: { Authorization: 'Bearer ' + (await user.getIdToken()) } });
   const corps = await r.json();
-  if (!r.ok) throw new Error(corps.erreur || ('Erreur ' + r.status));
+  if (!r.ok) throw new Error(corps.erreur || 'Erreur ' + r.status);
   return corps;
 }
 
 async function charge() {
-  $('maj').textContent = 'lecture…';
+  $('etat').textContent = 'lecture…';
   try {
     stats = (await lisLocal()) || (await lisEnLigne());
-    if (stats.erreur) throw new Error(stats.erreur);
-    $('maj').textContent = 'à jour — ' + new Date(stats.genere).toLocaleTimeString('fr-FR');
+    $('etat').textContent = 'à jour, ' + new Date(stats.genere).toLocaleTimeString('fr-FR');
     rendu();
   } catch (err) {
-    $('maj').textContent = 'erreur';
+    $('etat').textContent = 'erreur';
     $('corps').innerHTML = `<p class="vide">${esc(err.message)}</p>` +
-      (err.lien ? '<p class="vide"><a href="/" style="color:var(--accent)">Ouvrir CaliCrew</a></p>' : '');
+      (err.lien ? '<p class="vide"><a href="/">Ouvrir CaliCrew</a></p>' : '');
   }
 }
 
 $('recharger').onclick = charge;
+$('tableaux').onclick = (e) => {
+  const on = e.target.getAttribute('aria-pressed') !== 'true';
+  e.target.setAttribute('aria-pressed', String(on));
+  for (const t of document.querySelectorAll('[data-tableau]')) t.hidden = !on;
+};
+$('theme').onclick = () => {
+  const sombre = getComputedStyle(document.body).backgroundColor === 'rgb(0, 0, 0)';
+  document.documentElement.dataset.theme = sombre ? 'light' : 'dark';
+  localStorage.setItem('theme', document.documentElement.dataset.theme);
+};
+const memo = localStorage.getItem('theme');
+if (memo) document.documentElement.dataset.theme = memo;
+
 charge();
 </script>
 </body>

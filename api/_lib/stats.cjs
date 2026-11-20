@@ -63,6 +63,29 @@ function calcule({ users, sessions, groups, progress }) {
 
   const progressDe = new Map(progress.map((p) => [p.uid, p]));
 
+  /*
+   * Une carte possédée, c'est une carte d'une saison et en au moins un
+   * exemplaire.
+   *
+   * Compter les clés du document donnait un de trop : il y traîne des
+   * identifiants d'aucune saison, restes d'anciens essais, que l'app ignore
+   * et que ce tableau comptait quand même. Ils sont désormais sortis du
+   * compte et listés à part, puisqu'un reliquat dans une collection est
+   * exactement le genre de chose qu'on veut voir.
+   */
+  const estCarteDeSaison = (id) => /^s\d+-/.test(id);
+  const cartesDe = (p) =>
+    Object.entries(p.ownedCards || {}).filter(([id, n]) => estCarteDeSaison(id) && n > 0);
+
+  // Deux comptes peuvent porter le même pseudo : sans l'email à côté, on
+  // croit à une erreur du tableau là où il y a deux personnes, ou deux
+  // comptes de la même.
+  const compteNoms = new Map();
+  for (const u of users) {
+    const n = (u.displayName || '').trim().toLowerCase();
+    compteNoms.set(n, (compteNoms.get(n) || 0) + 1);
+  }
+
   const membres = users.map((u) => {
     const siennes = parMembre.get(u.uid) || [];
     const p = progressDe.get(u.uid) || {};
@@ -79,8 +102,9 @@ function calcule({ users, sessions, groups, progress }) {
       reps: siennes.reduce((n, s) => n + repsDe(s), 0),
       duree: siennes.reduce((n, s) => n + (s.duration || 0), 0),
       xp: p.passXp || 0,
-      cartes: Object.keys(p.ownedCards || {}).length,
+      cartes: cartesDe(p).length,
       saison: p.currentSeasonId || '',
+      homonyme: (compteNoms.get((u.displayName || '').trim().toLowerCase()) || 0) > 1,
     };
   });
 
@@ -180,6 +204,11 @@ function calcule({ users, sessions, groups, progress }) {
       .map(([nom, v]) => ({ nom, ...v }))
       .sort((a, b) => b.seances - a.seances)
       .slice(0, 15),
+    cartesInconnues: progress.flatMap((p) =>
+      Object.entries(p.ownedCards || {})
+        .filter(([id, n]) => !estCarteDeSaison(id) && n > 0)
+        .map(([id, n]) => ({ qui: nomDe.get(p.uid) || p.uid, id, n }))
+    ),
     aberrantes: sessions
       .filter((s) => (s.duration || 0) > SEANCE_ABERRANTE)
       .sort((a, b) => (b.duration || 0) - (a.duration || 0))
