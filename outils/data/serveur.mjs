@@ -102,6 +102,24 @@ const serveur = createServer(async (req, res) => {
   }
 });
 
+/*
+ * Le port déjà pris veut presque toujours dire « il tourne déjà ».
+ *
+ * Sans ce garde-fou, Node crachait trente lignes de pile d'appels pour dire
+ * ça — de quoi croire que l'outil est cassé alors qu'il suffit d'ouvrir
+ * l'onglet.
+ */
+serveur.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`\n  Le tableau de bord tourne déjà.\n  http://localhost:${PORT}\n`);
+    console.log('  Pour le relancer malgré tout :');
+    console.log(`    lsof -ti tcp:${PORT} | xargs kill\n`);
+    process.exit(0);
+  }
+  console.error(err);
+  process.exit(1);
+});
+
 // 127.0.0.1 et non 0.0.0.0 : personne d'autre sur le réseau ne doit pouvoir
 // ouvrir cette page, pas même un téléphone branché au même wifi.
 serveur.listen(PORT, '127.0.0.1', () => {
