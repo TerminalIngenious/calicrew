@@ -295,17 +295,63 @@ function bloc(titre, lignes, ligne, siVide) {
     <table><tbody>${lignes.map(ligne).join('')}</tbody></table>`;
 }
 
+/*
+ * Deux façons d'obtenir les chiffres, pour une seule page.
+ *
+ * En local, le serveur de `npm run data` répond sur /api/stats sans rien
+ * demander : il n'écoute que sur la boucle locale, personne d'autre ne peut
+ * l'atteindre. En ligne, la même page est servie par Vercel, où /api/stats
+ * n'existe pas : on bascule alors sur /api/data, qui exige le jeton du
+ * compte créateur — la réponse contient les adresses des inscrits.
+ */
+async function lisLocal() {
+  try {
+    const r = await fetch('/api/stats');
+    return r.ok ? await r.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+/* La configuration du client, déjà publique : elle est inlinée dans le
+   bundle de l'app à chaque build. La recopier ici n'expose rien de neuf. */
+const CONF = {'apiKey': 'AIzaSyCATSP6aBcjWxwcaz1b0CJVcjJo73BcB9E', 'authDomain': 'calicrew-ec042.firebaseapp.com', 'projectId': 'calicrew-ec042', 'appId': '1:1096910093780:web:a4d5f5f2b080079e71aa41'};
+
+async function lisEnLigne() {
+  const [{ initializeApp }, { getAuth, onAuthStateChanged }] = await Promise.all([
+    import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js'),
+  ]);
+  const auth = getAuth(initializeApp(CONF));
+  // La page est sur le même domaine que l'app : si tu y es connecté, la
+  // session est déjà là et il n'y a aucun mot de passe à redemander.
+  const user = await new Promise((res) => {
+    const stop = onAuthStateChanged(auth, (u) => { stop(); res(u); });
+  });
+  if (!user) {
+    const e = new Error('Connecte-toi d’abord sur l’app, dans un autre onglet.');
+    e.lien = true;
+    throw e;
+  }
+  const r = await fetch('/api/data', {
+    headers: { Authorization: 'Bearer ' + (await user.getIdToken()) },
+  });
+  const corps = await r.json();
+  if (!r.ok) throw new Error(corps.erreur || ('Erreur ' + r.status));
+  return corps;
+}
+
 async function charge() {
   $('maj').textContent = 'lecture…';
   try {
-    const r = await fetch('/api/stats');
-    stats = await r.json();
+    stats = (await lisLocal()) || (await lisEnLigne());
     if (stats.erreur) throw new Error(stats.erreur);
     $('maj').textContent = 'à jour — ' + new Date(stats.genere).toLocaleTimeString('fr-FR');
     rendu();
   } catch (err) {
     $('maj').textContent = 'erreur';
-    $('corps').innerHTML = `<p class="vide">Lecture impossible : ${esc(err.message)}</p>`;
+    $('corps').innerHTML = `<p class="vide">${esc(err.message)}</p>` +
+      (err.lien ? '<p class="vide"><a href="/" style="color:var(--accent)">Ouvrir CaliCrew</a></p>' : '');
   }
 }
 

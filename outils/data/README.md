@@ -1,11 +1,35 @@
-# Données — le tableau de bord local
+# Données — le tableau de bord
 
-Un petit serveur qui tourne sur ta machine et montre l'état de l'app :
-inscrits, actifs, séances, exercices, groupes, et les anomalies à surveiller.
+L'état de l'app : inscrits, actifs, séances, exercices, groupes, et les
+anomalies à surveiller.
 
-Il ne vit **pas** dans CaliCrew et n'est **pas** déployé. Il écoute sur
-`127.0.0.1`, donc personne d'autre ne peut l'ouvrir — pas même un téléphone
-sur le même wifi.
+Deux façons d'y accéder, **la même page** (`public/data.html`) et le **même
+calcul** (`api/_lib/stats.mjs`) :
+
+| | |
+|---|---|
+| **En ligne** | <https://calicrew.vercel.app/data.html> — rien à lancer. |
+| **En local** | `npm run data` — rien à configurer côté serveur. |
+
+## En ligne
+
+La page est servie à tout le monde, mais elle est vide sans les chiffres :
+c'est `/api/data` qui les détient, et cette route **vérifie le jeton
+Firebase côté serveur** puis que l'uid est dans `ADMIN_UIDS` (variable
+d'environnement Vercel, liste séparée par des virgules). Sans ça, elle ne
+lit même pas la base.
+
+La réponse contient les adresses email des inscrits : c'est pourquoi le
+verrou est sur l'API et non sur l'affichage.
+
+Il faut être connecté à CaliCrew dans le même navigateur — la page est sur
+le même domaine, elle reprend la session sans redemander de mot de passe.
+
+## En local
+
+Le serveur écoute sur `127.0.0.1` : personne d'autre ne peut l'ouvrir, pas
+même un téléphone sur le même wifi. Il lit avec la clé de service et ne
+demande donc aucune connexion.
 
 ## La clé, une fois pour toutes
 

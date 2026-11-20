@@ -27,7 +27,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { calcule } from './stats.mjs';
+// Le même calcul que la version en ligne : une seule implémentation.
+import { calcule } from '../../api/_lib/stats.mjs';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -82,7 +83,7 @@ async function lisTout() {
 const serveur = createServer(async (req, res) => {
   try {
     if (req.url === '/' || req.url === '/index.html') {
-      const page = await readFile(join(ICI, 'page.html'));
+      const page = await readFile(join(ICI, '..', '..', 'public', 'data.html'));
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(page);
     }
