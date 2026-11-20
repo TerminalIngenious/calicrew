@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getDb } from './_lib/push.js';
 import { uidDuJeton } from './_lib/auth.js';
-import { calcule } from './_lib/stats.mjs';
+import { calcule } from './_lib/stats.cjs';
 
 /**
  * Les chiffres de l'app, pour le créateur seulement.

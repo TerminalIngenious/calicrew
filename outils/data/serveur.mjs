@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 // Le même calcul que la version en ligne : une seule implémentation.
-import { calcule } from '../../api/_lib/stats.mjs';
+import { calcule } from '../../api/_lib/stats.cjs';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);

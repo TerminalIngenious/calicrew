@@ -1,6 +1,10 @@
 /**
  * Le calcul des statistiques, à part du serveur et de la page.
  *
+ * En CommonJS (.cjs) et non en module : Vercel compile les routes `api/` en
+ * CommonJS, et un `require()` d'un module ESM échoue — c'est ce qui faisait
+ * planter /api/data. Le .cjs, lui, se laisse charger par les deux mondes.
+ *
  * Ici il n'y a que des fonctions sur des tableaux : aucune lecture réseau,
  * aucun rendu. C'est ce qui permet de changer un chiffre sans toucher au
  * reste, et de vérifier un calcul en l'appelant directement.
@@ -37,7 +41,7 @@ function repsDe(s) {
 /** Au-delà, la séance n'a pas été terminée : on la signale. */
 const SEANCE_ABERRANTE = 6 * 3600;
 
-export function calcule({ users, sessions, groups, progress }) {
+function calcule({ users, sessions, groups, progress }) {
   const debutJour = minuit();
   const debut7 = minuit(6);
   const debut30 = minuit(29);
@@ -187,3 +191,5 @@ export function calcule({ users, sessions, groups, progress }) {
       })),
   };
 }
+
+module.exports = { calcule };
