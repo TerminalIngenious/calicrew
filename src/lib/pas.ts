@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { useAuth } from '../contexts/AuthContext';
+import type { UserProgress } from '../types';
 import { dayKey } from './creatine';
-import { ENDURANCE_XP_MAX_JOUR } from './passes';
+import { ENDURANCE_XP_MAX_JOUR, getCurrentSeason, needsSeasonReset, startNewSeason } from './passes';
 
 /**
  * Les pas de la journée.
@@ -175,6 +176,21 @@ export function usePas() {
         data.pasXpDay
       );
 
+      /*
+       * La bascule de saison se fait d'ordinaire à l'ouverture du Pass.
+       *
+       * Si elle n'a pas encore eu lieu, l'XP des pas s'ajouterait au total de
+       * la saison précédente et disparaîtrait à la première visite du Pass,
+       * sans que personne ne voie rien passer. On fait donc ici la même chose
+       * que l'enregistrement d'une séance.
+       */
+      const saison = getCurrentSeason();
+      const bascule =
+        saison && needsSeasonReset(data as UserProgress, saison.id)
+          ? startNewSeason(data as UserProgress, saison.id)
+          : null;
+      const totalXp = bascule ? bascule.passXp : (data.passXp as number) || 0;
+
       // On élague les vieilles entrées à l'écriture : sans ça la carte de
       // progression grossirait indéfiniment, un champ par jour.
       const suivants: Record<string, number> = { ...(data.pasJours || {}), [aujourdhui]: pas };
@@ -187,7 +203,16 @@ export function usePas() {
           pasJours: elague,
           pasXpDay: compteur,
           enduranceXpDay: endurance,
-          passXp: Math.max(0, ((data.passXp as number) || 0) + delta),
+          passXp: Math.max(0, totalXp + delta),
+          /* Les deux champs de la bascule ne partent que s'il y a bascule :
+             un document de progression né d'un `merge` n'a pas forcément de
+             `chestsToOpen`, et Firestore refuse d'écrire `undefined`. */
+          ...(bascule
+            ? {
+                currentSeasonId: bascule.currentSeasonId,
+                chestsToOpen: bascule.chestsToOpen || [],
+              }
+            : {}),
         },
         { merge: true }
       );
