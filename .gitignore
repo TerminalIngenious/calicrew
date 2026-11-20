@@ -14,6 +14,10 @@ dist-ssr
 .env
 .env.admin
 
+# Clés de service Firebase — elles ouvrent toute la base
+cle.json
+*-firebase-adminsdk-*.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
