@@ -29,7 +29,7 @@ const RENDEZ_VOUS: Record<string, { titre: string; texte: string; tag: string }>
   '2026-11-09': { titre: 'FaceID', texte: FACEID_LANCEMENT, tag: 'faceid-debut' },
   '2026-11-16': { titre: 'FaceID — semaine 2', texte: FACEID_SEMAINE[0], tag: 'faceid-s2' },
   '2026-11-23': { titre: 'FaceID — semaine 3', texte: FACEID_SEMAINE[1], tag: 'faceid-s3' },
-  '2026-11-29': { titre: 'FaceID', texte: FACEID_DERNIER_JOUR, tag: 'faceid-fin' },
+  '2026-11-30': { titre: 'FaceID', texte: FACEID_DERNIER_JOUR, tag: 'faceid-fin' },
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

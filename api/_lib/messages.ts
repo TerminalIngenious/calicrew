@@ -201,9 +201,16 @@ export const FACEID_SEMAINE = [
   'Dernière série de missions. Après, il n\'y a plus de boosters à gagner.',
 ];
 
-/** La veille de la fin des missions. */
+/**
+ * Le jour de la fermeture, et non la veille.
+ *
+ * La veille, le message tombait le 29 novembre — le jour où commence la
+ * saison 2. Deux annonces le même jour, dont une qui parle de la fin d'un
+ * event : autant la garder pour le 30, quand il reste vraiment quelques
+ * heures et que l'urgence est réelle.
+ */
 export const FACEID_DERNIER_JOUR =
-  'Dernier jour pour boucler les missions. Le fichier ferme demain soir, complet ou non.';
+  'Dernier jour pour boucler les missions. Le fichier ferme ce soir, complet ou non.';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Le rappel des pas, 21h
