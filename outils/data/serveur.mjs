@@ -13,12 +13,14 @@
  * Usage :
  *   node outils/data/serveur.mjs
  *   node outils/data/serveur.mjs --compte /chemin/vers/cle.json --port 4321
+ *   node outils/data/serveur.mjs --sans-navigateur
  *
  * La clé se range par défaut dans ~/.calicrew/cle.json — hors du dépôt, qui
  * est public. On la génère dans la console Firebase : Paramètres du projet,
  * Comptes de service, « Générer une nouvelle clé privée ».
  */
 import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -109,11 +111,29 @@ const serveur = createServer(async (req, res) => {
  * ça — de quoi croire que l'outil est cassé alors qu'il suffit d'ouvrir
  * l'onglet.
  */
+/*
+ * Ouvrir le navigateur fait partie du lancement.
+ *
+ * Retenir un port est exactement le genre de détail qui fait qu'on n'ouvre
+ * plus un outil. `--sans-navigateur` reste là pour les cas où l'on veut
+ * juste le serveur, par exemple quand il tourne déjà dans un autre onglet.
+ */
+function ouvre(url) {
+  if (args.includes('--sans-navigateur')) return;
+  const cmd = process.platform === 'darwin' ? 'open'
+    : process.platform === 'win32' ? 'start' : 'xdg-open';
+  // `detached` et les flux ignorés : le navigateur ne doit pas garder le
+  // terminal en otage ni écrire par-dessus nos messages.
+  spawn(cmd, [url], { detached: true, stdio: 'ignore' }).unref();
+}
+
 serveur.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     console.log(`\n  Le tableau de bord tourne déjà.\n  http://localhost:${PORT}\n`);
     console.log('  Pour le relancer malgré tout :');
     console.log(`    lsof -ti tcp:${PORT} | xargs kill\n`);
+    // Il tourne : la page est bonne, autant l'ouvrir quand même.
+    ouvre(`http://localhost:${PORT}`);
     process.exit(0);
   }
   console.error(err);
@@ -125,4 +145,5 @@ serveur.on('error', (err) => {
 serveur.listen(PORT, '127.0.0.1', () => {
   console.log(`\n  CaliCrew — données\n  http://localhost:${PORT}\n`);
   console.log('  Ctrl+C pour arrêter.\n');
+  ouvre(`http://localhost:${PORT}`);
 });

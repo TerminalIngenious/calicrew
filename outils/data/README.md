@@ -28,7 +28,17 @@ touchée.
 npm run data
 ```
 
-Puis ouvre <http://localhost:4321>. `Ctrl+C` pour arrêter.
+Le navigateur s'ouvre tout seul sur <http://localhost:4321>. `Ctrl+C` pour
+arrêter.
+
+L'adresse ne vit que tant que la commande tourne : ce n'est pas un site, il
+n'y a rien en ligne, et rien à partager.
+
+Pour lancer sans ouvrir de fenêtre :
+
+```bash
+node outils/data/serveur.mjs --sans-navigateur
+```
 
 Pour une clé rangée ailleurs, ou un autre port :
 
