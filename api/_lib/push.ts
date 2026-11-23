@@ -100,6 +100,20 @@ export function getDayKey(): string {
   }).format(new Date());
 }
 
+/**
+ * Un jour voisin, à partir d'une clé YYYY-MM-DD.
+ *
+ * Reconstruit à midi : à minuit, un changement d'heure ferait retomber sur le
+ * même jour. Même calcul que `shiftDay` côté client.
+ */
+export function decaleJour(cle: string, delta: number): string {
+  const [a, m, j] = cle.split('-').map(Number);
+  const d = new Date(Date.UTC(a, m - 1, j + delta, 12));
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'UTC', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(d);
+}
+
 /** Même numérotation que le client, pour reconstruire l'id du défi du jour. */
 export function getDayNumber(): number {
   const ref = zonedToEpoch(2026, 1, 1, 10, TZ);
