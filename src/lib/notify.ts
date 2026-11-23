@@ -76,3 +76,24 @@ export async function annonceNouvelleCarte(force = false): Promise<string> {
     return 'Envoi impossible. Réseau ?';
   }
 }
+
+/**
+ * S'envoie à soi-même un défi surprise, pour essayer la chaîne sans
+ * déranger le groupe. Réservé aux administrateurs côté serveur.
+ */
+export async function testeDefiSurprise(): Promise<string> {
+  const user = auth.currentUser;
+  if (!user) return 'Pas connecté.';
+  try {
+    const jeton = await user.getIdToken();
+    const r = await fetch('/api/notify/defi-test', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${jeton}` },
+    });
+    const corps = await r.json();
+    if (!r.ok) return corps.erreur || `Erreur ${r.status}`;
+    return corps.envoye ? 'Envoyé. Regarde l\'accueil.' : 'Déposé, mais pas de notification (abonnement absent).';
+  } catch {
+    return 'Envoi impossible. Réseau ?';
+  }
+}

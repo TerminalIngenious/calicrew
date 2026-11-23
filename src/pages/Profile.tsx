@@ -6,7 +6,7 @@ import { db } from '../lib/firebase';
 import { passeCache, docsEnCache } from '../lib/lectureCache';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
-import { annonceNouvelleCarte } from '../lib/notify';
+import { annonceNouvelleCarte, testeDefiSurprise } from '../lib/notify';
 
 /** Les comptes qui voient les outils de créateur. */
 const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
@@ -34,6 +34,7 @@ export default function Profile() {
   const { user, displayName: myName, updateDisplayName, signOut } = useAuth();
   const navigate = useNavigate();
   /** Le retour de l'annonce : vide, « envoi », ou ce que le serveur a répondu. */
+  const [essaiDefi, setEssaiDefi] = useState<string>('');
   const [annonce, setAnnonce] = useState('');
   const { uid } = useParams<{ uid: string }>();
   const { sessions: ownSessions } = useUserSessions();
@@ -481,6 +482,26 @@ export default function Profile() {
                   <span className="settings-row-label">Annoncer la nouvelle carte</span>
                   <span className="settings-row-sub">
                     {annonce === 'envoi' ? 'Envoi…' : annonce || 'Une fois, à la réouverture'}
+                  </span>
+                </div>
+              </button>
+            )}
+            {/* Un défi surprise pour soi seul : la seule façon d'essayer le
+                rendu sans réveiller tout le groupe. */}
+            {ADMIN_UIDS.includes(user.uid) && (
+              <button
+                className="settings-row"
+                disabled={essaiDefi === 'envoi'}
+                onClick={async () => {
+                  setEssaiDefi('envoi');
+                  setEssaiDefi(await testeDefiSurprise());
+                }}
+              >
+                <Zap size={17} />
+                <div className="settings-row-info">
+                  <span className="settings-row-label">Tester un défi surprise</span>
+                  <span className="settings-row-sub">
+                    {essaiDefi === 'envoi' ? 'Envoi…' : essaiDefi || 'Pour toi seul'}
                   </span>
                 </div>
               </button>
