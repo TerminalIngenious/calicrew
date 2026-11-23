@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CARTE_INTERGALACTIQUE, DOS_INTERGALACTIQUE, joursRestants } from '../lib/intergalactique';
-import { playCardExplosion, playCloche, playPas, playRumeur, primeAudio } from '../lib/sound';
+import { playCardExplosion, playChute, playCloche, playMontee, playPas, playRumeur, primeAudio } from '../lib/sound';
+import CielArrivee from './CielArrivee';
 import '../pages/Arrivee.css';
 
 /**
@@ -22,12 +23,14 @@ import '../pages/Arrivee.css';
 
 /** Les rendez-vous sonores, en millisecondes depuis le lancement. */
 const BANDE_SON: [number, () => void][] = [
-  [0, () => playRumeur(9.2)],
+  [0, () => playRumeur(7.3)],
+  [2000, () => playMontee(5.3)],
   [2900, playCloche],
   [4600, () => playPas(0.7)],
   [5600, () => playPas(0.9)],
-  [6500, () => playPas(1.1)],
+  [6500, () => playPas(1.15)],
   [7800, () => playCardExplosion('intergalactique')],
+  [7800, playChute],
 ];
 
 /** Fin de la séquence : au-delà, l'écran attend qu'on le referme. */
@@ -36,6 +39,10 @@ const DUREE = 10600;
 export default function ArriveeIntergalactique({ onFini }: { onFini: () => void }) {
   const [phase, setPhase] = useState<'attente' | 'joue' | 'fini'>('attente');
   const [sortie, setSortie] = useState(false);
+  /* L'heure du départ est partagée avec le ciel : les deux animations
+     suivent la même horloge, l'une en CSS, l'autre en canvas. Dans l'état
+     et non dans une ref, puisqu'elle est passée au rendu. */
+  const [depart, setDepart] = useState(0);
 
   useEffect(() => {
     if (phase !== 'joue') return;
@@ -48,6 +55,7 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
     // Le contexte audio ne s'ouvre que pendant le geste : tout le reste de
     // la bande-son part de minuteries, trop tard pour y avoir droit.
     primeAudio();
+    setDepart(Date.now());
     setPhase('joue');
   }
 
@@ -68,6 +76,14 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
 
   return (
     <div className={`arr arr-joue ${phase === 'fini' ? 'arr-pose' : ''} ${sortie ? 'arr-sortie' : ''}`}>
+      <CielArrivee depart={depart} />
+
+      {/* Les bandes de cinéma : deux rectangles noirs qui entrent et
+          sortent. Rien ne dit « ce qui suit compte » aussi vite. */}
+      <div className="arr-bande arr-bande-h" aria-hidden="true" />
+      <div className="arr-bande arr-bande-b" aria-hidden="true" />
+      <div className="arr-vignette" aria-hidden="true" />
+
       <div className="arr-projo arr-projo-g" aria-hidden="true" />
       <div className="arr-projo arr-projo-d" aria-hidden="true" />
 
@@ -82,6 +98,9 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
       {/* Le dos de carte qui fonce depuis le fond, puis la carte qui se
           retourne : deux faces d'un même bloc, retourné en 3D. */}
       <div className="arr-scene">
+        {/* Le halo tourne derrière la carte une fois qu'elle est posée :
+            c'est ce qui fait qu'elle respire au lieu de se figer. */}
+        <div className="arr-halo" aria-hidden="true" />
         <div className="arr-carte">
           <img className="arr-face arr-dos" src={DOS_INTERGALACTIQUE} alt="" />
           <img className="arr-face arr-recto" src={CARTE_INTERGALACTIQUE.image} alt="" />
@@ -89,6 +108,11 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
       </div>
 
       <div className="arr-onde" aria-hidden="true" />
+      <div className="arr-onde arr-onde-2" aria-hidden="true" />
+      {/* Trois couches décalées en rouge, vert et bleu : à l'impact,
+          l'image se désaligne une fraction de seconde. */}
+      <div className="arr-flash arr-flash-r" aria-hidden="true" />
+      <div className="arr-flash arr-flash-b" aria-hidden="true" />
       <div className="arr-flash" aria-hidden="true" />
 
       <div className="arr-titre" aria-hidden="true">INTERGALACTIQUE</div>

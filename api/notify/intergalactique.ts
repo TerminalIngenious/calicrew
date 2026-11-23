@@ -61,11 +61,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   for (const cible of cibles) {
     const sub = parUid.get(cible);
     if (!sub || !veutGroupe(sub)) continue;
+    /*
+     * Ni le nom de la carte, ni sa rareté.
+     *
+     * La notification doit donner envie d'ouvrir un coffre, pas raconter ce
+     * qu'il y a dedans. Celui qui ne l'a pas encore vue la découvrira par
+     * elle-même — et celui qui l'a déjà vue comprendra tout seul.
+     */
     envois.push(sendTo(sub, {
-      title: '\u{1FA90} Intergalactique',
-      body: `${moi} vient de trouver la carte intergalactique. Il en reste une par personne, et la fenêtre se referme.`,
+      title: '\u{1FA90} Quelqu\u2019un l\u2019a trouvée',
+      body: `${moi} vient d\u2019ouvrir un coffre et d\u2019y trouver ce que personne d\u2019autre n\u2019a. Il reste des jours, et des coffres.`,
       tag: 'intergalactique',
-      url: '/collection',
+      url: '/battlepass',
     }));
   }
 

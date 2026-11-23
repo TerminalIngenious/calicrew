@@ -235,3 +235,74 @@ export function playPas(force = 1): void {
     // idem
   }
 }
+
+/**
+ * La montée : un souffle dont la bande passante grimpe sans arrêt.
+ *
+ * C'est le son qui fait qu'on sent venir quelque chose avant de savoir
+ * quoi. Il monte jusqu'au bout et se coupe net — une montée qui redescend
+ * annonce une fausse alerte.
+ */
+export function playMontee(duree = 5): void {
+  const audio = getCtx();
+  if (!audio) return;
+  if (audio.state === 'suspended') void audio.resume();
+
+  try {
+    const out = getMaster(audio);
+    const t = audio.currentTime;
+    const source = audio.createBufferSource();
+    source.buffer = getNoise(audio);
+    source.loop = true;
+
+    const filtre = audio.createBiquadFilter();
+    filtre.type = 'bandpass';
+    filtre.Q.value = 6;
+    filtre.frequency.setValueAtTime(220, t);
+    filtre.frequency.exponentialRampToValueAtTime(7200, t + duree);
+
+    const env = audio.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.055, t + duree * 0.85);
+    env.gain.exponentialRampToValueAtTime(0.11, t + duree * 0.97);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + duree);
+
+    source.connect(filtre).connect(env).connect(out);
+    source.start(t);
+    source.stop(t + duree + 0.05);
+  } catch {
+    // Un son raté ne doit jamais empêcher l'animation de se dérouler.
+  }
+}
+
+/**
+ * La chute : une sinusoïde qui plonge sous le seuil de l'audible.
+ *
+ * Elle ne s'entend pas vraiment, elle se sent — c'est elle qui donne du
+ * ventre à l'impact, sous l'explosion qui part au même instant.
+ */
+export function playChute(): void {
+  const audio = getCtx();
+  if (!audio) return;
+  if (audio.state === 'suspended') void audio.resume();
+
+  try {
+    const out = getMaster(audio);
+    const t = audio.currentTime;
+    const osc = audio.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(190, t);
+    osc.frequency.exponentialRampToValueAtTime(24, t + 1.5);
+
+    const env = audio.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.5, t + 0.03);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 1.7);
+
+    osc.connect(env).connect(out);
+    osc.start(t);
+    osc.stop(t + 1.75);
+  } catch {
+    // idem
+  }
+}

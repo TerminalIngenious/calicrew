@@ -85,6 +85,57 @@
   75% { transform: translate(-7px, 4px); }
 }
 
+/* ── Le ciel, les bandes, la vignette ── */
+
+.arr-ciel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Les bandes de cinéma. Elles entrent avant tout le reste et sortent avec
+   le bouton : ce sont elles qui ouvrent et ferment la séquence. */
+.arr-bande {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 11vh;
+  background: #000;
+  z-index: 3;
+}
+
+.arr-bande-h { top: 0; animation: arr-bande-h 10.6s cubic-bezier(0.3, 0.8, 0.3, 1) forwards; }
+.arr-bande-b { bottom: 0; animation: arr-bande-b 10.6s cubic-bezier(0.3, 0.8, 0.3, 1) forwards; }
+
+@keyframes arr-bande-h {
+  0% { transform: translateY(-100%); }
+  5%, 88% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes arr-bande-b {
+  0% { transform: translateY(100%); }
+  5%, 88% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+/* Le coin des yeux assombri : l'œil va au centre sans qu'on le lui dise. */
+.arr-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(68% 58% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.92) 100%);
+  animation: arr-vignette 10.6s ease-in-out;
+}
+
+@keyframes arr-vignette {
+  0%, 60% { opacity: 1; }
+  73% { opacity: 1; }
+  /* Elle s'ouvre d'un coup à l'éclat, puis se referme doucement. */
+  75% { opacity: 0.25; }
+  100% { opacity: 0.8; }
+}
+
 /* ── Les projecteurs ── */
 
 .arr-projo {
@@ -172,6 +223,44 @@
   74%, 100% { opacity: 1; }
 }
 
+/*
+ * Le halo derrière la carte.
+ *
+ * Un dégradé conique qui tourne lentement : une fois la carte posée, c'est
+ * la seule chose qui bouge encore, et c'est ce qui l'empêche d'avoir l'air
+ * d'une capture d'écran.
+ */
+.arr-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(96vw, 460px);
+  aspect-ratio: 1;
+  margin: -1px 0 0 -1px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    rgba(185, 212, 255, 0) 0deg,
+    rgba(185, 212, 255, 0.5) 60deg,
+    rgba(217, 201, 255, 0.15) 150deg,
+    rgba(185, 212, 255, 0) 230deg,
+    rgba(255, 255, 255, 0.35) 310deg,
+    rgba(185, 212, 255, 0) 360deg);
+  filter: blur(42px);
+  opacity: 0;
+  animation: arr-halo-paraitre 10.6s linear forwards, arr-halo-tourne 14s linear infinite;
+}
+
+@keyframes arr-halo-paraitre {
+  0%, 73% { opacity: 0; }
+  76% { opacity: 0.95; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes arr-halo-tourne {
+  to { rotate: 360deg; }
+}
+
 .arr-carte {
   position: relative;
   width: min(62vw, 300px);
@@ -184,20 +273,26 @@
  * Elle sort du fond, grossit par à-coups — un pas, une avancée — marque un
  * temps dans le noir, puis se plante.
  *
- * Un tour et demi, et non un tour : à zéro degré c'est le dos qui fait
- * face, et il faut finir à cent quatre-vingts pour que le recto soit
- * devant. Une rotation pleine aurait montré le recto d'entrée, ce qui
- * n'était plus une révélation.
+ * Elle tourne dans son plan pendant l'approche, et ne se retourne qu'une
+ * fois, à l'impact.
+ *
+ * Une rotation sur l'axe vertical alternait les deux faces pendant tout le
+ * trajet : on voyait le recto trois fois avant la révélation, qui n'en
+ * était donc plus une. En `rotateZ`, c'est toujours le dos qui fait face —
+ * et le `rotateY` unique du retournement arrive pile sur le flash.
  */
 @keyframes arr-approche {
-  0%, 38% { transform: translateZ(-1400px) rotateY(0deg) scale(0.2); }
-  44% { transform: translateZ(-900px) rotateY(80deg) scale(0.35); }
-  53% { transform: translateZ(-620px) rotateY(190deg) scale(0.5); }
-  62% { transform: translateZ(-380px) rotateY(300deg) scale(0.68); }
-  69% { transform: translateZ(-300px) rotateY(380deg) scale(0.74); }
-  73% { transform: translateZ(-300px) rotateY(430deg) scale(0.74); }
-  74% { transform: translateZ(0) rotateY(540deg) scale(1.06); }
-  78%, 100% { transform: translateZ(0) rotateY(540deg) scale(1); }
+  0%, 38% { transform: translateZ(-1500px) rotateZ(-540deg) scale(0.22); }
+  44% { transform: translateZ(-980px) rotateZ(-392deg) scale(0.34); }
+  53% { transform: translateZ(-660px) rotateZ(-248deg) scale(0.48); }
+  62% { transform: translateZ(-400px) rotateZ(-124deg) scale(0.66); }
+  69% { transform: translateZ(-300px) rotateZ(-42deg) scale(0.74); }
+  /* Le temps mort : elle reste là, immobile, pendant que tout s'éteint. */
+  73% { transform: translateZ(-300px) rotateZ(-22deg) scale(0.74); }
+  /* Le retournement, pile sur le flash. */
+  74.5% { transform: translateZ(-60px) rotateY(90deg) rotateZ(-6deg) scale(1.12); }
+  76.5% { transform: translateZ(0) rotateY(180deg) rotateZ(0deg) scale(1.06); }
+  79%, 100% { transform: translateZ(0) rotateY(180deg) rotateZ(0deg) scale(1); }
 }
 
 .arr-face {
@@ -227,6 +322,33 @@
   box-shadow: 0 0 60px 10px rgba(190, 220, 255, 0.4);
 }
 
+/* Une fois posée, la carte flotte. Trois pixels suffisent : au-delà, on
+   dirait qu'elle tombe. */
+.arr-pose .arr-carte { animation: arr-approche 10.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards, arr-flotte 5s ease-in-out 1s infinite; }
+
+@keyframes arr-flotte {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -9px; }
+}
+
+/* Le reflet qui balaie la carte, comme une lumière qui passe dessus. */
+.arr-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(104deg, transparent 38%, rgba(255, 255, 255, 0.5) 47%, transparent 56%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: arr-reflet 10.6s linear forwards;
+}
+
+@keyframes arr-reflet {
+  0%, 76% { opacity: 0; background-position: -140% 0; }
+  78% { opacity: 0.9; }
+  88%, 100% { opacity: 0; background-position: 240% 0; }
+}
+
 /* ── Le flash et l'onde ── */
 
 .arr-flash {
@@ -235,6 +357,30 @@
   background: #fff;
   opacity: 0;
   animation: arr-flash 10.6s linear;
+}
+
+/*
+ * L'aberration chromatique de l'impact.
+ *
+ * Deux voiles, l'un rouge et l'autre bleu, décalés de quelques pixels en
+ * sens contraire et mélangés en écran : pendant deux dixièmes de seconde,
+ * l'image se dédouble comme sous un choc. Au-delà, ça fait mal aux yeux.
+ */
+.arr-flash-r { background: #ff3b3b; mix-blend-mode: screen; animation-name: arr-flash-r; }
+.arr-flash-b { background: #3b7bff; mix-blend-mode: screen; animation-name: arr-flash-b; }
+
+@keyframes arr-flash-r {
+  0%, 73.4% { opacity: 0; translate: 0 0; }
+  74% { opacity: 0.55; translate: -14px 0; }
+  77% { opacity: 0; translate: 0 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes arr-flash-b {
+  0%, 73.4% { opacity: 0; translate: 0 0; }
+  74% { opacity: 0.55; translate: 14px 0; }
+  77% { opacity: 0; translate: 0 0; }
+  100% { opacity: 0; }
 }
 
 @keyframes arr-flash {
@@ -262,6 +408,20 @@
   74% { opacity: 0.9; transform: scale(0.2); }
   82% { opacity: 0; transform: scale(34); }
   100% { opacity: 0; transform: scale(34); }
+}
+
+/* Une seconde onde, plus lente et plus discrète : une seule a l'air d'un
+   effet, deux ont l'air d'un souffle. */
+.arr-onde-2 {
+  border-color: rgba(217, 201, 255, 0.55);
+  animation-name: arr-onde-2;
+}
+
+@keyframes arr-onde-2 {
+  0%, 74.4% { opacity: 0; transform: scale(0.2); }
+  75% { opacity: 0.7; transform: scale(0.2); }
+  88% { opacity: 0; transform: scale(46); }
+  100% { opacity: 0; transform: scale(46); }
 }
 
 /* ── Le titre et la phrase ── */
@@ -353,7 +513,9 @@
   .arr-titre,
   .arr-speaker span { animation: none; }
   .arr-titre { opacity: 1; }
-  .arr-projo, .arr-flash, .arr-onde, .arr-speaker { display: none; }
+  .arr-projo, .arr-flash, .arr-onde, .arr-speaker, .arr-bande, .arr-halo { display: none; }
+  .arr-scene::after { display: none; }
+  .arr-vignette { animation: none; opacity: 0.8; }
   .arr-scene { opacity: 1; animation: none; }
   .arr-carte { animation: none; transform: rotateY(180deg); }
   .arr-titre span, .arr-sous { opacity: 1; animation: none; }
