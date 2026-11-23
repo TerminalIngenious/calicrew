@@ -41,6 +41,27 @@ function repsDe(s) {
 /** Au-delà, la séance n'a pas été terminée : on la signale. */
 const SEANCE_ABERRANTE = 6 * 3600;
 
+/**
+ * Une longue séance n'est pas forcément un chrono oublié.
+ *
+ * Un log de sortie — course, vélo, sport co — tire sa durée des temps que
+ * le joueur a saisis lui-même, pas du chronomètre. Sept heures de VTT, de
+ * vélo et de basket dans la même journée font une durée énorme et pourtant
+ * exacte. Le chrono oublié, lui, affiche une durée qui n'a aucun rapport
+ * avec ce qui a été déclaré.
+ */
+function dureeDeclaree(s) {
+  return (s.exercises || []).reduce((t, ex) => t + (ex.runDuration || 0), 0);
+}
+
+function chronoOublie(s) {
+  const d = s.duration || 0;
+  if (d <= SEANCE_ABERRANTE) return false;
+  const declare = dureeDeclaree(s);
+  // Une minute de marge : la durée enregistrée est arrondie à la seconde.
+  return Math.abs(d - declare) > 60;
+}
+
 function calcule({ users, sessions, groups, progress }) {
   const debutJour = minuit();
   const debut7 = minuit(6);
@@ -204,13 +225,23 @@ function calcule({ users, sessions, groups, progress }) {
       .map(([nom, v]) => ({ nom, ...v }))
       .sort((a, b) => b.seances - a.seances)
       .slice(0, 15),
+    longuesSorties: sessions
+      .filter((s) => (s.duration || 0) > SEANCE_ABERRANTE && !chronoOublie(s))
+      .sort((a, b) => (b.duration || 0) - (a.duration || 0))
+      .map((s) => ({
+        id: s.id,
+        nom: nomDe.get(s.userId) || s.userId,
+        date: s.date,
+        heures: Math.round((s.duration || 0) / 360) / 10,
+        quoi: (s.exercises || []).map((e) => e.exerciseName).join(', '),
+      })),
     cartesInconnues: progress.flatMap((p) =>
       Object.entries(p.ownedCards || {})
         .filter(([id, n]) => !estCarteDeSaison(id) && n > 0)
         .map(([id, n]) => ({ qui: nomDe.get(p.uid) || p.uid, id, n }))
     ),
     aberrantes: sessions
-      .filter((s) => (s.duration || 0) > SEANCE_ABERRANTE)
+      .filter(chronoOublie)
       .sort((a, b) => (b.duration || 0) - (a.duration || 0))
       .map((s) => ({
         id: s.id,

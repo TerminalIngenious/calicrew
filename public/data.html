@@ -473,6 +473,11 @@ function vueAlertes(s) {
         <td class="n"><code>${esc(a.id)}</code></td></tr>`,
       "Personne n'a oublié de terminer une séance.")}
 
+    ${alerte('Longues sorties déclarées', s.longuesSorties || [], (l) => `
+      <tr><td>${esc(l.nom)}<span class="sous">${esc(l.date)} · ${esc(l.quoi)}</span></td>
+        <td class="n"><span class="etiq attention">${l.heures} h</span></td></tr>`,
+      'Aucune sortie de plus de six heures.')}
+
     ${alerte('Cartes inconnues dans les collections', s.cartesInconnues || [], (c) => `
       <tr><td>${esc(c.qui)}</td><td class="n"><code>${esc(c.id)}</code></td>
         <td class="n">${c.n} ex.</td></tr>`,
@@ -499,6 +504,8 @@ function vueAlertes(s) {
 const VUES = { resume: vueResume, activite: vueActivite, membres: vueMembres, sport: vueSport, alertes: vueAlertes };
 
 function rendu() {
+  // Les longues sorties déclarées ne comptent pas : elles informent,
+  // elles ne signalent rien de cassé.
   const alertesN = stats.aberrantes.length + (stats.cartesInconnues || []).length + stats.fantomes.length;
   $('corps').innerHTML = `
     <div class="segments" role="tablist">
