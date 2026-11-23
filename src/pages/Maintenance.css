@@ -1,10 +1,12 @@
 /*
- * L'écran de maintenance, habillé comme l'event FaceID.
+ * L'écran de maintenance, en attendant la saison 2.
  *
- * Un mur de visages qui défile derrière un panneau de scan : le message
- * passe mieux quand l'attente ressemble à quelque chose. Tout est en
- * couleurs écrites en dur, sans variable de thème : cet écran s'affiche
- * avant le reste de l'app et ne doit dépendre de rien.
+ * Un mur de cartes de la saison 1 qui défile derrière un panneau : le
+ * message passe mieux quand l'attente ressemble à quelque chose. Les
+ * cartes de la saison 2 n'y figurent pas — on annonce, on ne montre pas.
+ *
+ * Tout est en couleurs écrites en dur, sans variable de thème : cet écran
+ * s'affiche avant le reste de l'app et ne doit dépendre de rien.
  */
 .mnt {
   position: fixed;
@@ -42,8 +44,9 @@
   width: 100%;
   aspect-ratio: 3 / 4;
   object-fit: cover;
+  object-position: top;
   border-radius: 10px;
-  filter: grayscale(0.7) brightness(0.55) contrast(1.1);
+  filter: grayscale(0.75) brightness(0.5) contrast(1.05);
 }
 
 @keyframes mnt-defile {
@@ -88,18 +91,6 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
-.mnt-logo { display: block; margin: 0 auto 0.75rem; }
-
-.mnt-logo-scan {
-  animation: mnt-logo-scan 2.4s ease-in-out infinite;
-}
-
-@keyframes mnt-logo-scan {
-  0%, 100% { transform: translateY(10px); opacity: 0; }
-  10%, 90% { opacity: 1; }
-  50% { transform: translateY(108px); }
-}
-
 .mnt-kicker {
   display: block;
   font-size: 0.65rem;
@@ -110,9 +101,38 @@
 }
 
 .mnt-panneau h1 {
-  font-size: 1.5rem;
+  font-size: 2rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   color: #e9f6cd;
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
+}
+
+/* Le compte à rebours : c'est la seule chose concrète de l'écran, il a
+   droit à sa place et à ses chiffres alignés. */
+.mnt-compte {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(182, 255, 0, 0.25);
+  background: rgba(182, 255, 0, 0.07);
+}
+
+.mnt-compte-l {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(233, 246, 205, 0.55);
+}
+
+.mnt-compte-v {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #b6ff00;
 }
 
 .mnt-message {
@@ -158,5 +178,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mnt-colonne, .mnt-balayage, .mnt-barre-fill, .mnt-logo-scan { animation: none; }
+  .mnt-colonne, .mnt-balayage, .mnt-barre-fill { animation: none; }
 }
