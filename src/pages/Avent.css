@@ -1,0 +1,579 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Event « Branlette Estivale » — le calendrier de l'avent
+   ──────────────────────────────────────────────────────────────────────────
+   Le rouge et le vert de Noël sont confinés à cette page, comme le vert de
+   FaceID l'était à la sienne. Ailleurs dans l'app ces deux couleurs veulent
+   dire « danger » et « validé » ; ici elles ne décrivent rien, donc elles
+   peuvent servir de décor.
+
+   Le fond est le vert sombre d'un sapin la nuit, et non le noir de l'app :
+   on doit sentir qu'on a changé d'endroit en entrant.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.avt-page {
+  --avt-rouge: #e8403a;
+  --avt-or: #ffd60a;
+  --avt-vert: #2f9e5a;
+  --avt-fond: #06120c;
+  --avt-carte: #0e2017;
+  --avt-trait: rgba(255, 214, 10, 0.2);
+
+  position: relative;
+  background:
+    radial-gradient(90% 40% at 50% 0%, rgba(47, 158, 90, 0.16) 0%, transparent 70%),
+    var(--avt-fond);
+  color: #e7f3ec;
+  isolation: isolate;
+}
+
+/* ── En-tête ── */
+
+.avt-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.avt-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  background: transparent;
+  border: 1px solid var(--avt-trait);
+  border-radius: 50%;
+  color: var(--avt-or);
+  cursor: pointer;
+}
+
+.avt-kicker {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--avt-or);
+}
+
+.avt-titre {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.avt-pitch {
+  margin-bottom: 1.4rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgba(231, 243, 236, 0.66);
+}
+
+/* ── Compteur ── */
+
+.avt-compteur {
+  padding: 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid var(--avt-trait);
+  border-radius: var(--radius);
+  background: var(--avt-carte);
+}
+
+.avt-compteur-ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.avt-compteur-valeur {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--avt-or);
+  font-variant-numeric: tabular-nums;
+}
+
+.avt-compteur-valeur em {
+  font-style: normal;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(231, 243, 236, 0.45);
+}
+
+.avt-compteur-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(231, 243, 236, 0.5);
+}
+
+.avt-jauge {
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.avt-jauge span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--avt-vert), var(--avt-or));
+  transition: width 0.4s ease;
+}
+
+.avt-restant {
+  display: block;
+  margin-top: 0.55rem;
+  font-size: 0.76rem;
+  color: rgba(231, 243, 236, 0.5);
+}
+
+.avt-fini {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid rgba(255, 214, 10, 0.35);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.13), rgba(255, 214, 10, 0.03));
+}
+
+.avt-fini-titre {
+  display: block;
+  font-weight: 700;
+  color: #fff;
+}
+
+.avt-fini-sous {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(231, 243, 236, 0.6);
+}
+
+/* ── Booster ── */
+
+.avt-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid rgba(232, 64, 58, 0.45);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(232, 64, 58, 0.2), rgba(232, 64, 58, 0.05));
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.avt-slot:disabled { opacity: 0.6; }
+
+.avt-slot-texte { display: flex; flex-direction: column; gap: 0.1rem; }
+.avt-slot-titre { font-weight: 700; }
+.avt-slot-sous { font-size: 0.76rem; color: rgba(231, 243, 236, 0.6); }
+
+/* ── Sections ── */
+
+.avt-section { margin-bottom: 1.8rem; }
+
+.avt-section-titre {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.avt-section-sous {
+  margin-bottom: 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(231, 243, 236, 0.5);
+}
+
+/* ── La grille des cases ──
+
+   Cinq colonnes, vingt-cinq cases : le calendrier est un carré, et c'est
+   exactement ce qu'on attend d'un calendrier de l'avent. */
+
+.avt-grille {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.45rem;
+}
+
+.avt-case {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  aspect-ratio: 1;
+  padding: 0.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(231, 243, 236, 0.35);
+  font: inherit;
+  cursor: default;
+  overflow: hidden;
+}
+
+.avt-case-jour {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.avt-case-cadenas { opacity: 0.45; }
+
+/* La case du jour : la seule qui bouge, pour qu'on la trouve sans chercher. */
+.avt-case.dispo {
+  border-color: rgba(255, 214, 10, 0.55);
+  background: linear-gradient(145deg, rgba(232, 64, 58, 0.35), rgba(255, 214, 10, 0.14));
+  color: #fff;
+  cursor: pointer;
+}
+
+.avt-case.du-jour {
+  animation: avtAppel 2.4s ease-in-out infinite;
+}
+
+@keyframes avtAppel {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.35); }
+  50% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(255, 214, 10, 0); }
+}
+
+.avt-case.ouverte {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: var(--avt-carte);
+  color: rgba(231, 243, 236, 0.8);
+  cursor: pointer;
+}
+
+/* Le nom tient sur deux lignes et se coupe proprement : certains font
+   dix-sept caractères et la case en fait soixante de large. */
+.avt-case-nom {
+  padding: 0 0.15rem;
+  font-size: 0.56rem;
+  line-height: 1.15;
+  font-weight: 600;
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.avt-case-pastille {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--teinte, #8e8e93);
+  box-shadow: 0 0 7px 1px var(--teinte, #8e8e93);
+}
+
+/* Le 25 prend toute la largeur, seul sur sa ligne : la dernière case doit se
+   voir depuis le 1er décembre, et une vingt-cinquième case de la taille des
+   autres se perdait dans le coin d'une grille incomplète. */
+.avt-case.noel {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  gap: 0.5rem;
+  aspect-ratio: auto;
+  min-height: 3.4rem;
+  border-color: rgba(255, 214, 10, 0.45);
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.12), rgba(232, 64, 58, 0.12));
+}
+
+.avt-case.noel .avt-case-jour { font-size: 1.3rem; }
+
+/* « Noël » écrit en toutes lettres sur la dernière case, tant qu'elle n'est
+   pas ouverte : c'est la seule qui mérite son nom. */
+.avt-case.noel:not(.ouverte) .avt-case-jour::after {
+  content: ' décembre — Noël';
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.avt-case.noel .avt-case-nom { font-size: 0.8rem; -webkit-line-clamp: 1; }
+
+.rarete-legendaire { --teinte: #ffd60a; }
+.rarete-epique { --teinte: #bf5af2; }
+.rarete-rare { --teinte: #64d2ff; }
+.rarete-commune { --teinte: #a9b0bb; }
+
+/* ── Quêtes ── */
+
+.avt-quetes { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.avt-quete {
+  position: relative;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  background: var(--avt-carte);
+}
+
+.avt-quete.done { border-color: rgba(255, 214, 10, 0.4); }
+.avt-quete.claimed { opacity: 0.55; }
+
+.avt-ruban {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 99px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0a0e16;
+  background: var(--avt-or);
+}
+
+.avt-quete-label { display: block; font-weight: 700; color: #fff; }
+
+.avt-quete-desc {
+  display: block;
+  margin: 0.15rem 0 0.6rem;
+  font-size: 0.78rem;
+  color: rgba(231, 243, 236, 0.55);
+}
+
+.avt-quete-jauge {
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.avt-quete-jauge span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--avt-vert);
+}
+
+.avt-quete-compte {
+  font-size: 0.75rem;
+  color: rgba(231, 243, 236, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.avt-quete-prise {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--avt-vert);
+}
+
+.avt-quete-btn {
+  padding: 0.45rem 0.8rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--avt-or);
+  color: #0a0e16;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* ── Le vivier ── */
+
+.avt-vivier {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+}
+
+.avt-vignette {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--teinte, #8e8e93);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(231, 243, 236, 0.3);
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.avt-vignette.eue {
+  background: var(--avt-carte);
+  color: #fff;
+  cursor: pointer;
+}
+
+.avt-vignette-nom {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.avt-vignette-num {
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(231, 243, 236, 0.3);
+}
+
+.avt-vignette-doublon {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  padding: 0.05rem 0.28rem;
+  border-radius: 99px;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #0a0e16;
+  background: var(--avt-or);
+}
+
+/* ── Révélation et aperçu ── */
+
+.avt-revele,
+.avt-apercu {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.avt-revele-carte,
+.avt-apercu-carte {
+  position: relative;
+  width: min(300px, 82vw);
+}
+
+/* L'arrivée : la carte tombe de haut, dépasse un peu puis se pose. Le
+   dépassement vient de la courbe, qui franchit 1 avant de revenir. */
+.avt-revele-carte {
+  animation: avtArrivee 0.75s cubic-bezier(0.2, 1.3, 0.35, 1) both;
+}
+
+@keyframes avtArrivee {
+  from { transform: translateY(-40px) scale(0.78) rotate(-5deg); opacity: 0; }
+  to { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+
+.avt-revele-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--avt-or, #ffd60a);
+  color: #0a0e16;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.avt-apercu-fermer {
+  position: absolute;
+  top: -2.6rem;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+}
+
+.avt-apercu-doublons {
+  display: block;
+  margin-top: 0.7rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avt-case.dispo { animation: none; }
+  .avt-revele-carte { animation-duration: 0.01s; }
+}
+
+/* ── L'entrée dans la page du pass ── */
+
+.avt-entree {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.95rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 214, 10, 0.35);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(47, 158, 90, 0.28), rgba(232, 64, 58, 0.18));
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.avt-entree:active { transform: scale(0.97); }
+
+.avt-entree-texte { display: flex; flex-direction: column; gap: 0.1rem; }
+
+.avt-entree-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--avt-or, #ffd60a);
+}
+
+.avt-entree-titre { font-size: 1.05rem; font-weight: 800; }
+
+.avt-entree-sous { font-size: 0.75rem; color: rgba(255, 255, 255, 0.65); }
+
+.avt-entree-pastille {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0.22rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0a0e16;
+  background: var(--avt-or, #ffd60a);
+}
+
+/* Le sapin de l'entrée, dessiné plutôt qu'emprunté à une fonte d'icônes :
+   aucune n'a de sapin décoré, et c'est la décoration qui fait Noël. */
+.avt-sapin { flex-shrink: 0; width: 34px; height: 44px; }

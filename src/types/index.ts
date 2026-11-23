@@ -415,6 +415,8 @@ export interface UserProgress {
    * pas pouvoir servir d'avatar. Voir lib/faceid.ts.
    */
   faceid?: FaceIdProgress;
+  /** Voir lib/avent.ts — l'event de décembre, stocké tel quel. */
+  avent?: AventProgress;
   /** Compteurs du mois tenus pour les notifications, écrits par le serveur. */
   moisCourant?: {
     mois: string;
@@ -423,6 +425,17 @@ export interface UserProgress {
     derniere: number;
     dernierPing?: string | null;
   };
+}
+
+/** Voir lib/avent.ts — stocké tel quel dans userProgress. */
+export interface AventProgress {
+  /** Combien d'exemplaires de chaque carte, par slug. */
+  cartes: Record<string, number>;
+  /** Les jours déjà ouverts, de 1 à 25. */
+  portes: number[];
+  boosters: number;
+  /** Les quêtes d'event déjà encaissées. */
+  questsPrises: string[];
 }
 
 /** Voir lib/faceid.ts — stocké tel quel dans userProgress. */

@@ -1,0 +1,321 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { ArrowLeft, Check, Gift, Lock, X } from 'lucide-react';
+import { db } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
+import { useUserProgress } from '../lib/useUserProgress';
+import { useUserSessions } from '../contexts/SessionsContext';
+import { questValue } from '../lib/quests';
+import Loader from '../components/Loader';
+import BottomNav from '../components/BottomNav';
+import AventCardArt from '../components/cardArt/AventCardArt';
+import RankBadgeIcon from '../components/RankBadgeIcon';
+import {
+  BADGE_ID, CARTES, CASES, DEBUT, SEMAINES, TOTAL_CARTES,
+  badgeAvent, calendrierDe, carteParSlug, collectionComplete, enCours, jourOuvert,
+  lis, nbPossedees, quetesDeSemaine, semaineCourante, tireBooster,
+} from '../lib/avent';
+import type { CarteAvent } from '../lib/avent';
+import type { Quest } from '../types';
+import './Avent.css';
+
+const SEMAINE_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Ce que raconte l'en-tête selon le moment du mois. */
+function texteRestant(ouvert: boolean, maintenant: number): string {
+  if (!ouvert) return maintenant < DEBUT ? 'Ouverture le 1er décembre' : 'Calendrier terminé';
+  const reste = CASES - jourOuvert(maintenant);
+  if (reste <= 0) return 'Dernière case — joyeux Noël';
+  return `Encore ${reste} case${reste > 1 ? 's' : ''} avant Noël`;
+}
+
+export default function Avent() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { progress, loading } = useUserProgress(user?.uid);
+  const { sessions } = useUserSessions();
+  const [occupe, setOccupe] = useState(false);
+  /** La carte qui vient de sortir d'une case, montrée en grand. */
+  const [revelee, setRevelee] = useState<{ carte: CarteAvent; jour?: number } | null>(null);
+  const [apercu, setApercu] = useState<CarteAvent | null>(null);
+  // L'heure lue une fois à l'ouverture : relue à chaque rendu, le même écran
+  // dirait autre chose selon le moment où React décide de le recalculer.
+  const [maintenant] = useState(() => Date.now());
+
+  const av = useMemo(() => lis(progress?.avent), [progress]);
+  // Le calendrier est recalculé depuis l'uid à chaque visite plutôt que
+  // stocké : vingt-cinq slugs de plus dans le document pour une suite qui ne
+  // change jamais, et qu'on peut rejouer n'importe quand.
+  const calendrier = useMemo(() => (user ? calendrierDe(user.uid) : []), [user]);
+  const ouvert = enCours(maintenant);
+  const jourMax = jourOuvert(maintenant);
+  const possedees = nbPossedees(av);
+  const complete = collectionComplete(av);
+  const semaine = semaineCourante(maintenant);
+
+  /** Le badge des vingt-cinq portes, posé à la seconde où la dernière s'ouvre. */
+  const badgeEnvoye = useRef(false);
+  useEffect(() => {
+    if (!user || !progress || !complete) return;
+    if ((progress.badges || []).some((b) => b.id === BADGE_ID)) return;
+    if (badgeEnvoye.current) return;
+    badgeEnvoye.current = true;
+    updateDoc(doc(db, 'userProgress', user.uid), { badges: arrayUnion(badgeAvent()) })
+      .catch((err) => {
+        badgeEnvoye.current = false;
+        console.error('Badge avent impossible :', err);
+      });
+  }, [user, progress, complete]);
+
+  async function ouvrePorte(jour: number) {
+    if (!user || occupe || jour > jourMax || av.portes.includes(jour)) return;
+    setOccupe(true);
+    const slug = calendrier[jour - 1];
+    const apres = {
+      ...av,
+      portes: [...av.portes, jour],
+      cartes: { ...av.cartes, [slug]: (av.cartes[slug] || 0) + 1 },
+    };
+    try {
+      // Enregistré avant l'animation : la carte est acquise même si l'écran
+      // s'éteint pendant la révélation.
+      await updateDoc(doc(db, 'userProgress', user.uid), { avent: apres });
+      const carte = carteParSlug(slug);
+      if (carte) setRevelee({ carte, jour });
+    } catch (err) {
+      console.error('Ouverture impossible :', err);
+    }
+    setOccupe(false);
+  }
+
+  async function ouvreBooster() {
+    if (!user || occupe || av.boosters <= 0) return;
+    setOccupe(true);
+    const slug = tireBooster(av);
+    const apres = {
+      ...av,
+      boosters: av.boosters - 1,
+      cartes: { ...av.cartes, [slug]: (av.cartes[slug] || 0) + 1 },
+    };
+    try {
+      await updateDoc(doc(db, 'userProgress', user.uid), { avent: apres });
+      const carte = carteParSlug(slug);
+      if (carte) setRevelee({ carte });
+    } catch (err) {
+      console.error('Ouverture impossible :', err);
+    }
+    setOccupe(false);
+  }
+
+  async function prendBooster(questId: string) {
+    if (!user || occupe) return;
+    setOccupe(true);
+    try {
+      await updateDoc(doc(db, 'userProgress', user.uid), {
+        avent: { ...av, boosters: av.boosters + 1, questsPrises: [...av.questsPrises, questId] },
+      });
+    } catch (err) {
+      console.error('Récupération impossible :', err);
+    }
+    setOccupe(false);
+  }
+
+  const seancesSemaine = useMemo(() => {
+    if (semaine < 0) return [];
+    const debut = SEMAINES[semaine];
+    return sessions.filter((s) => s.completed && s.createdAt >= debut && s.createdAt < debut + SEMAINE_MS);
+  }, [sessions, semaine]);
+
+  const quetes: Quest[] = semaine >= 0 ? quetesDeSemaine(semaine) : [];
+  const aOuvrir = ouvert && av.portes.length < jourMax;
+
+  if (loading) return <div className="page loading"><Loader /></div>;
+
+  return (
+    <div className="page avt-page">
+      <header className="avt-header">
+        <button className="avt-retour" onClick={() => navigate('/battlepass')} aria-label="Retour">
+          <ArrowLeft size={18} />
+        </button>
+        <div>
+          <span className="avt-kicker">Événement</span>
+          <h1 className="avt-titre">Branlette Estivale</h1>
+        </div>
+      </header>
+
+      <p className="avt-pitch">
+        Quarante-cinq cartes, vingt-cinq cases. Une par jour jusqu'à Noël, et
+        pas les mêmes que ton voisin : chaque calendrier est tiré à part. Les
+        vingt qui manquent au tien sortent des missions.
+      </p>
+
+      <section className="avt-compteur">
+        <div className="avt-compteur-ligne">
+          <span className="avt-compteur-valeur">
+            {String(possedees).padStart(2, '0')}<em> / {TOTAL_CARTES}</em>
+          </span>
+          <span className="avt-compteur-label">
+            {complete ? 'Calendrier terminé' : 'Cartes trouvées'}
+          </span>
+        </div>
+        <div className="avt-jauge">
+          <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />
+        </div>
+        <span className="avt-restant">{texteRestant(ouvert, maintenant)}</span>
+      </section>
+
+      {complete && (
+        <div className="avt-fini">
+          <RankBadgeIcon badge={badgeAvent(0)} size={64} />
+          <div>
+            <span className="avt-fini-titre">Vingt-cinq cases ouvertes</span>
+            <span className="avt-fini-sous">
+              Tu es allé au bout du calendrier. Le badge est dans ton profil.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {av.boosters > 0 && (
+        <button className="avt-slot" onClick={ouvreBooster} disabled={occupe}>
+          <Gift size={22} />
+          <div className="avt-slot-texte">
+            <span className="avt-slot-titre">
+              {av.boosters} booster{av.boosters > 1 ? 's' : ''} à ouvrir
+            </span>
+            <span className="avt-slot-sous">Une carte prise dans tout le vivier</span>
+          </div>
+        </button>
+      )}
+
+      <section className="avt-section">
+        <h2 className="avt-section-titre">Le calendrier</h2>
+        <p className="avt-section-sous">
+          {aOuvrir
+            ? 'Les cases des jours passés restent ouvrables. Rien ne se perd.'
+            : 'Reviens demain pour la suivante.'}
+        </p>
+
+        <div className="avt-grille">
+          {Array.from({ length: CASES }, (_, i) => i + 1).map((jour) => {
+            const ouverte = av.portes.includes(jour);
+            const dispo = ouvert && jour <= jourMax && !ouverte;
+            // Seule la case du jour s'anime. Quatorze cases en retard qui
+            // battent toutes ensemble, ce n'est plus un appel, c'est une
+            // alarme — et on ne sait plus laquelle est celle d'aujourd'hui.
+            const duJour = dispo && jour === jourMax;
+            const carte = ouverte ? carteParSlug(calendrier[jour - 1]) : undefined;
+            return (
+              <button
+                key={jour}
+                className={`avt-case ${ouverte ? 'ouverte' : ''} ${dispo ? 'dispo' : ''} ${duJour ? 'du-jour' : ''} ${jour === CASES ? 'noel' : ''}`}
+                disabled={!dispo && !ouverte}
+                onClick={() => (ouverte && carte ? setApercu(carte) : ouvrePorte(jour))}
+              >
+                {ouverte && carte ? (
+                  <>
+                    <span className={`avt-case-pastille rarete-${carte.rarete}`} />
+                    <span className="avt-case-nom">{carte.nom}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="avt-case-jour">{jour}</span>
+                    {!dispo && <Lock size={11} className="avt-case-cadenas" />}
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {quetes.length > 0 && (
+        <section className="avt-section">
+          <h2 className="avt-section-titre">Missions de la semaine</h2>
+          <p className="avt-section-sous">
+            Une mission réussie, un booster — et le booster pioche dans les cartes
+            que ton calendrier ne te donnera jamais.
+          </p>
+          <div className="avt-quetes">
+            {quetes.map((q) => {
+              const valeur = questValue(q, seancesSemaine);
+              const fini = valeur >= q.target;
+              const prise = av.questsPrises.includes(q.id);
+              return (
+                <div key={q.id} className={`avt-quete ${fini ? 'done' : ''} ${prise ? 'claimed' : ''}`}>
+                  <span className="avt-ruban">Event</span>
+                  <span className="avt-quete-label">{q.label}</span>
+                  <span className="avt-quete-desc">{q.description}</span>
+                  <div className="avt-quete-jauge">
+                    <span style={{ width: `${Math.min(100, (valeur / q.target) * 100)}%` }} />
+                  </div>
+                  {prise ? (
+                    <span className="avt-quete-prise"><Check size={14} /> Booster récupéré</span>
+                  ) : fini ? (
+                    <button className="avt-quete-btn" onClick={() => prendBooster(q.id)} disabled={occupe}>
+                      Récupérer le booster
+                    </button>
+                  ) : (
+                    <span className="avt-quete-compte">{Math.min(valeur, q.target)} / {q.target}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section className="avt-section">
+        <h2 className="avt-section-titre">Le vivier</h2>
+        <p className="avt-section-sous">
+          Les quarante-cinq. Celles que tu n'as pas restent masquées — savoir
+          ce qu'on n'a pas encore est la moitié du plaisir.
+        </p>
+        <div className="avt-vivier">
+          {CARTES.map((c) => {
+            const n = av.cartes[c.slug] || 0;
+            return (
+              <button
+                key={c.slug}
+                className={`avt-vignette rarete-${c.rarete} ${n > 0 ? 'eue' : ''}`}
+                disabled={n === 0}
+                onClick={() => setApercu(c)}
+              >
+                <span className="avt-vignette-nom">{n > 0 ? c.nom : '— — —'}</span>
+                <span className="avt-vignette-num">{String(c.numero).padStart(2, '0')}</span>
+                {n > 1 && <span className="avt-vignette-doublon">×{n}</span>}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* La révélation : la carte arrive seule au milieu de l'écran. */}
+      {revelee && (
+        <div className="avt-revele" onClick={() => setRevelee(null)}>
+          <div className="avt-revele-carte" onClick={(e) => e.stopPropagation()}>
+            <AventCardArt carte={revelee.carte} jour={revelee.jour} />
+            <button className="avt-revele-btn" onClick={() => setRevelee(null)}>Continuer</button>
+          </div>
+        </div>
+      )}
+
+      {apercu && (
+        <div className="avt-apercu" onClick={() => setApercu(null)}>
+          <div className="avt-apercu-carte" onClick={(e) => e.stopPropagation()}>
+            <button className="avt-apercu-fermer" onClick={() => setApercu(null)} aria-label="Fermer">
+              <X size={18} />
+            </button>
+            <AventCardArt carte={apercu} />
+            {(av.cartes[apercu.slug] || 0) > 1 && (
+              <span className="avt-apercu-doublons">×{av.cartes[apercu.slug]} dans ta collection</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      <BottomNav />
+    </div>
+  );
+}

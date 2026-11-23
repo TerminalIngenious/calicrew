@@ -13,6 +13,7 @@ import { CARTE_INTERGALACTIQUE, tirageIntergalactique } from '../lib/intergalact
 import { previensIntergalactique } from '../lib/notify';
 import { kmDesPas } from '../lib/pas';
 import FaceIdButton from '../components/FaceIdButton';
+import AventButton from '../components/AventButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer, ChevronRight } from 'lucide-react';
@@ -437,6 +438,7 @@ export default function BattlePass() {
       {/* L'event est posé par-dessus le pass, pas dedans : au-dessus des
           onglets, dans une forme qui n'appartient qu'à lui. */}
       <FaceIdButton faceid={progress.faceid} />
+      <AventButton avent={progress.avent} />
 
       <div className="bp-tabs">
         <button className={`bp-tab ${tab === 'quetes' ? 'active' : ''}`} onClick={() => setTab('quetes')}>
