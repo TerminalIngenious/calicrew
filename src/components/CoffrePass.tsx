@@ -18,6 +18,14 @@ interface Teintes {
 }
 
 const TEINTES: Record<CardRarity, Teintes> = {
+  /* Le coffre intergalactique : argent froid et ferrures claires, le seul
+     qui ne soit pas d'une couleur. Au-dessus du rouge, il n'y a plus de
+     teinte à prendre — il n'y a que la lumière. */
+  intergalactique: {
+    c1: '#ffffff', c2: '#b9c9e8', c3: '#45507a',
+    f1: '#ffffff', f2: '#8e9ec4',
+    glow: 'rgba(205, 225, 255, 0.75)',
+  },
   commune: {
     c1: '#ffffff', c2: '#dfe5ec', c3: '#9aa5b4',
     f1: '#b6c1cf', f2: '#6b7684',

@@ -1,5 +1,6 @@
 import type { Card, CardRarity } from '../types';
 import { PASS2_CARDS } from './cardsS2';
+import { CARTE_INTERGALACTIQUE, SET_INTERGALACTIQUE } from './intergalactique';
 
 // ── Pass 1 : Casier Judiciaire (50 cartes) ──
 
@@ -70,6 +71,11 @@ const PASS1_CARDS: Card[] = [
 const CARD_SETS: Record<string, Card[]> = {
   'pass-1': PASS1_CARDS,
   'pass-2': PASS2_CARDS,
+  /* Son propre jeu, et non un ajout à la saison 2 : sans ça, terminer la
+     collection de la saison exigerait de l'avoir, et plus personne n'y
+     arriverait. Les coffres tirent par saison, elle ne peut donc pas
+     tomber dans un tirage ordinaire. */
+  [SET_INTERGALACTIQUE]: [CARTE_INTERGALACTIQUE],
 };
 
 export function getCardsBySet(setId: string): Card[] {
@@ -126,9 +132,10 @@ export function getCardDisplayName(card: Card): string {
 
 // ── Raretés ──
 
-export const RARITY_ORDER: CardRarity[] = ['historique', 'legendaire', 'epique', 'rare', 'commune'];
+export const RARITY_ORDER: CardRarity[] = ['intergalactique', 'historique', 'legendaire', 'epique', 'rare', 'commune'];
 
 export const RARITY_LABELS: Record<CardRarity, string> = {
+  intergalactique: 'Intergalactique',
   historique: 'Historique',
   legendaire: 'Légendaire',
   epique: 'Épique',
@@ -157,6 +164,9 @@ export function getRarityLabel(rarity: CardRarity, setId?: string): string {
 }
 
 export const RARITY_COLORS: Record<CardRarity, string> = {
+  /* Un argent froid plutôt qu'une teinte de plus : au-dessus d'une échelle
+     qui va du gris au rouge, la seule place qui reste est la lumière. */
+  intergalactique: '#dfe9ff',
   historique: '#ff2d55',
   legendaire: '#ffd700',
   epique: '#a855f7',
@@ -166,7 +176,15 @@ export const RARITY_COLORS: Record<CardRarity, string> = {
 
 // ── Drop ──
 
+/*
+ * Le poids de l'intergalactique est à zéro, et ce n'est pas un oubli.
+ *
+ * Elle ne se tire jamais dans le sac pondéré : un coffre garanti réduit ce
+ * sac aux seules raretés hautes, et elle y raflerait presque tout. Son
+ * tirage est indépendant, avant celui-ci — voir lib/intergalactique.ts.
+ */
 const RARITY_WEIGHTS: Record<CardRarity, number> = {
+  intergalactique: 0,
   commune: 50,
   rare: 34,
   epique: 12,

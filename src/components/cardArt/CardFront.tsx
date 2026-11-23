@@ -20,6 +20,9 @@ import './CardFront.css';
 
 /** Le kit nomme « mythique » ce que l'app appelle `historique`. */
 const RARITY_CLASS: Record<CardRarity, string> = {
+  /* Le kit n'a pas de style pour elle : la carte intergalactique est une
+     image, jamais dessinée en direct. On retombe sur le plus haut. */
+  intergalactique: 'mythique',
   commune: 'commune',
   rare: 'rare',
   epique: 'epique',

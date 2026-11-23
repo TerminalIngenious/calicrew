@@ -147,7 +147,19 @@ export interface LeaderboardEntry {
 
 // ── Cards ──
 
-export type CardRarity = 'historique' | 'legendaire' | 'epique' | 'rare' | 'commune';
+/*
+ * `intergalactique` est au-dessus d'historique.
+ *
+ * Elle ne concerne qu'une seule carte, hors de toute saison, et ne se tire
+ * pas comme les autres : voir lib/intergalactique.ts.
+ */
+export type CardRarity =
+  | 'intergalactique'
+  | 'historique'
+  | 'legendaire'
+  | 'epique'
+  | 'rare'
+  | 'commune';
 
 export interface Card {
   id: string;

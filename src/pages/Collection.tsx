@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getCardsBySet, getFamilies, isSetComplete, RARITY_ORDER, getRarityLabel, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason, SEASONS } from '../lib/passes';
+import { SET_INTERGALACTIQUE, joursRestants, fenetreOuverte } from '../lib/intergalactique';
 import { useUserProgress } from '../lib/useUserProgress';
 import type { Card } from '../types';
 import { Layers, Info, X, ArrowLeft } from 'lucide-react';
@@ -38,15 +39,27 @@ export default function Collection() {
   // Le rang dans SEASONS suffit à écarter les saisons à venir : pas besoin de
   // lire l'horloge pendant le rendu, ce qui ne serait pas une fonction pure.
   const currentIndex = SEASONS.findIndex((s) => s.id === season?.id);
-  const viewableSeasons = SEASONS.filter(
+  const saisons = SEASONS.filter(
     (s, i) => i === currentIndex || (i < currentIndex && !isSetComplete(s.id, ownedCards))
   );
+
+  /*
+   * La carte intergalactique a son propre onglet, hors des saisons.
+   *
+   * Elle n'appartient à aucune : la ranger dans la saison en cours aurait
+   * rendu sa collection impossible à terminer. L'onglet reste là une fois
+   * la carte trouvée — c'est une vitrine, pas une liste de courses.
+   */
+  const viewableSeasons = [
+    ...saisons,
+    { id: SET_INTERGALACTIQUE, name: 'Intergalactique', theme: '', startDate: 0, endDate: 0, passLevels: [], quests: [] },
+  ];
 
   const [viewedId, setViewedId] = useState<string | null>(null);
   const activeId = viewedId && viewableSeasons.some((s) => s.id === viewedId)
     ? viewedId
     : season?.id || '';
-  const viewedSeason = SEASONS.find((s) => s.id === activeId);
+  const viewedSeason = viewableSeasons.find((s) => s.id === activeId);
 
   const cards: Card[] = activeId ? getCardsBySet(activeId) : [];
 
@@ -139,13 +152,21 @@ export default function Collection() {
               onClick={() => setViewedId(s.id)}
             >
               {s.name}
-              {s.id !== season?.id && <em> · terminée</em>}
+              {s.id !== season?.id && s.id !== SET_INTERGALACTIQUE && <em> · terminée</em>}
             </button>
           ))}
         </div>
       )}
 
-      {viewedSeason && viewedSeason.id !== season?.id && (
+      {activeId === SET_INTERGALACTIQUE ? (
+        <p className="collection-archive-hint">
+          {!fenetreOuverte()
+            ? 'La fenêtre est fermée. Cette carte ne tombe plus.'
+            : joursRestants() === 0
+              ? 'Dernier jour. Une chance sur deux cents à chaque coffre.'
+              : `Une chance sur deux cents à chaque coffre, jusqu'au 3 mars. Encore ${joursRestants()} jour${joursRestants() > 1 ? 's' : ''}. Une seule par personne.`}
+        </p>
+      ) : viewedSeason && viewedSeason.id !== season?.id && (
         <p className="collection-archive-hint">
           {viewedSeason.theme} ne tombe plus dans les coffres du pass. La quête
           bonus hebdomadaire du Pass donne un coffre de cette saison tant qu'il

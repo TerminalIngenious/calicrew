@@ -21,6 +21,7 @@ import type { CardRarity } from '../types';
  * photos, et le reflet à pleine force voilait la carte de sa couleur.
  */
 const HOLO: Record<CardRarity, string> = {
+  intergalactique: 'rainbow',
   commune: 'rgba(255,255,255,.12)',
   rare: 'rgba(90,170,255,.20)',
   epique: 'rgba(190,120,255,.21)',

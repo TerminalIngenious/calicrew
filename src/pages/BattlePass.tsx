@@ -9,6 +9,7 @@ import { getCardArt } from '../lib/cardsS2Art';
 import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
 import { questValue } from '../lib/quests';
+import { CARTE_INTERGALACTIQUE, tirageIntergalactique } from '../lib/intergalactique';
 import { kmDesPas } from '../lib/pas';
 import FaceIdButton from '../components/FaceIdButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
@@ -314,12 +315,26 @@ export default function BattlePass() {
     // Un coffre d'archive n'a d'intérêt que s'il complète : il évite les
     // doublons tant qu'il reste des cartes à trouver dans ce set.
     const isArchive = chest.pool !== 'current' && chest.pool !== season.id;
-    const card = rollCard(
-      pool,
-      progress.ownedCards,
-      chest.rarity === 'commune' ? undefined : chest.rarity,
-      isArchive
-    );
+
+    /*
+     * Le tirage intergalactique passe avant, et à part.
+     *
+     * Il ne peut pas vivre dans le sac pondéré : un coffre garanti y réduit
+     * le choix aux raretés hautes, et une carte au-dessus d'historique y
+     * sortirait une fois sur deux. Ici la chance est la même — une sur deux
+     * cents — pour le coffre du niveau 3 comme pour celui du niveau 100.
+     *
+     * Un coffre d'archive en est exclu : il est épinglé sur une saison
+     * passée et n'a qu'un rôle, finir une vieille collection.
+     */
+    const card = !isArchive && tirageIntergalactique(progress)
+      ? CARTE_INTERGALACTIQUE
+      : rollCard(
+          pool,
+          progress.ownedCards,
+          chest.rarity === 'commune' ? undefined : chest.rarity,
+          isArchive
+        );
 
     // La carte est tirée avant l'animation : sa rareté peut dépasser celle
     // garantie par le coffre, et c'est bien elle qui doit colorer la rotation.

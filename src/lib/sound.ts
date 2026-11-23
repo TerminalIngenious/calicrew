@@ -69,6 +69,7 @@ const INTENSITY: Record<CardRarity, { gain: number; tail: number; shimmer: numbe
   epique: { gain: 0.38, tail: 0.75, shimmer: 3 },
   legendaire: { gain: 0.45, tail: 0.95, shimmer: 4 },
   historique: { gain: 0.5, tail: 1.15, shimmer: 5 },
+  intergalactique: { gain: 0.58, tail: 1.6, shimmer: 7 },
 };
 
 /** Souffle : bruit blanc filtré dont la coupure s'effondre, façon déflagration. */
