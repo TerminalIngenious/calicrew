@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1086 1448" width="1086" height="1448" role="img" aria-label="Dos de la carte intergalactique">
+  <title>CaliCrew — Intergalactique</title>
+  <!--
+    Le dos de la carte intergalactique.
+
+    Celui de la saison 2 est un ticket de bus : il appartient à sa saison et
+    annonçait la mauvaise chose. Celui-ci n'appartient à rien — un ciel, des
+    orbites d'argent, et au centre le sceau. Il ne montre aucune carte : un
+    dos qui raconte ce qu'il cache n'est plus un dos.
+
+    En SVG et non en image : il s'affiche aussi bien en vignette qu'en plein
+    écran pendant l'animation d'arrivée, pour quinze kilo-octets.
+  -->
+  <defs>
+    <linearGradient id="ciel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#1b2340"/>
+      <stop offset="45%" stop-color="#0a0e1c"/>
+      <stop offset="100%" stop-color="#05060d"/>
+    </linearGradient>
+
+    <radialGradient id="halo" cx="0.5" cy="0.44" r="0.52">
+      <stop offset="0%" stop-color="#8ea8e0" stop-opacity="0.38"/>
+      <stop offset="60%" stop-color="#4a5c90" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- L'argent iridescent de la rareté : froid, puis un soupçon de violet. -->
+    <linearGradient id="argent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="28%" stop-color="#b9d4ff"/>
+      <stop offset="52%" stop-color="#ffffff"/>
+      <stop offset="74%" stop-color="#d9c9ff"/>
+      <stop offset="100%" stop-color="#8ea3cc"/>
+    </linearGradient>
+
+    <linearGradient id="argentV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#a8c2ee"/>
+      <stop offset="100%" stop-color="#6c7fa8"/>
+    </linearGradient>
+
+    <clipPath id="carte">
+      <rect x="0" y="0" width="1086" height="1448" rx="54"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#carte)">
+    <rect width="1086" height="1448" fill="url(#ciel)"/>
+    <rect width="1086" height="1448" fill="url(#halo)"/>
+
+    <!--
+      Le champ d'étoiles.
+
+      Posées à la main plutôt que tirées au hasard : un SVG doit rendre la
+      même image à chaque fois, et quelques dizaines de points bien répartis
+      valent mieux qu'un semis régulier qui se voit.
+    -->
+    <g fill="#ffffff">
+      <g opacity="0.85">
+        <circle cx="132" cy="196" r="3.2"/><circle cx="947" cy="243" r="3.6"/>
+        <circle cx="286" cy="438" r="2.6"/><circle cx="806" cy="612" r="3"/>
+        <circle cx="167" cy="921" r="3.4"/><circle cx="915" cy="1067" r="2.8"/>
+        <circle cx="402" cy="1284" r="3.2"/><circle cx="676" cy="152" r="2.4"/>
+      </g>
+      <g opacity="0.5">
+        <circle cx="233" cy="118" r="2"/><circle cx="520" cy="236" r="1.8"/>
+        <circle cx="862" cy="398" r="2.2"/><circle cx="96" cy="604" r="2"/>
+        <circle cx="990" cy="786" r="1.8"/><circle cx="330" cy="742" r="1.6"/>
+        <circle cx="742" cy="898" r="2.2"/><circle cx="212" cy="1142" r="2"/>
+        <circle cx="596" cy="1346" r="1.8"/><circle cx="868" cy="1268" r="2.2"/>
+        <circle cx="448" cy="92" r="1.6"/><circle cx="1012" cy="542" r="2"/>
+      </g>
+      <g opacity="0.26">
+        <circle cx="178" cy="332" r="1.4"/><circle cx="624" cy="466" r="1.2"/>
+        <circle cx="384" cy="596" r="1.4"/><circle cx="930" cy="690" r="1.2"/>
+        <circle cx="146" cy="1246" r="1.4"/><circle cx="712" cy="1176" r="1.2"/>
+        <circle cx="508" cy="1038" r="1.4"/><circle cx="286" cy="868" r="1.2"/>
+        <circle cx="1000" cy="206" r="1.4"/><circle cx="60" cy="760" r="1.2"/>
+      </g>
+    </g>
+
+    <!-- Les orbites, décentrées pour donner la perspective. -->
+    <g fill="none" stroke="url(#argent)" stroke-linecap="round">
+      <ellipse cx="543" cy="640" rx="392" ry="146" opacity="0.5" stroke-width="3"
+               transform="rotate(-18 543 640)"/>
+      <ellipse cx="543" cy="640" rx="330" ry="330" opacity="0.22" stroke-width="2"/>
+      <ellipse cx="543" cy="640" rx="300" ry="112" opacity="0.38" stroke-width="2.4"
+               transform="rotate(26 543 640)"/>
+      <ellipse cx="543" cy="640" rx="432" ry="432" opacity="0.12" stroke-width="2"/>
+    </g>
+
+    <!-- Les jalons sur l'orbite, comme des satellites arrêtés. -->
+    <g fill="url(#argentV)">
+      <circle cx="170" cy="762" r="7"/>
+      <circle cx="916" cy="518" r="7"/>
+      <circle cx="722" cy="356" r="5"/>
+      <circle cx="364" cy="924" r="5"/>
+    </g>
+
+    <!-- Le sceau central : l'hexagone des médailles, à l'argent de la rareté. -->
+    <g transform="translate(543 640)">
+      <polygon points="0,-210 182,-105 182,105 0,210 -182,105 -182,-105"
+               fill="#070b16" stroke="url(#argent)" stroke-width="7"/>
+      <polygon points="0,-168 146,-84 146,84 0,168 -146,84 -146,-84"
+               fill="none" stroke="url(#argent)" stroke-width="2.5" opacity="0.45"/>
+      <!-- La planète cerclée : le seul dessin du dos, et il ne dit rien de
+           ce qu'il y a devant. -->
+      <circle cx="0" cy="-6" r="74" fill="none" stroke="url(#argentV)" stroke-width="8"/>
+      <ellipse cx="0" cy="-6" rx="124" ry="34" fill="none" stroke="url(#argent)"
+               stroke-width="8" transform="rotate(-22)"/>
+      <circle cx="-30" cy="-34" r="13" fill="#b9d4ff" opacity="0.5"/>
+      <circle cx="24" cy="16" r="9" fill="#b9d4ff" opacity="0.32"/>
+    </g>
+
+    <!-- Les mots : la marque en haut, la rareté en bas. -->
+    <text x="543" y="196" text-anchor="middle" fill="url(#argent)"
+          font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+          font-size="78" font-weight="800" letter-spacing="10">CALICREW</text>
+
+    <text x="543" y="1104" text-anchor="middle" fill="url(#argent)"
+          font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+          font-size="46" font-weight="700" letter-spacing="19">INTERGALACTIQUE</text>
+
+    <g stroke="url(#argent)" stroke-width="2.5" opacity="0.55">
+      <path d="M232 1150 H854"/>
+    </g>
+
+    <text x="543" y="1252" text-anchor="middle" fill="#8ea3cc"
+          font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+          font-size="34" font-weight="600" letter-spacing="7">UNE SEULE</text>
+
+    <!-- Le cadre, en dernier pour qu'il passe au-dessus de tout. -->
+    <rect x="26" y="26" width="1034" height="1396" rx="34"
+          fill="none" stroke="url(#argent)" stroke-width="6"/>
+    <rect x="48" y="48" width="990" height="1352" rx="24"
+          fill="none" stroke="url(#argent)" stroke-width="2" opacity="0.38"/>
+  </g>
+</svg>

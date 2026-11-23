@@ -1,6 +1,6 @@
 import type { Card, CardRarity } from '../types';
 import { PASS2_CARDS } from './cardsS2';
-import { CARTE_INTERGALACTIQUE, SET_INTERGALACTIQUE } from './intergalactique';
+import { CARTE_INTERGALACTIQUE, DOS_INTERGALACTIQUE, SET_INTERGALACTIQUE } from './intergalactique';
 
 // ── Pass 1 : Casier Judiciaire (50 cartes) ──
 
@@ -90,6 +90,7 @@ export function getCardsBySet(setId: string): Card[] {
  */
 const CARD_BACKS: Record<string, string> = {
   'pass-2': '/cards/s2-dos.webp',
+  [SET_INTERGALACTIQUE]: DOS_INTERGALACTIQUE,
 };
 
 export function getCardBack(setId: string): string | undefined {

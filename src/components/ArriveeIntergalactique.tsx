@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CARTE_INTERGALACTIQUE, joursRestants } from '../lib/intergalactique';
+import { CARTE_INTERGALACTIQUE, DOS_INTERGALACTIQUE, joursRestants } from '../lib/intergalactique';
 import { playCardExplosion, playCloche, playPas, playRumeur, primeAudio } from '../lib/sound';
 import '../pages/Arrivee.css';
 
@@ -83,7 +83,7 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
           retourne : deux faces d'un même bloc, retourné en 3D. */}
       <div className="arr-scene">
         <div className="arr-carte">
-          <img className="arr-face arr-dos" src="/cards/s2-dos.webp" alt="" />
+          <img className="arr-face arr-dos" src={DOS_INTERGALACTIQUE} alt="" />
           <img className="arr-face arr-recto" src={CARTE_INTERGALACTIQUE.image} alt="" />
         </div>
       </div>

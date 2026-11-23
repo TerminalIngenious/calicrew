@@ -37,6 +37,7 @@ import PinkDecor from './components/PinkDecor';
 import MaintenanceScreen from './components/MaintenanceScreen';
 import BadgeDeblocage from './components/BadgeDeblocage';
 import PorteIntergalactique from './components/PorteIntergalactique';
+import ArriveeTest from './pages/ArriveeTest';
 import LimiteChargement from './components/LimiteChargement';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
@@ -127,6 +128,20 @@ function Racine() {
   return <Decouvrir />;
 }
 
+/**
+ * Route réservée au créateur.
+ *
+ * Le garde-fou est d'affichage : il n'y a rien de sensible derrière, juste
+ * une animation qu'on ne veut pas laisser traîner pour tout le monde.
+ */
+function RouteCreateur({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="page loading"><Loader /></div>;
+  if (!user) return <Navigate to="/login" />;
+  if (!ADMIN_UIDS.includes(user.uid)) return <Navigate to="/" />;
+  return <>{children}</>;
+}
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="page loading"><Loader /></div>;
@@ -196,6 +211,7 @@ function AppContent() {
             <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
             <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
             <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
+            <Route path="/arrivee" element={<RouteCreateur><ArriveeTest /></RouteCreateur>} />
             <Route path="/faceid" element={<ProtectedRoute><FaceId /></ProtectedRoute>} />
             <Route path="/faceid/cartes" element={<ProtectedRoute><FaceIdCartes /></ProtectedRoute>} />
             <Route path="/faceid/cartes/:uid" element={<ProtectedRoute><FaceIdCartes /></ProtectedRoute>} />

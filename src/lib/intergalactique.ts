@@ -29,6 +29,15 @@ export const CARTE_INTERGALACTIQUE: Card = {
 /** Le jeu à elle seule, pour que la collection sache où la ranger. */
 export const SET_INTERGALACTIQUE = 'intergalactique';
 
+/**
+ * Son dos à elle.
+ *
+ * Celui de la saison 2 est un ticket de bus : il appartient à sa saison et
+ * annonçait la mauvaise chose quand la carte arrivait en tournant. En SVG,
+ * parce qu'il sert aussi bien en vignette qu'en plein écran.
+ */
+export const DOS_INTERGALACTIQUE = '/cards/ig-dos.svg';
+
 /*
  * La fenêtre : cent jours, du 23 novembre 2026 au 3 mars 2027.
  *

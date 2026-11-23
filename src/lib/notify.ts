@@ -41,3 +41,13 @@ export function previensSeance(): void {
 export function previensEchange(listingId: string): void {
   void previens('trade', { listingId });
 }
+
+/**
+ * La carte intergalactique vient de tomber.
+ *
+ * Rien n'est transmis : le serveur relit la progression pour vérifier que la
+ * carte s'y trouve avant d'annoncer quoi que ce soit au groupe.
+ */
+export function previensIntergalactique(): void {
+  void previens('intergalactique');
+}

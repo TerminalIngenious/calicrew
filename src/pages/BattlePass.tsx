@@ -10,6 +10,7 @@ import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
 import { questValue } from '../lib/quests';
 import { CARTE_INTERGALACTIQUE, tirageIntergalactique } from '../lib/intergalactique';
+import { previensIntergalactique } from '../lib/notify';
 import { kmDesPas } from '../lib/pas';
 import FaceIdButton from '../components/FaceIdButton';
 import { primeAudio, playCardExplosion } from '../lib/sound';
@@ -358,6 +359,9 @@ export default function BattlePass() {
       const updated: UserProgress = { ...progress, chestsToOpen: newChests, ownedCards: newOwned };
       setProgress(updated);
       await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
+      // Le groupe l'apprend : une carte dont personne ne sait qu'elle est
+      // tombée ne vaut pas plus qu'une commune.
+      if (card.id === CARTE_INTERGALACTIQUE.id) previensIntergalactique();
       setOpenedCard(card);
     } else {
       const updated: UserProgress = { ...progress, chestsToOpen: newChests };

@@ -346,6 +346,8 @@ export interface UserProgress {
    * qu'une fois par personne, pas une fois par appareil.
    */
   vuIntergalactique?: boolean;
+  /** Le groupe a-t-il déjà été prévenu que cette personne l'a trouvée ? */
+  annonceIntergalactique?: boolean;
   passXp: number;
   isPremium: boolean;
   ownedCards: Record<string, number>;
