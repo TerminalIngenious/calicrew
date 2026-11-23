@@ -8976,3 +8976,251 @@ body {
 .oubli-recap strong {
   color: var(--accent);
 }
+
+/* ── Échange des doublons contre de l'XP ── */
+
+.collection-echange {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.collection-echange strong {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.echange-modal {
+  width: min(560px, 92vw);
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.echange-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.echange-tete h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.echange-fermer {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.echange-intro,
+.echange-vide {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0.75rem;
+  line-height: 1.45;
+}
+
+.echange-tarifs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.echange-tout {
+  align-self: flex-start;
+  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* La liste défile seule : le pied avec le total doit rester visible, c'est lui
+   qui dit ce qu'on s'apprête à détruire. */
+.echange-liste {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem;
+}
+
+.echange-ligne {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.echange-ligne.prise {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.echange-vignette {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.echange-nom {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.echange-nom strong {
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.echange-nom span {
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.echange-compteur {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.echange-compteur button {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.echange-compteur button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.echange-compteur > span {
+  min-width: 1.2rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.echange-pied {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.echange-total {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.echange-pied .primary-btn {
+  margin-left: auto;
+  width: auto;
+  padding: 0.55rem 1rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.echange-total.avertit {
+  color: var(--danger);
+}
+
+/* Toutes les lignes à la même hauteur : la sous-ligne se coupe comme le nom
+   plutôt que de passer à la ligne, sinon la liste ondule. */
+.echange-nom span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* La confirmation prend la couleur du danger : le clic suivant est définitif. */
+.echange-pied .primary-btn.danger {
+  background: var(--danger);
+}
+
+.echange-fini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 0 0.5rem;
+  color: var(--accent);
+  text-align: center;
+}
+
+.echange-fini strong {
+  font-size: 1.6rem;
+}
+
+.echange-fini span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.echange-fini .primary-btn {
+  margin-top: 0.75rem;
+  width: auto;
+  padding: 0.55rem 1.5rem;
+}
+
+.echange-erreur {
+  margin: 0.5rem 0 0;
+  font-size: 0.72rem;
+  color: var(--danger);
+}

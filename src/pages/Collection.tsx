@@ -6,10 +6,12 @@ import { getCurrentSeason, SEASONS } from '../lib/passes';
 import { SET_INTERGALACTIQUE, joursRestants, fenetreOuverte } from '../lib/intergalactique';
 import { useUserProgress } from '../lib/useUserProgress';
 import type { Card } from '../types';
-import { Layers, Info, X, ArrowLeft } from 'lucide-react';
+import { Layers, Info, X, ArrowLeft, Repeat } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
+import EchangeDoublons from '../components/EchangeDoublons';
+import { doublons, xpDuLot } from '../lib/echangeXp';
 
 const DROP_RATES = [
   { rarity: 'commune' as const, pct: '50%' },
@@ -26,6 +28,11 @@ export default function Collection() {
   const ownedCards = progress?.ownedCards || {};
   const [showInfo, setShowInfo] = useState(false);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [showEchange, setShowEchange] = useState(false);
+
+  /* Les doublons se comptent sur toute la collection, pas sur la saison
+     affichée : une carte de la saison 1 en double se rend aussi bien. */
+  const lotDoublons = doublons(progress?.ownedCards);
 
   const [groupBy, setGroupBy] = useState<'rarity' | 'family'>('rarity');
 
@@ -138,10 +145,24 @@ export default function Collection() {
         />
       )}
 
+      {showEchange && user && progress && (
+        <EchangeDoublons uid={user.uid} progress={progress} onClose={() => setShowEchange(false)} />
+      )}
+
       <div className="collection-summary">
         <Layers size={20} />
         <span>{ownedCount} / {cards.length} cartes</span>
       </div>
+
+      {/* Le bouton n'existe que s'il y a quelque chose à échanger : une porte
+          vers une pièce vide ne sert qu'à décevoir. */}
+      {lotDoublons.length > 0 && (
+        <button className="collection-echange" onClick={() => setShowEchange(true)}>
+          <Repeat size={16} />
+          <span>Échanger mes doublons</span>
+          <strong>+{xpDuLot(lotDoublons)} XP</strong>
+        </button>
+      )}
 
       {viewableSeasons.length > 1 && (
         <div className="layout-switch collection-season-switch">
