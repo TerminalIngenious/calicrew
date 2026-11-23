@@ -1,13 +1,17 @@
 /**
- * Suivi de la prise de créatine, stocké dans `userProgress/{uid}.creatineDays`.
+ * Suivi de la prise de créatine, stocké dans `userProgress/{uid}` :
+ * `creatineDays` pour les prises, `creatineGels` pour les jours rattrapés.
  *
- * Deux principes :
+ * Trois principes :
  *
  * 1. Le streak n'est jamais stocké. On garde la liste des jours cochés et on le
  *    recalcule — c'est la seule façon qu'il ne dérive pas de l'état réel.
  * 2. On passe par `onSnapshot`, et non par une lecture ponctuelle. Le cache
  *    persistant de Firestore répond immédiatement et hors ligne, met les
  *    écritures en file d'attente, et propage la prise aux autres appareils.
+ * 3. Les gels sont une liste de jours, comme les prises, et jamais un compteur.
+ *    Le quota du mois se recompte depuis cette liste : un compteur se
+ *    désynchroniserait du calendrier au premier changement de mois.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -24,7 +28,22 @@ const LEGACY_TODAY = 'calicrew-creatine';
 /** On ne garde pas l'historique complet, un an suffit largement. */
 const KEEP_DAYS = 400;
 
+/** Combien de jours oubliés on peut rattraper par mois civil. */
+export const GELS_PAR_MOIS = 3;
+
+/**
+ * Jusqu'où en arrière un gel peut aller, aujourd'hui exclu.
+ *
+ * Volontairement court : on oublie de noter un jour ou deux, pas une semaine.
+ * Une fenêtre large laisserait reconstruire un streak entier après coup, et le
+ * streak ne voudrait plus rien dire.
+ */
+export const FENETRE_GEL = 3;
+
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Liste vide partagée, pour garder une référence stable entre les rendus. */
+const AUCUN: string[] = [];
 
 /**
  * Jour local au format YYYY-MM-DD. Surtout pas `toISOString()` : il renvoie la
@@ -42,6 +61,11 @@ export function shiftDay(key: string, delta: number): string {
   // Midi en heure locale : aucun risque de retomber sur le même jour lors des
   // changements d'heure.
   return dayKey(new Date(y, m - 1, d + delta, 12));
+}
+
+/** Le mois civil d'un jour, au format YYYY-MM : c'est l'unité du quota. */
+export function moisDe(key: string): string {
+  return key.slice(0, 7);
 }
 
 /** Normalise ce qui vient de Firestore : trie, dédoublonne, borne, filtre. */
@@ -66,6 +90,35 @@ export function computeStreak(days: string[], today = dayKey()): number {
     cursor = shiftDay(cursor, -1);
   }
   return streak;
+}
+
+/**
+ * Les gels encore disponibles pour un mois donné.
+ *
+ * Le quota est rattaché au mois du jour rattrapé, pas à celui où on clique :
+ * sans ça, un oubli du 31 réglé le 1er viderait le quota du mois suivant.
+ */
+export function gelsRestants(gels: string[], mois: string): number {
+  return Math.max(0, GELS_PAR_MOIS - gels.filter((g) => moisDe(g) === mois).length);
+}
+
+/** Les jours de la fenêtre qu'un gel pourrait encore couvrir, récents d'abord. */
+export function joursRattrapables(days: string[], gels: string[], today = dayKey()): string[] {
+  const pris = new Set([...days, ...gels]);
+  const sortie: string[] = [];
+  for (let i = 1; i <= FENETRE_GEL; i++) {
+    const jour = shiftDay(today, -i);
+    if (pris.has(jour)) continue;
+    if (gelsRestants(gels, moisDe(jour)) <= 0) continue;
+    sortie.push(jour);
+  }
+  return sortie;
+}
+
+/** Les gels posés dans la fenêtre, donc encore annulables. */
+export function gelsRecents(gels: string[], today = dayKey()): string[] {
+  const fenetre = new Set(Array.from({ length: FENETRE_GEL }, (_, i) => shiftDay(today, -(i + 1))));
+  return gels.filter((g) => fenetre.has(g));
 }
 
 /**
@@ -108,6 +161,12 @@ export interface CreatineState {
   pending: boolean;
   /** Avant la première réponse de Firestore (cache compris). */
   loading: boolean;
+  /** Gels encore disponibles pour le mois en cours. */
+  gelsDispo: number;
+  /** Jours oubliés qu'un gel peut encore couvrir, du plus récent au plus vieux. */
+  rattrapables: string[];
+  /** Gels déjà posés dans la fenêtre, donc encore annulables. */
+  poses: string[];
 }
 
 /**
@@ -136,15 +195,19 @@ function useToday(): string {
   return today;
 }
 
-export function useCreatine(): CreatineState & { toggle: () => void } {
+export function useCreatine(): CreatineState & { toggle: () => void; rattrape: (jour: string) => void } {
   const { user } = useAuth();
   const today = useToday();
   // L'état porte l'uid qu'il décrit : à la déconnexion on repart donc de
   // `null` sans avoir à le remettre à zéro dans l'effet.
-  const [loaded, setLoaded] = useState<{ uid: string; days: string[] } | null>(null);
+  const [loaded, setLoaded] = useState<{ uid: string; days: string[]; gels: string[] } | null>(null);
 
   const uid = user?.uid;
-  const days = loaded && loaded.uid === uid ? loaded.days : null;
+  const etat = loaded && loaded.uid === uid ? loaded : null;
+  const days = etat?.days ?? null;
+  // La même référence quand il n'y a rien : un `[]` neuf à chaque rendu
+  // relancerait les mémos qui en dépendent.
+  const gels = etat?.gels ?? AUCUN;
 
   useEffect(() => {
     if (!uid) return;
@@ -155,7 +218,12 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
     return onSnapshot(
       ref,
       (snap) => {
-        const stored = snap.data()?.creatineDays;
+        const data = snap.data();
+        const stored = data?.creatineDays;
+        // Un gel sur un jour finalement coché n'a plus d'objet : on l'écarte
+        // à la lecture plutôt que de laisser deux sources se contredire.
+        const prises = clean(stored);
+        const gelsLus = clean(data?.creatineGels).filter((g) => !prises.includes(g));
 
         // Champ absent : première ouverture depuis la bascule sur Firestore.
         // On remonte l'historique local, puis on oublie les anciennes clés.
@@ -163,7 +231,7 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
           migrated = true;
           const legacy = readLegacyDays();
           if (legacy.length > 0) {
-            setLoaded({ uid, days: legacy });
+            setLoaded({ uid, days: legacy, gels: gelsLus });
             setDoc(ref, { creatineDays: legacy }, { merge: true })
               .then(clearLegacy)
               .catch(() => { /* réessayé au prochain snapshot */ });
@@ -172,13 +240,13 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
           clearLegacy();
         }
 
-        setLoaded({ uid, days: clean(stored) });
+        setLoaded({ uid, days: prises, gels: gelsLus });
       },
       (err) => {
         // Hors ligne sans cache, ou règles refusées : on retombe sur
         // l'historique local plutôt que d'afficher un streak nul et faux.
         console.error('Lecture créatine impossible:', err);
-        setLoaded({ uid, days: readLegacyDays() });
+        setLoaded({ uid, days: readLegacyDays(), gels: [] });
       }
     );
   }, [uid]);
@@ -189,23 +257,56 @@ export function useCreatine(): CreatineState & { toggle: () => void } {
       ? days.filter((d) => d !== today)
       : clean([...days, today]);
 
-    setLoaded({ uid, days: next }); // l'écriture est mise en file si hors ligne
+    setLoaded({ uid, days: next, gels }); // l'écriture est mise en file si hors ligne
     setDoc(doc(db, 'userProgress', uid), { creatineDays: next }, { merge: true }).catch((err) => {
       console.error('Écriture créatine impossible:', err);
     });
-  }, [uid, days, today]);
+  }, [uid, days, gels, today]);
+
+  /**
+   * Pose ou retire un gel sur un jour oublié.
+   *
+   * Les mêmes règles qu'à l'affichage sont revérifiées ici : le bouton peut
+   * avoir été rendu avant minuit et cliqué après, et un quota se vérifie là où
+   * il s'écrit.
+   */
+  const rattrape = useCallback((jour: string) => {
+    if (!uid || days === null) return;
+
+    if (gels.includes(jour)) {
+      const next = gels.filter((g) => g !== jour);
+      setLoaded({ uid, days, gels: next });
+      setDoc(doc(db, 'userProgress', uid), { creatineGels: next }, { merge: true }).catch((err) => {
+        console.error('Écriture gel impossible:', err);
+      });
+      return;
+    }
+
+    if (!joursRattrapables(days, gels, today).includes(jour)) return;
+
+    const next = clean([...gels, jour]);
+    setLoaded({ uid, days, gels: next });
+    setDoc(doc(db, 'userProgress', uid), { creatineGels: next }, { merge: true }).catch((err) => {
+      console.error('Écriture gel impossible:', err);
+    });
+  }, [uid, days, gels, today]);
 
   return useMemo(() => {
     const list = days ?? [];
     const takenToday = list.includes(today);
-    const streak = computeStreak(list, today);
+    // Un jour gelé compte comme tenu : c'est tout l'objet du gel.
+    const streak = computeStreak([...list, ...gels], today);
     return {
       day: today,
       takenToday,
       streak,
       pending: !takenToday && streak > 0,
       loading: days === null,
+      gelsDispo: gelsRestants(gels, moisDe(today)),
+      rattrapables: joursRattrapables(list, gels, today),
+      poses: gelsRecents(gels, today),
       toggle,
+      rattrape,
     };
-  }, [days, today, toggle]);
+  }, [days, gels, today, toggle, rattrape]);
 }

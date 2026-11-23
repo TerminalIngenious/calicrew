@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronRight, Droplets, ClipboardList } from 'lucide-react';
+import { Plus, ChevronRight, Droplets, ClipboardList, Snowflake } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import PinkRibbon from '../components/PinkRibbon';
@@ -16,7 +16,7 @@ import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
 import { getWeekStart } from '../lib/passes';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
-import { useCreatine } from '../lib/creatine';
+import { useCreatine, shiftDay, GELS_PAR_MOIS } from '../lib/creatine';
 import { useUserProgress } from '../lib/useUserProgress';
 import {
   badgeAcquisPourId, idBadgeCreatine, idBadgePasJour, idBadgePasTotal,
@@ -26,6 +26,19 @@ import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { amrapTitle } from '../lib/amrap';
 import Loader from '../components/Loader';
+
+/**
+ * Le nom d'un jour de la fenêtre de rattrapage.
+ *
+ * « hier » et « avant-hier » plutôt qu'une date : c'est ainsi qu'on se
+ * souvient d'un oubli, et la fenêtre est trop courte pour qu'une date aide.
+ */
+function libelleJour(cle: string, aujourdhui: string): string {
+  if (cle === shiftDay(aujourdhui, -1)) return 'hier';
+  if (cle === shiftDay(aujourdhui, -2)) return 'avant-hier';
+  const [a, m, j] = cle.split('-').map(Number);
+  return format(new Date(a, m - 1, j), 'EEEE', { locale: fr });
+}
 
 export default function Dashboard() {
   const { user, displayName: myName } = useAuth();
@@ -173,6 +186,44 @@ export default function Dashboard() {
               </div>
             </div>
           </button>
+
+          {/* Le rattrapage, sous la carte et pas dedans : la carte reste un
+              seul geste, et les gels n'apparaissent que s'il y a un oubli à
+              réparer ou un gel à annuler. */}
+          {!creatine.loading && (creatine.rattrapables.length > 0 || creatine.poses.length > 0) && (
+            <div className="gels">
+              <div className="gels-tete">
+                <span className="gels-titre">
+                  <Snowflake size={13} /> Gels
+                </span>
+                <span className="gels-quota">
+                  {creatine.gelsDispo} / {GELS_PAR_MOIS} ce mois-ci
+                </span>
+              </div>
+              <div className="gels-jours">
+                {creatine.poses.map((jour) => (
+                  <button
+                    key={jour}
+                    type="button"
+                    className="gel-jour pose"
+                    onClick={() => creatine.rattrape(jour)}
+                  >
+                    {libelleJour(jour, creatine.day)} gelé
+                  </button>
+                ))}
+                {creatine.rattrapables.map((jour) => (
+                  <button
+                    key={jour}
+                    type="button"
+                    className="gel-jour"
+                    onClick={() => creatine.rattrape(jour)}
+                  >
+                    Rattraper {libelleJour(jour, creatine.day)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Juste après la créatine : ce sont les deux gestes quotidiens qui
               ne passent pas par une séance. */}

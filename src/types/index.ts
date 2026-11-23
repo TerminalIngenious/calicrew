@@ -368,6 +368,11 @@ export interface UserProgress {
    * déduit et n'est jamais stocké, pour qu'il ne puisse pas devenir faux.
    */
   creatineDays?: string[];
+  /**
+   * Jours oubliés rattrapés avec un gel, même format. Séparés des prises :
+   * mélangés, on ne pourrait plus recompter le quota du mois.
+   */
+  creatineGels?: string[];
   /** Records saisis par le joueur lui-même. */
   personalRecords?: PersonalRecord[];
   /**
