@@ -7054,6 +7054,540 @@ body {
   .halloween-spider { animation: none; }
 }
 
+/* ══ Direction artistique de décembre ══
+
+   Noël ne repeint pas --accent, contrairement à Octobre Rose, et ce n'est
+   pas un oubli : les trois couleurs de la fête sont déjà prises et portent
+   du sens. Le rouge est celui du danger, le vert celui de la validation,
+   l'or celui de la première place du podium. Un bouton de suppression qui
+   prend la couleur de tous les autres boutons est une information fausse.
+
+   L'identité vient donc d'ailleurs — la nuit bleue dans le fond, la neige
+   posée sur les dalles, la guirlande, les sapins. Les couleurs de Noël
+   restent sur le décor, où elles ne décrivent rien. */
+
+:root[data-season="noel"] {
+  /* La calotte de neige, en motif répété plutôt qu'étiré : une tuile de
+     48 px garde ses bosses à la même taille sur une tuile de statistique
+     comme sur une carte de séance pleine largeur. */
+  /* Le profil de la congère : quatre bosses de rayons très différents,
+     plus deux gouttes qui pendent sous les plus grosses. Des bosses de
+     même taille à pas régulier ne faisaient pas de la neige mais un
+     feston, et ça se voyait d'autant plus que la tuile se répète. */
+  --neige: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='23'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M0%200%20H140%20V9%20C128%209%20126%2018%20112%2018%20C99%2018%20102%208%2090%208%20C78%208%2081%2016%2068%2016%20C55%2016%2060%207%2046%207%20C33%207%2036%2015%2024%2015%20C12%2015%2010%209%200%209%20Z'/%3E%3Ccircle cx='112' cy='19.6' r='2.9'/%3E%3Ccircle cx='68' cy='17.4' r='2.1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+:root[data-season="noel"] body {
+  background:
+    radial-gradient(90% 50% at 50% 0%, rgba(42, 96, 150, 0.26) 0%, transparent 72%),
+    radial-gradient(70% 40% at 50% 100%, rgba(24, 74, 48, 0.2) 0%, transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* ── La neige posée ──
+
+   Elle est en `::before` sur les dalles, et pas dans le décor en
+   `position: fixed` : il faut qu'elle descende avec la carte quand la page
+   défile. De la neige qui reste en l'air pendant que son support s'en va
+   n'est plus de la neige, c'est une tache à l'écran.
+
+   La boîte dépasse de 3 px de chaque côté et remonte de 4 px : c'est ce
+   débord qui donne l'épaisseur, l'impression que la couche s'est accumulée
+   par-dessus le bord et non qu'elle y est peinte. Les deux ombres portées
+   font le reste — la première, nette et bleutée, est le dessous de la
+   couche ; la seconde, floue, décolle la dalle du fond. */
+:root[data-season="noel"] .stat-card,
+:root[data-season="noel"] .session-card,
+:root[data-season="noel"] .creatine-card,
+:root[data-season="noel"] .pas-card,
+:root[data-season="noel"] .defi-card {
+  position: relative;
+}
+
+:root[data-season="noel"] .stat-card::before,
+:root[data-season="noel"] .session-card::before,
+:root[data-season="noel"] .creatine-card::before,
+:root[data-season="noel"] .pas-card::before,
+:root[data-season="noel"] .defi-card::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -3px;
+  right: -3px;
+  height: 23px;
+  background-image: var(--neige);
+  background-repeat: repeat-x;
+  background-size: 140px 23px;
+  border-radius: calc(var(--radius) + 2px) calc(var(--radius) + 2px) 0 0;
+  filter:
+    drop-shadow(0 2px 0 rgba(133, 175, 216, 0.6))
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+/* La carte de créatine et son panneau de gels forment une seule dalle : la
+   neige s'arrête donc sur la carte, et le décalage du panneau la ferait
+   flotter dans la couture. */
+:root[data-season="noel"] .gels::before {
+  content: none;
+}
+
+/* La congère ne tombe pas deux fois pareil : chaque dalle démarre la tuile
+   à un endroit différent, sinon les cartes d'une liste portent toutes la
+   même vague et l'œil y lit un motif de papier peint. */
+:root[data-season="noel"] .session-card:nth-child(2n)::before { background-position-x: -46px; }
+:root[data-season="noel"] .session-card:nth-child(3n)::before { background-position-x: -91px; }
+:root[data-season="noel"] .stat-card:nth-child(2n)::before { background-position-x: -67px; }
+:root[data-season="noel"] .pas-card::before { background-position-x: -38px; }
+:root[data-season="noel"] .defi-card::before { background-position-x: -103px; }
+
+/* ── Le décor ── */
+
+.noel-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.noel-lueur {
+  position: absolute;
+  top: -140px;
+  left: 50%;
+  width: 520px;
+  height: 340px;
+  margin-left: -260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(140, 190, 240, 0.22) 0%, transparent 68%);
+  filter: blur(20px);
+}
+
+/* La guirlande, accrochée aux deux coins hauts */
+/* La guirlande descend sous l'encoche : accrochée à 0, elle passait derrière
+   la barre d'état de l'iPhone, où la moitié des ampoules disparaissait. */
+.noel-guirlande {
+  position: absolute;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  height: 26px;
+}
+
+.noel-guirlande svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.noel-ampoule {
+  position: absolute;
+  width: 7px;
+  height: 10px;
+  margin-left: -3.5px;
+  border-radius: 46% 46% 54% 54%;
+  background: currentColor;
+  box-shadow: 0 0 9px 2px currentColor;
+  animation: noelClignote 2.8s ease-in-out infinite;
+}
+
+/* Le culot : sans lui, l'ampoule est une goutte posée sous un fil. */
+.noel-ampoule::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 1.5px;
+  width: 4px;
+  height: 3px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes noelClignote {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.32; }
+}
+
+/* La neige qui tombe */
+.noel-neige {
+  position: absolute;
+  inset: 0;
+}
+
+.noel-flocon {
+  position: absolute;
+  top: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 38%, rgba(255, 255, 255, 0.5) 72%, transparent 100%);
+  animation-name: noelChute;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/*
+ * La chute.
+ *
+ * La dérive horizontale est une propriété par flocon et non une valeur
+ * écrite ici : seize flocons qui partent tous du même côté tombent en
+ * diagonale, ce qui donne du vent et pas de la neige.
+ */
+@keyframes noelChute {
+  0% { transform: translate3d(0, -8vh, 0); opacity: 0; }
+  7% { opacity: 0.95; }
+  88% { opacity: 0.95; }
+  100% { transform: translate3d(var(--derive), 106vh, 0); opacity: 0; }
+}
+
+/* Les sapins, posés dans les coins bas, juste au-dessus de la barre */
+/*
+ * Les sapins sortent de derrière la barre de navigation plutôt que d'être
+ * posés au-dessus : les coins bas de l'écran sont rarement vides, et un
+ * sapin complet finissait caché derrière le dernier bouton de la page. À
+ * moitié enterré, il ne dépasse que de la hauteur d'une cime, où il n'y a
+ * jamais rien.
+ */
+.noel-sapin {
+  position: absolute;
+  bottom: calc(var(--nav-height) - 34px);
+  width: 66px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6));
+}
+
+.noel-sapin svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.noel-sapin-gauche {
+  left: 6px;
+  transform: rotate(-3deg);
+}
+
+.noel-sapin-droite {
+  right: 6px;
+  transform: rotate(3deg) scale(0.82);
+}
+
+@media (min-width: 1024px) {
+  /* Sur ordinateur la barre devient une colonne à gauche : le sapin de
+     gauche tomberait derrière elle. */
+  .noel-sapin { bottom: -26px; }
+  .noel-sapin-gauche { display: none; }
+  .noel-sapin-droite { right: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noel-flocon { animation: none; opacity: 0; }
+  .noel-ampoule { animation: none; }
+}
+
+.seasonal-noel {
+  color: #7ec8ff;
+  border-color: rgba(126, 200, 255, 0.35);
+  background: rgba(126, 200, 255, 0.1);
+}
+
+.bp-hero-left .seasonal-noel { color: #d8ecff; }
+
+/* ══ Le réveillon ══
+
+   Un écran qui prend toute la place, au-dessus de la barre de navigation et
+   des modales : c'est le seul moment de l'année où l'app a quelque chose de
+   plus important à dire que la page qu'on regardait. */
+
+.rev {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+  animation: revEntree 0.6s ease both;
+}
+
+.rev-avant {
+  background: radial-gradient(70% 50% at 50% 42%, rgba(26, 46, 86, 0.96) 0%, rgba(0, 0, 0, 0.97) 70%);
+  backdrop-filter: blur(14px);
+}
+
+.rev-apres {
+  background: radial-gradient(80% 60% at 50% 30%, rgba(14, 24, 54, 0.97) 0%, rgba(0, 0, 0, 0.98) 72%);
+}
+
+@keyframes revEntree {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rev-centre {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  margin: auto;
+}
+
+.rev-kicker {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Les chiffres en chasse fixe : sans elle, la largeur du 1 fait sauter
+   l'horloge à chaque seconde. */
+.rev-horloge {
+  font-size: clamp(4.5rem, 24vw, 9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  text-shadow: 0 0 46px rgba(130, 180, 255, 0.45);
+}
+
+.rev-dix {
+  font-size: clamp(8rem, 46vw, 17rem);
+  font-weight: 800;
+  line-height: 0.9;
+  color: var(--text);
+  text-shadow: 0 0 70px rgba(255, 214, 10, 0.5);
+  animation: revBattement 1s ease-out infinite;
+}
+
+/* Un battement par seconde, calé sur le changement de chiffre. */
+@keyframes revBattement {
+  0% { transform: scale(1.18); opacity: 0.4; }
+  26% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.rev-sous {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* ── Les feux ── */
+
+.rev-ciel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rev-gerbe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  /* La gerbe entière descend pendant qu'elle s'ouvre : les éclats d'un
+     même obus retombent ensemble, et c'est cette chute commune qui fait la
+     différence entre un feu d'artifice et une roue de vélo. */
+  animation: revChute 5.4s cubic-bezier(0.3, 0.1, 0.7, 1) infinite;
+}
+
+@keyframes revChute {
+  0%, 8% { transform: translateY(0); }
+  30% { transform: translateY(30px); }
+  100% { transform: translateY(30px); }
+}
+
+/*
+ * Une boucle longue pour une gerbe courte.
+ *
+ * L'éclat ne vit que le premier tiers du cycle et reste invisible le reste
+ * du temps : c'est ce qui permet d'étaler huit gerbes dans la boucle avec
+ * de simples retards. Avec une animation aussi courte que la gerbe, les
+ * retards au-delà de sa durée repartaient à zéro et tout partait ensemble.
+ */
+.rev-eclat {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 14px 3px currentColor, 0 0 3px 1px #fff inset;
+  opacity: 0;
+  animation: revEclat 5.4s cubic-bezier(0.1, 0.7, 0.26, 1) infinite;
+}
+
+@keyframes revEclat {
+  0% { transform: rotate(var(--a)) translateY(0) scale(0.4); opacity: 0; }
+  2% { transform: rotate(var(--a)) translateY(calc(var(--d) * -0.22)) scale(1.5); opacity: 1; }
+  20% { transform: rotate(var(--a)) translateY(calc(var(--d) * -0.86)) scale(1); opacity: 1; }
+  32% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(0.35); opacity: 0; }
+  100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(0.35); opacity: 0; }
+}
+
+.rev-montee {
+  position: absolute;
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 56px;
+  background: linear-gradient(to top, transparent, currentColor);
+  opacity: 0;
+  animation: revMontee 5.4s linear infinite;
+}
+
+@keyframes revMontee {
+  0% { transform: translateY(78vh) scaleY(0.5); opacity: 0.85; }
+  7% { transform: translateY(0) scaleY(1); opacity: 0.85; }
+  8.5% { opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+
+/* ── Minuit passé ── */
+
+.rev-annee {
+  font-size: clamp(4rem, 22vw, 8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffd60a 0%, #ffffff 45%, #ffb340 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: revAnnee 1.1s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes revAnnee {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.rev-voeu {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1.25rem;
+}
+
+/* Le bilan arrive après les feux, pas pendant : il monte doucement sous eux
+   une fois la première salve passée. */
+.rev-chiffres {
+  width: min(420px, 100%);
+  padding: 1.1rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 20, 24, 0.72);
+  backdrop-filter: blur(10px);
+  animation: revMonte 0.9s ease both;
+  animation-delay: 1.4s;
+}
+
+.rev-chiffres.tard {
+  animation-delay: 3.2s;
+}
+
+@keyframes revMonte {
+  from { transform: translateY(26px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.rev-chiffres-titre {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+
+.rev-grille {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.rev-grille div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.rev-grille b {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  line-height: 1.1;
+}
+
+.rev-grille span {
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.rev-lignes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.rev-lignes b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.rev-mot {
+  margin-top: 0.85rem;
+  font-size: 0.86rem;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.rev-fermer {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 0.9rem);
+  right: 0.9rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  cursor: pointer;
+}
+
+@media (max-width: 380px) {
+  .rev-grille { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rev-eclat,
+  .rev-montee,
+  .rev-dix { animation: none; }
+  .rev-eclat { opacity: 0.9; transform: rotate(var(--a)) translateY(calc(var(--d) * -0.7)); }
+  .rev-annee,
+  .rev-chiffres { animation-duration: 0.01s; }
+}
+
 /* ── Étagère des saisons (profil) ── */
 
 .season-shelf {

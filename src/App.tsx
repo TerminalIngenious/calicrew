@@ -32,6 +32,8 @@ const FaceId = lazy(() => import('./pages/FaceId'));
 const FaceIdCartes = lazy(() => import('./pages/FaceIdCartes'));
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
+import NoelDecor from './components/NoelDecor';
+import Reveillon from './components/Reveillon';
 import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
 import MaintenanceScreen from './components/MaintenanceScreen';
@@ -192,6 +194,10 @@ function AppContent() {
           maintenance : elle annonce la réouverture, elle ne la précède pas. */}
       {user && !MAINTENANCE && <PorteIntergalactique />}
       {season === 'halloween' && <HalloweenDecor />}
+      {season === 'noel' && <NoelDecor />}
+      {/* Son horloge est à lui : il commence le 31 à 23h50 et finit le
+          1er janvier, quand le thème de décembre est déjà éteint. */}
+      {user && <Reveillon />}
       {season === 'pink' && <PinkDecor />}
       <LimiteChargement>
         <Suspense fallback={<div className="page loading"><Loader /></div>}>
