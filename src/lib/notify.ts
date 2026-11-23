@@ -97,3 +97,24 @@ export async function testeDefiSurprise(): Promise<string> {
     return 'Envoi impossible. Réseau ?';
   }
 }
+
+/**
+ * S'envoie son propre récap du mois, pour vérifier le gabarit et la chaîne
+ * d'envoi sans attendre le 1er. Réservé aux administrateurs côté serveur.
+ */
+export async function testeRecap(): Promise<string> {
+  const user = auth.currentUser;
+  if (!user) return 'Pas connecté.';
+  try {
+    const jeton = await user.getIdToken();
+    const r = await fetch('/api/recap', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${jeton}` },
+    });
+    const corps = await r.json();
+    if (!r.ok) return corps.erreur || `Erreur ${r.status}`;
+    return corps.envoye ? 'Parti. Regarde ta boîte mail.' : 'Refusé par le service d\'envoi.';
+  } catch {
+    return 'Envoi impossible. Réseau ?';
+  }
+}
