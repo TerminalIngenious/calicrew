@@ -31,6 +31,8 @@ export interface Recap {
   /** Plus longue suite de jours consécutifs avec au moins une séance. */
   serie: number;
   meilleurJour: { jour: string; reps: number; seances: number } | null;
+  /** Reps par jour du mois, pour le calendrier. Les jours vides sont absents. */
+  calendrier: Record<string, number>;
   topExos: { nom: string; valeur: number; unite: 'reps' | 'secondes' }[];
   /** Le même mois, un mois plus tôt. Pour dire si ça monte ou si ça tombe. */
   veille: { seances: number; reps: number };
@@ -283,6 +285,7 @@ export function calculeRecaps(entrees: EntreeRecap[], mois: string): Recap[] {
       joursDuMois: jours,
       serie: plusLongueSerie(new Set(parJour.keys())),
       meilleurJour: meilleur ? { jour: meilleur[0], reps: meilleur[1].reps, seances: meilleur[1].seances } : null,
+      calendrier: Object.fromEntries([...parJour.entries()].map(([j, v]) => [j, v.reps])),
       topExos: [...parExo.entries()]
         .map(([nom, v]) => ({ nom, valeur: v.valeur, unite: v.unite }))
         .sort((a, b) => b.valeur - a.valeur)

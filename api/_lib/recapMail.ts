@@ -6,29 +6,40 @@
  * flex et grid, et la plupart des clients coupent ce qu'ils ne comprennent
  * pas sans rien dire. Tout ce qui suit est donc volontairement vieux.
  *
- * La direction artistique est celle de l'app : fond noir, surfaces gris
- * anthracite, orange système, et la pile de polices du système — la même que
- * celle de l'app, qui a l'avantage de n'avoir rien à télécharger.
+ * La mise en page suit une grille d'une seule colonne de 600 pixels, la
+ * largeur que tous les clients savent rendre, avec un rythme vertical
+ * constant : bandeau, ouverture, chiffres, puis des sections séparées par
+ * des filets plutôt que par des boîtes. Une suite de cartes identiques
+ * donnait un catalogue ; un filet et un titre suffisent à découper, et
+ * l'œil descend au lieu de sauter d'un cadre à l'autre.
+ *
+ * La direction artistique est celle de l'app : fond noir, orange système,
+ * et la pile de polices du système — la même que l'app, et elle a
+ * l'avantage de n'avoir rien à télécharger.
  */
 
 import { duMois, type Recap } from './recap.js';
 
-const NOIR = '#000000';
-const CARTE = '#1c1c1e';
-const BORD = '#2c2c2e';
+const FOND = '#0a0a0b';
+const PANNEAU = '#161618';
+const FILET = '#2a2a2d';
 const TEXTE = '#f5f5f7';
 const ESTOMPE = '#8e8e93';
+const SOURDINE = '#5c5c61';
 const ACCENT = '#ff9f0a';
-const VERT = '#30d158';
+const ACCENT_BAS = '#8a5406';
 const POLICE = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 export const SITE = 'https://calicrew.vercel.app';
+
+/** Marge intérieure du contenu, reprise partout pour aligner les colonnes. */
+const MARGE = '32px';
 
 function duree(secondes: number): string {
   const h = Math.floor(secondes / 3600);
   const m = Math.round((secondes % 3600) / 60);
   if (h === 0) return `${m} min`;
-  return m === 0 ? `${h} h` : `${h} h ${m}`;
+  return m === 0 ? `${h} h` : `${h} h ${String(m).padStart(2, '0')}`;
 }
 
 function nombre(n: number): string {
@@ -51,84 +62,142 @@ function jourLisible(jour: string): string {
   }).format(new Date(Date.UTC(a, m - 1, j)));
 }
 
-/** Une carte de section, avec son titre et son contenu déjà en HTML. */
-function bloc(titre: string, contenu: string): string {
+/** Le titre d'une section : un carré orange, un libellé, un filet. */
+function titre(texte: string): string {
   return `
-  <tr><td style="padding:0 0 12px 0;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="background:${CARTE};border-radius:14px;">
-      <tr><td style="padding:18px 20px;">
-        <div style="font:700 11px ${POLICE};letter-spacing:1.2px;text-transform:uppercase;color:${ESTOMPE};padding-bottom:10px;">${titre}</div>
-        ${contenu}
-      </td></tr>
-    </table>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td width="8" style="font-size:0;line-height:0;padding:0 8px 0 0;" valign="middle">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td width="8" height="8" style="background:${ACCENT};font-size:0;line-height:0;">&nbsp;</td>
+        </tr></table>
+      </td>
+      <td style="font:700 11px ${POLICE};letter-spacing:1.6px;text-transform:uppercase;color:${TEXTE};" valign="middle">${texte}</td>
+    </tr>
+  </table>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr><td height="1" style="background:${FILET};font-size:0;line-height:0;padding:0;">&nbsp;</td></tr>
+  </table>`;
+}
+
+/** Une section complète : son titre, puis son contenu, avec le rythme commun. */
+function section(nom: string, contenu: string): string {
+  return `
+  <tr><td style="padding:30px ${MARGE} 0 ${MARGE};">
+    ${titre(nom)}
+    <div style="height:16px;line-height:16px;font-size:0;">&nbsp;</div>
+    ${contenu}
   </td></tr>`;
 }
 
-/** Les trois chiffres du haut, côte à côte. */
-function chiffres(r: Recap): string {
-  const cellule = (valeur: string, label: string) => `
-    <td width="33%" align="center" style="padding:4px 2px;">
-      <div style="font:800 26px ${POLICE};color:${ACCENT};">${valeur}</div>
-      <div style="font:600 11px ${POLICE};color:${ESTOMPE};text-transform:uppercase;letter-spacing:0.8px;padding-top:4px;">${label}</div>
-    </td>`;
+/** Une ligne de données : libellé à gauche, valeur à droite, filet dessous. */
+function ligne(label: string, valeur: string, dernier = false): string {
   return `
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-    ${cellule(String(r.seances), r.seances > 1 ? 'séances' : 'séance')}
-    ${cellule(nombre(r.reps), 'reps')}
-    ${cellule(duree(r.secondes), 'de sport')}
-  </tr></table>`;
+  <tr>
+    <td style="font:400 15px ${POLICE};color:${ESTOMPE};padding:11px 0;">${label}</td>
+    <td align="right" style="font:700 15px ${POLICE};color:${TEXTE};padding:11px 0;">${valeur}</td>
+  </tr>
+  ${dernier ? '' : `<tr><td colspan="2" height="1" style="background:${FILET};font-size:0;line-height:0;">&nbsp;</td></tr>`}`;
 }
 
-/** La comparaison avec le mois d'avant, en une phrase. */
-function evolution(r: Recap): string {
-  if (r.veille.seances === 0 && r.seances === 0) return '';
-  if (r.veille.seances === 0) {
-    return `<div style="font:400 14px/1.5 ${POLICE};color:${TEXTE};">Le mois d’avant, tu n’avais rien enregistré. Là, ${r.seances}. On part de loin, mais on part.</div>`;
+function tableau(lignes: string[]): string {
+  const vraies = lignes.filter(Boolean);
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${vraies.join('')}</table>`;
+}
+
+/**
+ * Le calendrier du mois.
+ *
+ * C'est la seule image du mail, et elle est faite de cases : un mois se lit
+ * d'un coup d'œil sous cette forme, là où une liste de dates demande un
+ * effort. Deux tons d'orange selon l'intensité du jour — une case pleine
+ * partout aurait aplati un mois à deux séances et un mois à vingt.
+ */
+function calendrier(r: Recap): string {
+  const an = Number(r.mois.slice(0, 4));
+  const mois = Number(r.mois.slice(5, 7));
+  // Lundi en tête : getUTCDay() rend 0 pour dimanche, qui finit la semaine.
+  const premier = (new Date(Date.UTC(an, mois - 1, 1)).getUTCDay() + 6) % 7;
+  const max = Math.max(1, ...Object.values(r.calendrier));
+
+  const cases: string[] = [];
+  for (let i = 0; i < premier; i++) cases.push('<td width="30" height="30" style="font-size:0;line-height:0;">&nbsp;</td>');
+  for (let j = 1; j <= r.joursDuMois; j++) {
+    const cle = `${r.mois}-${String(j).padStart(2, '0')}`;
+    const reps = r.calendrier[cle] || 0;
+    const actif = cle in r.calendrier;
+    const fort = reps >= max * 0.6;
+    const fond = actif ? (fort ? ACCENT : ACCENT_BAS) : PANNEAU;
+    const encre = actif && fort ? '#0a0a0b' : actif ? TEXTE : SOURDINE;
+    cases.push(`<td width="30" height="30" align="center" valign="middle"
+      style="background:${fond};border-radius:7px;font:${actif ? 700 : 400} 12px ${POLICE};color:${encre};">${j}</td>`);
   }
-  const ecart = r.seances - r.veille.seances;
-  const couleur = ecart >= 0 ? VERT : ACCENT;
-  const signe = ecart > 0 ? `+${ecart}` : String(ecart);
-  const phrase = ecart > 0
-    ? 'Tu montes. Le mois prochain va être long pour les autres.'
-    : ecart === 0
-      ? 'Exactement pareil que le mois d’avant. Une régularité de métronome, ou un manque d’imagination.'
-      : 'Ça a baissé. Ce n’est pas un drame, c’est une information.';
+  while (cases.length % 7 !== 0) cases.push('<td width="30" height="30" style="font-size:0;line-height:0;">&nbsp;</td>');
+
+  const semaines: string[] = [];
+  for (let i = 0; i < cases.length; i += 7) {
+    semaines.push(`<tr>${cases.slice(i, i + 7).join('')}</tr>`);
+  }
+
+  const entete = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+    .map((d) => `<td width="30" align="center" style="font:600 10px ${POLICE};color:${SOURDINE};padding-bottom:6px;">${d}</td>`)
+    .join('');
+
   return `
-  <div style="font:400 14px/1.5 ${POLICE};color:${TEXTE};">
-    <span style="font-weight:800;color:${couleur};">${signe} séance${Math.abs(ecart) > 1 ? 's' : ''}</span>
-    par rapport à ${nombre(r.veille.seances)} le mois d’avant. ${phrase}
+  <table role="presentation" align="center" cellpadding="0" cellspacing="4" border="0" style="margin:0 auto;">
+    <tr>${entete}</tr>
+    ${semaines.join('')}
+  </table>
+  <div style="font:400 12px ${POLICE};color:${SOURDINE};text-align:center;padding-top:14px;">
+    ${r.joursActifs} jour${r.joursActifs > 1 ? 's' : ''} d’entraînement sur ${r.joursDuMois}
   </div>`;
 }
 
 /** Les exercices les plus travaillés, en barres proportionnelles. */
 function exercices(r: Recap): string {
-  if (r.topExos.length === 0) return '';
   const max = r.topExos[0].valeur;
-  const lignes = r.topExos.map((e) => {
-    const part = Math.max(6, Math.round((e.valeur / max) * 100));
-    return `
-    <tr><td style="padding:5px 0;">
+  const lignes = r.topExos.map((e, i) => `
+    <tr><td style="padding:${i === 0 ? '0' : '14px'} 0 0 0;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-        <td style="font:600 13px ${POLICE};color:${TEXTE};padding-bottom:5px;">${protege(e.nom)}</td>
-        <td align="right" style="font:700 13px ${POLICE};color:${ACCENT};padding-bottom:5px;">${nombre(e.valeur)} ${e.unite === 'secondes' ? 's' : 'reps'}</td>
+        <td style="font:600 14px ${POLICE};color:${TEXTE};padding-bottom:7px;">${protege(e.nom)}</td>
+        <td align="right" style="font:700 14px ${POLICE};color:${ACCENT};padding-bottom:7px;">${nombre(e.valeur)}<span style="color:${SOURDINE};font-weight:400;"> ${e.unite === 'secondes' ? 's' : 'reps'}</span></td>
       </tr></table>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="background:${BORD};border-radius:4px;">
-        <tr><td width="${part}%" style="background:${ACCENT};border-radius:4px;font-size:0;line-height:0;height:6px;">&nbsp;</td>
-            <td style="font-size:0;line-height:0;height:6px;">&nbsp;</td></tr>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${FILET};border-radius:3px;">
+        <tr>
+          <td width="${Math.max(5, Math.round((e.valeur / max) * 100))}%" height="5"
+              style="background:${ACCENT};border-radius:3px;font-size:0;line-height:0;">&nbsp;</td>
+          <td height="5" style="font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
       </table>
-    </td></tr>`;
-  }).join('');
+    </td></tr>`).join('');
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${lignes}</table>`;
 }
 
-/** Une ligne libellé / valeur, pour les petits blocs. */
-function ligne(label: string, valeur: string): string {
+/** La pastille d'écart avec le mois précédent, et sa phrase. */
+function evolution(r: Recap): string {
+  if (r.veille.seances === 0) {
+    return `<div style="font:400 15px/1.6 ${POLICE};color:${ESTOMPE};">Le mois d’avant, rien n’était enregistré. Là, ${r.seances}. On part de loin, mais on part.</div>`;
+  }
+  const ecart = r.seances - r.veille.seances;
+  const monte = ecart >= 0;
+  const phrase = ecart > 0
+    ? 'Tu montes. Le mois prochain va être long pour les autres.'
+    : ecart === 0
+      ? 'Exactement pareil que le mois d’avant. Métronome, ou manque d’imagination.'
+      : 'Ça a baissé. Ce n’est pas un drame, c’est une information.';
   return `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-    <td style="font:400 14px ${POLICE};color:${TEXTE};padding:3px 0;">${label}</td>
-    <td align="right" style="font:700 14px ${POLICE};color:${ACCENT};padding:3px 0;">${valeur}</td>
+    <td width="86" valign="top" style="padding-top:2px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="background:${monte ? ACCENT : PANNEAU};border-radius:999px;padding:7px 14px;
+                       font:800 15px ${POLICE};color:${monte ? '#0a0a0b' : ESTOMPE};white-space:nowrap;">
+          ${ecart > 0 ? '+' : ''}${ecart}
+        </td></tr>
+      </table>
+    </td>
+    <td valign="top" style="font:400 14px/1.6 ${POLICE};color:${ESTOMPE};padding-top:6px;">
+      séance${Math.abs(ecart) > 1 ? 's' : ''} par rapport aux ${nombre(r.veille.seances)} du mois d’avant. ${phrase}
+    </td>
   </tr></table>`;
 }
 
@@ -140,30 +209,30 @@ export function sujetRecap(r: Recap): string {
 export function rendsRecap(r: Recap): string {
   const sections: string[] = [];
 
-  const evo = evolution(r);
-  if (evo) sections.push(bloc('Par rapport au mois d’avant', evo));
-
-  if (r.topExos.length > 0) {
-    sections.push(bloc('Ce que tu as le plus fait', exercices(r)));
-  }
-
   if (r.seances > 0) {
-    const regularite = [
-      ligne('Jours où tu as bougé', `${r.joursActifs} / ${r.joursDuMois}`),
+    sections.push(section(`${r.moisNom} jour par jour`, calendrier(r)));
+
+    sections.push(section('Le mois en chiffres', tableau([
+      ligne('Séances', String(r.seances)),
+      ligne('Répétitions', nombre(r.reps)),
+      ligne('Temps de sport', duree(r.secondes)),
       r.serie > 1 ? ligne('Plus longue série', `${r.serie} jours d’affilée`) : '',
       r.meilleurJour
-        ? ligne('Meilleur jour', `${jourLisible(r.meilleurJour.jour)} — ${nombre(r.meilleurJour.reps)} reps`)
-        : '',
-    ].join('');
-    sections.push(bloc('Ta régularité', regularite));
+        ? ligne('Meilleur jour', `${jourLisible(r.meilleurJour.jour)}`, true)
+        : ligne('Jours actifs', `${r.joursActifs} / ${r.joursDuMois}`, true),
+    ])));
+
+    if (r.topExos.length > 0) {
+      sections.push(section('Ce que tu as le plus travaillé', exercices(r)));
+    }
+
+    sections.push(section('Face au mois d’avant', evolution(r)));
   }
 
-  /* Pour un mois blanc, la dernière séance remplace les statistiques : c'est
-     la seule chose qu'il reste à dire, et elle dit tout. */
   if (r.seances === 0 && r.derniere) {
-    sections.push(bloc('Ta dernière séance', `
-      <div style="font:700 17px ${POLICE};color:${ACCENT};padding-bottom:6px;">${jourLisible(r.derniere)}</div>
-      <div style="font:400 13px/1.5 ${POLICE};color:${ESTOMPE};">Elle t\u2019attend toujours, la suivante. Elle n\u2019est pas rancunière.</div>`));
+    sections.push(section('Ta dernière séance', `
+      <div style="font:700 20px ${POLICE};color:${ACCENT};padding-bottom:8px;">${jourLisible(r.derniere)}</div>
+      <div style="font:400 14px/1.6 ${POLICE};color:${ESTOMPE};">Elle t’attend toujours, la suivante. Elle n’est pas rancunière.</div>`));
   }
 
   if (r.place && r.rivaux > 1) {
@@ -171,91 +240,150 @@ export function rendsRecap(r: Recap): string {
       ? 'Personne devant toi. Profite, ça se reprend vite.'
       : r.place <= 3
         ? 'Le podium est à portée de main, et surtout à portée de séance.'
-        : 'Il y a de la place devant. Elle ne va pas se libérer toute seule.';
-    sections.push(bloc('Dans le groupe', `
-      <div style="font:800 22px ${POLICE};color:${ACCENT};padding-bottom:6px;">${r.place}<span style="font-size:14px;color:${ESTOMPE};"> sur ${r.rivaux}</span></div>
-      <div style="font:400 13px/1.5 ${POLICE};color:${ESTOMPE};">Au nombre de reps, parmi ceux qui ont bougé ce mois-ci. ${phrase}</div>`));
+        : 'Il y a de la place devant. Elle ne se libérera pas toute seule.';
+    sections.push(section('Dans le groupe', `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td width="96" valign="top" style="line-height:1;padding-top:2px;">
+          <span style="font:800 44px/1 ${POLICE};color:${ACCENT};">${r.place}</span>
+          <span style="font:600 14px ${POLICE};color:${SOURDINE};"> / ${r.rivaux}</span>
+        </td>
+        <td valign="top" style="font:400 14px/1.6 ${POLICE};color:${ESTOMPE};">
+          Au nombre de répétitions, parmi ceux qui ont bougé ce mois-ci. ${phrase}
+        </td>
+      </tr></table>`));
   }
 
+  const cotes: string[] = [];
   if (r.creatine) {
-    const detail = r.creatine.gels > 0
-      ? ligne('Gels utilisés', `${r.creatine.gels}`)
-      : '';
-    sections.push(bloc('Créatine', `
-      ${ligne('Jours cochés', `${r.creatine.coches} / ${r.joursDuMois}`)}${detail}
-      <div style="font:400 13px/1.5 ${POLICE};color:${ESTOMPE};padding-top:8px;">${
-        r.creatine.coches >= r.joursDuMois - 1
-          ? 'Un sans-faute, ou presque. Le shaker te remercie.'
-          : 'La créatine ne se prend pas toute seule. On a essayé.'
-      }</div>`));
+    cotes.push(`
+      <div style="font:700 11px ${POLICE};letter-spacing:1.4px;text-transform:uppercase;color:${SOURDINE};padding-bottom:10px;">Créatine</div>
+      <div style="font:800 26px ${POLICE};color:${TEXTE};">${r.creatine.coches}<span style="font-size:14px;color:${SOURDINE};font-weight:600;"> / ${r.joursDuMois}</span></div>
+      <div style="font:400 12px/1.5 ${POLICE};color:${ESTOMPE};padding-top:8px;">${
+        r.creatine.gels > 0
+          ? `jours cochés, dont ${r.creatine.gels} rattrapé${r.creatine.gels > 1 ? 's' : ''} au gel.`
+          : 'jours cochés. Le shaker tient les comptes.'
+      }</div>`);
   }
-
   if (r.pas) {
-    sections.push(bloc('Tes pas', `
-      ${ligne('Total du mois', nombre(r.pas.total))}
-      ${ligne('Meilleure journée', nombre(r.pas.meilleur))}
-      <div style="font:400 13px/1.5 ${POLICE};color:${ESTOMPE};padding-top:8px;">Soit à peu près ${nombre(Math.round(r.pas.total * 0.00075))} km. À pied. Sans s’en rendre compte.</div>`));
+    cotes.push(`
+      <div style="font:700 11px ${POLICE};letter-spacing:1.4px;text-transform:uppercase;color:${SOURDINE};padding-bottom:10px;">Pas</div>
+      <div style="font:800 26px ${POLICE};color:${TEXTE};">${nombre(r.pas.total)}</div>
+      <div style="font:400 12px/1.5 ${POLICE};color:${ESTOMPE};padding-top:8px;">soit environ ${nombre(Math.round(r.pas.total * 0.00075))} km, sans y penser.</div>`);
+  }
+  if (cotes.length > 0) {
+    const cellule = (contenu: string) => `
+      <td width="48%" valign="top" style="background:${PANNEAU};border-radius:12px;padding:18px;">${contenu}</td>`;
+    const corps = cotes.length === 2
+      ? `<tr>${cellule(cotes[0])}<td width="4%" style="font-size:0;line-height:0;">&nbsp;</td>${cellule(cotes[1])}</tr>`
+      : `<tr><td valign="top" style="background:${PANNEAU};border-radius:12px;padding:18px;">${cotes[0]}</td></tr>`;
+    sections.push(`
+      <tr><td style="padding:30px ${MARGE} 0 ${MARGE};">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${corps}</table>
+      </td></tr>`);
   }
 
   if (r.cartes > 0) {
-    sections.push(bloc('Ta collection', ligne('Cartes possédées', String(r.cartes))));
+    sections.push(section('Ta collection', tableau([
+      ligne('Cartes possédées', String(r.cartes), true),
+    ])));
   }
 
   return `<!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
 <meta name="color-scheme" content="dark">
 <meta name="supported-color-schemes" content="dark">
 <title>Récap ${duMois(r.mois)}</title>
 </head>
-<body style="margin:0;padding:0;background:${NOIR};">
+<body style="margin:0;padding:0;background:${FOND};-webkit-text-size-adjust:100%;">
 <!-- L'aperçu dans la liste des mails : sans lui, le client affiche le début
      du HTML, c'est-à-dire n'importe quoi. -->
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${protege(r.titre.nom)} — ton mois ${duMois(r.mois)} en chiffres.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${NOIR};">
-<tr><td align="center" style="padding:24px 12px 40px 12px;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${protege(r.titre.nom)} — ton mois ${duMois(r.mois)}, en chiffres et jour par jour.</div>
 
-    <tr><td align="center" style="padding:8px 0 22px 0;">
-      <img src="${SITE}/icon-192.png" width="54" height="54" alt="CaliCrew"
-           style="display:block;border-radius:13px;border:0;">
-      <div style="font:800 15px ${POLICE};letter-spacing:3px;color:${TEXTE};padding-top:10px;">CALICREW</div>
-      <div style="font:600 12px ${POLICE};letter-spacing:1px;color:${ESTOMPE};text-transform:uppercase;padding-top:4px;">Récap ${duMois(r.mois)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${FOND};">
+<tr><td align="center" style="padding:28px 10px 48px 10px;">
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"
+         style="max-width:600px;width:100%;background:#0f0f11;border-radius:18px;overflow:hidden;">
+
+    <!-- Bandeau : marque à gauche, mois à droite, comme une couverture. -->
+    <tr><td style="padding:22px ${MARGE};">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td valign="middle" width="34">
+          <img src="${SITE}/icon-192.png" width="34" height="34" alt=""
+               style="display:block;border-radius:9px;border:0;">
+        </td>
+        <td valign="middle" style="padding-left:12px;font:800 14px ${POLICE};letter-spacing:2.4px;color:${TEXTE};">CALICREW</td>
+        <td valign="middle" align="right" style="font:600 11px ${POLICE};letter-spacing:1.6px;text-transform:uppercase;color:${SOURDINE};">
+          ${r.moisNom} ${r.mois.slice(0, 4)}
+        </td>
+      </tr></table>
     </td></tr>
-
-    <tr><td style="padding:0 0 12px 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="background:${CARTE};border-radius:14px;border-left:3px solid ${ACCENT};">
-        <tr><td style="padding:20px;">
-          <div style="font:400 14px ${POLICE};color:${ESTOMPE};">${protege(r.nom)}, ce mois-ci tu étais</div>
-          <div style="font:800 27px ${POLICE};color:${ACCENT};padding:6px 0 10px 0;">${r.titre.nom}</div>
-          <div style="font:400 15px/1.55 ${POLICE};color:${TEXTE};">${r.titre.phrase}</div>
-        </td></tr>
+    <tr><td style="padding:0 ${MARGE};">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td height="1" style="background:${FILET};font-size:0;line-height:0;">&nbsp;</td></tr>
       </table>
     </td></tr>
 
-    <tr><td style="padding:0 0 12px 0;">
+    <!-- L'ouverture : le titre du mois, en grand, et sa phrase. -->
+    <tr><td style="padding:34px ${MARGE} 30px ${MARGE};">
+      <div style="font:600 12px ${POLICE};letter-spacing:1.6px;text-transform:uppercase;color:${ACCENT};padding-bottom:12px;">
+        ${protege(r.nom)}, ce mois-ci tu étais
+      </div>
+      <div style="font:800 38px/1.1 ${POLICE};color:${TEXTE};padding-bottom:16px;">${r.titre.nom}</div>
+      <div style="font:400 16px/1.65 ${POLICE};color:${ESTOMPE};">${r.titre.phrase}</div>
+    </td></tr>
+
+    <!-- Les trois chiffres, séparés par des filets verticaux et non par des
+         cadres : une bande de données, pas trois boîtes. -->
+    <tr><td style="padding:0 ${MARGE};">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-             style="background:${CARTE};border-radius:14px;">
-        <tr><td style="padding:20px 12px;">${chiffres(r)}</td></tr>
+             style="background:${PANNEAU};border-radius:14px;">
+        <tr>
+          <td width="33%" align="center" style="padding:20px 6px;">
+            <div style="font:800 28px ${POLICE};color:${TEXTE};">${r.seances}</div>
+            <div style="font:600 10px ${POLICE};letter-spacing:1.4px;text-transform:uppercase;color:${SOURDINE};padding-top:6px;">${r.seances > 1 ? 'séances' : 'séance'}</div>
+          </td>
+          <td width="1" style="background:${FILET};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="33%" align="center" style="padding:20px 6px;">
+            <div style="font:800 28px ${POLICE};color:${TEXTE};">${nombre(r.reps)}</div>
+            <div style="font:600 10px ${POLICE};letter-spacing:1.4px;text-transform:uppercase;color:${SOURDINE};padding-top:6px;">reps</div>
+          </td>
+          <td width="1" style="background:${FILET};font-size:0;line-height:0;">&nbsp;</td>
+          <td width="33%" align="center" style="padding:20px 6px;">
+            <div style="font:800 28px ${POLICE};color:${TEXTE};">${duree(r.secondes)}</div>
+            <div style="font:600 10px ${POLICE};letter-spacing:1.4px;text-transform:uppercase;color:${SOURDINE};padding-top:6px;">de sport</div>
+          </td>
+        </tr>
       </table>
     </td></tr>
 
     ${sections.join('')}
 
-    <tr><td align="center" style="padding:14px 0 6px 0;">
-      <a href="${SITE}" style="display:inline-block;background:${ACCENT};color:${NOIR};font:700 15px ${POLICE};text-decoration:none;padding:13px 30px;border-radius:999px;">Ouvrir CaliCrew</a>
+    <!-- L'appel, détaché du contenu par un filet : on a fini de raconter. -->
+    <tr><td style="padding:34px ${MARGE} 0 ${MARGE};">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td height="1" style="background:${FILET};font-size:0;line-height:0;">&nbsp;</td></tr>
+      </table>
     </td></tr>
-
-    <tr><td align="center" style="padding:18px 10px 0 10px;">
-      <div style="font:400 12px/1.6 ${POLICE};color:${ESTOMPE};">
-        Un mail par mois, le 1er, et rien d’autre. Celui ${duMois(r.mois)} est derrière toi :
-        le suivant est vierge, et c’est la meilleure nouvelle de ce mail.
-      </div>
+    <tr><td align="center" style="padding:28px ${MARGE} 34px ${MARGE};">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+        <tr><td style="background:${ACCENT};border-radius:999px;">
+          <a href="${SITE}" style="display:block;padding:15px 38px;font:700 15px ${POLICE};color:#0a0a0b;text-decoration:none;">Ouvrir CaliCrew</a>
+        </td></tr>
+      </table>
+      <div style="font:400 13px ${POLICE};color:${SOURDINE};padding-top:16px;">Le mois qui commence est vierge. C’est la meilleure nouvelle de ce mail.</div>
     </td></tr>
 
   </table>
+
+  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+    <tr><td align="center" style="padding:20px 24px 0 24px;font:400 11px/1.7 ${POLICE};color:${SOURDINE};">
+      CaliCrew — un mail par mois, le 1er, et rien d’autre.
+    </td></tr>
+  </table>
+
 </td></tr></table>
 </body></html>`;
 }
