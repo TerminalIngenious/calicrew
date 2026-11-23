@@ -373,6 +373,25 @@ export interface UserProgress {
    * mélangés, on ne pourrait plus recompter le quota du mois.
    */
   creatineGels?: string[];
+  /**
+   * Le défi surprise du jour, déposé par le cron au moment de la notification.
+   *
+   * Dans la progression et non dans une collection à part : l'app y est déjà
+   * abonnée en direct, et aucune règle d'accès n'a eu à bouger.
+   */
+  defiDuJour?: {
+    /** Jour local du dépôt, YYYY-MM-DD : au-delà, le défi n'est plus à faire. */
+    jour: string;
+    id: string;
+    texte: string;
+    /** Vide quand le défi n'a rien de mesurable (s'étirer, prendre l'escalier). */
+    exercices: { exerciseId: string; reps: number; unit?: 'reps' | 'seconds' }[];
+    /** Durée déclarée de la séance, en secondes. */
+    duree: number;
+    fait: boolean;
+    /** La séance créée en le validant, s'il y en a une. */
+    seanceId?: string;
+  };
   /** Records saisis par le joueur lui-même. */
   personalRecords?: PersonalRecord[];
   /**

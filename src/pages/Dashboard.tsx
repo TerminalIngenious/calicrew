@@ -9,6 +9,7 @@ import SeasonalBadge from '../components/SeasonalBadge';
 import PinkRibbon from '../components/PinkRibbon';
 import NotifGate from '../components/NotifGate';
 import PasCard from '../components/PasCard';
+import DefiSurpriseCard from '../components/DefiSurpriseCard';
 import CalendrierSeances from '../components/CalendrierSeances';
 import { getSeasonalTheme } from '../lib/seasonalTheme';
 import { format } from 'date-fns';
@@ -154,6 +155,10 @@ export default function Dashboard() {
           {/* Après les chiffres de la semaine et avant les gestes du jour :
               c'est le recul, pas une action à faire. */}
           <CalendrierSeances sessions={sessions} />
+
+          {/* Avant la créatine et les pas : c'est le seul geste du jour qui
+              expire ce soir. */}
+          {user && <DefiSurpriseCard uid={user.uid} progress={progress} />}
 
           <button
             type="button"

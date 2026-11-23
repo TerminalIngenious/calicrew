@@ -9224,3 +9224,88 @@ body {
   font-size: 0.72rem;
   color: var(--danger);
 }
+
+/* ── Le défi surprise du jour ── */
+
+.defi-card {
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.defi-card.fait {
+  border-left-color: var(--accent-green);
+}
+
+.defi-tete {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.defi-card.fait .defi-tete {
+  color: var(--accent-green);
+}
+
+.defi-etat {
+  margin-left: auto;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.defi-etat.oui {
+  color: var(--accent-green);
+}
+
+.defi-texte {
+  margin: 0.45rem 0 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.defi-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.defi-card:not(.fait) .defi-bouton {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.defi-bouton:disabled {
+  opacity: 0.5;
+}
+
+.defi-note {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.66rem;
+  color: var(--text-muted);
+}
+
+.defi-note.erreur {
+  color: var(--danger);
+}

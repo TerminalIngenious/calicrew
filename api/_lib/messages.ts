@@ -127,22 +127,80 @@ export const VANNE_GENERIQUE = [
 // ──────────────────────────────────────────────────────────────────────────
 // Le défi surprise de l'après-midi
 // ──────────────────────────────────────────────────────────────────────────
-// Rien à valider, rien à cocher : c'est une notification qui demande dix
-// secondes d'effort là où on est. Le but est qu'on la lise et qu'on s'exécute
-// en riant, pas qu'elle entre dans les statistiques.
+// Une notification qui demande dix secondes d'effort là où on est. Le but est
+// qu'on la lise et qu'on s'exécute en riant.
+//
+// Ceux qui se comptent portent leurs exercices : s'ils sont validés dans
+// l'app, ils s'enregistrent en séance pour de vrai. Les autres — s'étirer,
+// prendre l'escalier — restent à cocher sans rien derrière, parce qu'il n'y a
+// honnêtement rien à mesurer.
+//
+// Les identifiants d'exercice sont ceux de `src/lib/exercises.ts` : le client
+// y retrouve le nom et la catégorie, qui n'ont donc pas à être recopiés ici.
 
-export const DEFIS_SURPRISE = [
-  'Fais 10 pompes. Maintenant. Oui, là où tu es.',
-  '20 squats. Tout de suite. Personne ne regarde.',
-  'Gainage, 30 secondes. Le chrono tourne.',
-  'Lève-toi et fais 15 squats. On attend.',
-  'Cherche une barre, un portique, une branche. Une traction. Une seule.',
-  '10 pompes. Si t\'es en réunion, 10 pompes mentales, on ne jugera pas.',
-  '30 secondes de chaise contre le mur. C\'est court. Ça ne va pas le paraître.',
-  'Monte les escaliers au lieu de l\'ascenseur. Ça compte aussi.',
-  '15 fentes. Oui, en pantalon. On fait avec ce qu\'on a.',
-  'Étire-toi. Là. Tu viens de le sentir, hein ?',
+export interface DefiSurprise {
+  id: string;
+  texte: string;
+  exercices?: { exerciseId: string; reps: number; unit?: 'reps' | 'seconds' }[];
+  /** Durée déclarée de la séance, en secondes. Un ordre de grandeur. */
+  duree?: number;
+}
+
+export const DEFIS_SURPRISE: DefiSurprise[] = [
+  {
+    id: 'pompes-10',
+    texte: 'Fais 10 pompes. Maintenant. Oui, là où tu es.',
+    exercices: [{ exerciseId: 'push-ups', reps: 10 }],
+    duree: 45,
+  },
+  {
+    id: 'squats-20',
+    texte: '20 squats. Tout de suite. Personne ne regarde.',
+    exercices: [{ exerciseId: 'squats', reps: 20 }],
+    duree: 60,
+  },
+  {
+    id: 'gainage-30',
+    texte: 'Gainage, 30 secondes. Le chrono tourne.',
+    exercices: [{ exerciseId: 'gainage', reps: 30, unit: 'seconds' }],
+    duree: 30,
+  },
+  {
+    id: 'squats-15',
+    texte: 'Lève-toi et fais 15 squats. On attend.',
+    exercices: [{ exerciseId: 'squats', reps: 15 }],
+    duree: 45,
+  },
+  {
+    id: 'traction-1',
+    texte: 'Cherche une barre, un portique, une branche. Une traction. Une seule.',
+    exercices: [{ exerciseId: 'pull-ups', reps: 1 }],
+    duree: 30,
+  },
+  {
+    id: 'pompes-10-reunion',
+    texte: '10 pompes. Si t\'es en réunion, 10 pompes mentales, on ne jugera pas.',
+    exercices: [{ exerciseId: 'push-ups', reps: 10 }],
+    duree: 45,
+  },
+  // Pas d'exercice pour la chaise contre le mur : la bibliothèque n'en a pas,
+  // et la ranger en gainage fausserait les records de gainage.
+  { id: 'chaise-30', texte: '30 secondes de chaise contre le mur. C\'est court. Ça ne va pas le paraître.' },
+  { id: 'escaliers', texte: 'Monte les escaliers au lieu de l\'ascenseur. Ça compte aussi.' },
+  {
+    id: 'fentes-15',
+    texte: '15 fentes. Oui, en pantalon. On fait avec ce qu\'on a.',
+    exercices: [{ exerciseId: 'lunges', reps: 15 }],
+    duree: 60,
+  },
+  { id: 'etirements', texte: 'Étire-toi. Là. Tu viens de le sentir, hein ?' },
 ];
+
+/** Le défi du jour, choisi comme les autres messages : par le numéro du jour. */
+export function defiDuJour(jour: number): DefiSurprise {
+  const n = DEFIS_SURPRISE.length;
+  return DEFIS_SURPRISE[((jour % n) + n) % n];
+}
 
 /** Le membre tiré au sort pour la journée. */
 export const PATRON_DU_JOUR = [
