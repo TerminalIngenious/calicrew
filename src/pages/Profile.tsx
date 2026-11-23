@@ -6,6 +6,10 @@ import { db } from '../lib/firebase';
 import { passeCache, docsEnCache } from '../lib/lectureCache';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
+import { annonceNouvelleCarte } from '../lib/notify';
+
+/** Les comptes qui voient les outils de créateur. */
+const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
 import { useUserProgress } from '../lib/useUserProgress';
 import { totalReps as sumReps } from '../lib/stats';
 import type { Session, Card, Program } from '../types';
@@ -16,7 +20,7 @@ import PersonalRecords from '../components/PersonalRecords';
 import SeasonalBadge from '../components/SeasonalBadge';
 import NotificationSettings from '../components/NotificationSettings';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, TrendingUp, ChevronRight, LogOut, Settings } from 'lucide-react';
+import { ArrowLeft, Trophy, Clock, Zap, Dumbbell, X, ClipboardList, Download, Pencil, TrendingUp, ChevronRight, LogOut, Settings, Sparkles } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import SeasonShelf from '../components/SeasonShelf';
@@ -29,6 +33,8 @@ const DATE_OUVERTURE = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month:
 export default function Profile() {
   const { user, displayName: myName, updateDisplayName, signOut } = useAuth();
   const navigate = useNavigate();
+  /** Le retour de l'annonce : vide, « envoi », ou ce que le serveur a répondu. */
+  const [annonce, setAnnonce] = useState('');
   const { uid } = useParams<{ uid: string }>();
   const { sessions: ownSessions } = useUserSessions();
 
@@ -457,6 +463,28 @@ export default function Profile() {
           <h3><Settings size={16} style={{ marginRight: 6 }} />Compte</h3>
           <div className="settings-list">
             <NotificationSettings uid={user.uid} />
+            {/* L'annonce de la nouvelle carte, à la main et une seule fois :
+                un cron daté se serait trompé d'une heure, et c'est
+                justement l'annonce qu'on ne veut pas rater. */}
+            {ADMIN_UIDS.includes(user.uid) && (
+              <button
+                className="settings-row"
+                disabled={annonce === 'envoi'}
+                onClick={async () => {
+                  if (!confirm('Prévenir tout le groupe qu\u2019une nouvelle carte est apparue ?')) return;
+                  setAnnonce('envoi');
+                  setAnnonce(await annonceNouvelleCarte());
+                }}
+              >
+                <Sparkles size={17} />
+                <div className="settings-row-info">
+                  <span className="settings-row-label">Annoncer la nouvelle carte</span>
+                  <span className="settings-row-sub">
+                    {annonce === 'envoi' ? 'Envoi…' : annonce || 'Une fois, à la réouverture'}
+                  </span>
+                </div>
+              </button>
+            )}
             <button className="settings-row settings-row-danger" onClick={() => signOut()}>
               <LogOut size={17} />
               <div className="settings-row-info">

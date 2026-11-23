@@ -51,3 +51,28 @@ export function previensEchange(listingId: string): void {
 export function previensIntergalactique(): void {
   void previens('intergalactique');
 }
+
+/**
+ * L'annonce de la nouvelle carte, à la réouverture.
+ *
+ * La seule des quatre dont on attend la réponse : elle part à la main, une
+ * fois, et celui qui appuie doit savoir si elle est partie. Réservée au
+ * créateur, le serveur le vérifie.
+ */
+export async function annonceNouvelleCarte(force = false): Promise<string> {
+  const user = auth.currentUser;
+  if (!user) return 'Pas connecté.';
+  try {
+    const jeton = await user.getIdToken();
+    const r = await fetch(`/api/notify/nouvelle-carte${force ? '?force=1' : ''}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${jeton}` },
+    });
+    const corps = await r.json();
+    if (!r.ok) return corps.erreur || `Erreur ${r.status}`;
+    if (!corps.annonce) return `Rien envoyé : ${corps.raison}.`;
+    return `Envoyée à ${corps.envoyes} personne${corps.envoyes > 1 ? 's' : ''}.`;
+  } catch {
+    return 'Envoi impossible. Réseau ?';
+  }
+}
