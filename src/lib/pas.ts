@@ -4,7 +4,7 @@ import { db } from './firebase';
 import { useAuth } from '../contexts/AuthContext';
 import type { UserProgress } from '../types';
 import { dayKey } from './creatine';
-import { ENDURANCE_XP_MAX_JOUR, getCurrentSeason, needsSeasonReset, startNewSeason } from './passes';
+import { ENDURANCE_XP_MAX_JOUR, getCurrentSeason, needsSeasonReset, startNewSeason, accordeXp } from './passes';
 
 /**
  * Les pas de la journée.
@@ -189,7 +189,18 @@ export function usePas() {
         saison && needsSeasonReset(data as UserProgress, saison.id)
           ? startNewSeason(data as UserProgress, saison.id)
           : null;
-      const totalXp = bascule ? bascule.passXp : (data.passXp as number) || 0;
+      const base = (bascule || data) as UserProgress;
+
+      /* Les coffres des paliers franchis passent par accordeXp : les pas
+         donnent de l'XP de pass comme une quête, ils doivent donner les
+         mêmes récompenses de palier. */
+      const { passXp, chestsToOpen } = accordeXp(base, delta, saison);
+
+      /* La liste des coffres n'est réécrite que si elle change vraiment.
+         Entre la lecture et l'écriture, un coffre a pu être gagné ailleurs —
+         le renvoyer telle qu'on l'a lue l'effacerait. */
+      const coffresBouges =
+        !!bascule || chestsToOpen.length !== ((data.chestsToOpen as unknown[] | undefined)?.length || 0);
 
       // On élague les vieilles entrées à l'écriture : sans ça la carte de
       // progression grossirait indéfiniment, un champ par jour.
@@ -203,16 +214,12 @@ export function usePas() {
           pasJours: elague,
           pasXpDay: compteur,
           enduranceXpDay: endurance,
-          passXp: Math.max(0, totalXp + delta),
-          /* Les deux champs de la bascule ne partent que s'il y a bascule :
-             un document de progression né d'un `merge` n'a pas forcément de
-             `chestsToOpen`, et Firestore refuse d'écrire `undefined`. */
-          ...(bascule
-            ? {
-                currentSeasonId: bascule.currentSeasonId,
-                chestsToOpen: bascule.chestsToOpen || [],
-              }
-            : {}),
+          passXp,
+          ...(coffresBouges ? { chestsToOpen } : {}),
+          /* Le champ de saison ne part que s'il y a bascule : un document de
+             progression né d'un `merge` n'en a pas forcément, et Firestore
+             refuse d'écrire `undefined`. */
+          ...(bascule ? { currentSeasonId: bascule.currentSeasonId } : {}),
         },
         { merge: true }
       );

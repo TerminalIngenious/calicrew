@@ -4,7 +4,7 @@ import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { passeCache, docEnCache } from '../lib/lectureCache';
 import { db } from '../lib/firebase';
-import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, questsParDefaut, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
+import { getCurrentSeason, getSeasonTimeLeft, getLevelFromXp, accordeXp, getWeekStart, getDayStart, getDailyQuest, getPermanentQuests, generateQuestPool, questsParDefaut, SPORT_LABELS, needsSeasonReset, startNewSeason, getPreviousSeason, getArchiveQuest } from '../lib/passes';
 import { getCardArt } from '../lib/cardsS2Art';
 import CardFront from '../components/cardArt/CardFront';
 import { getRarityLabel, RARITY_COLORS, rollCard, getCardsBySet, getCardDisplayName, getMissingCards, isSetComplete } from '../lib/cards';
@@ -247,23 +247,13 @@ export default function BattlePass() {
 
   async function grantXp(questId: string, xp: number) {
     if (!user || !season) return;
-    const newXp = progress.passXp + xp;
-    const oldLevel = getLevelFromXp(progress.passXp, season.passLevels);
-    const newLevelInfo = getLevelFromXp(newXp, season.passLevels);
-
-    const newChests = [...progress.chestsToOpen];
-    for (let lvl = oldLevel.level; lvl < newLevelInfo.level; lvl++) {
-      const passLevel = season.passLevels[lvl];
-      if (passLevel?.freeChest) {
-        newChests.push({ rarity: passLevel.freeChest, pool: 'current' });
-      }
-    }
+    const { passXp, chestsToOpen } = accordeXp(progress, xp, season);
 
     const updated: UserProgress = {
       ...progress,
-      passXp: newXp,
+      passXp,
       questsClaimed: { ...progress.questsClaimed, [questId]: Date.now() },
-      chestsToOpen: newChests,
+      chestsToOpen,
       currentSeasonId: season.id,
     };
 

@@ -11,7 +11,7 @@
 
 import type { Card, CardRarity, Season, UserProgress } from '../types';
 import { getCardById, RARITY_ORDER } from './cards';
-import { getLevelFromXp, needsSeasonReset, startNewSeason } from './passes';
+import { accordeXp, needsSeasonReset, startNewSeason } from './passes';
 
 /**
  * Ce que rend un doublon, rareté par rareté.
@@ -136,21 +136,12 @@ export function appliqueEchange(
     xpGagne += sortie.rendus * XP_PAR_RARETE[card.rarity];
   }
 
-  const passXp = (base.passXp || 0) + xpGagne;
-  const coffres = [...(base.chestsToOpen || [])];
-  if (saison && xpGagne > 0) {
-    const avant = getLevelFromXp(base.passXp || 0, saison.passLevels).level;
-    const apres = getLevelFromXp(passXp, saison.passLevels).level;
-    for (let niveau = avant; niveau < apres; niveau++) {
-      const palier = saison.passLevels[niveau];
-      if (palier?.freeChest) coffres.push({ rarity: palier.freeChest, pool: 'current' });
-    }
-  }
+  const { passXp, chestsToOpen } = accordeXp(base, xpGagne, saison);
 
   return {
     ownedCards: collection,
     passXp,
-    chestsToOpen: coffres,
+    chestsToOpen,
     currentSeasonId: saison ? saison.id : base.currentSeasonId || '',
     xpGagne,
     rendus,

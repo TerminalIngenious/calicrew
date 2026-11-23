@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
-import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason } from '../lib/passes';
+import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason, accordeXp } from '../lib/passes';
 import { buildAmrapExercises } from '../lib/amrap';
 import {
   EXOS_ECHAUFFEMENT, FAMILLES, doseLabel, dureeEstimee, echauffementSuggere, enItem,
@@ -388,11 +388,14 @@ export default function NewSession() {
             base.enduranceXpDay,
             aujourdhui
           );
+          /* Par accordeXp et non par une addition : cet XP fait franchir des
+             paliers, et leurs coffres doivent tomber comme ceux d'une quête. */
+          const { passXp, chestsToOpen } = accordeXp(base, xpSportCo + xpEndurance, season);
           await updateDoc(ref, {
-            passXp: (base.passXp || 0) + xpSportCo + xpEndurance,
+            passXp,
             enduranceXpDay: journee,
             currentSeasonId: base.currentSeasonId,
-            chestsToOpen: base.chestsToOpen,
+            chestsToOpen,
           });
         }
       } catch (err) {

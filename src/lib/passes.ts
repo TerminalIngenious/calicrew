@@ -507,6 +507,40 @@ export function getLevelFromXp(totalXp: number, levels: PassLevel[]): { level: n
   return { level: levels.length, currentLevelXp: 0, xpForNext: 0 };
 }
 
+/**
+ * Ajoute de l'XP de pass et les coffres des paliers franchis au passage.
+ *
+ * Le seul chemin par lequel l'XP doit arriver, d'où qu'elle vienne.
+ * Auparavant, chaque source écrivait `passXp` à sa façon et seule la remise
+ * d'une quête pensait aux coffres : qui montait de niveau grâce à ses séances,
+ * à ses pas ou à son endurance franchissait le palier sans jamais recevoir la
+ * récompense accrochée dessus. Elle était perdue, et personne ne pouvait s'en
+ * apercevoir — rien n'annonce un coffre qui n'arrive pas.
+ *
+ * Un retrait d'XP (une saisie de pas corrigée à la baisse) ne donne rien : on
+ * ne redescend pas de niveau, mais on ne repaie pas non plus les paliers
+ * déjà franchis.
+ */
+export function accordeXp(
+  progress: UserProgress,
+  xp: number,
+  saison: Season | null
+): { passXp: number; chestsToOpen: { rarity: CardRarity; pool: string }[] } {
+  const passXp = Math.max(0, (progress.passXp || 0) + xp);
+  const coffres = [...(progress.chestsToOpen || [])];
+
+  if (saison && xp > 0) {
+    const avant = getLevelFromXp(progress.passXp || 0, saison.passLevels).level;
+    const apres = getLevelFromXp(passXp, saison.passLevels).level;
+    for (let niveau = avant; niveau < apres; niveau++) {
+      const palier = saison.passLevels[niveau];
+      if (palier?.freeChest) coffres.push({ rarity: palier.freeChest, pool: 'current' });
+    }
+  }
+
+  return { passXp, chestsToOpen: coffres };
+}
+
 export function getWeekStart(): number {
   const now = new Date();
   const shifted = new Date(now.getTime() - 10 * 60 * 60 * 1000);
