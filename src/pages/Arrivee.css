@@ -21,6 +21,17 @@
 .arr {
   position: fixed;
   inset: 0;
+  /*
+   * La hauteur est reprise explicitement, et en `dvh`.
+   *
+   * `inset: 0` seul se cale sur le petit viewport : il restait une bande
+   * sous l'écran quand la barre d'adresse du téléphone se rétractait.
+   * `100dvh` suit la hauteur réellement visible, et `100vh` reste en
+   * secours pour les navigateurs qui ne la connaissent pas.
+   */
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
   z-index: 300;
   overflow: hidden;
   background: #000;
@@ -479,24 +490,24 @@
   93%, 100% { opacity: 1; }
 }
 
-.arr-bouton {
+/* Plus de bouton : l'écran entier ferme. L'indication est discrète et
+   respire, comme sur l'écran d'attente — on n'appuie pas sur une phrase,
+   on appuie où on veut. */
+.arr-continue {
   position: absolute;
-  bottom: 2.2rem;
-  padding: 0.7rem 1.6rem;
-  border: 1px solid rgba(214, 233, 255, 0.4);
-  border-radius: 980px;
-  background: rgba(214, 233, 255, 0.1);
-  color: #eaf2ff;
-  font: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
-  cursor: pointer;
-  animation: arr-bouton 0.5s ease forwards;
+  bottom: 2.4rem;
+  z-index: 4;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(234, 242, 255, 0.4);
+  animation: arr-continue 0.6s ease forwards, arr-respire 2.6s ease-in-out 0.6s infinite;
+  opacity: 0;
 }
 
-@keyframes arr-bouton {
+@keyframes arr-continue {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+  to { opacity: 0.8; transform: none; }
 }
 
 /*

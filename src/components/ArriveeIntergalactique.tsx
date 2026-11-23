@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CARTE_INTERGALACTIQUE, DOS_INTERGALACTIQUE, joursRestants } from '../lib/intergalactique';
 import { playCardExplosion, playChute, playCloche, playMontee, playPas, playRumeur, primeAudio } from '../lib/sound';
 import CielArrivee from './CielArrivee';
@@ -64,8 +65,18 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
     window.setTimeout(onFini, 420);
   }
 
+  /*
+   * L'écran est posé dans le corps du document, et non là où le composant
+   * vit.
+   *
+   * Un `position: fixed` se cale sur le premier ancêtre transformé, et il
+   * y en a dans l'app — l'animation s'affichait alors dans le cadre d'une
+   * page au lieu de prendre le téléphone entier.
+   */
+  const dans = (contenu: React.ReactNode) => createPortal(contenu, document.body);
+
   if (phase === 'attente') {
-    return (
+    return dans(
       <div className="arr arr-attente" onClick={lance} role="button" tabIndex={0}>
         <span className="arr-kicker">Quelque chose est arrivé</span>
         <span className="arr-appuie">Appuie pour voir</span>
@@ -74,8 +85,11 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
     );
   }
 
-  return (
-    <div className={`arr arr-joue ${phase === 'fini' ? 'arr-pose' : ''} ${sortie ? 'arr-sortie' : ''}`}>
+  return dans(
+    <div
+      className={`arr arr-joue ${phase === 'fini' ? 'arr-pose' : ''} ${sortie ? 'arr-sortie' : ''}`}
+      onClick={phase === 'fini' ? ferme : undefined}
+    >
       <CielArrivee depart={depart} />
 
       {/* Les bandes de cinéma : deux rectangles noirs qui entrent et
@@ -122,9 +136,7 @@ export default function ArriveeIntergalactique({ onFini }: { onFini: () => void 
         {joursRestants()} jours pour la trouver.
       </p>
 
-      {phase === 'fini' && (
-        <button className="arr-bouton" onClick={ferme}>Bonne chasse</button>
-      )}
+      {phase === 'fini' && <span className="arr-continue">Appuie pour continuer</span>}
     </div>
   );
 }
