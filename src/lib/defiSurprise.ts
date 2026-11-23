@@ -8,16 +8,30 @@
  * Cette séance est une vraie séance : elle compte dans les reps, remplit les
  * quêtes et apparaît dans l'historique. Elle ne donne simplement pas de
  * coffre — dix pompes dans un couloir ne valent pas une séance d'une heure,
- * et le `noReward` existait déjà pour ça.
+ * et le `noReward` existait déjà pour ça. Sauf pour les comptes listés dans
+ * DEFI_AVEC_COFFRE, exception assumée.
  */
 
-import { addDoc, collection, deleteDoc, deleteField, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, deleteField, doc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase';
 import { DEFAULT_EXERCISES } from './exercises';
 import { dayKey } from './creatine';
 import type { ExerciseLog, UserProgress } from '../types';
 
 export type DefiDuJour = NonNullable<UserProgress['defiDuJour']>;
+
+/**
+ * Les comptes dont le défi rapporte quand même un coffre.
+ *
+ * Une exception décidée, pas un oubli : Coco est la seule à qui le défi
+ * surprise donne la récompense d'une séance entière. Par identifiant et non
+ * par pseudo, qui se change.
+ */
+const DEFI_AVEC_COFFRE = ['KD3vHcXqaNWWl2w9b7tauBy3PI43'];
+
+export function donneCoffre(uid: string): boolean {
+  return DEFI_AVEC_COFFRE.includes(uid);
+}
 
 /** Le défi à proposer aujourd'hui, ou rien si celui qu'on a date d'hier. */
 export function defiActif(progress: UserProgress | null, aujourdhui = dayKey()): DefiDuJour | null {
@@ -76,14 +90,28 @@ export async function valide(uid: string, defi: DefiDuJour): Promise<void> {
       startedAt: maintenant - defi.duree * 1000,
       // Une durée déclarée, pas mesurée : le défi se fait loin du téléphone.
       duration: defi.duree,
-      noReward: true,
+      // Le drapeau dit la vérité sur cette séance-là : pour les comptes qui
+      // touchent quand même un coffre, elle n'est pas sans récompense.
+      noReward: !donneCoffre(uid),
     });
     seanceId = ref.id;
   }
 
-  await updateDoc(doc(db, 'userProgress', uid), {
-    'defiDuJour.fait': true,
-    ...(seanceId ? { 'defiDuJour.seanceId': seanceId } : {}),
+  /* En transaction parce que le coffre s'ajoute à une liste qu'on vient de
+     lire : un coffre gagné ailleurs entre-temps serait effacé par le renvoi
+     d'une liste périmée. */
+  await runTransaction(db, async (tx) => {
+    const ref = doc(db, 'userProgress', uid);
+    const snap = await tx.get(ref);
+    const data = snap.data() as UserProgress | undefined;
+
+    const maj: Record<string, unknown> = { 'defiDuJour.fait': true };
+    if (seanceId) maj['defiDuJour.seanceId'] = seanceId;
+    if (donneCoffre(uid)) {
+      maj.chestsToOpen = [...(data?.chestsToOpen || []), { rarity: 'commune', pool: 'current' }];
+      maj['defiDuJour.coffre'] = true;
+    }
+    tx.update(ref, maj);
   });
 }
 
@@ -98,8 +126,25 @@ export async function annule(uid: string, defi: DefiDuJour): Promise<void> {
   if (defi.seanceId) {
     await deleteDoc(doc(db, 'sessions', defi.seanceId));
   }
-  await updateDoc(doc(db, 'userProgress', uid), {
-    'defiDuJour.fait': false,
-    'defiDuJour.seanceId': deleteField(),
+  /* Le coffre repart avec la séance. Sinon cocher puis décocher en boucle
+     serait une machine à coffres. On n'en retire qu'un, et seulement celui
+     qu'on avait donné. */
+  await runTransaction(db, async (tx) => {
+    const ref = doc(db, 'userProgress', uid);
+    const snap = await tx.get(ref);
+    const data = snap.data() as UserProgress | undefined;
+
+    const maj: Record<string, unknown> = {
+      'defiDuJour.fait': false,
+      'defiDuJour.seanceId': deleteField(),
+    };
+    if (defi.coffre) {
+      const liste = [...(data?.chestsToOpen || [])];
+      const i = liste.findIndex((c) => c.rarity === 'commune' && c.pool === 'current');
+      if (i >= 0) liste.splice(i, 1);
+      maj.chestsToOpen = liste;
+      maj['defiDuJour.coffre'] = false;
+    }
+    tx.update(ref, maj);
   });
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Zap, Check, Undo2 } from 'lucide-react';
-import { defiActif, mesurable, valide, annule } from '../lib/defiSurprise';
+import { defiActif, mesurable, valide, annule, donneCoffre } from '../lib/defiSurprise';
 import type { UserProgress } from '../types';
 
 /**
@@ -58,7 +58,9 @@ export default function DefiSurpriseCard({ uid, progress }: { uid: string; progr
       {/* Dit ce que le bouton va déclencher. Une séance qui s'enregistre
           toute seule sans prévenir se lirait comme un bug. */}
       {!defi.fait && mesurable(defi) && (
-        <span className="defi-note">S'enregistre en séance, sans coffre.</span>
+        <span className="defi-note">
+          S'enregistre en séance, {donneCoffre(uid) ? 'avec coffre' : 'sans coffre'}.
+        </span>
       )}
       {defi.fait && defi.seanceId && (
         <span className="defi-note">Séance enregistrée. Les quêtes sont à jour.</span>

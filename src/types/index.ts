@@ -391,6 +391,8 @@ export interface UserProgress {
     fait: boolean;
     /** La séance créée en le validant, s'il y en a une. */
     seanceId?: string;
+    /** Un coffre a-t-il été donné avec ? Voir DEFI_AVEC_COFFRE. */
+    coffre?: boolean;
   };
   /** Records saisis par le joueur lui-même. */
   personalRecords?: PersonalRecord[];
