@@ -10,7 +10,8 @@
     { "path": "/api/cron/ambiance?h=19", "schedule": "0 19 * * *" },
     { "path": "/api/cron/ambiance?h=20", "schedule": "0 20 * * *" },
     { "path": "/api/cron/faceid", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/pas", "schedule": "0 20 * * *" }
+    { "path": "/api/cron/pas", "schedule": "0 20 * * *" },
+    { "path": "/api/cron/recap", "schedule": "0 8 1 * *" }
   ],
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/" }
