@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, isAuthorized, sendTo, getDayKey, getDayNumber, decaleJour, type Subscription } from '../_lib/push.js';
-import { CREATINE_MESSAGES, messageDuJour } from '../_lib/messages.js';
+import { getDb, configureWebPush, sendTo, getDayKey, getDayNumber, decaleJour, type Subscription } from '../push.js';
+import { CREATINE_MESSAGES, messageDuJour } from '../messages.js';
 
 /**
  * Le quota de gels, tel que le client le fait respecter dans `lib/creatine.ts`.
@@ -15,9 +15,7 @@ function gelsRestants(gels: string[], jour: string): number {
   return GELS_PAR_MOIS - gels.filter((g) => g.slice(0, 7) === mois).length;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
   configureWebPush();
   const db = getDb();
 

@@ -1,13 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
-  getDb, configureWebPush, isAuthorized, sendTo,
+  getDb, configureWebPush, sendTo,
   getDayStart, getDayNumber, type Subscription,
-} from '../_lib/push.js';
-import { DAILY_CHALLENGE_MESSAGES, messageDuJour } from '../_lib/messages.js';
+} from '../push.js';
+import { DAILY_CHALLENGE_MESSAGES, messageDuJour } from '../messages.js';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
   configureWebPush();
   const db = getDb();
 

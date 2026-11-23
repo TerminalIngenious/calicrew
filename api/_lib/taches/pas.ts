@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, isAuthorized, sendTo, getDayKey, getDayNumber } from '../_lib/push.js';
-import { lisAbonnements } from '../_lib/groupe.js';
-import { PAS_MESSAGES, messageDuJour } from '../_lib/messages.js';
+import { getDb, configureWebPush, sendTo, getDayKey, getDayNumber } from '../push.js';
+import { lisAbonnements } from '../groupe.js';
+import { PAS_MESSAGES, messageDuJour } from '../messages.js';
 
 /**
  * Le rappel des pas, tous les soirs à 21h.
@@ -19,9 +19,7 @@ import { PAS_MESSAGES, messageDuJour } from '../_lib/messages.js';
  * mars. Au passage à l'heure d'été il faudra le descendre à 19h UTC, sinon
  * le rappel arrivera à 22h.
  */
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
   configureWebPush();
   const db = getDb();
 

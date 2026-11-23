@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, isAuthorized, sendTo, getDayKey } from '../_lib/push.js';
-import { lisAbonnements } from '../_lib/groupe.js';
-import { FACEID_LANCEMENT, FACEID_SEMAINE, FACEID_DERNIER_JOUR } from '../_lib/messages.js';
+import { getDb, configureWebPush, sendTo, getDayKey } from '../push.js';
+import { lisAbonnements } from '../groupe.js';
+import { FACEID_LANCEMENT, FACEID_SEMAINE, FACEID_DERNIER_JOUR } from '../messages.js';
 
 /*
  * Le logo de l'app, en vert.
@@ -32,9 +32,7 @@ const RENDEZ_VOUS: Record<string, { titre: string; texte: string; tag: string }>
   '2026-11-30': { titre: 'FaceID', texte: FACEID_DERNIER_JOUR, tag: 'faceid-fin' },
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
   const jour = getDayKey();
   const rdv = RENDEZ_VOUS[jour];
   if (!rdv) return res.status(200).json({ skipped: true, jour });

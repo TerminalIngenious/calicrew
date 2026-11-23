@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, isAuthorized, sendTo, getDayNumber, getDayKey } from '../_lib/push.js';
-import { lisAbonnements, veutAmbiance, lisNoms, heureDuJour } from '../_lib/groupe.js';
-import { defiDuJour, PATRON_DU_JOUR } from '../_lib/messages.js';
+import { getDb, configureWebPush, sendTo, getDayNumber, getDayKey } from '../push.js';
+import { lisAbonnements, veutAmbiance, lisNoms, heureDuJour } from '../groupe.js';
+import { defiDuJour, PATRON_DU_JOUR } from '../messages.js';
 
 /** Les heures possibles, en UTC — soit 10h-16h l'hiver, 11h-17h l'été. */
 const HEURES = [9, 11, 13, 15];
@@ -25,8 +25,6 @@ const HEURES = [9, 11, 13, 15];
  * de service aujourd'hui va au bout.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-
   const jour = getDayNumber();
   const demandee = Number(req.query.h);
   if (demandee !== heureDuJour(jour, HEURES, 0)) {

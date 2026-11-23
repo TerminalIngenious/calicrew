@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, isAuthorized } from '../_lib/push.js';
-import { moisPrecedent } from '../_lib/recap.js';
-import { recapsDuMois } from '../_lib/recapDonnees.js';
-import { rendsRecap, sujetRecap } from '../_lib/recapMail.js';
-import { envoieMail, fournisseur } from '../_lib/mail.js';
+import { getDb } from '../push.js';
+import { moisPrecedent } from '../recap.js';
+import { recapsDuMois } from '../recapDonnees.js';
+import { rendsRecap, sujetRecap } from '../recapMail.js';
+import { envoieMail, fournisseur } from '../mail.js';
 
 /**
  * Le récap du mois, envoyé par mail le 1er au matin.
@@ -15,7 +15,6 @@ import { envoieMail, fournisseur } from '../_lib/mail.js';
  * fois le même bilan donnerait l'impression d'un robot déréglé.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
   if (!fournisseur()) return res.status(200).json({ envoyes: 0, raison: 'pas de clé de messagerie' });
 
   const db = getDb();

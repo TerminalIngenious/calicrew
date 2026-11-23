@@ -1,14 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, isAuthorized, sendTo, getDayNumber } from '../_lib/push.js';
+import { getDb, configureWebPush, sendTo, getDayNumber } from '../push.js';
 import {
   lisAbonnements, veutAmbiance, lisNoms, statsDe,
   jourDeSemaine, quantieme, debutDuJour, moisCourant, heureDuJour,
   type Membre,
-} from '../_lib/groupe.js';
+} from '../groupe.js';
 import {
   GROUPE_VIDE, LEADER_INTOUCHABLE, MEMBRE_DISPARU, BILAN_DIMANCHE,
   RESET_MOIS, VANNE_GENERIQUE, messageDuJour,
-} from '../_lib/messages.js';
+} from '../messages.js';
 
 /** Au bout de combien de jours l'absence d'un membre devient une vanne. */
 const SEUIL_DISPARU = 7;
@@ -33,8 +33,6 @@ const HEURES = [18, 19, 20];
  * attendue à heure fixe se lit d'avance.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-
   const demandee = Number(req.query.h);
   if (demandee !== heureDuJour(getDayNumber(), HEURES, 7)) {
     return res.status(200).json({ skipped: true, heure: demandee });
