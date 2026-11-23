@@ -36,6 +36,7 @@ import HalloweenDecor from './components/HalloweenDecor';
 import PinkDecor from './components/PinkDecor';
 import MaintenanceScreen from './components/MaintenanceScreen';
 import BadgeDeblocage from './components/BadgeDeblocage';
+import PorteIntergalactique from './components/PorteIntergalactique';
 import LimiteChargement from './components/LimiteChargement';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
@@ -172,6 +173,9 @@ function AppContent() {
           page, et l'annoncer à la prochaine visite de l'accueil reviendrait
           à ne pas l'annoncer. */}
       {user && <BadgeDeblocage />}
+      {/* L'arrivée de la carte passe par-dessus tout, mais jamais pendant la
+          maintenance : elle annonce la réouverture, elle ne la précède pas. */}
+      {user && !MAINTENANCE && <PorteIntergalactique />}
       {season === 'halloween' && <HalloweenDecor />}
       {season === 'pink' && <PinkDecor />}
       <LimiteChargement>

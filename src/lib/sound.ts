@@ -148,3 +148,90 @@ export function playCardExplosion(rarity: CardRarity): void {
     // Un son qui échoue ne doit jamais interrompre l'ouverture du coffre.
   }
 }
+
+// ── L'arrivée de la carte intergalactique ──
+
+/**
+ * La rumeur de la salle.
+ *
+ * Du bruit filtré très bas qui enfle, et rien d'autre : une vraie foule
+ * demanderait un fichier, donc un téléchargement et un cache à gérer, pour
+ * un son qu'on entend une fois dans sa vie. Celui-ci suffit à faire monter
+ * la pression.
+ */
+export function playRumeur(duree = 6): void {
+  const audio = getCtx();
+  if (!audio) return;
+  if (audio.state === 'suspended') void audio.resume();
+
+  try {
+    const out = getMaster(audio);
+    const t = audio.currentTime;
+    const source = audio.createBufferSource();
+    source.buffer = getNoise(audio);
+    source.loop = true;
+
+    const filtre = audio.createBiquadFilter();
+    filtre.type = 'bandpass';
+    filtre.Q.value = 0.8;
+    filtre.frequency.setValueAtTime(300, t);
+    filtre.frequency.linearRampToValueAtTime(900, t + duree * 0.8);
+
+    const env = audio.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.09, t + duree * 0.6);
+    env.gain.exponentialRampToValueAtTime(0.14, t + duree * 0.78);
+    // Le silence juste avant la révélation : c'est lui qui fait l'effet.
+    env.gain.exponentialRampToValueAtTime(0.0001, t + duree * 0.84);
+
+    source.connect(filtre).connect(env).connect(out);
+    source.start(t);
+    source.stop(t + duree);
+  } catch {
+    // Un son raté ne doit jamais empêcher l'animation de se dérouler.
+  }
+}
+
+/** Le gong d'ouverture. Trois partiels désaccordés, longue traîne. */
+export function playCloche(): void {
+  const audio = getCtx();
+  if (!audio) return;
+  if (audio.state === 'suspended') void audio.resume();
+
+  try {
+    const out = getMaster(audio);
+    const t = audio.currentTime;
+    // Désaccordés exprès : des partiels justes sonnent comme un synthé, pas
+    // comme un métal frappé.
+    for (const [freq, gain, duree] of [[523, 0.3, 2.6], [784, 0.16, 2.2], [1109, 0.1, 1.6]] as const) {
+      const osc = audio.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.linearRampToValueAtTime(freq * 0.995, t + duree);
+
+      const env = audio.createGain();
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(gain, t + 0.008);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + duree);
+
+      osc.connect(env).connect(out);
+      osc.start(t);
+      osc.stop(t + duree + 0.05);
+    }
+  } catch {
+    // idem
+  }
+}
+
+/** Un pas : le sol qui prend le poids de ce qui arrive. */
+export function playPas(force = 1): void {
+  const audio = getCtx();
+  if (!audio) return;
+  if (audio.state === 'suspended') void audio.resume();
+  try {
+    const out = getMaster(audio);
+    playThump(audio, out, audio.currentTime, 0.42 * force);
+  } catch {
+    // idem
+  }
+}

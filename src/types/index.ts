@@ -339,6 +339,13 @@ export interface PersonalRecord {
 // ── User Progress ──
 
 export interface UserProgress {
+  /**
+   * L'arrivée de la carte intergalactique a-t-elle été vue ?
+   *
+   * Dans la progression et non dans le navigateur : elle ne doit se jouer
+   * qu'une fois par personne, pas une fois par appareil.
+   */
+  vuIntergalactique?: boolean;
   passXp: number;
   isPremium: boolean;
   ownedCards: Record<string, number>;

@@ -1,0 +1,360 @@
+/*
+ * L'arrivée de la carte intergalactique.
+ *
+ * Toutes les couleurs sont écrites en dur : cet écran passe par-dessus
+ * l'app entière et ne doit dépendre d'aucun thème, pas même du mode
+ * saisonnier qui repeint l'accent.
+ *
+ * Les durées sont réparties en `animation-delay` sur une seule timeline de
+ * dix secondes et demie. Les repères :
+ *   0,0 s   noir, les projecteurs se mettent à balayer
+ *   0,5 s   le speaker annonce, lettre par lettre
+ *   2,9 s   la cloche, les projecteurs convergent
+ *   4,3 s   le dos de carte sort du fond et grandit
+ *   4,6 / 5,6 / 6,5 s   trois pas, le sol tremble
+ *   7,4 s   plus rien. Une seconde de silence et de noir.
+ *   7,8 s   flash, onde de choc, la carte se retourne
+ *   8,1 s   le mot se compose
+ *   9,4 s   la phrase
+ */
+
+.arr {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #eaf2ff;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.arr-sortie { animation: arr-sortie 0.4s ease forwards; }
+@keyframes arr-sortie { to { opacity: 0; } }
+
+/* ── L'écran d'attente ── */
+
+.arr-attente { cursor: pointer; gap: 0.75rem; }
+
+.arr-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(234, 242, 255, 0.45);
+}
+
+.arr-appuie {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  animation: arr-respire 2.4s ease-in-out infinite;
+}
+
+@keyframes arr-respire {
+  0%, 100% { opacity: 0.55; transform: scale(0.99); }
+  50% { opacity: 1; transform: scale(1.01); }
+}
+
+.arr-note {
+  font-size: 0.78rem;
+  color: rgba(234, 242, 255, 0.35);
+}
+
+/* ── Le tremblement, posé sur tout l'écran ── */
+
+.arr-joue { animation: arr-secousse 10.6s linear; }
+
+/* Trois secousses sèches, rien entre : un tremblement continu donne le mal
+   de mer, trois coups donnent du poids. */
+@keyframes arr-secousse {
+  0%, 42%, 46%, 51%, 55%, 60%, 64%, 72%, 100% { transform: translate(0, 0); }
+  43% { transform: translate(-5px, 3px); }
+  44% { transform: translate(4px, -3px); }
+  52% { transform: translate(-7px, 4px); }
+  53% { transform: translate(6px, -4px); }
+  61% { transform: translate(-10px, 6px); }
+  62% { transform: translate(9px, -5px); }
+  73% { transform: translate(-16px, 9px); }
+  74% { transform: translate(14px, -8px); }
+  75% { transform: translate(-7px, 4px); }
+}
+
+/* ── Les projecteurs ── */
+
+.arr-projo {
+  position: absolute;
+  top: -40%;
+  width: 55vmax;
+  height: 180vmax;
+  background: linear-gradient(to bottom, rgba(220, 235, 255, 0.22), rgba(220, 235, 255, 0) 62%);
+  filter: blur(14px);
+  transform-origin: 50% 0;
+  opacity: 0;
+}
+
+.arr-projo-g { left: -14vmax; animation: arr-projo-g 10.6s ease-in-out; }
+.arr-projo-d { right: -14vmax; animation: arr-projo-d 10.6s ease-in-out; }
+
+/* Ils balayent, se rejoignent au centre sur la cloche, puis s'éteignent au
+   moment du silence. */
+@keyframes arr-projo-g {
+  0% { opacity: 0; transform: rotate(-38deg); }
+  8% { opacity: 1; }
+  26% { transform: rotate(14deg); }
+  28% { transform: rotate(18deg); }
+  40%, 68% { transform: rotate(20deg); opacity: 1; }
+  70% { opacity: 0.1; }
+  74%, 100% { opacity: 0; }
+}
+
+@keyframes arr-projo-d {
+  0% { opacity: 0; transform: rotate(38deg); }
+  8% { opacity: 1; }
+  26% { transform: rotate(-14deg); }
+  28% { transform: rotate(-18deg); }
+  40%, 68% { transform: rotate(-20deg); opacity: 1; }
+  70% { opacity: 0.1; }
+  74%, 100% { opacity: 0; }
+}
+
+/* ── L'annonce du speaker ── */
+
+.arr-speaker {
+  position: absolute;
+  top: 13%;
+  font-size: clamp(0.8rem, 3.4vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: rgba(234, 242, 255, 0.9);
+}
+
+.arr-speaker span {
+  display: inline-block;
+  opacity: 0;
+  animation: arr-lettre 2.8s ease forwards;
+}
+
+@keyframes arr-lettre {
+  0% { opacity: 0; transform: translateY(-10px); filter: blur(6px); }
+  12% { opacity: 1; transform: none; filter: none; }
+  /* Elles s'effacent avant l'arrivée : la carte doit avoir l'écran. */
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── La carte ── */
+
+/*
+ * L'opacité est portée par la scène, jamais par la carte.
+ *
+ * Une opacité inférieure à un sur un élément en `preserve-3d` aplatit ses
+ * enfants : `backface-visibility` cessait d'agir, et on voyait la face
+ * arrière en miroir — le recto à l'envers pendant l'approche, puis le dos
+ * à l'envers à l'arrivée. La carte ne fait donc que tourner.
+ */
+.arr-scene {
+  perspective: 1400px;
+  opacity: 0;
+  animation: arr-paraitre 10.6s linear forwards;
+}
+
+@keyframes arr-paraitre {
+  0%, 38% { opacity: 0; }
+  41%, 72% { opacity: 1; }
+  /* Le temps mort, juste avant la révélation. */
+  73% { opacity: 0.25; }
+  74%, 100% { opacity: 1; }
+}
+
+.arr-carte {
+  position: relative;
+  width: min(62vw, 300px);
+  aspect-ratio: 1086 / 1448;
+  transform-style: preserve-3d;
+  animation: arr-approche 10.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/*
+ * Elle sort du fond, grossit par à-coups — un pas, une avancée — marque un
+ * temps dans le noir, puis se plante.
+ *
+ * Un tour et demi, et non un tour : à zéro degré c'est le dos qui fait
+ * face, et il faut finir à cent quatre-vingts pour que le recto soit
+ * devant. Une rotation pleine aurait montré le recto d'entrée, ce qui
+ * n'était plus une révélation.
+ */
+@keyframes arr-approche {
+  0%, 38% { transform: translateZ(-1400px) rotateY(0deg) scale(0.2); }
+  44% { transform: translateZ(-900px) rotateY(80deg) scale(0.35); }
+  53% { transform: translateZ(-620px) rotateY(190deg) scale(0.5); }
+  62% { transform: translateZ(-380px) rotateY(300deg) scale(0.68); }
+  69% { transform: translateZ(-300px) rotateY(380deg) scale(0.74); }
+  73% { transform: translateZ(-300px) rotateY(430deg) scale(0.74); }
+  74% { transform: translateZ(0) rotateY(540deg) scale(1.06); }
+  78%, 100% { transform: translateZ(0) rotateY(540deg) scale(1); }
+}
+
+.arr-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 14px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* C'est le recto qui est retourné : le dos fait face au départ, et le
+   recto n'arrive qu'au dernier demi-tour. */
+.arr-recto { transform: rotateY(180deg); }
+
+/*
+ * Le halo est une ombre portée de boîte, et non un `filter`.
+ *
+ * Un filtre sur une face aplatit la 3D de tout le bloc : la face arrière
+ * cessait d'être masquée et on voyait le recto en miroir pendant toute
+ * l'approche. La carte est un rectangle à coins arrondis, une ombre de
+ * boîte fait exactement le même halo.
+ */
+.arr-recto {
+  box-shadow: 0 0 60px 10px rgba(190, 220, 255, 0.4);
+}
+
+/* ── Le flash et l'onde ── */
+
+.arr-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  animation: arr-flash 10.6s linear;
+}
+
+@keyframes arr-flash {
+  0%, 73.4% { opacity: 0; }
+  74% { opacity: 1; }
+  78% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.arr-onde {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  border: 2px solid rgba(214, 233, 255, 0.9);
+  opacity: 0;
+  animation: arr-onde 10.6s ease-out;
+}
+
+@keyframes arr-onde {
+  0%, 73.6% { opacity: 0; transform: scale(0.2); }
+  74% { opacity: 0.9; transform: scale(0.2); }
+  82% { opacity: 0; transform: scale(34); }
+  100% { opacity: 0; transform: scale(34); }
+}
+
+/* ── Le titre et la phrase ── */
+
+.arr-titre {
+  position: absolute;
+  bottom: 17%;
+  font-size: clamp(1.05rem, 5vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  /* L'argent iridescent de la rareté, en dégradé sur le texte lui-même. */
+  background: linear-gradient(100deg, #ffffff, #b9d4ff 28%, #ffffff 46%, #d9c9ff 68%, #ffffff);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes arr-iris {
+  to { background-position: 250% 0; }
+}
+
+/*
+ * Le mot apparaît d'un bloc, et non lettre par lettre.
+ *
+ * Le dégradé est découpé sur le texte par `background-clip`, ce qui ne
+ * fonctionne que tant que les glyphes appartiennent à la même couche.
+ * Chaque lettre animée en `transform` et `filter` se créait son propre
+ * calque, le découpage ne la suivait pas, et le mot sortait transparent
+ * sur fond noir — invisible.
+ */
+.arr-titre {
+  opacity: 0;
+  animation: arr-iris 4s linear infinite, arr-titre-entree 0.75s cubic-bezier(0.2, 0.7, 0.3, 1) 8.1s forwards;
+}
+
+@keyframes arr-titre-entree {
+  from { opacity: 0; letter-spacing: 0.45em; filter: blur(9px); }
+  to { opacity: 1; letter-spacing: 0.12em; filter: none; }
+}
+
+.arr-sous {
+  position: absolute;
+  bottom: 9%;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(234, 242, 255, 0.62);
+  opacity: 0;
+  animation: arr-sous 10.6s ease forwards;
+}
+
+@keyframes arr-sous {
+  0%, 88% { opacity: 0; }
+  93%, 100% { opacity: 1; }
+}
+
+.arr-bouton {
+  position: absolute;
+  bottom: 2.2rem;
+  padding: 0.7rem 1.6rem;
+  border: 1px solid rgba(214, 233, 255, 0.4);
+  border-radius: 980px;
+  background: rgba(214, 233, 255, 0.1);
+  color: #eaf2ff;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  animation: arr-bouton 0.5s ease forwards;
+}
+
+@keyframes arr-bouton {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/*
+ * Sans animation, il reste une annonce.
+ *
+ * On ne joue pas une version au ralenti : on montre la carte, le mot et la
+ * phrase, tout de suite et sans rien qui bouge.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .arr-joue,
+  .arr-projo,
+  .arr-flash,
+  .arr-onde,
+  .arr-titre,
+  .arr-speaker span { animation: none; }
+  .arr-titre { opacity: 1; }
+  .arr-projo, .arr-flash, .arr-onde, .arr-speaker { display: none; }
+  .arr-scene { opacity: 1; animation: none; }
+  .arr-carte { animation: none; transform: rotateY(180deg); }
+  .arr-titre span, .arr-sous { opacity: 1; animation: none; }
+}
