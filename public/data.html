@@ -182,6 +182,29 @@ tr:last-child td { border-bottom: 0; }
 tr.muet td { opacity: 0.5; }
 .large table { min-width: 680px; }
 
+/* ── Le dépliage d'un membre ── */
+tr.ouvrable { cursor: pointer; }
+tr.ouvrable:hover td { background: var(--survol); }
+.chevron { display: inline-block; color: var(--ink-3); transition: transform .15s; }
+tr.ouvert .chevron { transform: rotate(90deg); }
+tr.detail td { padding: 0; background: var(--survol); }
+.dernieres { padding: 0.7rem 0.9rem 0.8rem; }
+.dernieres-titre {
+  display: block; margin-bottom: 0.45rem;
+  font-size: 0.72rem; font-weight: 600; color: var(--ink-3);
+}
+.seance {
+  display: grid; grid-template-columns: 5.5rem 1fr auto;
+  gap: 0.7rem; align-items: baseline;
+  padding: 0.3rem 0; font-size: 0.8rem;
+}
+.seance + .seance { border-top: 1px solid var(--trait); }
+.seance-date { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* Le détail d'une séance tient sur une ligne : une liste d'exercices qui
+   revient à la ligne ferait un pavé là où on ne vient que jeter un œil. */
+.seance-quoi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seance-chiffres { color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
 .etiq {
   display: inline-flex; align-items: center; gap: 0.3rem;
   padding: 0.1rem 0.45rem; border-radius: 6px;
@@ -403,8 +426,8 @@ function vueMembres(s) {
       <table><thead><tr>${COLONNES.map(([c, t]) =>
         `<th class="${c === 'nom' ? '' : 'n'}" data-tri="${c}">${esc(t)}${tri.cle === c ? (tri.sens === -1 ? ' ↓' : ' ↑') : ''}</th>`).join('')}</tr></thead>
       <tbody>${liste.map((m) => `
-        <tr class="${m.seances === 0 ? 'muet' : ''}">
-          <td>${esc(m.nom)}
+        <tr class="${m.seances === 0 ? 'muet' : ''} ${m.seances ? 'ouvrable' : ''}" ${m.seances ? `data-membre="${esc(m.uid)}"` : ''}>
+          <td>${m.seances ? '<span class="chevron">›</span> ' : ''}${esc(m.nom)}
             <span class="sous">${m.homonyme ? esc(m.email) + ' · ' : ''}${esc(m.groupes.join(', ') || 'aucun groupe')}</span></td>
           <td class="n">${m.seances}</td>
           <td class="n">${m.seances7 || '—'}</td>
@@ -414,7 +437,18 @@ function vueMembres(s) {
           <td class="n">${m.cartes}</td>
           <td class="n">${esc(depuis(m.derniere))}</td>
           <td class="n">${date(m.inscrit)}</td>
-        </tr>`).join('')}</tbody></table>
+        </tr>
+        ${m.seances ? `<tr class="detail" data-detail="${esc(m.uid)}" hidden><td colspan="${COLONNES.length}">
+          <div class="dernieres">
+            <span class="dernieres-titre">${m.dernieres.length} dernière${m.dernieres.length > 1 ? 's' : ''} séance${m.dernieres.length > 1 ? 's' : ''}</span>
+            ${m.dernieres.map((d) => `
+              <div class="seance">
+                <span class="seance-date">${esc(date(d.quand) )}</span>
+                <span class="seance-quoi">${esc(d.mode ? d.mode + ' · ' : '')}${esc(d.quoi || '—')}</span>
+                <span class="seance-chiffres">${d.reps ? nb(d.reps) + ' reps' : ''}${d.reps && d.duree ? ' · ' : ''}${d.duree ? heures(d.duree) : ''}</span>
+              </div>`).join('')}
+          </div>
+        </td></tr>` : ''}`).join('')}</tbody></table>
     </div>`;
 }
 
@@ -516,6 +550,14 @@ function rendu() {
 
   for (const b of document.querySelectorAll('[data-onglet]')) {
     b.onclick = () => { onglet = b.dataset.onglet; rendu(); };
+  }
+  for (const ligne of document.querySelectorAll('[data-membre]')) {
+    ligne.onclick = () => {
+      const detail = document.querySelector(`[data-detail="${ligne.dataset.membre}"]`);
+      if (!detail) return;
+      detail.hidden = !detail.hidden;
+      ligne.classList.toggle('ouvert', !detail.hidden);
+    };
   }
   for (const th of document.querySelectorAll('[data-tri]')) {
     th.onclick = () => {

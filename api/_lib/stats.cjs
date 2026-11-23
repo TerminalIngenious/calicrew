@@ -126,6 +126,22 @@ function calcule({ users, sessions, groups, progress }) {
       cartes: cartesDe(p).length,
       saison: p.currentSeasonId || '',
       homonyme: (compteNoms.get((u.displayName || '').trim().toLowerCase()) || 0) > 1,
+      /* Les cinq dernières séances, pour savoir ce que quelqu'un fait
+         vraiment — un compteur de séances ne dit pas s'il s'entraîne ou
+         s'il pointe. Cinq : de quoi voir une habitude, assez peu pour que
+         la réponse ne double pas de taille. */
+      dernieres: [...siennes]
+        .sort((a, b) => quand(b) - quand(a))
+        .slice(0, 5)
+        .map((s) => ({
+          id: s.id,
+          quand: quand(s),
+          date: s.date,
+          mode: s.mode === 'amrap' ? (s.amrapName || 'AMRAP') : '',
+          duree: s.duration || 0,
+          reps: repsDe(s),
+          quoi: (s.exercises || []).map((e) => e.exerciseName).filter(Boolean).join(', '),
+        })),
     };
   });
 
