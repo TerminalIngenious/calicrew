@@ -129,10 +129,18 @@
           font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
           font-size="34" font-weight="600" letter-spacing="7">UNE SEULE</text>
 
-    <!-- Le cadre, en dernier pour qu'il passe au-dessus de tout. -->
-    <rect x="26" y="26" width="1034" height="1396" rx="34"
-          fill="none" stroke="url(#argent)" stroke-width="6"/>
-    <rect x="48" y="48" width="990" height="1352" rx="24"
-          fill="none" stroke="url(#argent)" stroke-width="2" opacity="0.38"/>
+    <!--
+      Le cadre, en dernier pour qu'il passe au-dessus de tout.
+
+      Collé aux arêtes et non en retrait : le recto de la carte remplit son
+      image jusqu'au bord, et un dos dessiné vingt-six pixels plus loin
+      donnait l'impression d'une carte plus petite une fois retournée.
+      Le trait est posé sur le bord même, sa moitié extérieure est rognée
+      par le masque — c'est ce qui le fait affleurer.
+    -->
+    <rect x="0" y="0" width="1086" height="1448" rx="54"
+          fill="none" stroke="url(#argent)" stroke-width="16"/>
+    <rect x="26" y="26" width="1034" height="1396" rx="38"
+          fill="none" stroke="url(#argent)" stroke-width="2.5" opacity="0.4"/>
   </g>
 </svg>
