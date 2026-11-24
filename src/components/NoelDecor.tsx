@@ -57,9 +57,15 @@ function Sapin() {
 
 export default function NoelDecor() {
   return (
-    <div className="noel-decor" aria-hidden="true">
-      <div className="noel-lueur" />
-
+    <>
+      {/* La guirlande vit hors du décor, en calque à part.
+       *
+       * Le décor est derrière le contenu, pour qu'un sapin ne mange jamais
+       * une ligne de texte. La guirlande, elle, est accrochée en haut de
+       * l'écran : derrière, elle disparaissait sous les bannières pleine
+       * largeur — celle du Pass notamment. Elle passe donc devant, comme
+       * une vraie guirlande tendue au-dessus de la pièce, et reste sous la
+       * barre de navigation. */}
       {/* La guirlande : un fil qui pend en arc, et les ampoules accrochées
           dessus. Le fil est un trait, pas une image : il doit s'étirer sur
           toute la largeur, du téléphone à l'écran d'ordinateur. */}
@@ -87,6 +93,9 @@ export default function NoelDecor() {
         })}
       </div>
 
+      <div className="noel-decor" aria-hidden="true">
+        <div className="noel-lueur" />
+
       <div className="noel-neige">
         {FLOCONS.map((f, i) => (
           <span
@@ -104,8 +113,9 @@ export default function NoelDecor() {
         ))}
       </div>
 
-      <div className="noel-sapin noel-sapin-gauche"><Sapin /></div>
-      <div className="noel-sapin noel-sapin-droite"><Sapin /></div>
-    </div>
+        <div className="noel-sapin noel-sapin-gauche"><Sapin /></div>
+        <div className="noel-sapin noel-sapin-droite"><Sapin /></div>
+      </div>
+    </>
   );
 }

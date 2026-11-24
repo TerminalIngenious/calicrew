@@ -7316,12 +7316,21 @@ body {
 /* La guirlande, accrochée aux deux coins hauts */
 /* La guirlande descend sous l'encoche : accrochée à 0, elle passait derrière
    la barre d'état de l'iPhone, où la moitié des ampoules disparaissait. */
+/* La guirlande est son propre calque, hors du décor : celui-ci est passé
+   derrière le contenu, et une guirlande derrière une bannière pleine
+   largeur n'existe plus. Elle est donc devant les pages (1) et sous la
+   barre de navigation (20) — comme un fil tendu au plafond. */
 .noel-guirlande {
-  position: absolute;
-  top: env(safe-area-inset-top, 0px);
+  position: fixed;
+  /* Remontée de quelques points depuis qu'elle passe devant : les pages
+     dont le titre colle au bord — celles des events — prenaient une
+     ampoule en travers des lettres. */
+  top: calc(env(safe-area-inset-top, 0px) - 7px);
   left: 0;
   right: 0;
   height: 26px;
+  z-index: 6;
+  pointer-events: none;
 }
 
 .noel-guirlande svg {
