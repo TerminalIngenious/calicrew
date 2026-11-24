@@ -1584,10 +1584,15 @@ body {
 }
 
 /* Member modal */
+
+/* `var(--card)` n'a jamais été déclarée : la fiche n'avait donc aucun fond,
+   et les chiffres du membre flottaient par-dessus le classement. */
 .member-modal {
-  background: var(--card);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  padding: 1.5rem 1.25rem 1.25rem;
   width: 100%;
   max-width: 340px;
   position: relative;
@@ -1626,10 +1631,13 @@ body {
   font-size: 1.1rem;
 }
 
+/* Quatre chiffres, quatre colonnes séparées par un filet. En quatre petites
+   boîtes dans une boîte, la fiche était un cadre dans un cadre dans un
+   cadre. */
 .member-modal-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 0.9rem 0;
   margin-bottom: 1.25rem;
 }
 
@@ -1637,9 +1645,11 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-  padding: 0.5rem 0.6rem;
+  padding: 0 0.7rem;
+}
+
+.member-modal-stat:nth-child(even) {
+  border-left: 1px solid var(--border);
 }
 
 .member-modal-stat div {
@@ -1790,9 +1800,28 @@ body {
 }
 
 /* Explore modal */
+
+/* Les feuilles qui montent du bas portent une poignée : c'est ce qui dit
+   qu'elles se referment en les tirant vers le bas, et sans elle une feuille
+   se lit comme une page qui a surgi. */
+.explore-modal::before,
+.chat-modal::before {
+  content: '';
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .explore-modal {
   background: var(--bg-card);
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.55);
+  border-radius: 20px 20px 0 0;
   position: fixed;
   bottom: 0;
   left: 50%;
@@ -1810,7 +1839,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.25rem 0;
+  padding: 1.5rem 1.25rem 0;
 }
 
 .explore-modal-header h3 {
@@ -1847,10 +1876,13 @@ body {
   gap: 0.5rem;
 }
 
+/* Un groupe trouvé est une ligne de résultat, pas une carte : dix cartes
+   bordées dans une feuille déjà bordée faisaient trois cadres imbriqués. */
 .explore-group-card {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -2066,12 +2098,15 @@ body {
   color: var(--text-muted);
 }
 
+/* Une annonce est une ligne de liste : la carte proposée porte déjà son
+   propre cadre coloré, un second cadre autour n'ajoutait rien. */
 .trade-listing {
-  padding: 0.75rem;
-  margin-bottom: 0.6rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  padding: 0.8rem 0.15rem;
+  margin: 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
 }
 
 /* La carte à l'échange garde une largeur fixe : c'est le sujet de l'annonce,
@@ -5819,8 +5854,9 @@ body {
   justify-content: center;
 }
 
+/* Même oubli que sur la fiche membre : la feuille n'avait pas de fond. */
 .avatar-picker {
-  background: var(--card);
+  background: var(--bg-card);
   border-radius: 1rem 1rem 0 0;
   width: 100%;
   max-width: 500px;
@@ -6426,8 +6462,10 @@ body {
   left: 0;
   right: 0;
   height: 50vh;
-  background: var(--bg);
-  border-radius: 16px 16px 0 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.55);
+  border-radius: 20px 20px 0 0;
   display: flex;
   flex-direction: column;
   z-index: 1000;
