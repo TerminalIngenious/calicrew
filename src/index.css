@@ -3681,6 +3681,161 @@ body {
   opacity: 0.75;
 }
 
+/* ══ La page progrès ══
+
+   Même grammaire que l'accueil, et scopée pareil : .profile-stat et
+   .chart-container servent ailleurs. */
+
+.progres {
+  padding-top: 0 !important;
+}
+
+.pro-entete {
+  position: relative;
+  margin: 0 -1rem 1.25rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) 1rem 1.2rem;
+  overflow: hidden;
+}
+
+.pro-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+}
+
+.pro-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.pro-titre-ligne {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pro-titre-ligne h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+/* Les quatre totaux, en colonnes séparées par un filet. Les icônes de
+   couleur sont tombées : quatre pastilles pour quatre nombres, c'était de
+   la décoration, et les mots disent déjà ce que chacun compte. */
+.pro-totaux {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 1.1rem;
+}
+
+.pro-total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid var(--border);
+}
+
+.pro-total:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.pro-nombre {
+  font-size: 1.22rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.pro-mot {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.pro-depuis {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
+/* Le titre de section et le choix d'exercice sur une même ligne. */
+.progres .progress-charts-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.progres .progress-charts-title {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.progres .filter-bar {
+  margin: 0 0 0 auto;
+  max-width: 62%;
+}
+
+/* `appearance: none` sinon le système dessine son propre cadre par-dessus
+   et la pastille redevient une boîte. Le chevron est donc à notre charge. */
+.progres .filter-bar select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.35rem 1.75rem 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-color: transparent;
+  background-color: rgba(255, 255, 255, 0.06);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.55rem center;
+  background-size: 13px 13px;
+  text-overflow: ellipsis;
+}
+
+/* Les graphiques n'ont plus de cadre : une courbe est déjà délimitée par
+   ses axes, le rectangle autour n'ajoutait qu'un trait. */
+.pro-graphe {
+  margin-top: 1.5rem;
+}
+
+.pro-graphe h3 {
+  margin-bottom: 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.progres .chart-container {
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.progres .progress-pr {
+  margin-top: 1.5rem;
+}
+
 /* Tabs */
 .bp-tabs {
   display: flex;

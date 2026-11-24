@@ -16,7 +16,6 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Loader from '../components/Loader';
 import PersonalRecords from '../components/PersonalRecords';
-import { Trophy, Zap, Clock, Dumbbell } from 'lucide-react';
 import { exerciseReps, exerciseTotal, getUnit, unitLabel, totalReps, sessionSets } from '../lib/stats';
 
 /*
@@ -113,49 +112,47 @@ export default function Progress() {
   }, [sortedSessions, selectedExercise]);
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <h1>Progression</h1>
-        <SeasonalBadge />
+    <div className="page progres">
+      {/* Les totaux de toujours vivent dans le bandeau, comme les chiffres
+          de la semaine sur l'accueil : dans quatre cartes à icône, ils
+          pesaient autant que les graphiques, qui sont pourtant ce qu'on
+          vient voir. */}
+      <header className="pro-entete">
+        <div className="pro-entete-fond" />
+        <div className="pro-entete-contenu">
+          <div className="pro-titre-ligne">
+            <h1>Progression</h1>
+            <SeasonalBadge />
+          </div>
+
+          {!loading && (
+            <div className="pro-totaux">
+              <div className="pro-total">
+                <span className="pro-nombre">{completed.length}</span>
+                <span className="pro-mot">séances</span>
+              </div>
+              <div className="pro-total">
+                <span className="pro-nombre">{allTimeReps}</span>
+                <span className="pro-mot">reps</span>
+              </div>
+              <div className="pro-total">
+                <span className="pro-nombre">{formatDuration(allTimeDuration)}</span>
+                <span className="pro-mot">temps</span>
+              </div>
+              <div className="pro-total">
+                <span className="pro-nombre">{allTimeSets}</span>
+                <span className="pro-mot">séries</span>
+              </div>
+            </div>
+          )}
+          <span className="pro-depuis">depuis le début</span>
+        </div>
       </header>
 
       {loading ? (
         <div className="page loading"><Loader /></div>
       ) : (
         <div className="progress-body">
-          <section className="section progress-totals">
-            <h3>Total <span className="stats-period-inline">all-time</span></h3>
-            <div className="profile-stats">
-              <div className="profile-stat">
-                <Trophy size={18} className="gold" />
-                <div>
-                  <span className="profile-stat-value">{completed.length}</span>
-                  <span className="profile-stat-label">Séances</span>
-                </div>
-              </div>
-              <div className="profile-stat">
-                <Zap size={18} style={{ color: 'var(--accent)' }} />
-                <div>
-                  <span className="profile-stat-value">{allTimeReps}</span>
-                  <span className="profile-stat-label">Reps</span>
-                </div>
-              </div>
-              <div className="profile-stat">
-                <Clock size={18} style={{ color: 'var(--accent-green)' }} />
-                <div>
-                  <span className="profile-stat-value">{formatDuration(allTimeDuration)}</span>
-                  <span className="profile-stat-label">Temps</span>
-                </div>
-              </div>
-              <div className="profile-stat">
-                <Dumbbell size={18} style={{ color: 'var(--accent-light)' }} />
-                <div>
-                  <span className="profile-stat-value">{allTimeSets}</span>
-                  <span className="profile-stat-label">Séries</span>
-                </div>
-              </div>
-            </div>
-          </section>
 
           <div className="progress-pr">
             <PersonalRecords uid={user?.uid} editable />
@@ -165,6 +162,9 @@ export default function Progress() {
             <div className="progress-charts-head">
               <h3 className="progress-charts-title">Graphiques</h3>
 
+              {/* Le choix de l'exercice se pose à côté du titre : en pleine
+                  largeur sous lui, il se lisait comme un bouton d'action
+                  alors que c'est un réglage de ce qui suit. */}
               <div className="filter-bar">
                 <select
                   value={selectedExercise}
@@ -184,7 +184,7 @@ export default function Progress() {
               <p className="empty">Fais quelques séances pour voir ta progression ici !</p>
             ) : (
               <>
-                <section className="section">
+                <section className="pro-graphe">
                   <h3>Volume total ({unitLabel(selectedUnit)})</h3>
                   <div className="chart-container">
                     <ResponsiveContainer width="100%" height="100%">
@@ -208,7 +208,7 @@ export default function Progress() {
                 </section>
 
                 {selectedExercise !== 'all' && maxRepsData.length > 0 && (
-                  <section className="section">
+                  <section className="pro-graphe">
                     <h3>Max {unitLabel(selectedUnit)} par séance</h3>
                     <div className="chart-container">
                       <ResponsiveContainer width="100%" height="100%">
