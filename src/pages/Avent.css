@@ -593,3 +593,44 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* ── La collection seule, telle qu'on l'ouvre depuis un profil ──
+
+   Deux colonnes : la carte a été dessinée pour cette largeur-là, et les
+   visages y restent reconnaissables. Une grille à cinq, comme le
+   calendrier, les réduirait à des timbres. */
+.avt-cartes-grille {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.avt-carte-case {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.avt-carte-case:active { transform: scale(0.97); }
+
+/* Le nombre d'exemplaires, posé sur le coin : la carte en double est la
+   monnaie de l'event, elle doit se voir sans ouvrir. */
+.avt-carte-doublon {
+  position: absolute;
+  /* Au-dessus du contenu de la carte, qui monte jusqu'à 2 dans son propre
+     empilement : sans ça la pastille passait dessous et disparaissait. */
+  z-index: 3;
+  top: 0.4rem;
+  right: 0.4rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 99px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #0a0e16;
+  background: rgba(255, 255, 255, 0.92);
+}

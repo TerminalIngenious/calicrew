@@ -201,9 +201,7 @@ export default function Profile() {
     <AventShelf
       avent={progress?.avent}
       termine={termine}
-      /* Pas de page de collection par joueur pour l'avent : sur le profil
-         d'un autre, le bandeau informe sans s'ouvrir. */
-      onOpen={isOwnProfile ? () => navigate('/avent') : undefined}
+      onOpen={() => navigate(isOwnProfile ? '/avent/cartes' : `/avent/cartes/${targetUid}`)}
     />
   );
   const etagereFaceId = (termine: boolean) => (

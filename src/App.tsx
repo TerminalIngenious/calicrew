@@ -30,6 +30,7 @@ const Decouvrir = lazy(() => import('./pages/Decouvrir'));
 const Badges = lazy(() => import('./pages/Badges'));
 const FaceId = lazy(() => import('./pages/FaceId'));
 const Avent = lazy(() => import('./pages/Avent'));
+const AventCartes = lazy(() => import('./pages/AventCartes'));
 const FaceIdCartes = lazy(() => import('./pages/FaceIdCartes'));
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
@@ -220,6 +221,8 @@ function AppContent() {
             <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
             <Route path="/arrivee" element={<RouteCreateur><ArriveeTest /></RouteCreateur>} />
             <Route path="/avent" element={<ProtectedRoute><Avent /></ProtectedRoute>} />
+            <Route path="/avent/cartes" element={<ProtectedRoute><AventCartes /></ProtectedRoute>} />
+            <Route path="/avent/cartes/:uid" element={<ProtectedRoute><AventCartes /></ProtectedRoute>} />
             <Route path="/faceid" element={<ProtectedRoute><FaceId /></ProtectedRoute>} />
             <Route path="/faceid/cartes" element={<ProtectedRoute><FaceIdCartes /></ProtectedRoute>} />
             <Route path="/faceid/cartes/:uid" element={<ProtectedRoute><FaceIdCartes /></ProtectedRoute>} />
