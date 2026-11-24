@@ -5,18 +5,48 @@ import './fonts.css';
 import './AventCardArt.css';
 import Godemichet from './Godemichet';
 
-/** Le nœud du cadeau, posé en travers de l'objet au dos de la carte. */
+/**
+ * Le nœud du cadeau, posé en travers de l'objet au dos de la carte.
+ *
+ * Un vrai ruban de satin n'est pas une forme plate : chaque boucle montre
+ * sa face intérieure, plus sombre, et retient un trait de lumière sur son
+ * arête. C'est ce qui sépare un nœud d'un papillon découpé dans du papier.
+ */
 function Noeud() {
   return (
-    <svg className="av-noeud" viewBox="0 0 220 90" aria-hidden="true">
-      <path d="M0 48h220v16H0z" fill="#e8403a" />
-      <path d="M0 48h220v5H0z" fill="rgba(255,255,255,0.25)" />
-      <path d="M110 56 60 28c-14-8-26 2-24 14 2 11 16 16 30 16z" fill="#ff5a4e" />
-      <path d="M110 56 160 28c14-8 26 2 24 14-2 11-16 16-30 16z" fill="#ff5a4e" />
-      <path d="M110 56 92 86h14l10-20z" fill="#d8352f" />
-      <path d="M110 56 128 86h-14l-10-20z" fill="#d8352f" />
-      <circle cx="110" cy="56" r="11" fill="#e8403a" />
-      <circle cx="106" cy="52" r="4" fill="rgba(255,255,255,0.35)" />
+    <svg className="av-noeud" viewBox="0 0 220 120" aria-hidden="true">
+      {/* Le ruban qui ceinture : il traverse de bord à bord, sinon le nœud
+          est posé sur l'objet au lieu de l'entourer. */}
+      <path d="M0 45h220v22H0z" fill="#d8352f" />
+      <path d="M0 45h220v7H0z" fill="rgba(255,255,255,0.26)" />
+      <path d="M0 63h220v4H0z" fill="rgba(0,0,0,0.25)" />
+
+      {/* Les pans qui retombent, coupés en V au bout comme un vrai ruban. */}
+      <g fill="#c22f28">
+        <path d="M100 62c-8 18-18 32-34 45l12-9 4 14c16-13 28-32 32-46z" />
+        <path d="M120 62c8 18 18 32 34 45l-12-9-4 14c-16-13-28-32-32-46z" />
+      </g>
+      <path d="M100 62c-6 14-14 26-24 37" stroke="rgba(255,255,255,0.18)" strokeWidth="3" fill="none" strokeLinecap="round" />
+
+      {/* Les deux boucles, en goutte : elles sortent du nœud, montent et y
+          reviennent. La face intérieure, plus sombre, se voit sous la
+          boucle — sans elle, le ruban est un triangle découpé. */}
+      <g>
+        <path d="M105 47C88 26 58 14 42 24 28 33 32 50 52 58c20 8 44 4 54-2z" fill="#ff5a4e" />
+        <path d="M106 56c-12 5-34 8-52 2-10-3-16-9-15-15 2 9 13 13 27 15 14 2 30 1 40-2z" fill="rgba(0,0,0,0.3)" />
+        <path d="M100 46C84 29 60 20 46 26" stroke="rgba(255,255,255,0.34)" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+
+        <path d="M115 47c17-21 47-33 63-23 14 9 10 26-10 34-20 8-44 4-54-2z" fill="#ff5a4e" />
+        <path d="M114 56c12 5 34 8 52 2 10-3 16-9 15-15-2 9-13 13-27 15-14 2-30 1-40-2z" fill="rgba(0,0,0,0.3)" />
+        <path d="M120 46c16-17 40-26 54-20" stroke="rgba(255,255,255,0.34)" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+      </g>
+
+      {/* Le cœur du nœud : un bout de ruban enroulé et serré, pas une
+          pastille — d'où les deux plis qui le pincent. */}
+      <rect x="99" y="42" width="22" height="28" rx="9" fill="#e8403a" />
+      <path d="M103 46c-2 7-2 15 0 21" stroke="rgba(0,0,0,0.24)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M117 46c2 7 2 15 0 21" stroke="rgba(0,0,0,0.24)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M105 47c3-2 7-2 10 0" stroke="rgba(255,255,255,0.36)" strokeWidth="3" fill="none" strokeLinecap="round" />
     </svg>
   );
 }
