@@ -249,65 +249,77 @@ export default function Profile() {
   if (loading || progressLoading) return <div className="page loading"><Loader /></div>;
 
   return (
-    <div className="page">
-      <header className="page-header">
-        {!isOwnProfile && (
-          <button className="icon-btn" onClick={() => navigate(-1)}>
-            <ArrowLeft size={20} />
-          </button>
-        )}
-        <h1>{isOwnProfile ? 'Mon profil' : 'Profil'}</h1>
-        <SeasonalBadge compact />
-      </header>
-
-      <div className="profile-header-card">
-        <div
-          className={`profile-avatar ${avatarCard?.image ? 'has-image' : ''} ${isOwnProfile ? 'editable' : ''}`}
-          onClick={isOwnProfile ? () => setShowAvatarPicker(true) : undefined}
-        >
-          {avatarCard?.image ? (
-            <img src={avatarCard.image} alt={getCardDisplayName(avatarCard)} className="profile-avatar-img" />
-          ) : (
-            (displayName || '?')[0].toUpperCase()
+    <div className="page profil">
+      {/* Le bandeau remplace l'en-tête et la carte de profil, qui disaient la
+          même chose l'une sous l'autre : « Mon profil », puis le pseudo au
+          centre d'un cadre. L'avatar passe à côté du nom plutôt qu'au-dessus
+          — centré, il imposait une carte haute pour trois lignes. */}
+      <header className="pro-tete">
+        <div className="pro-tete-fond" />
+        <div className="pro-tete-contenu">
+          {!isOwnProfile && (
+            <button className="pro-retour" onClick={() => navigate(-1)} aria-label="Revenir">
+              <ArrowLeft size={20} />
+            </button>
           )}
-          {isOwnProfile && <span className="profile-avatar-edit">Modifier</span>}
-        </div>
-        {editingName ? (
-          <div className="profile-name-edit">
-            <input
-              type="text"
-              className="profile-name-input"
-              value={nameDraft}
-              maxLength={MAX_DISPLAY_NAME}
-              autoFocus
-              onChange={(e) => setNameDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') saveName();
-                if (e.key === 'Escape') setEditingName(false);
-              }}
-            />
-            <div className="profile-name-actions">
-              <button className="secondary-btn small" onClick={() => setEditingName(false)}>
-                Annuler
-              </button>
-              <button className="primary-btn small" onClick={saveName} disabled={savingName}>
-                {savingName ? '...' : 'Enregistrer'}
-              </button>
+
+          <div className="pro-identite">
+            <div
+              className={`profile-avatar ${avatarCard?.image ? 'has-image' : ''} ${isOwnProfile ? 'editable' : ''}`}
+              onClick={isOwnProfile ? () => setShowAvatarPicker(true) : undefined}
+            >
+              {avatarCard?.image ? (
+                <img src={avatarCard.image} alt={getCardDisplayName(avatarCard)} className="profile-avatar-img" />
+              ) : (
+                (displayName || '?')[0].toUpperCase()
+              )}
+              {isOwnProfile && <span className="profile-avatar-edit">Modifier</span>}
             </div>
-            {nameError && <span className="profile-name-error">{nameError}</span>}
+
+            <div className="pro-identite-texte">
+              {editingName ? (
+                <div className="profile-name-edit">
+                  <input
+                    type="text"
+                    className="profile-name-input"
+                    value={nameDraft}
+                    maxLength={MAX_DISPLAY_NAME}
+                    autoFocus
+                    onChange={(e) => setNameDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveName();
+                      if (e.key === 'Escape') setEditingName(false);
+                    }}
+                  />
+                  <div className="profile-name-actions">
+                    <button className="secondary-btn small" onClick={() => setEditingName(false)}>
+                      Annuler
+                    </button>
+                    <button className="primary-btn small" onClick={saveName} disabled={savingName}>
+                      {savingName ? '...' : 'Enregistrer'}
+                    </button>
+                  </div>
+                  {nameError && <span className="profile-name-error">{nameError}</span>}
+                </div>
+              ) : (
+                <>
+                  <span className="pro-kicker">{isOwnProfile ? 'Mon profil' : 'Profil'}</span>
+                  <h1 className="profile-name">
+                    {displayName}
+                    {isOwnProfile && (
+                      <button className="profile-name-edit-btn" onClick={startEditName} aria-label="Modifier le pseudo">
+                        <Pencil size={14} />
+                      </button>
+                    )}
+                  </h1>
+                  <span className="profile-cards-count">{uniqueCards.length} cartes</span>
+                </>
+              )}
+            </div>
           </div>
-        ) : (
-          <h2 className="profile-name">
-            {displayName}
-            {isOwnProfile && (
-              <button className="profile-name-edit-btn" onClick={startEditName} aria-label="Modifier le pseudo">
-                <Pencil size={14} />
-              </button>
-            )}
-          </h2>
-        )}
-        <span className="profile-cards-count">{uniqueCards.length} cartes</span>
-      </div>
+          <SeasonalBadge compact />
+        </div>
+      </header>
 
       {showAvatarPicker && (
         <div className="avatar-picker-overlay" onClick={() => setShowAvatarPicker(false)}>
