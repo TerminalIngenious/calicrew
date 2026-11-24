@@ -291,6 +291,25 @@ export default function Avent() {
         </div>
       </section>
 
+      {/* Le crédit de la seule photo du lot qui en demande un : celle de
+          Manuel Ferrara vient de Wikimedia Commons, sous une licence qui
+          oblige à nommer le photographe et à laisser la même licence sur
+          l'image recadrée. */}
+      <p className="avt-credit">
+        Photo de Manuel Ferrara © Glenn Francis,{' '}
+        <a href="https://www.pacificprodigital.com" target="_blank" rel="noreferrer noopener">
+          PacificProDigital.com
+        </a>
+        , recadrée, sous licence{' '}
+        <a
+          href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          CC BY-SA 4.0
+        </a>.
+      </p>
+
       {/* La révélation : la carte arrive seule au milieu de l'écran. */}
       {revelee && (
         <div className="avt-revele" onClick={() => setRevelee(null)}>

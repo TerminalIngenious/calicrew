@@ -73,7 +73,7 @@ const VIVIER: [string, string, RareteAvent][] = [
   ['gatouzz', 'Gatouzz', 'rare'],
   ['tiffany-leidi', 'Tiffany Leidi', 'rare'],
   ['abella-danger', 'Abella Danger', 'epique'],
-  ['lana-rhodes', 'Lana Rhodes', 'legendaire'],
+  ['lana-rhodes', 'Lana Rhoades', 'legendaire'],
   ['ad-laurent', 'Ad Laurent', 'rare'],
   ['angel-heaven', 'Angel Heaven', 'commune'],
   ['manoah-la-branche', 'Manoah La Branche', 'rare'],

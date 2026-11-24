@@ -577,3 +577,19 @@
 /* Le sapin de l'entrée, dessiné plutôt qu'emprunté à une fonte d'icônes :
    aucune n'a de sapin décoré, et c'est la décoration qui fait Noël. */
 .avt-sapin { flex-shrink: 0; width: 34px; height: 44px; }
+
+/* Le crédit photo : présent parce qu'il est obligatoire, discret parce que
+   ce n'est pas lui qu'on vient lire. */
+.avt-credit {
+  margin: 0 0 1.4rem;
+  font-size: 0.66rem;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.avt-credit a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
