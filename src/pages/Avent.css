@@ -205,109 +205,282 @@
    Cinq colonnes, vingt-cinq cases : le calendrier est un carré, et c'est
    exactement ce qu'on attend d'un calendrier de l'avent. */
 
+/* ══ Le tableau ══
+
+   Un calendrier de supermarché : un carton imprimé, et vingt-cinq portes
+   découpées dedans. Le décor est donc SOUS les portes et non autour — c'est
+   ce qu'on vient découvrir en ouvrant, et un décor qu'on voit déjà n'a plus
+   rien à révéler. */
+.avt-tableau {
+  position: relative;
+  padding: 0.8rem 0.85rem 0.95rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(78, 132, 196, 0.3) 0%, transparent 62%),
+    linear-gradient(170deg, #16233f 0%, #0d1526 58%, #121c33 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 26px rgba(0, 0, 0, 0.5);
+}
+
+.avt-tableau-tete {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  padding: 0 0.15rem;
+}
+
+.avt-tableau-marque {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.avt-tableau-annee {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--avt-or, #ffd60a);
+}
+
+/* ── Le décor imprimé ──
+
+   Dix motifs posés à la main plutôt qu'une trame répétée : une trame se
+   voit comme un papier peint, et on cherche la régularité au lieu de
+   regarder. Chacun est un masque teinté, donc une seule forme sert à toutes
+   les tailles. */
+.avt-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.avt-dec {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.5;
+}
+
+.avt-dec-sapin {
+  top: 12%; left: -3%; width: 72px; height: 94px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 44'%3E%3Cpath d='M17 2 22 15H12z' fill='%232f9e5a'/%3E%3Cpath d='M17 11 24 26H10z' fill='%2338b368'/%3E%3Cpath d='M17 21 27 38H7z' fill='%232f9e5a'/%3E%3Crect x='14.5' y='38' width='5' height='5' rx='1.4' fill='%235a3a22'/%3E%3Ccircle cx='17' cy='1.8' r='1.9' fill='%23ffd60a'/%3E%3C/svg%3E");
+}
+
+.avt-dec-sapin2 {
+  bottom: 6%; right: -2%; width: 58px; height: 76px; opacity: 0.38;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 44'%3E%3Cpath d='M17 2 22 15H12z' fill='%232f9e5a'/%3E%3Cpath d='M17 11 24 26H10z' fill='%2338b368'/%3E%3Cpath d='M17 21 27 38H7z' fill='%232f9e5a'/%3E%3Crect x='14.5' y='38' width='5' height='5' rx='1.4' fill='%235a3a22'/%3E%3C/svg%3E");
+}
+
+/* L'emblème de l'event, deux fois, à la façon d'un motif de papier cadeau :
+   assez gros pour qu'on le reconnaisse, assez pâle pour qu'il reste un
+   fond. */
+.avt-dec-god {
+  top: 30%; right: 4%; width: 46px; height: 92px; opacity: 0.42;
+  transform: rotate(18deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cg fill='%23ffd60a'%3E%3Ccircle cx='18' cy='104' r='14'/%3E%3Ccircle cx='42' cy='104' r='14'/%3E%3Crect x='16' y='14' width='28' height='86' rx='14'/%3E%3Cellipse cx='30' cy='18' rx='14' ry='16'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.avt-dec-god2 {
+  bottom: 18%; left: 8%; width: 34px; height: 68px; opacity: 0.3;
+  transform: rotate(-24deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cg fill='%23ff6ec7'%3E%3Ccircle cx='18' cy='104' r='14'/%3E%3Ccircle cx='42' cy='104' r='14'/%3E%3Crect x='16' y='14' width='28' height='86' rx='14'/%3E%3Cellipse cx='30' cy='18' rx='14' ry='16'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.avt-dec-cadeau {
+  top: 58%; left: 44%; width: 54px; height: 54px; opacity: 0.36;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='4' y='14' width='32' height='22' rx='2' fill='%23e8403a'/%3E%3Crect x='17' y='14' width='6' height='22' fill='%23ffd60a'/%3E%3Crect x='2' y='10' width='36' height='7' rx='1.6' fill='%23ff5a4e'/%3E%3Crect x='17' y='10' width='6' height='7' fill='%23ffd60a'/%3E%3Cpath d='M20 10C14 10 10 4 14 3s6 4 6 7c0-3 2-8 6-7s0 7-6 7z' fill='%23ffd60a'/%3E%3C/svg%3E");
+}
+
+.avt-dec-canne {
+  top: 6%; right: 26%; width: 34px; height: 52px; opacity: 0.4;
+  transform: rotate(14deg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 40'%3E%3Cpath d='M9 38V14a5 5 0 0 1 10 0' stroke='%23ffffff' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M9 38V14a5 5 0 0 1 10 0' stroke='%23e8403a' stroke-width='6' fill='none' stroke-linecap='round' stroke-dasharray='4 8'/%3E%3C/svg%3E");
+}
+
+.avt-dec-etoile,
+.avt-dec-etoile2 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23ffd60a'/%3E%3C/svg%3E");
+}
+
+.avt-dec-etoile { top: 4%; left: 30%; width: 26px; height: 26px; opacity: 0.55; }
+.avt-dec-etoile2 { bottom: 30%; right: 32%; width: 18px; height: 18px; opacity: 0.4; }
+
+.avt-dec-flocon,
+.avt-dec-flocon2 {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg stroke='%23cfe6ff' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7'/%3E%3Cpath d='M12 6l-2.5-2.5M12 6l2.5-2.5M12 18l-2.5 2.5M12 18l2.5 2.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.avt-dec-flocon { top: 44%; left: 18%; width: 28px; height: 28px; opacity: 0.5; }
+.avt-dec-flocon2 { top: 74%; right: 16%; width: 20px; height: 20px; opacity: 0.4; }
+
+/* ── Les portes ── */
+
 .avt-grille {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
 
 .avt-case {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.15rem;
   aspect-ratio: 1;
-  padding: 0.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(231, 243, 236, 0.35);
+  padding: 0;
+  border: 0;
+  background: none;
   font: inherit;
   cursor: default;
-  overflow: hidden;
+  /* La profondeur du battant. Sans elle, le volet ne tourne pas : il
+     s'aplatit. */
+  perspective: 420px;
 }
 
-.avt-case-jour {
-  font-size: 1.05rem;
+/* La niche : le trou dans le carton, et ce qu'il y a au fond. */
+.avt-niche {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(160deg, #060a12, #0d1424);
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.9);
+}
+
+.avt-niche-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.avt-niche-nom {
+  position: relative;
+  width: 100%;
+  padding: 0.5rem 0.15rem 0.15rem;
+  font-size: 0.56rem;
   font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(to top, rgba(4, 6, 11, 0.95) 40%, transparent);
+  border-bottom: 2px solid var(--teinte, #8e8e93);
+}
+
+.avt-niche-cadenas { opacity: 0.3; }
+
+/* Le volet. Charnière à gauche, comme les portes en carton : elles se
+   plient toutes du même côté, et c'est à ça qu'on les reconnaît. */
+.avt-volet {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.05, 0.2, 1);
+  backface-visibility: hidden;
+}
+
+.avt-volet-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  /* Le carton : un grain très fin, deux arêtes de lumière, une ombre
+     portée sur la droite — le côté opposé à la charnière. */
+  background:
+    repeating-linear-gradient(46deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 5px),
+    linear-gradient(150deg, #2b3a5c 0%, #1b2742 54%, #23304e 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset -2px 0 4px rgba(0, 0, 0, 0.45),
+    0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.avt-volet-jour {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: rgba(231, 243, 236, 0.5);
   font-variant-numeric: tabular-nums;
 }
 
-.avt-case-cadenas { opacity: 0.45; }
-
-/* La case du jour : la seule qui bouge, pour qu'on la trouve sans chercher. */
-.avt-case.dispo {
-  border-color: rgba(255, 214, 10, 0.55);
-  background: linear-gradient(145deg, rgba(232, 64, 58, 0.35), rgba(255, 214, 10, 0.14));
-  color: #fff;
-  cursor: pointer;
+/* La porte du jour : dorée, et la seule qui bouge, pour qu'on la trouve
+   sans chercher. */
+.avt-case.dispo .avt-volet-face {
+  background:
+    repeating-linear-gradient(46deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
+    linear-gradient(150deg, #b8341f 0%, #7d1f12 52%, #a52d1b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 0 0 1px rgba(255, 214, 10, 0.5),
+    inset -2px 0 4px rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
-.avt-case.du-jour {
-  animation: avtAppel 2.4s ease-in-out infinite;
+.avt-case.dispo { cursor: pointer; }
+.avt-case.dispo .avt-volet-jour { color: #fff; }
+
+.avt-case.du-jour .avt-volet {
+  animation: avtAppel 2.6s ease-in-out infinite;
 }
 
+/* Le battement entrouvre la porte de quelques degrés : c'est plus juste
+   qu'un clignotement, et ça dit ce qu'il va se passer. */
 @keyframes avtAppel {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 214, 10, 0.35); }
-  50% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(255, 214, 10, 0); }
+  0%, 100% { transform: rotateY(0deg); }
+  50% { transform: rotateY(-13deg); }
 }
 
-.avt-case.ouverte {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: var(--avt-carte);
-  color: rgba(231, 243, 236, 0.8);
-  cursor: pointer;
+/* Ouverte : le volet reste accroché à sa charnière, rabattu vers la
+   gauche. On ne le fait pas disparaître — une porte ne disparaît pas. */
+.avt-case.ouverte { cursor: pointer; }
+
+.avt-case.ouverte .avt-volet {
+  transform: rotateY(-118deg);
 }
 
-/* Le nom tient sur deux lignes et se coupe proprement : certains font
-   dix-sept caractères et la case en fait soixante de large. */
-.avt-case-nom {
-  padding: 0 0.15rem;
-  font-size: 0.56rem;
-  line-height: 1.15;
-  font-weight: 600;
-  text-align: center;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.avt-case.ouverte .avt-volet-face {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 2px 0 10px rgba(0, 0, 0, 0.65);
+  filter: brightness(0.62);
 }
 
-.avt-case-pastille {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--teinte, #8e8e93);
-  box-shadow: 0 0 7px 1px var(--teinte, #8e8e93);
-}
-
-/* Le 25 prend toute la largeur, seul sur sa ligne : la dernière case doit se
-   voir depuis le 1er décembre, et une vingt-cinquième case de la taille des
-   autres se perdait dans le coin d'une grille incomplète. */
+/* La case de Noël : toute la largeur, sur sa propre ligne. */
 .avt-case.noel {
   grid-column: 1 / -1;
-  flex-direction: row;
-  gap: 0.5rem;
   aspect-ratio: auto;
-  min-height: 3.4rem;
-  border-color: rgba(255, 214, 10, 0.45);
-  background: linear-gradient(135deg, rgba(255, 214, 10, 0.12), rgba(232, 64, 58, 0.12));
+  min-height: 3.6rem;
 }
 
-.avt-case.noel .avt-case-jour { font-size: 1.3rem; }
+.avt-case.noel .avt-volet-jour { font-size: 1.3rem; color: var(--avt-or, #ffd60a); }
 
-/* « Noël » écrit en toutes lettres sur la dernière case, tant qu'elle n'est
-   pas ouverte : c'est la seule qui mérite son nom. */
-.avt-case.noel:not(.ouverte) .avt-case-jour::after {
+.avt-case.noel .avt-volet-face {
+  background:
+    repeating-linear-gradient(46deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
+    linear-gradient(135deg, #8d6a07 0%, #3c2d05 50%, #7a5c06 100%);
+}
+
+/* « Noël » écrit en toutes lettres sur la dernière porte, tant qu'elle
+   n'est pas ouverte : c'est la seule qui mérite son nom. */
+.avt-case.noel:not(.ouverte) .avt-volet-jour::after {
   content: ' décembre — Noël';
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
-.avt-case.noel .avt-case-nom { font-size: 0.8rem; -webkit-line-clamp: 1; }
+.avt-case.noel .avt-niche-nom { font-size: 0.72rem; }
 
 .rarete-legendaire { --teinte: #ffd60a; }
 .rarete-epique { --teinte: #bf5af2; }
@@ -523,7 +696,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .avt-case.dispo { animation: none; }
+  .avt-case.du-jour .avt-volet { animation: none; }
   .avt-revele-carte { animation-duration: 0.01s; }
 }
 

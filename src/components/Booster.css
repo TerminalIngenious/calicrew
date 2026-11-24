@@ -1,0 +1,365 @@
+/*
+ * Le booster de l'event, et son ouverture.
+ *
+ * Tout le relief est en CSS : un sachet est un objet brillant et froissé,
+ * et une image plate aurait fait autocollant. D'où trois calques — le fond
+ * métallisé, l'irisation, la bande de lumière — plus un pli vertical et des
+ * bords éclairés. Seule la bande de lumière est animée : si tout bouge,
+ * plus rien ne brille.
+ */
+
+.bst-ecran {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 1.5rem;
+  background: radial-gradient(60% 50% at 50% 45%, rgba(26, 44, 92, 0.5) 0%, rgba(0, 0, 0, 0.93) 70%);
+  animation: bstFondu 0.35s ease-out;
+}
+
+@keyframes bstFondu {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bst-scene {
+  position: relative;
+  width: min(300px, 78vw);
+  aspect-ratio: 3 / 4.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+.bst {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  --bst-or: #ffd60a;
+  animation: bstArrivee 0.5s cubic-bezier(0.2, 1.1, 0.4, 1);
+}
+
+@keyframes bstArrivee {
+  from { transform: translateY(14%) scale(0.82) rotate(-4deg); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Le sachet flotte légèrement tant qu'il est fermé : un objet parfaitement
+   immobile au milieu d'un écran noir a l'air d'une image, pas d'un objet. */
+.bst:not(.bst-ouvert) .bst-corps {
+  animation: bstFlotte 4.5s ease-in-out infinite;
+}
+
+@keyframes bstFlotte {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50% { transform: translateY(-1.5%) rotate(0.6deg); }
+}
+
+/* ── Le corps ── */
+
+.bst-corps {
+  position: absolute;
+  inset: 11% 0 0;
+  overflow: hidden;
+  border-radius: 10px 10px 14px 14px;
+  background:
+    linear-gradient(100deg,
+      #050a1c 0%, #16316f 11%, #03060f 24%, #2b54b6 37%,
+      #060b1c 50%, #1d3a7d 63%, #04070f 78%, #203f8c 90%, #050a1c 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -14px 26px rgba(0, 0, 0, 0.55),
+    0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* L'irisation : un conique très peu opaque, qui donne au métal ses teintes
+   changeantes sans colorer le sachet. */
+.bst-iris {
+  position: absolute;
+  inset: 0;
+  opacity: 0.13;
+  background: conic-gradient(
+    from 210deg at 35% 20%,
+    #ff6ec7, #ffd60a, #64d2ff, #30d158, #bf5af2, #ff6ec7);
+  mix-blend-mode: screen;
+}
+
+/* La bande de lumière qui balaie le sachet. */
+.bst-lueur {
+  position: absolute;
+  inset: -30% -60%;
+  background: linear-gradient(74deg,
+    transparent 44%, rgba(255, 255, 255, 0.34) 48.5%, rgba(255, 255, 255, 0.07) 51%, transparent 56%);
+  animation: bstBalaye 5s ease-in-out infinite;
+}
+
+@keyframes bstBalaye {
+  0%, 100% { transform: translateX(-34%); }
+  50% { transform: translateX(34%); }
+}
+
+/* Le pli vertical : c'est lui qui fait qu'on lit un sachet et pas une
+   carte. Deux arêtes de lumière de part et d'autre d'une ombre fine. */
+.bst-pli {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(0, 0, 0, 0.3) 0%, transparent 7%,
+    transparent 46%, rgba(255, 255, 255, 0.14) 49.4%,
+    rgba(0, 0, 0, 0.3) 50.6%, transparent 54%,
+    transparent 93%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.bst-contenu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.bst-embleme {
+  width: 52px;
+  height: 104px;
+  filter:
+    drop-shadow(0 2px 0 rgba(0, 0, 0, 0.5))
+    drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+}
+
+.bst-titre {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.bst-titre em {
+  font-style: normal;
+  color: var(--bst-or);
+}
+
+/* Le bandeau doré : la seule zone pleine du sachet, pour que le mot
+   « booster » se lise à travers tous les reflets. */
+.bst-bandeau {
+  padding: 0.22rem 0.7rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1a1403;
+  background: linear-gradient(180deg, #ffe877, var(--bst-or) 55%, #c79d00);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.bst-pied {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.bst-neige {
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: -6px;
+  height: 22px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='23'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M140 23 H0 V14 C12 14 14 5 28 5 C41 5 38 15 50 15 C62 15 59 7 72 7 C85 7 80 16 94 16 C107 16 104 8 116 8 C128 8 130 14 140 14 Z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 120px 22px;
+  opacity: 0.9;
+}
+
+/* ── La bande du haut, celle qu'on arrache ── */
+
+.bst-bande {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 13%;
+  border-radius: 12px 12px 0 0;
+  /* Le sertissage : des dents fines sur toute la largeur, comme la pince
+     qui ferme un vrai sachet. */
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(0, 0, 0, 0.28) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, #d7dde8 0%, #8d9ab2 48%, #e6ebf3 52%, #76839c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 10px rgba(0, 0, 0, 0.45);
+  transform-origin: left bottom;
+  transform: rotate(calc(var(--coupe, 0) * -2.5deg)) translateY(calc(var(--coupe, 0) * -6%));
+}
+
+.bst-bande-fond {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bst-consigne {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(20, 28, 48, 0.78);
+  opacity: calc(1 - var(--coupe, 0) * 2);
+}
+
+/* La déchirure elle-même : une bande sombre à bord dentelé qui grandit
+   depuis la gauche, au rythme du doigt. */
+.bst-dechirure {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 58%;
+  width: calc(var(--coupe, 0) * 102%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.45));
+  clip-path: polygon(
+    0 0, 100% 0, 100% 100%,
+    96% 42%, 92% 100%, 88% 38%, 84% 100%, 80% 46%, 76% 100%,
+    72% 40%, 68% 100%, 64% 44%, 60% 100%, 56% 38%, 52% 100%,
+    48% 46%, 44% 100%, 40% 40%, 36% 100%, 32% 44%, 28% 100%,
+    24% 38%, 20% 100%, 16% 46%, 12% 100%, 8% 40%, 4% 100%, 0 44%);
+}
+
+/* Le doigt qui montre le geste, tant que personne ne l'a fait. */
+.bst-doigt {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, rgba(255, 255, 255, 0.2) 70%, transparent);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  opacity: calc(1 - var(--coupe, 0) * 3);
+  animation: bstDoigt 2.6s ease-in-out infinite;
+}
+
+@keyframes bstDoigt {
+  0%, 12% { transform: translateX(0); opacity: 0; }
+  22% { opacity: 1; }
+  72% { transform: translateX(560%); opacity: 1; }
+  86%, 100% { transform: translateX(560%); opacity: 0; }
+}
+
+/* La zone sensible déborde la bande : viser 13 % de hauteur au doigt, sur
+   un téléphone, c'est viser 40 px — on en donne le double. */
+.bst-zone {
+  position: absolute;
+  inset: -40% 0 -30%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.bst-zone:active { cursor: grabbing; }
+
+/* ── L'ouverture ── */
+
+.bst-ouvert .bst-bande {
+  animation: bstEnvole 0.75s cubic-bezier(0.3, 0, 0.6, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes bstEnvole {
+  to { transform: translate(34%, -230%) rotate(26deg); opacity: 0; }
+}
+
+.bst-ouvert .bst-corps {
+  animation: bstTombe 0.9s cubic-bezier(0.4, 0, 0.3, 1) 0.1s forwards;
+}
+
+@keyframes bstTombe {
+  to { transform: translateY(26%) scale(0.9) rotate(3deg); opacity: 0; }
+}
+
+/* L'éclat qui sort du sachet au moment où il cède. */
+.bst-eclair {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+}
+
+.bst-ouvert .bst-eclair {
+  animation: bstEclair 0.7s ease-out 0.15s forwards;
+}
+
+@keyframes bstEclair {
+  0% { opacity: 0; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9); }
+  25% { opacity: 1; box-shadow: 0 0 60px 30px rgba(255, 240, 180, 0.95); }
+  100% { opacity: 0; box-shadow: 0 0 220px 150px rgba(255, 214, 10, 0); }
+}
+
+/* La carte monte du sachet et vient se poser au milieu. */
+.bst-carte {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bstSortie 0.85s cubic-bezier(0.2, 1, 0.3, 1) 0.28s backwards;
+}
+
+.bst-carte > * { width: 100%; }
+
+@keyframes bstSortie {
+  from { transform: translateY(34%) scale(0.74); opacity: 0; filter: brightness(2.4); }
+  to { transform: none; opacity: 1; filter: none; }
+}
+
+.bst-continuer,
+.bst-secours {
+  padding: 0.75rem 1.6rem;
+  border: 0;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0a0e16;
+  background: #fff;
+  cursor: pointer;
+  animation: bstFondu 0.4s ease-out;
+}
+
+.bst-secours {
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bst,
+  .bst-lueur,
+  .bst-doigt,
+  .bst:not(.bst-ouvert) .bst-corps { animation: none; }
+  .bst-carte { animation-duration: 0.01s; }
+}

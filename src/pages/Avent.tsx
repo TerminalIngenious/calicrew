@@ -10,6 +10,7 @@ import { questValue } from '../lib/quests';
 import Loader from '../components/Loader';
 import BottomNav from '../components/BottomNav';
 import AventCardArt from '../components/cardArt/AventCardArt';
+import Booster from '../components/Booster';
 import RankBadgeIcon from '../components/RankBadgeIcon';
 import {
   BADGE_ID, CARTES, CASES, DEBUT, SEMAINES, TOTAL_CARTES,
@@ -36,8 +37,8 @@ export default function Avent() {
   const { progress, loading } = useUserProgress(user?.uid);
   const { sessions } = useUserSessions();
   const [occupe, setOccupe] = useState(false);
-  /** La carte qui vient de sortir d'une case, montrée en grand. */
-  const [revelee, setRevelee] = useState<{ carte: CarteAvent; jour?: number } | null>(null);
+  /** La carte qui vient de sortir, montrée dans son sachet. */
+  const [booster, setBooster] = useState<{ carte: CarteAvent; jour?: number } | null>(null);
   const [apercu, setApercu] = useState<CarteAvent | null>(null);
   // L'heure lue une fois à l'ouverture : relue à chaque rendu, le même écran
   // dirait autre chose selon le moment où React décide de le recalculer.
@@ -82,7 +83,9 @@ export default function Avent() {
       // s'éteint pendant la révélation.
       await updateDoc(doc(db, 'userProgress', user.uid), { avent: apres });
       const carte = carteParSlug(slug);
-      if (carte) setRevelee({ carte, jour });
+      // Le sachet arrive une fois le volet rabattu : les deux en même temps,
+      // on ne voit ni l'un ni l'autre.
+      if (carte) setTimeout(() => setBooster({ carte, jour }), 620);
     } catch (err) {
       console.error('Ouverture impossible :', err);
     }
@@ -101,7 +104,7 @@ export default function Avent() {
     try {
       await updateDoc(doc(db, 'userProgress', user.uid), { avent: apres });
       const carte = carteParSlug(slug);
-      if (carte) setRevelee({ carte });
+      if (carte) setBooster({ carte });
     } catch (err) {
       console.error('Ouverture impossible :', err);
     }
@@ -197,36 +200,68 @@ export default function Avent() {
             : 'Reviens demain pour la suivante.'}
         </p>
 
-        <div className="avt-grille">
-          {Array.from({ length: CASES }, (_, i) => i + 1).map((jour) => {
-            const ouverte = av.portes.includes(jour);
-            const dispo = ouvert && jour <= jourMax && !ouverte;
-            // Seule la case du jour s'anime. Quatorze cases en retard qui
-            // battent toutes ensemble, ce n'est plus un appel, c'est une
-            // alarme — et on ne sait plus laquelle est celle d'aujourd'hui.
-            const duJour = dispo && jour === jourMax;
-            const carte = ouverte ? carteParSlug(calendrier[jour - 1]) : undefined;
-            return (
-              <button
-                key={jour}
-                className={`avt-case ${ouverte ? 'ouverte' : ''} ${dispo ? 'dispo' : ''} ${duJour ? 'du-jour' : ''} ${jour === CASES ? 'noel' : ''}`}
-                disabled={!dispo && !ouverte}
-                onClick={() => (ouverte && carte ? setApercu(carte) : ouvrePorte(jour))}
-              >
-                {ouverte && carte ? (
-                  <>
-                    <span className={`avt-case-pastille rarete-${carte.rarete}`} />
-                    <span className="avt-case-nom">{carte.nom}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="avt-case-jour">{jour}</span>
-                    {!dispo && <Lock size={11} className="avt-case-cadenas" />}
-                  </>
-                )}
-              </button>
-            );
-          })}
+        {/* Le tableau : un vrai calendrier de supermarché, avec son décor
+            imprimé et ses vingt-cinq portes découpées dedans. Le décor est
+            sous les portes, pas autour : c'est lui qu'on découvre quand une
+            porte s'ouvre. */}
+        <div className="avt-tableau">
+          <div className="avt-tableau-tete">
+            <span className="avt-tableau-marque">Calendrier de l'avent</span>
+            <span className="avt-tableau-annee">2026</span>
+          </div>
+
+          <div className="avt-decor" aria-hidden="true">
+            <span className="avt-dec avt-dec-sapin" />
+            <span className="avt-dec avt-dec-sapin2" />
+            <span className="avt-dec avt-dec-god" />
+            <span className="avt-dec avt-dec-god2" />
+            <span className="avt-dec avt-dec-cadeau" />
+            <span className="avt-dec avt-dec-etoile" />
+            <span className="avt-dec avt-dec-etoile2" />
+            <span className="avt-dec avt-dec-canne" />
+            <span className="avt-dec avt-dec-flocon" />
+            <span className="avt-dec avt-dec-flocon2" />
+          </div>
+
+          <div className="avt-grille">
+            {Array.from({ length: CASES }, (_, i) => i + 1).map((jour) => {
+              const ouverte = av.portes.includes(jour);
+              const dispo = ouvert && jour <= jourMax && !ouverte;
+              // Seule la case du jour s'anime. Quatorze cases en retard qui
+              // battent toutes ensemble, ce n'est plus un appel, c'est une
+              // alarme — et on ne sait plus laquelle est celle d'aujourd'hui.
+              const duJour = dispo && jour === jourMax;
+              const carte = ouverte ? carteParSlug(calendrier[jour - 1]) : undefined;
+              return (
+                <button
+                  key={jour}
+                  className={`avt-case ${ouverte ? 'ouverte' : ''} ${dispo ? 'dispo' : ''} ${duJour ? 'du-jour' : ''} ${jour === CASES ? 'noel' : ''}`}
+                  disabled={!dispo && !ouverte}
+                  onClick={() => (ouverte && carte ? setApercu(carte) : ouvrePorte(jour))}
+                >
+                  {/* Le fond de la case : ce qu'il y a derrière la porte. */}
+                  <span className="avt-niche">
+                    {ouverte && carte ? (
+                      <>
+                        <img className="avt-niche-photo" src={carte.image} alt="" loading="lazy" />
+                        <span className={`avt-niche-nom rarete-${carte.rarete}`}>{carte.nom}</span>
+                      </>
+                    ) : (
+                      <Lock size={13} className="avt-niche-cadenas" />
+                    )}
+                  </span>
+
+                  {/* Le volet, charnière à gauche. Il pivote au lieu de
+                      disparaître : c'est le geste du calendrier en carton. */}
+                  <span className="avt-volet">
+                    <span className="avt-volet-face">
+                      <span className="avt-volet-jour">{jour}</span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -310,14 +345,12 @@ export default function Avent() {
         </a>.
       </p>
 
-      {/* La révélation : la carte arrive seule au milieu de l'écran. */}
-      {revelee && (
-        <div className="avt-revele" onClick={() => setRevelee(null)}>
-          <div className="avt-revele-carte" onClick={(e) => e.stopPropagation()}>
-            <AventCardArt carte={revelee.carte} jour={revelee.jour} retournable />
-            <button className="avt-revele-btn" onClick={() => setRevelee(null)}>Continuer</button>
-          </div>
-        </div>
+      {booster && (
+        <Booster
+          carte={booster.carte}
+          jour={booster.jour}
+          onFini={() => setBooster(null)}
+        />
       )}
 
       {apercu && (
