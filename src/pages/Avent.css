@@ -19,11 +19,21 @@
   --avt-trait: rgba(255, 214, 10, 0.2);
 
   position: relative;
+  color: #e7f3ec;
+}
+
+/* Le fond de l'event est posé sur le body, pas sur la page.
+ *
+ * .page est un contexte d'empilement à z-index 1 : tout ce qu'on peint
+ * dedans passe au-dessus du décor de Noël, y compris un calque en z-index
+ * négatif, qui reste prisonnier du contexte. Un fond plein écran peint là
+ * effaçait donc la guirlande, la neige et les sapins. Sur le body, il
+ * descend sous le décor, qui redevient visible. Avent.tsx pose l'attribut
+ * et le retire en partant. */
+:root[data-page="avent"] body {
   background:
     radial-gradient(90% 40% at 50% 0%, rgba(47, 158, 90, 0.16) 0%, transparent 70%),
-    var(--avt-fond);
-  color: #e7f3ec;
-  isolation: isolate;
+    #06120c;
 }
 
 /* ── En-tête ── */

@@ -73,6 +73,14 @@ export default function Avent() {
    * bonusDonne est ce qui empêche de le regagner en rouvrant la page.
    */
   const bonusEnvoye = useRef(false);
+  /* Le fond vert de l'event vit sur le body : peint sur la page, il
+     couvrirait le décor de Noël, qui est derrière elle. Retiré en partant,
+     sinon les autres pages le gardent. */
+  useEffect(() => {
+    document.documentElement.dataset.page = 'avent';
+    return () => { delete document.documentElement.dataset.page; };
+  }, []);
+
   useEffect(() => {
     if (!user || !progress || !complete) return;
     const aBadge = (progress.badges || []).some((b) => b.id === BADGE_ID);

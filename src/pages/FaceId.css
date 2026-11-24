@@ -20,10 +20,17 @@
   --fid-trait: rgba(182, 255, 0, 0.22);
 
   position: relative;
-  background: var(--fid-fond);
   color: #e9f6cd;
   isolation: isolate;
 }
+
+/* Le fond de l'event est posé sur le body, pas sur la page.
+ *
+ * .page est un contexte d'empilement à z-index 1 : un fond plein écran
+ * peint dedans passe au-dessus du décor de saison et efface la guirlande,
+ * la neige et les sapins. Sur le body il descend dessous. FaceId.tsx pose
+ * l'attribut et le retire en partant. */
+:root[data-page="faceid"] body { background: #0c1104; }
 
 /* ── En-tête ── */
 

@@ -34,6 +34,13 @@ function texteRestant(enCours: boolean, maintenant: number): string {
 }
 
 export default function FaceId() {
+  /* Le fond de l'event vit sur le body : peint sur la page, il couvrirait
+     le décor de saison, qui est derrière elle. */
+  useEffect(() => {
+    document.documentElement.dataset.page = 'faceid';
+    return () => { delete document.documentElement.dataset.page; };
+  }, []);
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const { progress, loading } = useUserProgress(user?.uid);

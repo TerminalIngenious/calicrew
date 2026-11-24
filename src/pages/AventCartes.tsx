@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -29,6 +29,14 @@ export default function AventCartes() {
   const cible = uid || user?.uid;
 
   const [apercu, setApercu] = useState<CarteAvent | null>(null);
+
+  /* Même fond que la page de l'event, et pour la même raison : posé sur la
+     page il couvrirait le décor de Noël, qui est derrière elle. */
+  useEffect(() => {
+    document.documentElement.dataset.page = 'avent';
+    return () => { delete document.documentElement.dataset.page; };
+  }, []);
+
   const { progress, loading } = useUserProgress(cible);
   const av = lis(progress?.avent);
 

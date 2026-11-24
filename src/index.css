@@ -7292,10 +7292,11 @@ body {
 .noel-decor {
   position: fixed;
   inset: 0;
-  /* Au-dessus des fonds de page — l'event a le sien, qui masquait tout le
-     décor — et en dessous de la barre du bas (20), pour que les sapins
-     sortent de derrière elle. */
-  z-index: 5;
+  /* Derrière le contenu, devant les fonds de page. À 5 le décor passait
+     par-dessus les cartes : un sapin mangeait la moitié de la dernière
+     séance de l'accueil. Les pages qui peignent leur propre fond plein
+     écran — l'event — le posent donc sous ce calque, pas au-dessus. */
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
 }
@@ -7396,6 +7397,14 @@ body {
  * moitié enterré, il ne dépasse que de la hauteur d'une cime, où il n'y a
  * jamais rien.
  */
+/* En décembre, le bas des pages recule : les sapins sont derrière le
+   contenu, et sans cette bande ils restent coincés sous la dernière carte.
+   Le décor ne doit jamais prendre la place du texte — mais il a droit à un
+   bout de sol. */
+:root[data-season="noel"] .page {
+  padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+}
+
 .noel-sapin {
   position: absolute;
   bottom: calc(var(--nav-height) - 34px);
