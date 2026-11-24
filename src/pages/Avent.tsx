@@ -15,8 +15,9 @@ import RankBadgeIcon from '../components/RankBadgeIcon';
 import {
   BADGE_ID, CARTES, CASES, DEBUT, SEMAINES, TOTAL_CARTES,
   badgeAvent, calendrierDe, carteParSlug, collectionComplete, enCours, jourOuvert,
-  lis, nbPossedees, quetesDeSemaine, semaineCourante, tireBooster,
+  lis, nbPossedees, quetesDeSemaine, semaineCourante, tireBooster, tireBoosterDore,
 } from '../lib/avent';
+import { estAdmin } from '../lib/admin';
 import type { CarteAvent } from '../lib/avent';
 import type { Quest } from '../types';
 import './Avent.css';
@@ -38,7 +39,7 @@ export default function Avent() {
   const { sessions } = useUserSessions();
   const [occupe, setOccupe] = useState(false);
   /** La carte qui vient de sortir, montrée dans son sachet. */
-  const [booster, setBooster] = useState<{ carte: CarteAvent; jour?: number } | null>(null);
+  const [booster, setBooster] = useState<{ carte: CarteAvent; jour?: number; dore?: boolean } | null>(null);
   const [apercu, setApercu] = useState<CarteAvent | null>(null);
   // L'heure lue une fois à l'ouverture : relue à chaque rendu, le même écran
   // dirait autre chose selon le moment où React décide de le recalculer.
@@ -55,19 +56,33 @@ export default function Avent() {
   const complete = collectionComplete(av);
   const semaine = semaineCourante(maintenant);
 
-  /** Le badge des vingt-cinq portes, posé à la seconde où la dernière s'ouvre. */
-  const badgeEnvoye = useRef(false);
+  /*
+   * Le badge des vingt-cinq portes, et le booster doré qui va avec, posés à
+   * la seconde où la dernière s'ouvre.
+   *
+   * Les deux dans la même écriture : séparés, un échec réseau entre les deux
+   * aurait laissé un badge sans récompense, ou l'inverse. Le drapeau
+   * bonusDonne est ce qui empêche de le regagner en rouvrant la page.
+   */
+  const bonusEnvoye = useRef(false);
   useEffect(() => {
     if (!user || !progress || !complete) return;
-    if ((progress.badges || []).some((b) => b.id === BADGE_ID)) return;
-    if (badgeEnvoye.current) return;
-    badgeEnvoye.current = true;
-    updateDoc(doc(db, 'userProgress', user.uid), { badges: arrayUnion(badgeAvent()) })
+    const aBadge = (progress.badges || []).some((b) => b.id === BADGE_ID);
+    if (aBadge && av.bonusDonne) return;
+    if (bonusEnvoye.current) return;
+    bonusEnvoye.current = true;
+    const maj: Record<string, unknown> = {};
+    if (!aBadge) maj.badges = arrayUnion(badgeAvent());
+    if (!av.bonusDonne) {
+      maj['avent.bonusDonne'] = true;
+      maj['avent.boostersOr'] = (av.boostersOr || 0) + 1;
+    }
+    updateDoc(doc(db, 'userProgress', user.uid), maj)
       .catch((err) => {
-        badgeEnvoye.current = false;
-        console.error('Badge avent impossible :', err);
+        bonusEnvoye.current = false;
+        console.error('Bonus avent impossible :', err);
       });
-  }, [user, progress, complete]);
+  }, [user, progress, complete, av.bonusDonne, av.boostersOr]);
 
   async function ouvrePorte(jour: number) {
     if (!user || occupe || jour > jourMax || av.portes.includes(jour)) return;
@@ -105,6 +120,25 @@ export default function Avent() {
       await updateDoc(doc(db, 'userProgress', user.uid), { avent: apres });
       const carte = carteParSlug(slug);
       if (carte) setBooster({ carte });
+    } catch (err) {
+      console.error('Ouverture impossible :', err);
+    }
+    setOccupe(false);
+  }
+
+  async function ouvreBoosterDore() {
+    if (!user || occupe || (av.boostersOr || 0) <= 0) return;
+    setOccupe(true);
+    const slug = tireBoosterDore(av);
+    const apres = {
+      ...av,
+      boostersOr: (av.boostersOr || 0) - 1,
+      cartes: { ...av.cartes, [slug]: (av.cartes[slug] || 0) + 1 },
+    };
+    try {
+      await updateDoc(doc(db, 'userProgress', user.uid), { avent: apres });
+      const carte = carteParSlug(slug);
+      if (carte) setBooster({ carte, dore: true });
     } catch (err) {
       console.error('Ouverture impossible :', err);
     }
@@ -178,6 +212,16 @@ export default function Avent() {
             </span>
           </div>
         </div>
+      )}
+
+      {(av.boostersOr || 0) > 0 && (
+        <button className="avt-slot avt-slot-or" onClick={ouvreBoosterDore} disabled={occupe}>
+          <Gift size={22} />
+          <div className="avt-slot-texte">
+            <span className="avt-slot-titre">Booster doré</span>
+            <span className="avt-slot-sous">Une épique ou une légendaire que tu n'as pas</span>
+          </div>
+        </button>
       )}
 
       {av.boosters > 0 && (
@@ -301,11 +345,16 @@ export default function Avent() {
         </section>
       )}
 
+      {/* Le vivier n'est plus montré à tout le monde.
+          Voir les quarante-cinq cases dont onze resteront vides quoi qu'on
+          fasse, ça n'excite pas, ça agace. Chacun voit ce qu'il a dans la
+          collection de son profil ; la liste complète reste ici pour
+          l'administration, qui a besoin de savoir qui manque à qui. */}
+      {estAdmin(user?.uid) && (
       <section className="avt-section">
         <h2 className="avt-section-titre">Le vivier</h2>
         <p className="avt-section-sous">
-          Les quarante-cinq. Celles que tu n'as pas restent masquées — savoir
-          ce qu'on n'a pas encore est la moitié du plaisir.
+          Les quarante-cinq, visibles de toi seul.
         </p>
         <div className="avt-vivier">
           {CARTES.map((c) => {
@@ -325,6 +374,7 @@ export default function Avent() {
           })}
         </div>
       </section>
+      )}
 
       {/* Le crédit de la seule photo du lot qui en demande un : celle de
           Manuel Ferrara vient de Wikimedia Commons, sous une licence qui
@@ -349,6 +399,7 @@ export default function Avent() {
         <Booster
           carte={booster.carte}
           jour={booster.jour}
+          dore={booster.dore}
           onFini={() => setBooster(null)}
         />
       )}

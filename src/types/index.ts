@@ -437,6 +437,13 @@ export interface UserProgress {
 export interface AventProgress {
   /** Combien d'exemplaires de chaque carte, par slug. */
   cartes: Record<string, number>;
+  /**
+   * Boosters dorés en attente : ceux qui ne piochent que dans les épiques et
+   * les légendaires. Un seul se gagne, en ouvrant les vingt-cinq portes.
+   */
+  boostersOr?: number;
+  /** Le booster des vingt-cinq portes a déjà été donné. */
+  bonusDonne?: boolean;
   /** Les jours déjà ouverts, de 1 à 25. */
   portes: number[];
   boosters: number;

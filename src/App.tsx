@@ -34,6 +34,7 @@ const AventCartes = lazy(() => import('./pages/AventCartes'));
 const FaceIdCartes = lazy(() => import('./pages/FaceIdCartes'));
 import type { ReactNode } from 'react';
 import Loader from './components/Loader';
+import { ADMIN_UIDS } from './lib/admin';
 import NoelDecor from './components/NoelDecor';
 import Reveillon from './components/Reveillon';
 import HalloweenDecor from './components/HalloweenDecor';
@@ -47,8 +48,6 @@ import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
 const MAINTENANCE = false;
-const ADMIN_UIDS = ['bhH01VzturU9rgVVopKbFe5edoO2'];
-
 /**
  * Intro de saison.
  *

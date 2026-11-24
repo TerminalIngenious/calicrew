@@ -27,10 +27,13 @@ const SEUIL = 0.78;
 export default function Booster({
   carte,
   jour,
+  dore = false,
   onFini,
 }: {
   carte: CarteAvent;
   jour?: number;
+  /** Le booster des vingt-cinq portes : même sachet, en doré. */
+  dore?: boolean;
   onFini: () => void;
 }) {
   const [coupe, setCoupe] = useState(0);
@@ -70,7 +73,7 @@ export default function Booster({
     <div className={`bst-ecran ${ouvert ? 'ouvert' : ''}`}>
       <div className="bst-scene">
         <div
-          className={`bst ${ouvert ? 'bst-ouvert' : ''}`}
+          className={`bst ${ouvert ? 'bst-ouvert' : ''} ${dore ? 'bst-dore' : ''}`}
           style={{ ['--coupe' as string]: coupe }}
         >
           {/* Le corps du sachet. Les reflets sont trois calques superposés :
@@ -100,9 +103,11 @@ export default function Booster({
                 Branlette
                 <em>Hivernale</em>
               </span>
-              <span className="bst-bandeau">Booster · 1 carte</span>
+              <span className="bst-bandeau">
+                {dore ? 'Booster doré · 1 carte' : 'Booster · 1 carte'}
+              </span>
               <span className="bst-pied">
-                {jour ? `Case du ${jour} décembre` : 'Avent 2026'}
+                {dore ? 'Les 25 portes' : jour ? `Case du ${jour} décembre` : 'Avent 2026'}
               </span>
             </div>
 

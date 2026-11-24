@@ -308,7 +308,9 @@ export function enCours(maintenant = Date.now()): boolean {
 
 // ── Progression ──
 
-export const VIDE: AventProgress = { cartes: {}, portes: [], boosters: 0, questsPrises: [] };
+export const VIDE: AventProgress = {
+  cartes: {}, portes: [], boosters: 0, questsPrises: [], boostersOr: 0, bonusDonne: false,
+};
 
 export function lis(brut: AventProgress | undefined): AventProgress {
   return {
@@ -316,6 +318,8 @@ export function lis(brut: AventProgress | undefined): AventProgress {
     portes: brut?.portes || [],
     boosters: brut?.boosters || 0,
     questsPrises: brut?.questsPrises || [],
+    boostersOr: brut?.boostersOr || 0,
+    bonusDonne: brut?.bonusDonne || false,
   };
 }
 
@@ -337,6 +341,24 @@ export function collectionComplete(p: AventProgress): boolean {
  * Collection complète, le booster redonne une carte au hasard — un doublon,
  * qui ne sert plus qu'à échanger.
  */
+/**
+ * Le booster doré des vingt-cinq portes.
+ *
+ * Il ne pioche que dans les épiques et les légendaires, et seulement parmi
+ * celles qu'on n'a pas : la récompense d'un calendrier fini ne peut pas être
+ * une commune en double. S'il n'en manque plus aucune — ce qui demande
+ * d'avoir déjà tout raflé — il retombe sur n'importe quelle manquante,
+ * puis sur n'importe quelle carte.
+ */
+export function tireBoosterDore(p: AventProgress): string {
+  const hautes = CARTES.filter(
+    (c) => (c.rarete === 'legendaire' || c.rarete === 'epique') && !(p.cartes[c.slug] > 0),
+  );
+  const manquantes = CARTES.filter((c) => !(p.cartes[c.slug] > 0));
+  const pioche = hautes.length ? hautes : manquantes.length ? manquantes : CARTES;
+  return pioche[Math.floor(Math.random() * pioche.length)].slug;
+}
+
 export function tireBooster(p: AventProgress): string {
   const manquantes = CARTES.filter((c) => !(p.cartes[c.slug] > 0));
   const pioche = manquantes.length ? manquantes : CARTES;

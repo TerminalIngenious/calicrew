@@ -363,3 +363,36 @@
   .bst:not(.bst-ouvert) .bst-corps { animation: none; }
   .bst-carte { animation-duration: 0.01s; }
 }
+
+/* ── Le sachet doré ──
+
+   Celui des vingt-cinq portes. Même objet, même pli, même sertissage : on
+   doit reconnaître un booster au premier coup d'œil, et c'est la couleur
+   seule qui dit qu'il vaut mieux que les autres. */
+/* L'emblème et le mot « Hivernale » passent en crème : en doré sur doré, ils
+   disparaissaient dans le fond. */
+.bst-dore { --bst-or: #fffbe8; }
+
+.bst-dore .bst-corps {
+  background:
+    linear-gradient(100deg,
+      #2a1c03 0%, #8a6a0c 11%, #241901 24%, #d2a51a 37%,
+      #2a1c03 50%, #a07c10 63%, #1d1401 78%, #c09518 90%, #2a1c03 100%);
+}
+
+.bst-dore .bst-iris { opacity: 0.08; }
+
+.bst-dore .bst-bandeau {
+  color: #2a1c03;
+  background: linear-gradient(180deg, #fff6c9, #ffe877 55%, #e0b400);
+}
+
+/* Le sertissage passe au laiton : un sachet doré fermé par de l'aluminium
+   se lit comme deux objets collés l'un à l'autre. */
+.bst-dore .bst-bande {
+  background:
+    repeating-linear-gradient(90deg, rgba(60, 40, 0, 0.3) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, #f0dfa4 0%, #b79a46 48%, #fbf1cf 52%, #9c813a 100%);
+}
+
+.bst-dore .bst-consigne { color: rgba(44, 32, 0, 0.8); }

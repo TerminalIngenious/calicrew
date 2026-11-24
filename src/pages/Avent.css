@@ -160,6 +160,16 @@
 
 /* ── Booster ── */
 
+/* La dalle du booster doré. Même forme que l'autre, autre couleur : c'est
+   la récompense des vingt-cinq portes, elle doit se distinguer sans
+   inventer un objet de plus. */
+.avt-slot-or {
+  border-color: rgba(255, 214, 10, 0.55);
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.22), rgba(255, 214, 10, 0.05));
+}
+
+.avt-slot-or svg { color: var(--avt-or, #ffd60a); }
+
 .avt-slot {
   display: flex;
   align-items: center;
