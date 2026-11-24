@@ -4,15 +4,18 @@ import { lisAbonnements, veutAmbiance, lisNoms } from '../groupe.js';
 import { defiDuJour, PATRON_DU_JOUR } from '../messages.js';
 
 /**
- * Les deux créneaux du jour, en UTC — soit 10h-16h l'hiver, 11h-17h l'été.
+ * Les trois créneaux du jour, en UTC — soit 8h-18h l'hiver, 9h-19h l'été.
  *
- * Deux défis par jour et non un seul, et jamais les deux mêmes heures d'un
- * jour sur l'autre. Les paires sont écrites à la main plutôt que tirées au
+ * Trois défis par jour et non un seul, et jamais les trois mêmes heures d'un
+ * jour sur l'autre. Les triplets sont écrits à la main plutôt que tirés au
  * sort : un défi ne vit que trois heures, donc deux créneaux séparés de deux
- * heures feraient disparaître le premier avant la fin de sa fenêtre. Toutes
- * celles-ci laissent au moins quatre heures.
+ * heures feraient disparaître le premier avant la fin de sa fenêtre. Tous
+ * ceux-ci laissent au moins quatre heures entre deux défis.
  */
-const PAIRES = [[9, 13], [11, 15], [9, 15]];
+const TRIPLETS = [[7, 11, 15], [9, 13, 17], [7, 11, 17], [7, 13, 17]];
+
+/** Autant que de créneaux : sert à décaler le texte de chaque défi. */
+const PAR_JOUR = 3;
 
 /** Trois heures pour le faire, ensuite il disparaît. */
 const FENETRE_MS = 3 * 60 * 60 * 1000;
@@ -43,9 +46,9 @@ function melange(n: number): number {
  * personne tant que le groupe ne change pas.
  *
  * L'heure change tous les jours, et c'est volontaire : un défi surprise qui
- * tombe à 14h pile n'est plus une surprise au bout de trois jours. Quatre
- * crons pointent donc ici, chacun avec son heure en paramètre, et seuls les
- * deux de service aujourd'hui vont au bout.
+ * tombe à 14h pile n'est plus une surprise au bout de trois jours. Six crons
+ * pointent donc ici, chacun avec son heure en paramètre, et seuls les trois
+ * de service aujourd'hui vont au bout.
  *
  * Chaque défi ne vit que trois heures. Passé ce délai la carte disparaît de
  * l'accueil, faite ou non : c'est ce qui sépare un défi surprise d'une
@@ -54,7 +57,7 @@ function melange(n: number): number {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const jour = getDayNumber();
   const demandee = Number(req.query.h);
-  const creneaux = PAIRES[melange(jour) % PAIRES.length];
+  const creneaux = TRIPLETS[melange(jour) % TRIPLETS.length];
   const rang = creneaux.indexOf(demandee);
   if (rang < 0) {
     return res.status(200).json({ skipped: true, heure: demandee, creneaux });
@@ -66,8 +69,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const abonnes = (await lisAbonnements(db)).filter(veutAmbiance);
   if (abonnes.length === 0) return res.status(200).json({ targeted: 0, sent: 0 });
 
-  // Deux défis dans la même journée : le second doit être un autre texte.
-  const defi = defiDuJour(jour * PAIRES[0].length + rang);
+  // Trois défis dans la même journée : chacun doit avoir son texte.
+  const defi = defiDuJour(jour * PAR_JOUR + rang);
   // La fenêtre est dans le titre : sans elle, personne ne sait que la
   // carte aura disparu en rentrant du travail.
   let titre = 'Défi surprise · 3 h';
