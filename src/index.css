@@ -3334,59 +3334,75 @@ body {
  * largeur.
  */
 .bp-page {
-  padding-top: env(safe-area-inset-top, 0px) !important;
+  /* Le bandeau monte jusqu'au bord : la zone de sécurité est portée par lui,
+     pas par la page, sinon elle reste en noir au-dessus de la couleur. */
+  padding-top: 0 !important;
 }
 
 .bp-hero {
   position: relative;
-  margin: 0 -1rem 1rem;
-  /* De l'air au-dessus du nom de saison : collé au bord, il se lisait comme
-     une continuation de la barre d'état. */
-  padding: 1.75rem 1rem 1rem;
+  margin: 0 -1rem 1.1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.4rem) 1rem 1.1rem;
   overflow: hidden;
-  max-height: 230px;
 }
 
 .bp-hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1a0a2e 0%, #16213e 40%, #0f3460 70%, #1a1a2e 100%);
-  z-index: 0;
-}
-
-.bp-hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 70% 20%, rgba(var(--accent-rgb), 0.15) 0%, transparent 60%),
-              radial-gradient(ellipse at 20% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+  background:
+    radial-gradient(120% 90% at 78% 8%, rgba(var(--accent-rgb), 0.22) 0%, transparent 58%),
+    radial-gradient(90% 70% at 10% 100%, rgba(78, 205, 196, 0.12) 0%, transparent 60%),
+    linear-gradient(168deg, #1d1033 0%, #152139 45%, #0d2b50 76%, #0b1020 100%);
+  /* Le bandeau s'éteint vers le bas au lieu de s'arrêter net : c'est le
+     trait horizontal qui le faisait lire comme un rectangle posé sur la
+     page, et non comme le haut de la page. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
 }
 
 .bp-hero-content {
   position: relative;
   z-index: 1;
+}
+
+.bp-hero-ligne {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.75rem;
+  gap: 0.75rem;
 }
 
 .bp-hero-season {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.66rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.18em;
   color: var(--accent);
 }
 
+/* Le temps qui reste : une mention, pas un cadran. Le gros nombre de jours
+   pesait autant que le nom de la saison, alors qu'on le lit une fois. */
+.bp-hero-reste {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
 .bp-hero-title {
-  font-size: 1.3rem;
+  margin-top: 0.1rem;
+  font-size: 1.65rem;
   font-weight: 800;
-  margin-top: 0.15rem;
-  background: linear-gradient(90deg, #fff, #ccc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: #fff;
 }
 
 .bp-premium-tag {
@@ -3404,66 +3420,55 @@ body {
   border-radius: 20px;
 }
 
-.bp-hero-timer {
+/* Le niveau, en chiffre et sur une seule ligne avec l'XP : c'est la donnée
+   qu'on vient chercher, elle n'a pas à partager la place avec une étiquette
+   et une icône. */
+.bp-hero-niveau {
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: rgba(255, 255, 255, 0.6);
-  flex-shrink: 0;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
 }
 
-.bp-hero-days {
-  font-size: 1.4rem;
+.bp-hero-niv-nombre {
+  font-size: 2.1rem;
   font-weight: 800;
-  color: #fff;
-  display: block;
   line-height: 1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
 }
 
-.bp-hero-days-label {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: block;
-}
-
-.bp-hero-xp {
-  position: relative;
-  z-index: 1;
-}
-
-.bp-hero-xp-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.35rem;
-}
-
-.bp-hero-level {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
+.bp-hero-niv-mot {
+  font-size: 0.64rem;
   font-weight: 700;
-  color: var(--accent);
-}
-
-.bp-hero-xp-text {
-  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
   color: rgba(255, 255, 255, 0.5);
 }
 
+.bp-hero-xp-text {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Collée au bord bas du bandeau, d'un côté à l'autre de l'écran. */
 .bp-hero-xp-bar {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  overflow: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.09);
 }
 
 .bp-hero-xp-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

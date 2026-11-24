@@ -406,34 +406,46 @@ export default function BattlePass() {
 
   return (
     <div className="page bp-page">
-      <div className="bp-hero">
+      {/* Le bandeau de saison.
+       *
+       * Il monte jusqu'au bord de l'écran, derrière l'encoche et l'îlot
+       * dynamique : un bandeau qui s'arrête sous la zone de sécurité laisse
+       * une barre noire en haut, et l'app a l'air mal posée. Seule la
+       * couleur monte là-haut — rien à lire, puisque rien n'y serait lu. */}
+      <header className="bp-hero">
         <div className="bp-hero-bg" />
         <div className="bp-hero-content">
-          <div className="bp-hero-left">
+          <div className="bp-hero-ligne">
             <span className="bp-hero-season">{season.name}</span>
-            <h1 className="bp-hero-title">{season.theme}</h1>
-            <SeasonalBadge />
-          </div>
-          <div className="bp-hero-timer">
-            <Clock size={14} />
-            <div>
-              <span className="bp-hero-days">{timeLeft.days}</span>
-              <span className="bp-hero-days-label">jours</span>
-            </div>
-          </div>
-        </div>
-        <div className="bp-hero-xp">
-          <div className="bp-hero-xp-top">
-            <span className="bp-hero-level">
-              <Flame size={14} /> Niv. {levelInfo.level}
+            <span className="bp-hero-reste">
+              <Clock size={12} />
+              {timeLeft.days > 1
+                ? `${timeLeft.days} jours`
+                : timeLeft.days === 1
+                  ? '1 jour'
+                  : `${timeLeft.hours} h`}
             </span>
-            <span className="bp-hero-xp-text">{levelInfo.currentLevelXp}/{levelInfo.xpForNext} XP</span>
           </div>
-          <div className="bp-hero-xp-bar">
-            <div className="bp-hero-xp-fill" style={{ width: `${progressPct}%` }} />
+
+          <h1 className="bp-hero-title">{season.theme}</h1>
+          <SeasonalBadge />
+
+          <div className="bp-hero-niveau">
+            <span className="bp-hero-niv-nombre">{levelInfo.level}</span>
+            <span className="bp-hero-niv-mot">Niveau</span>
+            <span className="bp-hero-xp-text">
+              {levelInfo.currentLevelXp} / {levelInfo.xpForNext} XP
+            </span>
           </div>
         </div>
-      </div>
+
+        {/* La barre d'XP court d'un bord à l'autre, tout en bas du bandeau :
+            posée dedans, elle ajoutait une boîte de plus à une page qui en a
+            déjà beaucoup. */}
+        <div className="bp-hero-xp-bar">
+          <div className="bp-hero-xp-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+      </header>
 
       {/* L'event est posé par-dessus le pass, pas dedans : au-dessus des
           onglets, dans une forme qui n'appartient qu'à lui. */}
