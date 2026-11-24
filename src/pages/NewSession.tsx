@@ -4,7 +4,7 @@ import { useUserSessions } from '../contexts/SessionsContext';
 import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { DEFAULT_EXERCISES, CATEGORY_LABELS } from '../lib/exercises';
+import { DEFAULT_EXERCISES, CATEGORY_LABELS, uniteProbable } from '../lib/exercises';
 import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason, accordeXp } from '../lib/passes';
 import { buildAmrapExercises } from '../lib/amrap';
 import {
@@ -46,6 +46,10 @@ export default function NewSession() {
   const [newExCategory, setNewExCategory] = useState<Exercise['category']>('push');
   const [newExWeighted, setNewExWeighted] = useState(false);
   const [newExUnit, setNewExUnit] = useState<SetUnit>('reps');
+  /* Vrai dès que la personne a touché le sélecteur d'unité. Tant qu'elle n'y
+     a pas touché, le nom qu'elle tape le pilote ; après, on ne touche plus à
+     son choix — deviner par-dessus une décision serait insupportable. */
+  const [uniteChoisie, setUniteChoisie] = useState(false);
   const [addingExo, setAddingExo] = useState(false);
   const [editingExo, setEditingExo] = useState<Exercise | null>(null);
   const [editExoName, setEditExoName] = useState('');
@@ -174,6 +178,7 @@ export default function NewSession() {
       setNewExName('');
       setNewExWeighted(false);
       setNewExUnit('reps');
+      setUniteChoisie(false);
       setShowAddExercise(false);
     } catch (err) {
       console.error('Erreur ajout exercice:', err);
@@ -666,7 +671,12 @@ export default function NewSession() {
                   type="text"
                   placeholder="Nom de l'exercice"
                   value={newExName}
-                  onChange={(e) => setNewExName(e.target.value)}
+                  onChange={(e) => {
+                    setNewExName(e.target.value);
+                    if (uniteChoisie) return;
+                    const devinee = uniteProbable(e.target.value);
+                    if (devinee) setNewExUnit(devinee);
+                  }}
                   autoFocus
                 />
                 <div className="category-picker">
@@ -687,13 +697,22 @@ export default function NewSession() {
                       <button
                         key={u}
                         className={`unit-btn ${newExUnit === u ? 'active' : ''}`}
-                        onClick={() => setNewExUnit(u)}
+                        onClick={() => { setNewExUnit(u); setUniteChoisie(true); }}
                       >
                         {label}
                       </button>
                     ))}
                   </div>
                 </div>
+                {/* On dit pourquoi l'unité a bougé toute seule. Un réglage
+                    qui change sans explication se lit comme un bug, et on le
+                    remet à l'envers. */}
+                {!uniteChoisie && newExUnit === 'seconds' && (
+                  <p className="unit-devinee">
+                    Mis en secondes : cet exercice se tient, il ne se compte pas.
+                    Change-le si ce n'est pas le cas.
+                  </p>
+                )}
                 <div className="weighted-toggle" style={{ marginTop: '0.75rem' }} onClick={() => setNewExWeighted(!newExWeighted)}>
                   <Weight size={16} />
                   <span>Peut être lesté</span>

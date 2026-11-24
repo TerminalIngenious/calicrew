@@ -1,4 +1,4 @@
-import type { Exercise } from '../types';
+import type { Exercise, SetUnit } from '../types';
 
 /**
  * Le catalogue, et l'unité de chaque exercice.
@@ -171,3 +171,43 @@ export const CATEGORY_LABELS: Record<Exercise['category'], string> = {
   velo: 'Vélo',
   sportco: 'Sport Co',
 };
+
+/**
+ * L'unité que le nom d'un exercice laisse deviner.
+ *
+ * Le formulaire d'exercice personnalisé propose « Reps » par défaut, et
+ * presque personne ne touche au sélecteur : c'est comme ça que les mountain
+ * climbers sont entrés trois fois en répétitions. Un gainage compté en reps
+ * n'est pas qu'un libellé de travers — sa valeur s'ajoute aux répétitions
+ * dans les totaux et le classement.
+ *
+ * Alors on devine, et on ne décide pas : le sélecteur reste là, visible, et
+ * la personne garde le dernier mot. On ne reconnaît que le vocabulaire de
+ * ce qui se tient — un verbe d'effort continu, pas un mouvement qu'on
+ * compte.
+ */
+const TENUS: RegExp[] = [
+  // Ancrés, et non en simple sous-chaîne : « chaise » seul rangeait les
+  // « dips chaise » en secondes, et « lever » attrapait « lever de bassin ».
+  /^(gainage|planche|hollow|chaise|superman|bateau|suspension|équilibre|equilibre)\b/,
+  /\b(front|back|straddle|tuck|ice ?cream) lever\b/,
+  /\bl-?sit\b/,
+  /\b(hold|tenue|isom[ée]tri)/,
+  /\b(mountain|montain|montin) ?climb/,
+  /\bclimbers?\b/,
+  /\b(dead ?hang|wall ?sit|human flag)\b/,
+  /\bcorde à sauter\b|\bcorde a sauter\b/,
+  /\bmont[ée]es? de genoux\b/,
+  /\b(atr|handstand)\b/,
+  /\b(rameur|assault ?bike)\b/,
+];
+
+export function uniteProbable(nom: string): SetUnit | null {
+  const n = nom.trim().toLowerCase();
+  if (n.length < 3) return null;
+  // Un exercice déjà au catalogue tranche mieux qu'un motif : on prend son
+  // unité, y compris quand elle est en répétitions.
+  const connu = DEFAULT_EXERCISES.find((e) => e.name.toLowerCase() === n);
+  if (connu) return connu.defaultUnit === 'seconds' ? 'seconds' : 'reps';
+  return TENUS.some((re) => re.test(n)) ? 'seconds' : null;
+}

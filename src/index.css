@@ -1252,6 +1252,15 @@ body {
 }
 
 /* Reps ou secondes */
+/* L'explication de l'unité devinée. Discrète : c'est une information, pas
+   un avertissement — rien n'est allé de travers. */
+.unit-devinee {
+  margin: 0.5rem 0 0;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
 .unit-picker {
   display: flex;
   gap: 0.35rem;
