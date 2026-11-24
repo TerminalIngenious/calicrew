@@ -3472,6 +3472,215 @@ body {
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ══ L'accueil ══
+
+   Tout est scopé sous .accueil : .stat-card, .session-card et .section
+   servent aussi au profil, aux progrès et au groupe, et ces pages seront
+   reprises une par une. */
+
+.accueil {
+  /* Le bandeau porte la zone de sécurité, comme sur le pass : laissée à la
+     page, elle reste en noir au-dessus de la couleur. */
+  padding-top: 0 !important;
+}
+
+.acc-entete {
+  position: relative;
+  margin: 0 -1rem 1.25rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) 1rem 1.3rem;
+  overflow: hidden;
+}
+
+.acc-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  /* Pas de bord net en bas : un fond qui s'éteint se lit comme le haut de
+     la page, un trait franc comme un rectangle posé dessus. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+}
+
+.acc-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.acc-salut {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.acc-salut h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+/* Les chiffres de la semaine, posés à même le bandeau. Un filet les sépare
+   au lieu d'un cadre : il suffit à dire que ce sont deux mesures. */
+.acc-semaine {
+  display: flex;
+  align-items: baseline;
+  gap: 1.1rem;
+  margin-top: 1rem;
+}
+
+.acc-chiffre {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.acc-chiffre + .acc-chiffre {
+  padding-left: 1.1rem;
+  border-left: 1px solid var(--border);
+}
+
+.acc-nombre {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.acc-mot {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.acc-depuis {
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
+/* Le chemin de côté : un lien posé sur la page, sans fond ni bordure. */
+.acc-lien {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.15rem;
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acc-lien svg:last-child { margin-left: auto; }
+.acc-lien:active { color: var(--text); }
+
+.acc-section {
+  margin-top: 1.75rem;
+}
+
+.acc-section h2 {
+  margin-bottom: 0.35rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+/* Les séances : des lignes séparées par un filet, pas une pile de cartes.
+   Dix cartes identiques à la suite, c'est dix fois le même cadre pour deux
+   lignes de texte. */
+.accueil .session-list {
+  gap: 0;
+}
+
+.acc-seance {
+  padding: 0.85rem 0.15rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.acc-seance:last-child { border-bottom: 0; }
+.acc-seance:active { background: rgba(255, 255, 255, 0.03); }
+
+.acc-seance-tete {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.acc-seance-date {
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.acc-seance-quoi {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acc-seance-encours {
+  flex-shrink: 0;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.14);
+}
+
+.acc-seance-fleche {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.acc-seance-chiffres {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Les cartes d'action de l'accueil — créatine, pas, défi — perdent leur
+   bordure. Une surface suffit à dire « ceci est un geste à faire » ; le
+   trait autour ajoutait un cadre de plus à une page qui en empilait six.
+   Le bleu de la créatine prise reste, lui : il porte une information. */
+.accueil .creatine-card,
+.accueil .pas-card,
+.accueil .defi-card {
+  border-color: transparent;
+}
+
+.accueil .creatine-card.taken {
+  border-color: rgba(59, 130, 246, 0.32);
+}
+
+/* Le barème des pas, en note de bas de carte : c'est une règle qu'on lit
+   une fois, pas une consigne à relire chaque jour. */
+.accueil .pas-card-bareme {
+  font-size: 0.68rem;
+  line-height: 1.35;
+  opacity: 0.75;
+}
+
 /* Tabs */
 .bp-tabs {
   display: flex;

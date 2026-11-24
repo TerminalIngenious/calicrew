@@ -112,11 +112,33 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <div>
-          <h1>Salut {myName}</h1>
-        <SeasonalBadge compact />
+    <div className="page accueil">
+      {/* Le bandeau d'accueil, comme celui du pass : il monte jusqu'au bord
+          de l'écran, zone de sécurité comprise, et les chiffres de la
+          semaine vivent dedans. Dans deux cartes séparées, ils pesaient
+          autant que la créatine et les pas — trois blocs de même poids, et
+          plus rien qui ressort. */}
+      <header className="acc-entete">
+        <div className="acc-entete-fond" />
+        <div className="acc-entete-contenu">
+          <div className="acc-salut">
+            <h1>Salut {myName}</h1>
+            <SeasonalBadge compact />
+          </div>
+
+          {!loading && (
+            <div className="acc-semaine">
+              <div className="acc-chiffre">
+                <span className="acc-nombre">{stats.weekSessions}</span>
+                <span className="acc-mot">séance{stats.weekSessions > 1 ? 's' : ''}</span>
+              </div>
+              <div className="acc-chiffre">
+                <span className="acc-nombre">{stats.weekReps}</span>
+                <span className="acc-mot">reps</span>
+              </div>
+              <span className="acc-depuis">cette semaine</span>
+            </div>
+          )}
         </div>
       </header>
 
@@ -140,17 +162,6 @@ export default function Dashboard() {
               rattraper quelqu'un qui n'a pas activé ses rappels. */}
           {user && <NotifGate uid={user.uid} />}
 
-          <span className="stats-period">Cette semaine</span>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-value">{stats.weekSessions}</span>
-              <span className="stat-label">Séances</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">{stats.weekReps}</span>
-              <span className="stat-label">Reps</span>
-            </div>
-          </div>
 
           {/* Après les chiffres de la semaine et avant les gestes du jour :
               c'est le recul, pas une action à faire. */}
@@ -237,30 +248,37 @@ export default function Dashboard() {
           <button className="primary-btn home-cta" onClick={() => navigate('/session/new')}>
             <Plus size={20} /> Nouvelle séance
           </button>
-          <button className="home-secondary-cta" onClick={() => navigate('/programs')}>
-            <ClipboardList size={18} />
+          {/* Un lien, pas un bouton : c'est le chemin de côté, et une
+              deuxième boîte sous la grande en faisait une alternative de
+              même poids. */}
+          <button className="acc-lien" onClick={() => navigate('/programs')}>
+            <ClipboardList size={16} />
             <span>Partir d'un programme</span>
-            <ChevronRight size={16} />
+            <ChevronRight size={15} />
           </button>
 
-          <section className="section">
+          <section className="acc-section">
             <h2>Dernières séances</h2>
             {recentSessions.length === 0 ? (
               <p className="empty">Aucune séance pour l'instant. Lance-toi !</p>
             ) : (
               <div className="session-list">
                 {recentSessions.map((s) => (
-                  <div key={s.id} className="session-card" onClick={() => navigate(`/session/${s.id}`)}>
-                    <div className="session-card-top">
-                      <span className="session-date">
+                  <div key={s.id} className="acc-seance" onClick={() => navigate(`/session/${s.id}`)}>
+                    <div className="acc-seance-tete">
+                      <span className="acc-seance-date">
                         {format(new Date(s.date), 'd MMM', { locale: fr })}
-                          <span className="session-categories"> • {s.mode === 'amrap' ? amrapTitle(s.amrapName) : getSessionCategories(s)}</span>
                       </span>
-                      <span className={`session-badge ${s.completed ? 'done' : 'partial'}`}>
-                        {s.completed ? 'Terminée' : 'En cours'}
+                      <span className="acc-seance-quoi">
+                        {s.mode === 'amrap' ? amrapTitle(s.amrapName) : getSessionCategories(s)}
                       </span>
+                      {/* Seules les séances en cours portent une étiquette :
+                          « Terminée » sur chaque ligne, c'est le cas normal
+                          répété dix fois, donc du bruit. */}
+                      {!s.completed && <span className="acc-seance-encours">En cours</span>}
+                      <ChevronRight size={15} className="acc-seance-fleche" />
                     </div>
-                    <div className="session-card-bottom">
+                    <div className="acc-seance-chiffres">
                       {s.mode === 'amrap' ? (
                         <span>{s.amrapRounds || 0} rounds</span>
                       ) : (
