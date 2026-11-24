@@ -1,20 +1,40 @@
-import { useState } from 'react';
-import { Zap, Check, Undo2 } from 'lucide-react';
-import { defiActif, mesurable, valide, annule, donneCoffre } from '../lib/defiSurprise';
+import { useEffect, useState } from 'react';
+import { Zap, Check, Undo2, Timer } from 'lucide-react';
+import { defiActif, mesurable, resteMs, valide, annule, donneCoffre } from '../lib/defiSurprise';
 import type { UserProgress } from '../types';
 
+/** « 2 h 14 », « 12 min », « 40 s » — l'unité suit ce qu'il reste. */
+function compte(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  if (s >= 3600) return `${Math.floor(s / 3600)} h ${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
+  if (s >= 60) return `${Math.floor(s / 60)} min`;
+  return `${s} s`;
+}
+
 /**
- * Le défi surprise du jour, sur l'accueil.
+ * Le défi surprise, sur l'accueil.
  *
- * La carte ne paraît que le jour même : un défi d'hier ne se rattrape pas,
- * c'est tout l'intérêt d'un défi surprise.
+ * Il ne vit que trois heures, et il y en a deux par jour. La carte disparaît
+ * d'elle-même à la fin de la fenêtre, sans rechargement : c'est tout
+ * l'intérêt d'un défi surprise, et un compte à rebours qui s'arrête sans
+ * rien faire serait un mensonge.
  */
 export default function DefiSurpriseCard({ uid, progress }: { uid: string; progress: UserProgress | null }) {
-  const defi = defiActif(progress);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState(false);
+  // L'heure relue plutôt que décomptée : un téléphone en veille ne fait pas
+  // tourner les minuteurs, et le compte serait faux au réveil.
+  const [maintenant, setMaintenant] = useState(() => Date.now());
 
+  useEffect(() => {
+    const t = setInterval(() => setMaintenant(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const defi = defiActif(progress, maintenant);
   if (!defi) return null;
+
+  const reste = resteMs(defi, maintenant);
 
   async function bascule() {
     if (!defi || envoi) return;
@@ -36,9 +56,19 @@ export default function DefiSurpriseCard({ uid, progress }: { uid: string; progr
       <div className="defi-tete">
         <Zap size={15} />
         <span>Défi surprise</span>
-        <span className={`defi-etat ${defi.fait ? 'oui' : ''}`}>
-          {defi.fait ? 'Fait' : 'Pas encore fait'}
-        </span>
+        {/* Le temps qui reste prend la place de l'état tant que le défi
+            n'est pas fait : une fois coché, c'est la coche qu'on vient
+            vérifier, pas le chrono. */}
+        {!defi.fait && reste > 0 ? (
+          <span className={`defi-minuteur ${reste < 15 * 60 * 1000 ? 'presse' : ''}`}>
+            <Timer size={12} />
+            {compte(reste)}
+          </span>
+        ) : (
+          <span className={`defi-etat ${defi.fait ? 'oui' : ''}`}>
+            {defi.fait ? 'Fait' : 'Pas encore fait'}
+          </span>
+        )}
       </div>
 
       <p className="defi-texte">{defi.texte}</p>

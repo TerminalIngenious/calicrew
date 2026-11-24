@@ -382,6 +382,12 @@ export interface UserProgress {
   defiDuJour?: {
     /** Jour local du dépôt, YYYY-MM-DD : au-delà, le défi n'est plus à faire. */
     jour: string;
+    /**
+     * L'instant où le défi disparaît, trois heures après son dépôt.
+     * Absent sur les défis déposés avant cette règle : ceux-là tiennent la
+     * journée, comme avant.
+     */
+    expire?: number;
     id: string;
     texte: string;
     /** Vide quand le défi n'a rien de mesurable (s'étirer, prendre l'escalier). */

@@ -33,10 +33,31 @@ export function donneCoffre(uid: string): boolean {
   return DEFI_AVEC_COFFRE.includes(uid);
 }
 
-/** Le défi à proposer aujourd'hui, ou rien si celui qu'on a date d'hier. */
-export function defiActif(progress: UserProgress | null, aujourdhui = dayKey()): DefiDuJour | null {
+/**
+ * Le défi encore ouvert, ou rien.
+ *
+ * Trois heures de fenêtre, puis il disparaît — fait ou non. C'est ce qui
+ * sépare un défi surprise d'une tâche de la journée : on le fait tout de
+ * suite ou on ne le fait pas.
+ *
+ * Les défis déposés avant cette règle n'ont pas de date de péremption ; on
+ * leur applique l'ancienne, la journée entière, plutôt que de les faire
+ * disparaître sous le nez de quelqu'un au premier chargement.
+ */
+export function defiActif(
+  progress: UserProgress | null,
+  maintenant = Date.now(),
+  aujourdhui = dayKey(),
+): DefiDuJour | null {
   const defi = progress?.defiDuJour;
-  return defi && defi.jour === aujourdhui ? defi : null;
+  if (!defi) return null;
+  if (defi.expire) return maintenant < defi.expire ? defi : null;
+  return defi.jour === aujourdhui ? defi : null;
+}
+
+/** Ce qu'il reste, en millisecondes. Zéro quand il n'y a pas de fenêtre. */
+export function resteMs(defi: DefiDuJour, maintenant = Date.now()): number {
+  return defi.expire ? Math.max(0, defi.expire - maintenant) : 0;
 }
 
 /** Un défi sans exercice ne se mesure pas : il se coche, et c'est tout. */

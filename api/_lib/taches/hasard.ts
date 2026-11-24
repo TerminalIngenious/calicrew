@@ -1,10 +1,33 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getDb, configureWebPush, sendTo, getDayNumber, getDayKey } from '../push.js';
-import { lisAbonnements, veutAmbiance, lisNoms, heureDuJour } from '../groupe.js';
+import { lisAbonnements, veutAmbiance, lisNoms } from '../groupe.js';
 import { defiDuJour, PATRON_DU_JOUR } from '../messages.js';
 
-/** Les heures possibles, en UTC — soit 10h-16h l'hiver, 11h-17h l'été. */
-const HEURES = [9, 11, 13, 15];
+/**
+ * Les deux créneaux du jour, en UTC — soit 10h-16h l'hiver, 11h-17h l'été.
+ *
+ * Deux défis par jour et non un seul, et jamais les deux mêmes heures d'un
+ * jour sur l'autre. Les paires sont écrites à la main plutôt que tirées au
+ * sort : un défi ne vit que trois heures, donc deux créneaux séparés de deux
+ * heures feraient disparaître le premier avant la fin de sa fenêtre. Toutes
+ * celles-ci laissent au moins quatre heures.
+ */
+const PAIRES = [[9, 13], [11, 15], [9, 15]];
+
+/** Trois heures pour le faire, ensuite il disparaît. */
+const FENETRE_MS = 3 * 60 * 60 * 1000;
+
+/** Le même brassage que pour les heures d'ambiance : une suite linéaire du
+    numéro du jour redonnerait un cycle visible au bout d'une semaine. */
+function melange(n: number): number {
+  let h = n | 0;
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x45d9f3b);
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x45d9f3b);
+  h ^= h >>> 16;
+  return Math.abs(h);
+}
 
 /**
  * Le défi surprise de la journée.
@@ -20,15 +43,21 @@ const HEURES = [9, 11, 13, 15];
  * personne tant que le groupe ne change pas.
  *
  * L'heure change tous les jours, et c'est volontaire : un défi surprise qui
- * tombe à 14h pile n'est plus une surprise au bout de trois jours. Plusieurs
- * crons pointent donc ici, chacun avec son heure en paramètre, et seul celui
- * de service aujourd'hui va au bout.
+ * tombe à 14h pile n'est plus une surprise au bout de trois jours. Quatre
+ * crons pointent donc ici, chacun avec son heure en paramètre, et seuls les
+ * deux de service aujourd'hui vont au bout.
+ *
+ * Chaque défi ne vit que trois heures. Passé ce délai la carte disparaît de
+ * l'accueil, faite ou non : c'est ce qui sépare un défi surprise d'une
+ * tâche de la journée, et ce qui fait qu'on le fait tout de suite.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const jour = getDayNumber();
   const demandee = Number(req.query.h);
-  if (demandee !== heureDuJour(jour, HEURES, 0)) {
-    return res.status(200).json({ skipped: true, heure: demandee });
+  const creneaux = PAIRES[melange(jour) % PAIRES.length];
+  const rang = creneaux.indexOf(demandee);
+  if (rang < 0) {
+    return res.status(200).json({ skipped: true, heure: demandee, creneaux });
   }
 
   configureWebPush();
@@ -37,12 +66,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const abonnes = (await lisAbonnements(db)).filter(veutAmbiance);
   if (abonnes.length === 0) return res.status(200).json({ targeted: 0, sent: 0 });
 
-  const defi = defiDuJour(jour);
-  let titre = 'Défi surprise';
+  // Deux défis dans la même journée : le second doit être un autre texte.
+  const defi = defiDuJour(jour * PAIRES[0].length + rang);
+  // La fenêtre est dans le titre : sans elle, personne ne sait que la
+  // carte aura disparu en rentrant du travail.
+  let titre = 'Défi surprise · 3 h';
   let texte = defi.texte;
   let patron = false;
 
-  if (jour % 4 === 0) {
+  if (jour % 4 === 0 && rang === 0) {
     const noms = await lisNoms(db);
     // Les abonnés triés par uid : l'ordre ne doit pas dépendre de celui, non
     // garanti, dans lequel Firestore rend les documents.
@@ -71,7 +103,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       lot.set(
         db.collection('userProgress').doc(a.uid),
         { defiDuJour: { jour: jourCle, id: defi.id, texte: defi.texte,
-                        exercices: defi.exercices || [], duree: defi.duree || 0, fait: false } },
+                        exercices: defi.exercices || [], duree: defi.duree || 0, fait: false,
+                        expire: Date.now() + FENETRE_MS } },
         { merge: true }
       );
     }
@@ -83,5 +116,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   );
 
   const sent = results.filter(Boolean).length;
-  return res.status(200).json({ targeted: abonnes.length, sent, body: texte, defi: patron ? null : defi.id });
+  return res.status(200).json({ targeted: abonnes.length, sent, body: texte, defi: patron ? null : defi.id, heure: demandee, rang });
 }

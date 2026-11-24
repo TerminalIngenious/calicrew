@@ -9937,6 +9937,31 @@ body {
   color: var(--accent-green);
 }
 
+/* Le temps qui reste, à la place de l'état. En chiffres et pas en jauge :
+   « 12 min » se lit d'un coup d'œil, une barre à moitié vide ne dit pas
+   combien. Elle passe au rouge dans le dernier quart d'heure, qui est le
+   seul moment où ça change quelque chose. */
+.defi-minuteur {
+  display: flex;
+  align-items: center;
+  gap: 0.22rem;
+  margin-left: auto;
+  padding: 0.12rem 0.42rem;
+  border-radius: 99px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-gold);
+  background: rgba(255, 214, 10, 0.12);
+}
+
+.defi-minuteur.presse {
+  color: var(--danger);
+  background: rgba(255, 69, 58, 0.14);
+}
+
 .defi-etat {
   margin-left: auto;
   text-transform: none;
