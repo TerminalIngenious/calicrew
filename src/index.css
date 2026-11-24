@@ -7147,7 +7147,10 @@ body {
 .noel-decor {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  /* Au-dessus des fonds de page — l'event a le sien, qui masquait tout le
+     décor — et en dessous de la barre du bas (20), pour que les sapins
+     sortent de derrière elle. */
+  z-index: 5;
   overflow: hidden;
   pointer-events: none;
 }
