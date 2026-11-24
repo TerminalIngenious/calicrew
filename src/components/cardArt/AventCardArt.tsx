@@ -14,19 +14,25 @@ import Godemichet from './Godemichet';
  */
 function Noeud() {
   return (
-    <svg className="av-noeud" viewBox="0 0 220 120" aria-hidden="true">
-      {/* Le ruban qui ceinture : il traverse de bord à bord, sinon le nœud
-          est posé sur l'objet au lieu de l'entourer. */}
-      <path d="M0 45h220v22H0z" fill="#d8352f" />
-      <path d="M0 45h220v7H0z" fill="rgba(255,255,255,0.26)" />
-      <path d="M0 63h220v4H0z" fill="rgba(0,0,0,0.25)" />
+    <svg className="av-noeud" viewBox="0 0 220 132" aria-hidden="true">
+      {/* Le ruban ne traverse pas la carte : il fait le tour de l'objet, et
+          s'arrête là où l'objet s'arrête. Ses deux bords sont des arcs qui
+          plongent au centre — c'est ce qu'on voit d'une sangle enroulée
+          autour d'un cylindre, et c'est la seule chose qui dise qu'elle
+          passe derrière. */}
+      <path d="M74 52c12 6 60 6 72 0v26c-12 6-60 6-72 0z" fill="#d8352f" />
+      <path d="M74 52c12 6 60 6 72 0v8c-12 6-60 6-72 0z" fill="rgba(255,255,255,0.26)" />
+      <path d="M74 72c12 6 60 6 72 0v6c-12 6-60 6-72 0z" fill="rgba(0,0,0,0.26)" />
+      {/* Les deux bouts qui disparaissent derrière l'objet. */}
+      <path d="M74 52v26l-5-4V54z" fill="#9e241e" />
+      <path d="M146 52v26l5-4V54z" fill="#9e241e" />
 
-      {/* Les pans qui retombent, coupés en V au bout comme un vrai ruban. */}
+      {/* Les pans qui retombent, coupés en V au bout. */}
       <g fill="#c22f28">
-        <path d="M100 62c-8 18-18 32-34 45l12-9 4 14c16-13 28-32 32-46z" />
-        <path d="M120 62c8 18 18 32 34 45l-12-9-4 14c-16-13-28-32-32-46z" />
+        <path d="M100 74c-7 16-16 28-30 40l11-8 4 13c14-12 25-28 29-41z" />
+        <path d="M120 74c7 16 16 28 30 40l-11-8-4 13c-14-12-25-28-29-41z" />
       </g>
-      <path d="M100 62c-6 14-14 26-24 37" stroke="rgba(255,255,255,0.18)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M100 74c-5 12-12 23-21 33" stroke="rgba(255,255,255,0.18)" strokeWidth="3" fill="none" strokeLinecap="round" />
 
       {/* Les deux boucles, en goutte : elles sortent du nœud, montent et y
           reviennent. La face intérieure, plus sombre, se voit sous la
@@ -43,9 +49,9 @@ function Noeud() {
 
       {/* Le cœur du nœud : un bout de ruban enroulé et serré, pas une
           pastille — d'où les deux plis qui le pincent. */}
-      <rect x="99" y="42" width="22" height="28" rx="9" fill="#e8403a" />
-      <path d="M103 46c-2 7-2 15 0 21" stroke="rgba(0,0,0,0.24)" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M117 46c2 7 2 15 0 21" stroke="rgba(0,0,0,0.24)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <rect x="99" y="44" width="22" height="32" rx="10" fill="#e8403a" />
+      <path d="M103 48c-2 8-2 17 0 25" stroke="rgba(0,0,0,0.24)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M117 48c2 8 2 17 0 25" stroke="rgba(0,0,0,0.24)" strokeWidth="3" fill="none" strokeLinecap="round" />
       <path d="M105 47c3-2 7-2 10 0" stroke="rgba(255,255,255,0.36)" strokeWidth="3" fill="none" strokeLinecap="round" />
     </svg>
   );
