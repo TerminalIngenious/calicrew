@@ -3,32 +3,7 @@ import type { CarteAvent } from '../../lib/avent';
 import { LIBELLE_RARETE, LIBELLE_STAT, NOM_STAT, TOTAL_CARTES } from '../../lib/avent';
 import './fonts.css';
 import './AventCardArt.css';
-
-/** L'objet de l'event, dessiné une fois et servi aux deux faces. */
-function Godemichet({ className }: { className?: string }) {
-  return (
-    /* Les formes sont peintes à plat avec var(--teinte), sans dégradé SVG :
-       un <linearGradient> porte un id, et quarante-cinq cartes dans une
-       grille partageraient le même — toutes auraient alors pris la couleur
-       de la première. L'ombre et le reflet sont deux calques par-dessus. */
-    <svg className={className} viewBox="0 0 60 120" aria-hidden="true">
-      {/* Deux billes à la base, puis une hampe à bout rond : la silhouette
-          suffit à faire la blague, le détail l'aurait rendue gênante. */}
-      <g fill="var(--teinte)">
-        <circle cx="18" cy="104" r="14" />
-        <circle cx="42" cy="104" r="14" />
-        <rect x="16" y="14" width="28" height="86" rx="14" />
-        <ellipse cx="30" cy="18" rx="14" ry="16" />
-      </g>
-      <g fill="rgba(0,0,0,0.28)">
-        <rect x="38" y="16" width="6" height="84" rx="3" />
-        <circle cx="46" cy="107" r="7" opacity="0.6" />
-      </g>
-      {/* Le reflet, sinon la forme est plate et ne se lit pas en petit. */}
-      <rect x="22" y="22" width="6" height="70" rx="3" fill="rgba(255,255,255,0.3)" />
-    </svg>
-  );
-}
+import Godemichet from './Godemichet';
 
 /** Le nœud du cadeau, posé en travers de l'objet au dos de la carte. */
 function Noeud() {

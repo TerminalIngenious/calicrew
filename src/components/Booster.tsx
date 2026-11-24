@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import { Scissors } from 'lucide-react';
 import type { CarteAvent } from '../lib/avent';
 import AventCardArt from './cardArt/AventCardArt';
+import Godemichet from './cardArt/Godemichet';
 import './Booster.css';
 
 /** La part du bord qu'il faut avoir parcourue pour que le sachet cède. */
@@ -85,19 +86,9 @@ export default function Booster({
             <div className="bst-pli" aria-hidden="true" />
 
             <div className="bst-contenu">
-              <svg className="bst-embleme" viewBox="0 0 60 120" aria-hidden="true">
-                <g fill="var(--bst-or)">
-                  <circle cx="18" cy="104" r="14" />
-                  <circle cx="42" cy="104" r="14" />
-                  <rect x="16" y="14" width="28" height="86" rx="14" />
-                  <ellipse cx="30" cy="18" rx="14" ry="16" />
-                </g>
-                <g fill="rgba(0,0,0,0.26)">
-                  <rect x="38" y="16" width="6" height="84" rx="3" />
-                  <circle cx="46" cy="107" r="7" opacity="0.6" />
-                </g>
-                <rect x="22" y="22" width="6" height="70" rx="3" fill="rgba(255,255,255,0.32)" />
-              </svg>
+              {/* Le même objet que sur les cartes : c'est la marque de
+                  l'event, elle ne se redessine pas à chaque endroit. */}
+              <Godemichet className="bst-embleme" couleur="var(--bst-or)" />
 
               <span className="bst-titre">
                 Branlette
