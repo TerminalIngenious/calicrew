@@ -39,7 +39,7 @@
   --radius-sm: 10px;
   /* Hauteur occupée par la barre de navigation : son padding haut, un
      .nav-btn (icône + label), son padding bas, et la safe-area de l'iPhone. */
-  --nav-height: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  --nav-height: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 body {
@@ -436,6 +436,12 @@ body {
 }
 
 /* Bottom nav */
+/* La barre de navigation.
+ *
+ * Elle était une dalle grise posée sur la page, séparée par un trait franc.
+ * Son fond part maintenant du transparent pour arriver au noir de la page :
+ * le contenu s'efface en passant dessous au lieu de buter sur une arête, et
+ * la barre cesse d'être un bloc rapporté. */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -443,26 +449,59 @@ body {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  background: var(--bg-card);
-  border-top: 1px solid var(--border);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, var(--bg) 22%, var(--bg) 100%);
+  border-top: 0;
   display: flex;
-  justify-content: space-around;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0 0.5rem;
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
   z-index: 20;
 }
 
 .nav-btn {
+  position: relative;
+  /* Cinq parts égales : à padding fixe, la zone touchable de « Pass »
+     faisait la moitié de celle de « Accueil ». */
+  flex: 1;
   background: none;
   border: none;
   color: var(--text-muted);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.7rem;
+  gap: 0.22rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  padding: 0.4rem 1rem;
+  padding: 0.3rem 0;
+  transition: color 0.18s;
+}
+
+/* La pastille de l'onglet courant, derrière l'icône. La couleur seule ne
+   suffisait pas : sur cinq icônes vertes de la même famille, il fallait
+   chercher laquelle était un peu plus claire. */
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  transform: translateX(-50%) scale(0.8);
+  background: rgba(var(--accent-rgb), 0.16);
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.18s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.nav-btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-btn.active::before {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
 .nav-btn.active {
@@ -8762,6 +8801,7 @@ body {
     top: 0;
     bottom: 0;
     left: 0;
+    background: var(--bg-card);
     transform: none;
     width: var(--rail-width);
     max-width: none;
@@ -8795,6 +8835,10 @@ body {
     font-weight: 500;
     transition: background 0.15s, color 0.15s;
   }
+
+  /* La colonne a sa propre pastille, pleine largeur : celle de la barre du
+     bas n'a plus de sens ici. */
+  .nav-btn::before { display: none; }
 
   .nav-btn:hover {
     background: rgba(255, 255, 255, 0.05);
