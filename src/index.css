@@ -9915,55 +9915,103 @@ body {
    Un palier par carte, le coffre à la couleur de ce qu'il garantit.
    ────────────────────────────────────────────────────────────── */
 
+/* La piste des paliers.
+ *
+ * Cent cartes bordées de cent cinquante pixels, c'était cent fois le même
+ * cadre et quinze mille pixels de page. C'est devenu un rail : un trait
+ * vertical que les paliers franchis remplissent, un point par niveau, et
+ * le coffre posé à côté. On voit enfin où l'on en est dans la saison, ce
+ * qu'une pile de cartes ne disait pas. */
 .bp-piste {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  padding-left: 1.4rem;
+}
+
+/* Le rail lui-même, derrière les points. */
+.bp-piste::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.42rem;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--accent) 0 var(--parcouru, 0%),
+    var(--border) var(--parcouru, 0%) 100%
+  );
 }
 
 .bp-palier {
   position: relative;
   display: grid;
-  grid-template-columns: 62px 1fr;
-  grid-template-areas: 'niveau coffre' 'niveau texte';
+  grid-template-columns: 2.6rem 60px 1fr;
+  grid-template-areas: 'niveau coffre texte';
   align-items: center;
-  gap: 0 0.6rem;
-  padding: 0.7rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-card);
+  gap: 0 0.7rem;
+  padding: 0.45rem 0.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
 }
 
-/* Un palier franchi s'efface : il n'y a plus rien à y faire, et cent cartes
-   au même contraste donnaient une page sans relief. */
-.bp-palier.atteint {
-  opacity: 0.55;
+.bp-palier:last-child { border-bottom: 0; }
+
+/* Le point du rail. Plein tant que le palier est franchi, creux après :
+   le trait se lit alors comme une jauge. */
+.bp-palier::before {
+  content: '';
+  position: absolute;
+  left: -1.16rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2px var(--border);
 }
 
+/* Un palier franchi s'efface : il n'y a plus rien à y faire, et cent
+   lignes au même contraste donnaient une page sans relief. */
+.bp-palier.atteint { opacity: 0.5; }
+
+.bp-palier.atteint::before {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+/* Le prochain : le seul en pleine lumière, avec un halo sur son point. */
 .bp-palier.prochain {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 6px 20px rgba(var(--accent-rgb), 0.18);
   opacity: 1;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), transparent 80%);
+  box-shadow: inset 2px 0 0 var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.bp-palier.prochain::before {
+  width: 13px;
+  height: 13px;
+  left: -1.3rem;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.2);
 }
 
 .bp-palier-niveau {
   grid-area: niveau;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
+  align-items: flex-start;
+  gap: 0;
 }
 
-.bp-palier-kicker {
-  font-size: 0.55rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
-}
+/* Le mot « Niveau » cent fois de suite n'apprend rien : le rail dit déjà
+   que ce sont des paliers. */
+.bp-palier-kicker { display: none; }
 
 .bp-palier-num {
-  font-size: 1.9rem;
+  font-size: 1.15rem;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -9974,23 +10022,22 @@ body {
 }
 
 .bp-palier-coche {
-  display: inline-flex;
-  color: var(--accent);
+  display: none;
 }
 
 .bp-palier-coffre {
   grid-area: coffre;
   display: flex;
   justify-content: center;
-  padding: 0.2rem 0;
+  padding: 0;
 }
 
 .bp-palier-texte {
   grid-area: texte;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
+  justify-content: flex-start;
+  gap: 0.3rem;
 }
 
 .bp-palier-titre {
@@ -10019,10 +10066,13 @@ body {
 /* Posé sur le bord haut de la carte, et non dans le flux : la carte du
    prochain palier garde la même hauteur que les quatre-vingt-dix-neuf
    autres. */
+/* L'étiquette « Prochain » se cale dans la ligne depuis que les paliers
+   n'ont plus de cadre : à cheval sur le bord, elle flottait dans le vide. */
 .bp-palier-prochain {
   position: absolute;
-  top: -0.5rem;
-  right: 0.8rem;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
   padding: 0.1rem 0.45rem;
   border-radius: 99px;
   background: var(--accent);

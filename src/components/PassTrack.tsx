@@ -39,7 +39,12 @@ export default function PassTrack({
   }, []);
 
   return (
-    <div className="bp-piste">
+    /* La part du rail déjà parcourue, pour que le trait se lise comme une
+       jauge et non comme une simple ligne de reliure. */
+    <div
+      className="bp-piste"
+      style={{ ['--parcouru' as string]: `${Math.min(100, (currentLevel / levels.length) * 100)}%` }}
+    >
       {levels.map((lvl) => {
         const atteint = currentLevel >= lvl.level;
         const prochain = currentLevel === lvl.level - 1;
@@ -60,7 +65,7 @@ export default function PassTrack({
             </div>
 
             <div className="bp-palier-coffre">
-              <CoffrePass rarity={rarete} size={88} />
+              <CoffrePass rarity={rarete} size={52} />
             </div>
 
             <div className="bp-palier-texte">
