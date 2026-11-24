@@ -164,11 +164,13 @@
    la récompense des vingt-cinq portes, elle doit se distinguer sans
    inventer un objet de plus. */
 .avt-slot-or {
-  border-color: rgba(255, 214, 10, 0.55);
-  background: linear-gradient(135deg, rgba(255, 214, 10, 0.22), rgba(255, 214, 10, 0.05));
+  border-color: rgba(255, 214, 10, 0.75);
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.3), rgba(255, 214, 10, 0.06));
+  box-shadow: 0 0 18px rgba(255, 214, 10, 0.12);
 }
 
 .avt-slot-or svg { color: var(--avt-or, #ffd60a); }
+.avt-slot-or .avt-slot-titre { color: var(--avt-or, #ffd60a); }
 
 .avt-slot {
   display: flex;
