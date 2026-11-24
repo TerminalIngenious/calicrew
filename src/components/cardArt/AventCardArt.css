@@ -78,7 +78,7 @@
 .av-haut {
   position: absolute;
   z-index: 2;
-  top: 8.5cqw;
+  top: 10.5cqw;
   left: 4.5cqw;
   right: 4.5cqw;
   display: flex;
@@ -90,8 +90,10 @@
   font-size: 4cqw;
   font-weight: 800;
   letter-spacing: 0.22em;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 0.3cqw 1cqw rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.92);
+  /* Deux ombres : la marque se pose aussi sur des photos claires, où une
+     seule ombre douce la laissait illisible. */
+  text-shadow: 0 0.2cqw 0.5cqw rgba(0, 0, 0, 0.95), 0 0.4cqw 2cqw rgba(0, 0, 0, 0.8);
 }
 
 .av-marque em {
