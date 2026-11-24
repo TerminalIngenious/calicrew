@@ -1,5 +1,21 @@
 import type { Exercise } from '../types';
 
+/**
+ * Le catalogue, et l'unité de chaque exercice.
+ *
+ * `defaultUnit: 'seconds'` pour tout ce qui se tient au lieu de se compter.
+ * L'unité n'est pas qu'un libellé : une série en secondes range sa valeur
+ * dans le même champ qu'une série en reps, et c'est l'unité qui dit aux
+ * stats de ne pas l'additionner aux répétitions (voir lib/stats.ts). Un
+ * mountain climber en « reps » offrait donc 90 répétitions pour 90 secondes
+ * d'effort, dans les totaux comme dans le classement.
+ *
+ * Le catalogue est aussi la vraie parade : quand un exercice manque, il est
+ * recréé à la main, et le sélecteur d'unité reste sur « Reps » par défaut.
+ * Tout ce qui revenait souvent en exercice personnalisé est donc entré ici,
+ * avec la bonne unité.
+ */
+
 export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'pull-ups', name: 'Tractions', category: 'pull', canBeWeighted: true },
   { id: 'chin-ups', name: 'Chin-ups', category: 'pull', canBeWeighted: true },
@@ -12,6 +28,11 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'oiseau', name: 'Oiseau', category: 'pull', canBeWeighted: true },
   { id: 'shrugs', name: 'Shrugs', category: 'pull', canBeWeighted: true },
   { id: 'pull-over', name: 'Pull-over', category: 'pull', canBeWeighted: true },
+  { id: 'tirage-vertical', name: 'Tirage vertical', category: 'pull', canBeWeighted: true },
+  { id: 'tirage-horizontal', name: 'Tirage horizontal', category: 'pull', canBeWeighted: true },
+  { id: 'face-pull', name: 'Face pull', category: 'pull', canBeWeighted: true },
+  { id: 'extension-lombaire', name: 'Extension lombaire', category: 'pull', canBeWeighted: true },
+  { id: 'suspension-barre', name: 'Suspension à la barre', category: 'pull', canBeWeighted: true, defaultUnit: 'seconds' },
   { id: 'dips', name: 'Dips', category: 'push', canBeWeighted: true },
   { id: 'push-ups', name: 'Pompes', category: 'push', canBeWeighted: true },
   { id: 'diamond-push-ups', name: 'Pompes diamant', category: 'push', canBeWeighted: true },
@@ -25,6 +46,11 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'barre-au-front', name: 'Barre au front', category: 'push', canBeWeighted: true },
   { id: 'elevations-laterales', name: 'Élévations latérales', category: 'push', canBeWeighted: true },
   { id: 'elevations-frontales', name: 'Élévations frontales', category: 'push', canBeWeighted: true },
+  { id: 'ecarte-halteres', name: 'Écarté haltères', category: 'push', canBeWeighted: true },
+  { id: 'chest-press', name: 'Chest press', category: 'push', canBeWeighted: true },
+  { id: 'dips-sur-banc', name: 'Dips sur banc', category: 'push', canBeWeighted: true },
+  { id: 'hand-release-push-ups', name: 'Pompes mains levées', category: 'push' },
+  { id: 'atr-tenue', name: 'ATR (tenue)', category: 'push', defaultUnit: 'seconds' },
   { id: 'pistol-squats', name: 'Pistol squats', category: 'legs', canBeWeighted: true },
   { id: 'squats', name: 'Squats', category: 'legs', canBeWeighted: true },
   { id: 'lunges', name: 'Fentes', category: 'legs', canBeWeighted: true },
@@ -32,11 +58,31 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'souleve-de-terre', name: 'Soulevé de terre', category: 'legs', canBeWeighted: true },
   { id: 'souleve-de-terre-roumain', name: 'Soulevé de terre roumain', category: 'legs', canBeWeighted: true },
   { id: 'hip-thrust', name: 'Hip thrust', category: 'legs', canBeWeighted: true },
+  { id: 'squat-bulgare', name: 'Squat bulgare', category: 'legs', canBeWeighted: true },
+  { id: 'presse-a-cuisses', name: 'Presse à cuisses', category: 'legs', canBeWeighted: true },
+  { id: 'leg-extension', name: 'Leg extension', category: 'legs', canBeWeighted: true },
+  { id: 'leg-curl', name: 'Leg curl', category: 'legs', canBeWeighted: true },
+  { id: 'abducteurs', name: 'Abducteurs', category: 'legs', canBeWeighted: true },
+  { id: 'adducteurs', name: 'Adducteurs', category: 'legs', canBeWeighted: true },
+  { id: 'chaise', name: 'Chaise', category: 'legs', defaultUnit: 'seconds' },
   { id: 'l-sit', name: 'L-sit', category: 'core', canBeWeighted: true, defaultUnit: 'seconds' },
   { id: 'leg-raises', name: 'Relevés de jambes', category: 'core', canBeWeighted: true },
   { id: 'dragon-flags', name: 'Dragon flags', category: 'core', canBeWeighted: true },
   { id: 'crunch', name: 'Crunch', category: 'core', canBeWeighted: true },
   { id: 'gainage', name: 'Gainage', category: 'core', defaultUnit: 'seconds' },
+  { id: 'gainage-lateral', name: 'Gainage latéral', category: 'core', defaultUnit: 'seconds' },
+  { id: 'hollow-hold', name: 'Hollow hold', category: 'core', defaultUnit: 'seconds' },
+  { id: 'bateau', name: 'Bateau', category: 'core', defaultUnit: 'seconds' },
+  { id: 'superman', name: 'Superman', category: 'core', defaultUnit: 'seconds' },
+  // Les grimpeurs : un mouvement qu'on ne compte pas, on le tient. C'est
+  // l'exercice qui revenait le plus souvent recréé à la main, en reps.
+  { id: 'mountain-climbers', name: 'Mountain climbers', category: 'core', defaultUnit: 'seconds' },
+  { id: 'sit-ups', name: 'Sit-ups', category: 'core', canBeWeighted: true },
+  { id: 'russian-twist', name: 'Russian twist', category: 'core', canBeWeighted: true },
+  { id: 'knees-to-elbow', name: 'Knees to elbow', category: 'core' },
+  { id: 'battements-de-jambes', name: 'Battements de jambes', category: 'core' },
+  { id: 'touches-epaules', name: "Touchés d'épaules en planche", category: 'core' },
+  { id: 'lever-de-bassin', name: 'Lever de bassin', category: 'core', canBeWeighted: true },
   { id: 'planche', name: 'Planche', category: 'skill', canBeWeighted: true, defaultUnit: 'seconds' },
   { id: 'front-lever', name: 'Front lever', category: 'skill', canBeWeighted: true, defaultUnit: 'seconds' },
   { id: 'back-lever', name: 'Back lever', category: 'skill', canBeWeighted: true, defaultUnit: 'seconds' },
@@ -67,10 +113,15 @@ export const DEFAULT_EXERCISES: Exercise[] = [
   { id: 'box-jumps', name: 'Box jumps', category: 'crossfit' },
   { id: 'wall-balls', name: 'Wall balls', category: 'crossfit', canBeWeighted: true },
   { id: 'double-unders', name: 'Double unders', category: 'crossfit' },
+  { id: 'corde-a-sauter', name: 'Corde à sauter', category: 'crossfit', defaultUnit: 'seconds' },
+  { id: 'montees-de-genoux', name: 'Montées de genoux', category: 'crossfit', defaultUnit: 'seconds' },
+  { id: 'jumping-jacks', name: 'Jumping jacks', category: 'crossfit' },
   { id: 'kettlebell-swing', name: 'Kettlebell swing', category: 'crossfit', canBeWeighted: true },
   { id: 'goblet-squat', name: 'Goblet squat', category: 'crossfit', canBeWeighted: true },
   { id: 'turkish-get-up', name: 'Turkish get-up', category: 'crossfit', canBeWeighted: true },
   { id: 'dumbbell-snatch', name: 'Arraché haltère', category: 'crossfit', canBeWeighted: true },
+  { id: 'renegade-rows', name: 'Renegade rows', category: 'crossfit', canBeWeighted: true },
+  { id: 'devil-press', name: 'Devil press', category: 'crossfit', canBeWeighted: true },
   { id: 'farmers-walk', name: "Farmer's walk", category: 'crossfit', canBeWeighted: true, defaultUnit: 'seconds' },
   { id: 'sled-push', name: 'Poussée de traîneau', category: 'crossfit', canBeWeighted: true, defaultUnit: 'seconds' },
   // Machines : mesurées au temps, l'app n'a pas de champ mètres hors running.
