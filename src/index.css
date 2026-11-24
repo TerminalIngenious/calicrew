@@ -4282,6 +4282,137 @@ body {
   color: var(--text-muted);
 }
 
+/* ══ La séance en cours ══ */
+
+.seance-live {
+  padding-top: 0 !important;
+}
+
+.liv-entete {
+  position: relative;
+  margin: 0 -1rem 1.1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1rem;
+  overflow: hidden;
+}
+
+.liv-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+}
+
+.liv-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.liv-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.liv-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.liv-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+/* Le chrono en gros, le compte de séries à côté : ce sont les deux seules
+   choses qu'on vient lire entre deux séries, et elles étaient toutes les
+   deux en petit, à deux endroits différents. */
+.liv-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+  padding-left: 0.1rem;
+}
+
+.liv-chrono {
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.liv-series {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* La progression ferme le bandeau d'un bord à l'autre. En gélule de 36 px
+   au milieu de la page, elle prenait la place d'une carte pour une seule
+   information. */
+.liv-barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.liv-barre-fill {
+  height: 100%;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+  transition: width 0.3s ease;
+}
+
+/* Le bouton de pause perd son contour : c'est une commande posée sur la
+   page, pas une carte de plus. */
+.seance-live .rest-start-btn {
+  border-color: transparent;
+  border-radius: 999px;
+}
+
+/* Les tours du circuit perdent leur cadre : chaque exercice porte déjà le
+   sien à l'intérieur, et un cadre autour de six cadres n'apprend rien. Un
+   filet et le titre suffisent à dire où un tour commence. */
+.seance-live .circuit-round {
+  padding: 0.9rem 0 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.seance-live .circuit-round:first-child { border-top: 0; padding-top: 0.2rem; }
+
+.seance-live .circuit-round-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
 /* Tabs */
 .bp-tabs {
   display: flex;

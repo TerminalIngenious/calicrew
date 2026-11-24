@@ -862,15 +862,30 @@ export default function LiveSession() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <button className="icon-btn" onClick={() => navigate('/')}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1>Séance en cours</h1>
-        <div className="session-timer">
-          <Timer size={16} />
-          <span>{formatTime(elapsed)}</span>
+    <div className="page seance-live">
+      {/* Le bandeau de la séance.
+       *
+       * Le chrono était une mention de 0,9 rem à droite du titre, et les
+       * séries faites vivaient plus bas dans une gélule à part. Ce sont
+       * pourtant les deux seules choses qu'on regarde entre deux séries :
+       * le chrono passe en gros, le compte à côté, et la progression devient
+       * le trait qui ferme le bandeau. */}
+      <header className="liv-entete">
+        <div className="liv-entete-fond" />
+        <div className="liv-entete-contenu">
+          <div className="liv-haut">
+            <button className="liv-retour" onClick={() => navigate('/')} aria-label="Revenir à l'accueil">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="liv-kicker">Séance en cours</span>
+          </div>
+          <div className="liv-mesures">
+            <span className="liv-chrono">{formatTime(elapsed)}</span>
+            <span className="liv-series">{completedSets}/{totalSets} séries</span>
+          </div>
+        </div>
+        <div className="liv-barre">
+          <div className="liv-barre-fill" style={{ width: `${progress}%` }} />
         </div>
       </header>
 
@@ -922,13 +937,6 @@ export default function LiveSession() {
             </div>
           </div>
         )}
-      </div>
-
-      <div className="progress-bar-container">
-        <div className="progress-bar" style={{ width: `${progress}%` }} />
-        <span className="progress-label">
-          {completedSets}/{totalSets} séries
-        </span>
       </div>
 
       {session.exercises.length > 1 && (
