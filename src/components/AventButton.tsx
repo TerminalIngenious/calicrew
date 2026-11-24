@@ -43,7 +43,7 @@ export default function AventButton({ avent }: { avent?: AventProgress }) {
       <Sapin />
       <div className="avt-entree-texte">
         <span className="avt-entree-kicker">Événement</span>
-        <span className="avt-entree-titre">Branlette Estivale</span>
+        <span className="avt-entree-titre">Branlette Hivernale</span>
         <span className="avt-entree-sous">
           {av.portes.length} / {CASES} cases ouvertes
         </span>

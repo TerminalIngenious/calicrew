@@ -3,7 +3,7 @@ import type { AventProgress, Quest, RankBadge } from '../types';
 export type { AventProgress };
 
 /**
- * Branlette Estivale — le calendrier de l'avent, du 1er au 25 décembre 2026.
+ * Branlette Hivernale — le calendrier de l'avent, du 1er au 25 décembre 2026.
  *
  * Quarante-cinq cartes pour vingt-cinq cases : personne ne peut tout avoir,
  * et surtout personne n'a la même collection le 25 au soir. C'est tout le
@@ -39,6 +39,50 @@ export const COULEUR_RARETE: Record<RareteAvent, string> = {
   commune: '#8e8e93',
 };
 
+/**
+ * Les cinq stats imprimées sur la carte, dans l'ordre d'affichage.
+ *
+ * Deux se prennent au sérieux — l'endurance et la souplesse. Deux sont la
+ * blague : personne ne dépasse 65 en jeu d'acteur, et la crédibilité du
+ * scénario plafonne à 30, parce qu'un plombier qui sonne à la porte n'a
+ * jamais convaincu personne. La cinquième, la notoriété, est la seule qui
+ * classe vraiment les gens, et c'est elle qui pèse le plus dans la note.
+ */
+export type StatsAvent = {
+  end: number;
+  sou: number;
+  jeu: number;
+  sce: number;
+  pop: number;
+};
+
+export const LIBELLE_STAT: Record<keyof StatsAvent, string> = {
+  end: 'END',
+  sou: 'SOU',
+  jeu: 'JEU',
+  sce: 'SCÉ',
+  pop: 'POP',
+};
+
+export const NOM_STAT: Record<keyof StatsAvent, string> = {
+  end: 'Endurance',
+  sou: 'Souplesse',
+  jeu: "Jeu d'acteur",
+  sce: 'Crédibilité du scénario',
+  pop: 'Notoriété',
+};
+
+/**
+ * La note en gros sur la carte.
+ *
+ * Pas une moyenne : les deux stats comiques sont volontairement basses, et
+ * une moyenne plate aurait collé 45 à tout le monde. La notoriété et
+ * l'endurance font les deux tiers de la note, le reste ajuste.
+ */
+export function noteGlobale(st: StatsAvent): number {
+  return Math.round(0.35 * st.pop + 0.3 * st.end + 0.2 * st.sou + 0.1 * st.jeu + 0.05 * st.sce);
+}
+
 export interface CarteAvent {
   /** Identifiant et nom de fichier image. Ne change jamais. */
   slug: string;
@@ -48,6 +92,9 @@ export interface CarteAvent {
   numero: number;
   /** La photo, dans public/avent/. Absente tant qu'elle n'est pas fournie. */
   image: string;
+  stats: StatsAvent;
+  /** Calculée une fois au chargement, jamais en cours de rendu. */
+  note: number;
 }
 
 /*
@@ -62,60 +109,107 @@ export interface CarteAvent {
  * légendaires, 10 épiques, 14 rares, 16 communes. Une ligne à changer si le
  * groupe n'est pas d'accord — et il ne le sera pas.
  */
-const VIVIER: [string, string, RareteAvent][] = [
-  ['bunny-blue', 'Bunny Blue', 'epique'],
-  ['eva-elfie', 'Eva Elfie', 'legendaire'],
-  ['sweetie-fox', 'Sweetie Fox', 'legendaire'],
-  ['mia-khalifa', 'Mia Khalifa', 'legendaire'],
-  ['khalamite', 'Khalamité', 'rare'],
-  ['angela-white', 'Angela White', 'epique'],
-  ['manuel-ferrara', 'Manuel Ferrara', 'epique'],
-  ['gatouzz', 'Gatouzz', 'rare'],
-  ['tiffany-leidi', 'Tiffany Leidi', 'rare'],
-  ['abella-danger', 'Abella Danger', 'epique'],
-  ['lana-rhodes', 'Lana Rhoades', 'legendaire'],
-  ['ad-laurent', 'Ad Laurent', 'rare'],
-  ['angel-heaven', 'Angel Heaven', 'commune'],
-  ['manoah-la-branche', 'Manoah La Branche', 'rare'],
-  ['johnny-sins', 'Johnny Sins', 'legendaire'],
-  ['jordi-el-nino-polla', 'Jordi El Niño Polla', 'epique'],
-  ['keiran-lee', 'Keiran Lee', 'rare'],
-  ['violet-myers', 'Violet Myers', 'rare'],
-  ['little-angel', 'Little Angel', 'commune'],
-  ['mia-malkova', 'Mia Malkova', 'epique'],
-  ['carla-vyx', 'Carla Vyx', 'commune'],
-  ['aphrodixia', 'Aphrodixia', 'commune'],
-  ['comatozze', 'Comatozze', 'rare'],
-  ['nicole-aniston', 'Nicole Aniston', 'epique'],
-  ['angela-doll', 'Angela Doll', 'commune'],
-  ['margot-dulac', 'Margot Dulac', 'rare'],
-  ['britney-amber', 'Britney Amber', 'commune'],
-  ['danny-d', 'Danny D', 'epique'],
-  ['emma-hix', 'Emma Hix', 'commune'],
-  ['angel-youngs', 'Angel Youngs', 'commune'],
-  ['luxury-girl', 'Luxury Girl', 'rare'],
-  ['hayley-davies', 'Hayley Davies', 'commune'],
-  ['gabbie-carter', 'Gabbie Carter', 'epique'],
-  ['savannah-bond', 'Savannah Bond', 'rare'],
-  ['clea-gaultier', 'Clea Gaultier', 'rare'],
-  ['autumn-falls', 'Autumn Falls', 'epique'],
-  ['ruth-lee', 'Ruth Lee', 'commune'],
-  ['hellolimoon', 'Hellolimoon', 'commune'],
-  ['lexis-star', 'Lexis Star', 'commune'],
-  ['ester-muniz', 'Ester Muniz', 'commune'],
-  ['julie-jess', 'Julie Jess', 'rare'],
-  ['reislin', 'Reislin', 'rare'],
-  ['anastangel', 'Anastangel', 'commune'],
-  ['gina-wap', 'Gina Wap', 'commune'],
-  ['elly-clutch', 'Elly Clutch', 'commune'],
+const VIVIER: [string, string, RareteAvent, StatsAvent][] = [
+  ['bunny-blue', 'Bunny Blue', 'epique',
+    { end: 81, sou: 73, jeu: 29, sce: 16, pop: 78 }],
+  ['eva-elfie', 'Eva Elfie', 'legendaire',
+    { end: 84, sou: 79, jeu: 46, sce: 18, pop: 96 }],
+  ['sweetie-fox', 'Sweetie Fox', 'legendaire',
+    { end: 88, sou: 94, jeu: 52, sce: 23, pop: 95 }],
+  ['mia-khalifa', 'Mia Khalifa', 'legendaire',
+    { end: 80, sou: 74, jeu: 38, sce: 11, pop: 99 }],
+  ['khalamite', 'Khalamité', 'rare',
+    { end: 66, sou: 59, jeu: 35, sce: 22, pop: 72 }],
+  ['angela-white', 'Angela White', 'epique',
+    { end: 91, sou: 82, jeu: 57, sce: 21, pop: 86 }],
+  ['manuel-ferrara', 'Manuel Ferrara', 'epique',
+    { end: 96, sou: 64, jeu: 41, sce: 12, pop: 85 }],
+  ['gatouzz', 'Gatouzz', 'rare',
+    { end: 61, sou: 47, jeu: 52, sce: 28, pop: 74 }],
+  ['tiffany-leidi', 'Tiffany Leidi', 'rare',
+    { end: 70, sou: 64, jeu: 38, sce: 19, pop: 71 }],
+  ['abella-danger', 'Abella Danger', 'epique',
+    { end: 90, sou: 96, jeu: 44, sce: 15, pop: 88 }],
+  ['lana-rhodes', 'Lana Rhoades', 'legendaire',
+    { end: 88, sou: 77, jeu: 34, sce: 14, pop: 97 }],
+  ['ad-laurent', 'Ad Laurent', 'rare',
+    { end: 58, sou: 44, jeu: 49, sce: 25, pop: 73 }],
+  ['angel-heaven', 'Angel Heaven', 'commune',
+    { end: 54, sou: 52, jeu: 24, sce: 14, pop: 41 }],
+  ['manoah-la-branche', 'Manoah La Branche', 'rare',
+    { end: 67, sou: 55, jeu: 36, sce: 21, pop: 65 }],
+  ['johnny-sins', 'Johnny Sins', 'legendaire',
+    { end: 95, sou: 61, jeu: 63, sce: 9, pop: 98 }],
+  ['jordi-el-nino-polla', 'Jordi El Niño Polla', 'epique',
+    { end: 69, sou: 58, jeu: 48, sce: 7, pop: 86 }],
+  ['keiran-lee', 'Keiran Lee', 'rare',
+    { end: 85, sou: 51, jeu: 30, sce: 11, pop: 69 }],
+  ['violet-myers', 'Violet Myers', 'rare',
+    { end: 72, sou: 63, jeu: 26, sce: 15, pop: 68 }],
+  ['little-angel', 'Little Angel', 'commune',
+    { end: 51, sou: 56, jeu: 22, sce: 12, pop: 38 }],
+  ['mia-malkova', 'Mia Malkova', 'epique',
+    { end: 83, sou: 97, jeu: 39, sce: 19, pop: 87 }],
+  ['carla-vyx', 'Carla Vyx', 'commune',
+    { end: 57, sou: 49, jeu: 27, sce: 18, pop: 44 }],
+  ['aphrodixia', 'Aphrodixia', 'commune',
+    { end: 49, sou: 53, jeu: 25, sce: 15, pop: 36 }],
+  ['comatozze', 'Comatozze', 'rare',
+    { end: 59, sou: 48, jeu: 41, sce: 24, pop: 62 }],
+  ['nicole-aniston', 'Nicole Aniston', 'epique',
+    { end: 79, sou: 71, jeu: 43, sce: 17, pop: 82 }],
+  ['angela-doll', 'Angela Doll', 'commune',
+    { end: 52, sou: 47, jeu: 21, sce: 13, pop: 39 }],
+  ['margot-dulac', 'Margot Dulac', 'rare',
+    { end: 64, sou: 61, jeu: 33, sce: 18, pop: 60 }],
+  ['britney-amber', 'Britney Amber', 'commune',
+    { end: 60, sou: 45, jeu: 29, sce: 16, pop: 47 }],
+  ['danny-d', 'Danny D', 'epique',
+    { end: 92, sou: 55, jeu: 33, sce: 10, pop: 84 }],
+  ['emma-hix', 'Emma Hix', 'commune',
+    { end: 55, sou: 58, jeu: 23, sce: 11, pop: 43 }],
+  ['angel-youngs', 'Angel Youngs', 'commune',
+    { end: 53, sou: 51, jeu: 26, sce: 14, pop: 40 }],
+  ['luxury-girl', 'Luxury Girl', 'rare',
+    { end: 68, sou: 66, jeu: 29, sce: 16, pop: 63 }],
+  ['hayley-davies', 'Hayley Davies', 'commune',
+    { end: 56, sou: 54, jeu: 20, sce: 12, pop: 42 }],
+  ['gabbie-carter', 'Gabbie Carter', 'epique',
+    { end: 76, sou: 69, jeu: 31, sce: 20, pop: 79 }],
+  ['savannah-bond', 'Savannah Bond', 'rare',
+    { end: 77, sou: 58, jeu: 34, sce: 13, pop: 66 }],
+  ['clea-gaultier', 'Clea Gaultier', 'rare',
+    { end: 71, sou: 62, jeu: 37, sce: 20, pop: 67 }],
+  ['autumn-falls', 'Autumn Falls', 'epique',
+    { end: 74, sou: 72, jeu: 27, sce: 13, pop: 77 }],
+  ['ruth-lee', 'Ruth Lee', 'commune',
+    { end: 48, sou: 59, jeu: 24, sce: 17, pop: 35 }],
+  ['hellolimoon', 'Hellolimoon', 'commune',
+    { end: 50, sou: 55, jeu: 28, sce: 19, pop: 45 }],
+  ['lexis-star', 'Lexis Star', 'commune',
+    { end: 47, sou: 46, jeu: 22, sce: 13, pop: 33 }],
+  ['ester-muniz', 'Ester Muniz', 'commune',
+    { end: 58, sou: 50, jeu: 25, sce: 15, pop: 37 }],
+  ['julie-jess', 'Julie Jess', 'rare',
+    { end: 63, sou: 57, jeu: 28, sce: 17, pop: 58 }],
+  ['reislin', 'Reislin', 'rare',
+    { end: 65, sou: 70, jeu: 31, sce: 23, pop: 64 }],
+  ['anastangel', 'Anastangel', 'commune',
+    { end: 46, sou: 57, jeu: 23, sce: 16, pop: 34 }],
+  ['gina-wap', 'Gina Wap', 'commune',
+    { end: 59, sou: 44, jeu: 27, sce: 12, pop: 46 }],
+  ['elly-clutch', 'Elly Clutch', 'commune',
+    { end: 52, sou: 48, jeu: 21, sce: 14, pop: 32 }],
 ];
 
-export const CARTES: CarteAvent[] = VIVIER.map(([slug, nom, rarete], i) => ({
+export const CARTES: CarteAvent[] = VIVIER.map(([slug, nom, rarete, stats], i) => ({
   slug,
   nom,
   rarete,
   numero: i + 1,
   image: `/avent/${slug}.webp`,
+  stats,
+  note: noteGlobale(stats),
 }));
 
 export const TOTAL_CARTES = CARTES.length;

@@ -10,6 +10,9 @@
   container-type: inline-size;
   width: 100%;
   aspect-ratio: 1086 / 1448;
+  /* La profondeur du retournement. Posée ici et pas sur le pivot : une
+     perspective sur l'élément qui tourne lui-même ne se voit pas. */
+  perspective: 1400px;
   --or: #ffd60a;
 }
 
@@ -17,6 +20,32 @@
 .av-carte.rarete-epique { --teinte: #bf5af2; --teinte-sombre: #4a2165; }
 .av-carte.rarete-rare { --teinte: #64d2ff; --teinte-sombre: #15455c; }
 .av-carte.rarete-commune { --teinte: #a9b0bb; --teinte-sombre: #333a44; }
+
+.av-carte.retournable { cursor: pointer; }
+
+/* ── Le retournement ── */
+
+.av-pivot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.3, 0.9, 0.25, 1);
+}
+
+.av-carte.au-dos .av-pivot { transform: rotateY(180deg); }
+
+.av-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.av-verso { transform: rotateY(180deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .av-pivot { transition: none; }
+}
 
 .av-cadre {
   width: 100%;
@@ -46,8 +75,7 @@
 }
 
 /* Le repli quand la photo n'est pas encore là : des initiales sur un fond
-   givré, et pas un cadre vide. La carte doit être montrable avant que les
-   quarante-cinq images soient détourées. */
+   givré, et pas un cadre vide. */
 .av-sans-photo {
   position: absolute;
   inset: 0;
@@ -66,15 +94,14 @@
   color: rgba(255, 255, 255, 0.12);
 }
 
+/* Le voile remonte plus haut qu'avant : il y a désormais cinq stats sous le
+   nom, et elles doivent rester lisibles sur n'importe quelle photo. */
 .av-voile {
   position: absolute;
-  inset: 40% 0 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(4, 6, 11, 0.72) 52%, rgba(4, 6, 11, 0.96) 100%);
+  inset: 30% 0 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(4, 6, 11, 0.74) 44%, rgba(4, 6, 11, 0.97) 100%);
 }
 
-/* Le bandeau haut passe sous la ligne de neige, et au-dessus d'elle dans
-   l'ordre d'empilement : collé en haut, la marque et le jour disparaissaient
-   derrière la congère. */
 .av-haut {
   position: absolute;
   z-index: 2;
@@ -82,23 +109,32 @@
   left: 4.5cqw;
   right: 4.5cqw;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
-.av-marque {
-  font-size: 4cqw;
-  font-weight: 800;
-  letter-spacing: 0.22em;
-  color: rgba(255, 255, 255, 0.92);
-  /* Deux ombres : la marque se pose aussi sur des photos claires, où une
-     seule ombre douce la laissait illisible. */
-  text-shadow: 0 0.2cqw 0.5cqw rgba(0, 0, 0, 0.95), 0 0.4cqw 2cqw rgba(0, 0, 0, 0.8);
+/* La note et l'emblème, l'un sous l'autre dans le coin : c'est la colonne
+   que l'œil lit en premier sur une carte de collection, avant le nom. */
+.av-bloc-note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6cqw;
 }
 
-.av-marque em {
-  font-style: normal;
+.av-note {
+  font-size: 13cqw;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
   color: var(--teinte);
+  text-shadow: 0 0.3cqw 1cqw rgba(0, 0, 0, 0.95);
+}
+
+.av-embleme {
+  width: 9.5cqw;
+  height: 18cqw;
+  filter: drop-shadow(0 0.3cqw 0.8cqw rgba(0, 0, 0, 0.9));
 }
 
 .av-jour {
@@ -122,7 +158,7 @@
 }
 
 .av-nom {
-  font-size: 7.6cqw;
+  font-size: 7.2cqw;
   font-weight: 800;
   line-height: 1.02;
   letter-spacing: -0.02em;
@@ -130,16 +166,51 @@
   text-shadow: 0 0.4cqw 1.6cqw rgba(0, 0, 0, 0.9);
 }
 
+/* ── Les cinq stats ──
+
+   Cinq colonnes d'égale largeur plutôt qu'une ligne de texte : les chiffres
+   s'alignent d'une carte à l'autre, et deux cartes côte à côte se comparent
+   d'un coup d'œil. La valeur passe avant le sigle, parce que c'est elle
+   qu'on vient lire. */
+.av-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5cqw;
+  padding: 1.4cqw 0;
+  border-top: 0.3cqw solid rgba(255, 255, 255, 0.18);
+  border-bottom: 0.3cqw solid rgba(255, 255, 255, 0.18);
+}
+
+.av-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2cqw;
+}
+
+.av-stat-valeur {
+  font-size: 5cqw;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.av-stat-cle {
+  font-size: 2.5cqw;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .av-pied {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 1.4cqw;
-  border-top: 0.3cqw solid rgba(255, 255, 255, 0.18);
 }
 
 .av-rarete {
-  font-size: 3.2cqw;
+  font-size: 3cqw;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -147,10 +218,74 @@
 }
 
 .av-numero {
-  font-size: 3.2cqw;
+  font-size: 3cqw;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.55);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Le dos ──
+
+   Un seul motif, en grand : l'objet de l'event emballé comme un cadeau.
+   Une carte retournée doit se reconnaître de loin, donc pas de petits
+   détails ici. */
+.av-fond-dos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3cqw;
+  background:
+    radial-gradient(70% 45% at 50% 38%, rgba(255, 255, 255, 0.08) 0%, transparent 70%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 3cqw, transparent 3cqw 6cqw),
+    linear-gradient(170deg, #16203a 0%, #080b14 100%);
+}
+
+.av-paquet {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.av-god-dos {
+  width: 36cqw;
+  height: 72cqw;
+  filter: drop-shadow(0 1cqw 2.5cqw rgba(0, 0, 0, 0.7));
+}
+
+/* Le nœud barre l'objet aux deux tiers, là où un ruban tiendrait. */
+.av-noeud {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  width: 56cqw;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0.6cqw 1.4cqw rgba(0, 0, 0, 0.6));
+}
+
+.av-dos-titre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 7cqw;
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-align: center;
+}
+
+.av-dos-titre em {
+  font-style: normal;
+  color: var(--teinte);
+}
+
+.av-dos-pied {
+  font-size: 3cqw;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* La congère sur le bord haut, posée sur le cadre lui-même : la même tuile
@@ -170,7 +305,7 @@
 
 /* La légendaire a un reflet qui balaie le cadre. Les autres n'en ont pas :
    un effet que tout le monde porte n'en est plus un. */
-.av-carte.rarete-legendaire .av-fond::after {
+.av-carte.rarete-legendaire .av-recto .av-fond::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -185,5 +320,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .av-carte.rarete-legendaire .av-fond::after { animation: none; opacity: 0.5; }
+  .av-carte.rarete-legendaire .av-recto .av-fond::after { animation: none; opacity: 0.5; }
 }

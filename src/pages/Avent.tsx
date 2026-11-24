@@ -140,7 +140,7 @@ export default function Avent() {
         </button>
         <div>
           <span className="avt-kicker">Événement</span>
-          <h1 className="avt-titre">Branlette Estivale</h1>
+          <h1 className="avt-titre">Branlette Hivernale</h1>
         </div>
       </header>
 
@@ -314,7 +314,7 @@ export default function Avent() {
       {revelee && (
         <div className="avt-revele" onClick={() => setRevelee(null)}>
           <div className="avt-revele-carte" onClick={(e) => e.stopPropagation()}>
-            <AventCardArt carte={revelee.carte} jour={revelee.jour} />
+            <AventCardArt carte={revelee.carte} jour={revelee.jour} retournable />
             <button className="avt-revele-btn" onClick={() => setRevelee(null)}>Continuer</button>
           </div>
         </div>
@@ -326,7 +326,7 @@ export default function Avent() {
             <button className="avt-apercu-fermer" onClick={() => setApercu(null)} aria-label="Fermer">
               <X size={18} />
             </button>
-            <AventCardArt carte={apercu} />
+            <AventCardArt carte={apercu} retournable />
             {(av.cartes[apercu.slug] || 0) > 1 && (
               <span className="avt-apercu-doublons">×{av.cartes[apercu.slug]} dans ta collection</span>
             )}

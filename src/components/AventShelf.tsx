@@ -42,7 +42,7 @@ export default function AventShelf({
         </div>
         <div className="ev-shelf-texte">
           <span className="ev-shelf-kicker"><Gift size={13} /> Événement</span>
-          <span className="ev-shelf-titre">Branlette Estivale</span>
+          <span className="ev-shelf-titre">Branlette Hivernale</span>
           <span className="ev-shelf-compte">{possedees} / {TOTAL_CARTES} cartes trouvées</span>
           <div className="ev-shelf-jauge">
             <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />

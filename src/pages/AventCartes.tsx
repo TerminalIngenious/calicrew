@@ -46,7 +46,7 @@ export default function AventCartes() {
         </button>
         <div className="season-page-title">
           <span className="season-slab-kicker">Événement</span>
-          <h1>Branlette Estivale</h1>
+          <h1>Branlette Hivernale</h1>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function AventCartes() {
             <button className="avt-apercu-fermer" onClick={() => setApercu(null)} aria-label="Fermer">
               <X size={18} />
             </button>
-            <AventCardArt carte={apercu} />
+            <AventCardArt carte={apercu} retournable />
             {(av.cartes[apercu.slug] || 0) > 1 && (
               <span className="avt-apercu-doublons">
                 ×{av.cartes[apercu.slug]} dans {cestMoi ? 'ta' : 'sa'} collection
