@@ -4109,6 +4109,93 @@ body {
 
 .profil .settings-row:last-child { border-bottom: 0; }
 
+/* ══ Les quêtes du pass ══
+
+   Chaque quête portait quatre éléments de cadre pour deux lignes : un
+   contour, une barre d'accent verticale, une barre de progression et une
+   pastille ronde. À huit quêtes à la suite, plus rien ne ressortait — une
+   quête finie et une quête à faire se ressemblaient. */
+
+.bp-page .bp-quest-list,
+.bp-page .bp-daily {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Le choix du lundi garde ses cartes : là, chaque quête est une case à
+   cocher qu'on prend ou qu'on laisse, et une case a besoin d'un contour.
+   Ici ce sont des lignes de suivi, pas des choix. */
+.bp-page .bp-quest:not(.quest-pickable):not(.quest-perm) {
+  position: relative;
+  display: block;
+  padding: 0.75rem 0.2rem 0.85rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  overflow: visible;
+}
+
+.bp-page .bp-quest:not(.quest-pickable):not(.quest-perm):last-child { border-bottom: 0; }
+
+/* La barre d'accent verticale disparaît : elle était de la même couleur
+   pour tous les états, donc elle ne distinguait rien. */
+.bp-page .bp-quest:not(.quest-pickable):not(.quest-perm) .bp-quest-accent { display: none; }
+
+.bp-page .bp-quest:not(.quest-pickable):not(.quest-perm) .bp-quest-body { padding: 0; }
+
+/* Prête à encaisser : un fond teinté qui court sous la ligne. C'est le seul
+   état qui demande un geste, c'est le seul à porter de la couleur. */
+.bp-page .bp-quest-ready {
+  border-color: var(--border);
+  box-shadow: none;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.1), transparent 75%);
+}
+
+/* Encaissée : la ligne s'efface. Elle reste lisible, mais elle ne dispute
+   plus l'attention à celles qui restent. */
+.bp-page .bp-quest-claimed { opacity: 0.42; }
+
+/* La progression devient un filet fin, collé au bas de la ligne et large
+   comme elle : une barre arrondie dans la carte faisait un troisième
+   cadre. */
+.bp-page .bp-quest-progress {
+  display: block;
+  margin-top: 0.45rem;
+}
+
+.bp-page .bp-quest-bar {
+  height: 2px;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.bp-page .bp-quest-bar-fill { border-radius: 0; }
+
+.bp-page .bp-quest-count {
+  display: block;
+  margin-top: 0.25rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La coche verte sans sa pastille : le vert dit déjà que c'est fait. */
+.bp-page .bp-quest-done-badge {
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--accent-green);
+}
+
+.bp-page .bp-section-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
 /* Tabs */
 .bp-tabs {
   display: flex;
