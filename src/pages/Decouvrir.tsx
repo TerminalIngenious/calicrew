@@ -389,7 +389,14 @@ export default function Decouvrir() {
       </section>
 
       <footer className="lp-pied">
-        <span>CaliCrew</span>
+        <div className="lp-pied-contact">
+          <span>CaliCrew</span>
+          {/* L'adresse en clair plutôt qu'un « Nous contacter » : sur un
+              téléphone, le lien ouvre la boîte mail, mais sur un ordinateur
+              sans client configuré il ne se passe rien — et il faut bien
+              pouvoir la recopier. */}
+          <a href="mailto:contactcalicrew@gmail.com">contactcalicrew@gmail.com</a>
+        </div>
         <Link to="/login">Ouvrir l'app</Link>
       </footer>
     </div>

@@ -467,6 +467,20 @@
   text-decoration: none;
 }
 
+/* Le nom et l'adresse l'un sous l'autre : côte à côte sur une seule ligne,
+   le pied de page débordait sur un écran de téléphone. */
+.lp-pied-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.lp-pied-contact a {
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
 /* ── Mode d'emploi, là où aucun bouton n'est possible ── */
 
 .lp-etat {
