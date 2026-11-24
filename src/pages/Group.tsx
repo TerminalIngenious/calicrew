@@ -962,19 +962,50 @@ export default function Group() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <h1>Groupe</h1>
-        <SeasonalBadge compact />
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {selectedGroup && !grandEcran && (
-            <button className="icon-btn" onClick={() => setShowChat(true)}>
-              <MessageCircle size={20} />
-            </button>
+    <div className="page groupe">
+      {/* Le bandeau porte le nom du groupe, pas le mot « Groupe » : c'est
+          l'information, et elle vivait en dessous dans une carte centrée de
+          plus. Les deux actions passent à droite du titre. */}
+      <header className="grp-entete">
+        <div className="grp-entete-fond" />
+        <div className="grp-entete-contenu">
+          <div className="grp-tete-ligne">
+            <div className="grp-tete-texte">
+              <span className="grp-kicker">Groupe</span>
+              <h1>{selectedGroup ? selectedGroup.name : 'Aucun groupe'}</h1>
+            </div>
+            <SeasonalBadge compact />
+            <div className="grp-actions">
+              {selectedGroup && !grandEcran && (
+                <button className="grp-action" onClick={() => setShowChat(true)} aria-label="Ouvrir le chat">
+                  <MessageCircle size={18} />
+                </button>
+              )}
+              <button className="grp-action" onClick={openExplore} aria-label="Explorer les groupes">
+                <Search size={18} />
+              </button>
+            </div>
+          </div>
+
+          {selectedGroup && (
+            <span className="grp-membres">
+              {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
+            </span>
           )}
-          <button className="explore-btn" onClick={openExplore}>
-            <Search size={16} /> Explorer
-          </button>
+
+          {selectedGroup && awards.length > 0 && (
+            <div className="awards-section-inline">
+              {awards.map((award, i) => (
+                <div key={i} className="award-badge">
+                  {award.icon}
+                  <div>
+                    <span className="award-label">{award.label}</span>
+                    <span className="award-winner">{award.winner}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
@@ -1108,27 +1139,6 @@ export default function Group() {
       {selectedGroup && (
         <div className="group-body">
           <div className="group-main">
-            <div className="group-info">
-              <h2>{selectedGroup.name}</h2>
-              <span className="member-count">
-                {selectedGroup.memberIds.length} membre{selectedGroup.memberIds.length > 1 ? 's' : ''}
-              </span>
-
-              {awards.length > 0 && (
-                <div className="awards-section-inline">
-                  {awards.map((award, i) => (
-                    <div key={i} className="award-badge">
-                      {award.icon}
-                      <div>
-                        <span className="award-label">{award.label}</span>
-                        <span className="award-winner">{award.winner}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {isCreator && pendingCount > 0 && (
               <section className="section pending-section">
                 <h3>

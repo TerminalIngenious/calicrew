@@ -3836,6 +3836,154 @@ body {
   margin-top: 1.5rem;
 }
 
+/* ══ La page groupe ══ */
+
+.groupe {
+  padding-top: 0 !important;
+}
+
+.grp-entete {
+  position: relative;
+  margin: 0 -1rem 1.1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) 1rem 1.2rem;
+  overflow: hidden;
+}
+
+.grp-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 64%, transparent 100%);
+}
+
+.grp-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.grp-tete-ligne {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.grp-tete-texte {
+  min-width: 0;
+}
+
+.grp-kicker {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.grp-tete-texte h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Deux icônes au lieu d'un bouton étiqueté : « Explorer » dans un cadre
+   pesait autant que le nom du groupe. */
+.grp-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.grp-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.grp-action:active { background: rgba(255, 255, 255, 0.14); }
+
+.grp-membres {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Les trophées du mois : du texte doré aligné à gauche, plus des gélules
+   centrées. L'or dit déjà que c'est un podium, le contour était en trop. */
+.groupe .awards-section-inline {
+  justify-content: flex-start;
+  gap: 0.9rem;
+  margin-top: 0.85rem;
+}
+
+.groupe .award-badge {
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+/* Le classement : des lignes à filets. Vingt et une cartes empilées, c'est
+   vingt et une fois le même cadre — et le cadre d'accent de sa propre ligne
+   se perdait au milieu. */
+.groupe .leaderboard {
+  gap: 0;
+}
+
+.groupe .leaderboard-row {
+  padding: 0.6rem 0.5rem 0.6rem 0.15rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.groupe .leaderboard-row:last-child { border-bottom: 0; }
+
+/* Sa propre ligne : un fond teinté et un liseré à gauche. Un contour
+   complet, au milieu d'une liste sans contours, se lisait comme une carte
+   oubliée. */
+.groupe .leaderboard-row.me {
+  border-color: var(--border);
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.1), transparent 70%);
+  box-shadow: inset 2px 0 0 var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Même petite capitale que partout ailleurs : le titre de la liste n'a pas
+   à peser plus que les noms qu'elle contient. */
+.groupe .leaderboard-header h3 {
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.groupe .sort-tab {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.groupe .sort-tab.active {
+  background: rgba(var(--accent-rgb), 0.18);
+}
+
 /* Tabs */
 .bp-tabs {
   display: flex;
