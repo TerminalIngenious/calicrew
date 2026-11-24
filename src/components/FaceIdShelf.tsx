@@ -1,7 +1,6 @@
 import { ScanFace, ChevronRight } from 'lucide-react';
 import { CARTES, evenementEnCours, lisFaceId, nbPossedees, TOTAL_CARTES } from '../lib/faceid';
 import type { FaceIdProgress } from '../types';
-import '../pages/FaceId.css';
 
 /**
  * La collection de l'event dans le profil.
@@ -15,10 +14,13 @@ import '../pages/FaceId.css';
 export default function FaceIdShelf({
   faceid,
   onOpen,
+  termine = false,
 }: {
   faceid?: FaceIdProgress;
   /** Ouvre la collection de l'event — celle du joueur dont c'est le profil. */
   onOpen?: () => void;
+  /** L'event est fini : le bandeau part au fond de la page, marqué comme tel. */
+  termine?: boolean;
 }) {
   const fid = lisFaceId(faceid);
   const possedees = nbPossedees(fid);
@@ -33,24 +35,25 @@ export default function FaceIdShelf({
 
   return (
     <section className="section">
-      <button className="fid-shelf" onClick={onOpen} disabled={!onOpen}>
-        <div className="fid-shelf-vignettes" aria-hidden="true">
+      <button className={`ev-shelf ${termine ? 'termine' : ''}`} onClick={onOpen} disabled={!onOpen}>
+        <div className="ev-shelf-vignettes" aria-hidden="true">
           {apercu.map((c) => (
-            <img key={c.id} src={c.image} alt="" className="fid-shelf-vignette" />
+            <img key={c.id} src={c.image} alt="" className="ev-shelf-vignette" />
           ))}
           {Array.from({ length: vides }, (_, i) => (
-            <span key={`vide-${i}`} className="fid-shelf-vignette vide" />
+            <span key={`vide-${i}`} className="ev-shelf-vignette vide" />
           ))}
         </div>
-        <div className="fid-shelf-texte">
-          <span className="fid-shelf-kicker"><ScanFace size={13} /> Événement</span>
-          <span className="fid-shelf-titre">FaceID</span>
-          <span className="fid-shelf-compte">{possedees} / {TOTAL_CARTES} visages identifiés</span>
-          <div className="fid-shelf-jauge">
+        <div className="ev-shelf-texte">
+          <span className="ev-shelf-kicker"><ScanFace size={13} /> Événement</span>
+          <span className="ev-shelf-titre">FaceID</span>
+          <span className="ev-shelf-compte">{possedees} / {TOTAL_CARTES} visages identifiés</span>
+          <div className="ev-shelf-jauge">
             <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />
           </div>
         </div>
-        {onOpen && <ChevronRight size={18} className="fid-shelf-fleche" />}
+        {termine && <span className="ev-shelf-etat">Terminé</span>}
+        {onOpen && <ChevronRight size={18} className="ev-shelf-fleche" />}
       </button>
     </section>
   );

@@ -21,6 +21,9 @@ import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import SeasonShelf from '../components/SeasonShelf';
 import FaceIdShelf from '../components/FaceIdShelf';
+import AventShelf from '../components/AventShelf';
+import { evenementEnCours as faceidEnCours, lisFaceId, nbPossedees as nbFaceId } from '../lib/faceid';
+import { enCours as aventEnCours, lis as lisAvent, nbPossedees as nbAvent } from '../lib/avent';
 import type { SeasonShelfEntry } from '../components/SeasonShelf';
 
 /** « 29 novembre » — la date d'ouverture annoncée sur un bandeau verrouillé. */
@@ -178,6 +181,39 @@ export default function Profile() {
    * distinguait plus de quelle collection venait quelle carte. Chaque saison a
    * donc son bandeau, qu'on déplie pour voir ce qu'on a.
    */
+  /*
+   * Les events, rangés par leur état.
+   *
+   * Celui qui tourne est en haut, au-dessus des saisons : c'est la
+   * collection qu'on vient regarder ce mois-ci. Les autres descendent au
+   * fond de la page sous leur propre titre — ils ne proposent plus rien,
+   * mais ce qu'on en a ramené reste consultable, et c'est tout l'intérêt
+   * d'avoir joué.
+   */
+  const aventActif = aventEnCours();
+  const faceidActif = faceidEnCours();
+  // Un event fini dont on n'a aucune carte n'a rien à montrer : son bandeau
+  // ne s'affiche pas, donc le titre ne doit pas s'afficher pour lui seul.
+  const aventFini = !aventActif && nbAvent(lisAvent(progress?.avent)) > 0;
+  const faceidFini = !faceidActif && nbFaceId(lisFaceId(progress?.faceid)) > 0;
+
+  const etagereAvent = (termine: boolean) => (
+    <AventShelf
+      avent={progress?.avent}
+      termine={termine}
+      /* Pas de page de collection par joueur pour l'avent : sur le profil
+         d'un autre, le bandeau informe sans s'ouvrir. */
+      onOpen={isOwnProfile ? () => navigate('/avent') : undefined}
+    />
+  );
+  const etagereFaceId = (termine: boolean) => (
+    <FaceIdShelf
+      faceid={progress?.faceid}
+      termine={termine}
+      onOpen={() => navigate(isOwnProfile ? '/faceid/cartes' : `/faceid/cartes/${targetUid}`)}
+    />
+  );
+
   const seasonShelves: SeasonShelfEntry[] = openedSeasons.map((s) => {
     const cards = getCardsBySet(s.id);
     const owned = RARITY_ORDER.flatMap((r) => cards.filter((c) => c.rarity === r && (ownedCards[c.id] || 0) > 0));
@@ -390,13 +426,11 @@ export default function Profile() {
           choses différentes. */}
       {badges.length > 0 && <hr className="profile-trait" />}
 
-      {/* L'event a son propre bandeau, au-dessus des saisons : ses cartes ne
-          sont pas des cartes de saison, et pendant trois semaines c'est la
+      {/* Les events en cours, au-dessus des saisons : leurs cartes ne sont
+          pas des cartes de saison, et tant que l'event tourne c'est la
           collection qu'on vient regarder en premier. */}
-      <FaceIdShelf
-        faceid={progress?.faceid}
-        onOpen={() => navigate(isOwnProfile ? '/faceid/cartes' : `/faceid/cartes/${targetUid}`)}
-      />
+      {aventActif && etagereAvent(false)}
+      {faceidActif && etagereFaceId(false)}
 
       <section className="section">
         <SeasonShelf
@@ -448,6 +482,15 @@ export default function Profile() {
             ))}
           </div>
         </section>
+      )}
+
+      {(aventFini || faceidFini) && (
+        <>
+          <hr className="profile-trait" />
+          <h3 className="profile-events-finis">Événements terminés</h3>
+          {aventFini && etagereAvent(true)}
+          {faceidFini && etagereFaceId(true)}
+        </>
       )}
 
       {/* Réglages et déconnexion rapatriés depuis l'en-tête de l'Accueil :
