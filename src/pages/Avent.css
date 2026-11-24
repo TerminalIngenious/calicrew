@@ -364,6 +364,11 @@
   justify-content: center;
   overflow: hidden;
   border-radius: var(--radius-sm);
+}
+
+/* Le creux ne se creuse qu'à l'ouverture : avant, la porte est translucide
+   et un fond noir dessous masquerait le décor imprimé. */
+.avt-case.ouverte .avt-niche {
   background: linear-gradient(160deg, #060a12, #0d1424);
   box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.9);
 }
@@ -389,8 +394,6 @@
   background: linear-gradient(to top, rgba(4, 6, 11, 0.95) 40%, transparent);
   border-bottom: 2px solid var(--teinte, #8e8e93);
 }
-
-.avt-niche-cadenas { opacity: 0.3; }
 
 /* La niche d'une case qu'on vient d'ouvrir, avant que le sachet ne soit
    déchiré : un creux sombre, ni photo ni cadenas. La carte est acquise,
@@ -419,15 +422,15 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  /* Le carton : un grain très fin, deux arêtes de lumière, une ombre
-     portée sur la droite — le côté opposé à la charnière. */
-  background:
-    repeating-linear-gradient(46deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 5px),
-    linear-gradient(150deg, #2b3a5c 0%, #1b2742 54%, #23304e 100%);
+  /* La porte est découpée dans le carton, pas posée dessus : elle ne porte
+     donc aucune couleur propre — on voit le fond et les motifs à travers,
+     et seul le trait de découpe la délimite. Le filet clair sous le trait
+     noir est l'épaisseur de la coupe, c'est lui qui donne le relief. */
+  background: transparent;
+  border: 1.5px solid rgba(0, 0, 0, 0.72);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    inset -2px 0 4px rgba(0, 0, 0, 0.45),
-    0 2px 5px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .avt-volet-jour {
@@ -439,15 +442,21 @@
 
 /* La porte du jour : dorée, et la seule qui bouge, pour qu'on la trouve
    sans chercher. */
+/* Une porte encore ouvrable : le trait s'éclaire. Pas en or — l'or est
+   réservé à Noël, et quinze cases dorées ne désigneraient plus rien. */
 .avt-case.dispo .avt-volet-face {
-  background:
-    repeating-linear-gradient(46deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
-    linear-gradient(150deg, #b8341f 0%, #7d1f12 52%, #a52d1b 100%);
+  border-color: rgba(0, 0, 0, 0.8);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 0 0 1px rgba(255, 214, 10, 0.5),
-    inset -2px 0 4px rgba(0, 0, 0, 0.4),
-    0 2px 6px rgba(0, 0, 0, 0.5);
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.5),
+    inset 0 0 10px rgba(255, 255, 255, 0.07);
+}
+
+/* Celle du jour, elle, est dorée : c'est la seule qu'on cherche. */
+.avt-case.du-jour .avt-volet-face {
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 214, 10, 0.9),
+    inset 0 0 14px rgba(255, 214, 10, 0.18),
+    0 0 12px rgba(255, 214, 10, 0.25);
 }
 
 .avt-case.dispo { cursor: pointer; }
@@ -472,36 +481,30 @@
   transform: rotateY(-118deg);
 }
 
+/* Une fois rabattu, c'est le dos du battant qu'on regarde : là, du carton,
+   sinon la porte semblerait s'être évaporée. Le chiffre disparaît — il
+   serait lu à l'envers. */
 .avt-case.ouverte .avt-volet-face {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 2px 0 10px rgba(0, 0, 0, 0.65);
-  filter: brightness(0.62);
+  background: linear-gradient(150deg, #1b2742 0%, #0e1627 56%, #16213a 100%);
+  border-color: rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 2px 0 10px rgba(0, 0, 0, 0.7);
 }
 
-/* La case de Noël : toute la largeur, sur sa propre ligne. */
-.avt-case.noel {
-  grid-column: 1 / -1;
-  aspect-ratio: auto;
-  min-height: 3.6rem;
+.avt-case.ouverte .avt-volet-jour { opacity: 0; }
+
+/* La case de Noël : carrée comme les vingt-quatre autres — vingt-cinq
+   cases sur cinq colonnes tombent juste — mais cerclée d'or. Elle se
+   distingue par son trait, pas par sa forme : une case plus grande cassait
+   la grille et se lisait comme un bandeau. */
+.avt-case.noel .avt-volet-jour { color: var(--avt-or, #ffd60a); }
+
+.avt-case.noel:not(.ouverte) .avt-volet-face {
+  border-color: rgba(0, 0, 0, 0.8);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 214, 10, 0.9),
+    inset 0 0 14px rgba(255, 214, 10, 0.18),
+    0 0 12px rgba(255, 214, 10, 0.22);
 }
-
-.avt-case.noel .avt-volet-jour { font-size: 1.3rem; color: var(--avt-or, #ffd60a); }
-
-.avt-case.noel .avt-volet-face {
-  background:
-    repeating-linear-gradient(46deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
-    linear-gradient(135deg, #8d6a07 0%, #3c2d05 50%, #7a5c06 100%);
-}
-
-/* « Noël » écrit en toutes lettres sur la dernière porte, tant qu'elle
-   n'est pas ouverte : c'est la seule qui mérite son nom. */
-.avt-case.noel:not(.ouverte) .avt-volet-jour::after {
-  content: ' décembre — Noël';
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.avt-case.noel .avt-niche-nom { font-size: 0.72rem; }
 
 .rarete-legendaire { --teinte: #ffd60a; }
 .rarete-epique { --teinte: #bf5af2; }

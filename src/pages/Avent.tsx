@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { ArrowLeft, Check, Gift, Lock, X } from 'lucide-react';
+import { ArrowLeft, Check, Gift, X } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProgress } from '../lib/useUserProgress';
@@ -304,9 +304,7 @@ export default function Avent() {
                       </>
                     ) : jour === caseEnCours ? (
                       <span className="avt-niche-vide" />
-                    ) : (
-                      <Lock size={13} className="avt-niche-cadenas" />
-                    )}
+                    ) : null}
                   </span>
 
                   {/* Le volet, charnière à gauche. Il pivote au lieu de
