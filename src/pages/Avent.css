@@ -392,6 +392,15 @@
 
 .avt-niche-cadenas { opacity: 0.3; }
 
+/* La niche d'une case qu'on vient d'ouvrir, avant que le sachet ne soit
+   déchiré : un creux sombre, ni photo ni cadenas. La carte est acquise,
+   mais elle n'a pas encore été montrée. */
+.avt-niche-vide {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(60% 50% at 50% 30%, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+}
+
 /* Le volet. Charnière à gauche, comme les portes en carton : elles se
    plient toutes du même côté, et c'est à ça qu'on les reconnaît. */
 .avt-volet {

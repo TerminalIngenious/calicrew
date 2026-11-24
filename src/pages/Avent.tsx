@@ -40,6 +40,14 @@ export default function Avent() {
   const [occupe, setOccupe] = useState(false);
   /** La carte qui vient de sortir, montrée dans son sachet. */
   const [booster, setBooster] = useState<{ carte: CarteAvent; jour?: number; dore?: boolean } | null>(null);
+  /*
+   * La case dont on est en train de découvrir la carte.
+   *
+   * Sa niche reste vide tant que le sachet n'est pas déchiré : la carte est
+   * déjà enregistrée à cet instant, donc le volet qui s'ouvre montrerait la
+   * photo avant le booster — et il ne resterait plus rien à découvrir.
+   */
+  const [caseEnCours, setCaseEnCours] = useState<number | null>(null);
   const [apercu, setApercu] = useState<CarteAvent | null>(null);
   // L'heure lue une fois à l'ouverture : relue à chaque rendu, le même écran
   // dirait autre chose selon le moment où React décide de le recalculer.
@@ -100,7 +108,10 @@ export default function Avent() {
       const carte = carteParSlug(slug);
       // Le sachet arrive une fois le volet rabattu : les deux en même temps,
       // on ne voit ni l'un ni l'autre.
-      if (carte) setTimeout(() => setBooster({ carte, jour }), 620);
+      if (carte) {
+        setCaseEnCours(jour);
+        setTimeout(() => setBooster({ carte, jour }), 620);
+      }
     } catch (err) {
       console.error('Ouverture impossible :', err);
     }
@@ -275,7 +286,8 @@ export default function Avent() {
               // battent toutes ensemble, ce n'est plus un appel, c'est une
               // alarme — et on ne sait plus laquelle est celle d'aujourd'hui.
               const duJour = dispo && jour === jourMax;
-              const carte = ouverte ? carteParSlug(calendrier[jour - 1]) : undefined;
+              // Rien à montrer tant que le sachet de cette case n'est pas ouvert.
+              const carte = ouverte && jour !== caseEnCours ? carteParSlug(calendrier[jour - 1]) : undefined;
               return (
                 <button
                   key={jour}
@@ -290,6 +302,8 @@ export default function Avent() {
                         <img className="avt-niche-photo" src={carte.image} alt="" loading="lazy" />
                         <span className={`avt-niche-nom rarete-${carte.rarete}`}>{carte.nom}</span>
                       </>
+                    ) : jour === caseEnCours ? (
+                      <span className="avt-niche-vide" />
                     ) : (
                       <Lock size={13} className="avt-niche-cadenas" />
                     )}
@@ -400,7 +414,10 @@ export default function Avent() {
           carte={booster.carte}
           jour={booster.jour}
           dore={booster.dore}
-          onFini={() => setBooster(null)}
+          onFini={() => {
+            setBooster(null);
+            setCaseEnCours(null);
+          }}
         />
       )}
 
