@@ -12806,3 +12806,82 @@ body {
     inset 0 0 0 3px var(--accent),
     0 0 0 4px rgba(var(--accent-rgb), 0.16);
 }
+
+/* ══ Les bandeaux qui restent en haut ══
+
+   Sur les deux pages à échelle — le pass et les niveaux de profil — on
+   descend sur plusieurs milliers de pixels. Le bandeau disparaissait au bout
+   de quelques paliers, et pour revoir son niveau il fallait remonter tout en
+   haut.
+
+   Il se colle donc, mais replié : à 160 px il aurait mangé un cinquième de
+   l'écran en permanence. Le titre, la saison et l'explication s'en vont ; le
+   niveau et sa barre restent, c'est ce qu'on vient vérifier en défilant. */
+
+.bp-hero-sentinelle,
+.niv-sentinelle {
+  height: 1px;
+  margin-bottom: -1px;
+}
+
+.bp-hero,
+.niv-entete {
+  position: sticky;
+  top: 0;
+  /* Au-dessus du contenu de la page, sous la barre de navigation (20) et
+     sous la guirlande de décembre (6) — un fil tendu au plafond passe
+     devant tout. */
+  z-index: 4;
+  transition: padding 0.22s ease;
+}
+
+/* Replié, le fond ne s'éteint plus en dégradé : la page défilerait au
+   travers de sa moitié basse, et on verrait le texte traverser le bandeau.
+   Il devient franc, et un filet marque le bas. */
+.bp-hero.replie .bp-hero-bg,
+.niv-entete.replie .niv-entete-fond {
+  -webkit-mask-image: none;
+  mask-image: none;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+/* Ce qui disparaît en se repliant. La hauteur et l'opacité ensemble : sans
+   la hauteur, la place resterait prise ; sans l'opacité, le texte
+   s'écraserait au lieu de s'effacer. */
+.bp-hero.replie .bp-hero-ligne,
+.bp-hero.replie .bp-hero-title,
+.bp-hero.replie .seasonal-badge,
+.niv-entete.replie .niv-haut,
+.niv-entete.replie .niv-titre,
+.niv-entete.replie .niv-sous {
+  height: 0;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bp-hero.replie,
+.niv-entete.replie {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 0.6rem);
+  padding-bottom: 0.7rem;
+  margin-bottom: 1.1rem;
+}
+
+/* Replié, le niveau se met sur une ligne au lieu d'un bloc : le gros
+   chiffre et sa mesure côte à côte tiennent en 34 px de haut. */
+.bp-hero.replie .bp-hero-niv-nombre,
+.niv-entete.replie .niv-chiffre {
+  font-size: 1.5rem;
+}
+
+.niv-entete.replie .niv-mesures {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-hero,
+  .niv-entete {
+    transition: none;
+  }
+}

@@ -18,6 +18,7 @@ import { primeAudio, playCardExplosion } from '../lib/sound';
 import type { UserProgress, Card, Quest, SportType, WeeklyQuestSelection, CardRarity } from '../types';
 import { Swords, Check, Package, Clock, Trophy, Flame, Dumbbell, PersonStanding, Timer, ChevronRight } from 'lucide-react';
 import PassTrack from '../components/PassTrack';
+import { useBandeauCollant } from '../lib/bandeauCollant';
 import BottomNav from '../components/BottomNav';
 import SeasonalBadge from '../components/SeasonalBadge';
 import Loader from '../components/Loader';
@@ -56,6 +57,7 @@ export default function BattlePass() {
   /** Rareté de la carte tirée : colore la rotation avant même la révélation. */
   const [spinRarity, setSpinRarity] = useState<CardRarity>('commune');
   const [tab, setTab] = useState<'quetes' | 'pass'>('quetes');
+  const [sentinelle, replie] = useBandeauCollant();
 
   const [selectedSports, setSelectedSports] = useState<SportType[]>([]);
   const [questPool, setQuestPool] = useState<Quest[]>([]);
@@ -450,7 +452,10 @@ export default function BattlePass() {
        * dynamique : un bandeau qui s'arrête sous la zone de sécurité laisse
        * une barre noire en haut, et l'app a l'air mal posée. Seule la
        * couleur monte là-haut — rien à lire, puisque rien n'y serait lu. */}
-      <header className="bp-hero">
+      {/* La sentinelle : elle sort de l'écran juste avant le bandeau, et
+          c'est ce qui le fait se replier. */}
+      <div ref={sentinelle} className="bp-hero-sentinelle" aria-hidden="true" />
+      <header className={`bp-hero ${replie ? 'replie' : ''}`}>
         <div className="bp-hero-bg" />
         <div className="bp-hero-content">
           <div className="bp-hero-ligne">

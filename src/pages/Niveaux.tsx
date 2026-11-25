@@ -7,6 +7,7 @@ import { getCurrentSeason } from '../lib/passes';
 import { coffreDuNiveau, niveauDepuisXp, PALIERS_BADGE } from '../lib/niveaux';
 import PisteProfil from '../components/PisteProfil';
 import type { PalierProfil } from '../components/PisteProfil';
+import { useBandeauCollant } from '../lib/bandeauCollant';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -31,6 +32,7 @@ export default function Niveaux() {
 
   const niveau = niveauDepuisXp(progress?.xp || 0);
   const [jusqua, setJusqua] = useState(0);
+  const [sentinelle, replie] = useBandeauCollant();
 
   // Le plafond réel : le niveau atteint, une avance, et ce que le joueur a
   // déroulé en plus. Calculé ici plutôt que dans l'état pour que l'arrivée
@@ -59,7 +61,10 @@ export default function Niveaux() {
 
   return (
     <div className="page niv-page">
-      <header className="niv-entete">
+      {/* La sentinelle : elle sort de l'écran juste avant le bandeau, et
+          c'est ce qui le fait se replier. */}
+      <div ref={sentinelle} className="niv-sentinelle" aria-hidden="true" />
+      <header className={`niv-entete ${replie ? 'replie' : ''}`}>
         <div className="niv-entete-fond" />
         <div className="niv-entete-contenu">
           <div className="niv-haut">
