@@ -255,9 +255,18 @@ familles. Rien ici ne dépend d'une saison : ce sont des traces permanentes.
 complètes) · `historique` (posséder une carte historique) ·
 `intergalactique` (déjà existant)
 
-Ça fait **39 badges neufs**. Chacun a besoin d'un titre, d'un sous-titre, d'une
-rubrique et d'un couple de couleurs, comme les badges d'événement actuels dans
-`lib/badges.ts`.
+Ça fait **39 badges neufs**.
+
+Leurs couleurs ne sont pas écrites à la main, contrairement aux sept badges
+existants : une famille a une teinte, un palier a un rang dans sa famille, et
+les neuf tons de la médaille s'en déduisent. À trente-neuf entrées manuelles,
+les familles auraient dérivé — deux bronzes légèrement différents dans la même
+famille, et la grille du profil se met à ressembler à un nuancier raté.
+
+Et sept dessins pour sept familles, pas trente-neuf : à ce compte-là aucun
+n'aurait été bon, et surtout on n'aurait plus reconnu une famille d'un coup
+d'œil dans la grille — ce qu'on y cherche en premier. Le palier se lit à
+l'intensité de la couleur.
 
 ---
 
@@ -428,7 +437,9 @@ n'ai rien changé en attendant.
    pass est devenue `PisteNiveaux`, partagée ; `PassTrack` n'en est plus
    qu'une traduction. La page affiche le niveau atteint plus vingt et se
    déroule par quarante.
-5. Les 39 badges, et leur détection.
+5. ~~Les 39 badges, et leur détection.~~ **Fait.** Palettes calculées depuis
+   la teinte de famille et le rang, sept dessins pour sept familles, et la
+   détection branchée sur l'écriture de badges qui existait déjà.
 6. La page `/cartes` unifiée, et les redirections.
 7. Les titres, si retenus.
 8. Le renommage XP → CaliPass sur la page Pass.

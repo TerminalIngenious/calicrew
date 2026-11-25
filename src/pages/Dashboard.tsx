@@ -15,7 +15,9 @@ import { getSeasonalTheme } from '../lib/seasonalTheme';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS } from '../lib/exercises';
-import { getWeekStart } from '../lib/passes';
+import { getWeekStart, SEASONS } from '../lib/passes';
+import { getCardById, isSetComplete } from '../lib/cards';
+import { meritesExploits, totaux } from '../lib/badgesExploits';
 import { totalReps, sessionReps, sessionSeconds } from '../lib/stats';
 import { useCreatine, shiftDay, GELS_PAR_MOIS } from '../lib/creatine';
 import { useUserProgress } from '../lib/useUserProgress';
@@ -73,10 +75,24 @@ export default function Dashboard() {
     const meilleurJour = valeurs.reduce((max, v) => Math.max(max, v), 0);
     const cumul = valeurs.reduce((somme, v) => somme + v, 0);
 
+    /* Les badges d'exploit rejoignent la même écriture que la créatine et
+       les pas. Un deuxième effet aurait relu le même instantané et serait
+       arrivé sur un document que le premier n'avait pas encore modifié —
+       c'est exactement la raison pour laquelle ces deux familles-là avaient
+       déjà été réunies. */
+    const t = totaux(sessions, progress);
+    const coll = {
+      saisonsCompletes: SEASONS.filter((s) => isSetComplete(s.id, progress.ownedCards || {})).length,
+      historique: Object.entries(progress.ownedCards || {}).some(
+        ([id, n]) => n > 0 && getCardById(id)?.rarity === 'historique'
+      ),
+    };
+
     const merites = [
       ...PALIERS_CREATINE.filter((j) => creatine.streak >= j).map(idBadgeCreatine),
       ...PALIERS_PAS_JOUR.filter((p) => meilleurJour >= p).map(idBadgePasJour),
       ...PALIERS_PAS_TOTAL.filter((p) => cumul >= p).map(idBadgePasTotal),
+      ...meritesExploits(t, coll),
     ];
 
     const acquis = new Set((progress.badges || []).map((b) => b.id));
@@ -92,7 +108,7 @@ export default function Dashboard() {
       for (const id of aDonner) badgesEnvoyes.current.delete(id);
       console.error('Badge impossible :', err);
     });
-  }, [user, progress, creatine.loading, creatine.streak]);
+  }, [user, progress, sessions, creatine.loading, creatine.streak]);
 
   const recentSessions = useMemo(() => sessions.slice(0, 5), [sessions]);
 

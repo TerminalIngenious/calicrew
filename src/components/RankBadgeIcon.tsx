@@ -4,6 +4,7 @@ import { BADGE_CATEGORIES, BADGE_RANKS, estEvenement, eventStyle } from '../lib/
 import BadgeCreatine from './BadgeCreatine';
 import BadgeFaceId from './BadgeFaceId';
 import BadgePas from './BadgePas';
+import BadgeExploit from './BadgeExploit';
 
 const CATEGORY_ICONS: Record<RankCategory, typeof Zap> = {
   reps: Zap,
@@ -34,6 +35,7 @@ export default function RankBadgeIcon({
     if (style.glyphe === 'creatine') return <BadgeCreatine id={badge.id} size={size} />;
     if (style.glyphe === 'pas') return <BadgePas id={badge.id} size={size} />;
     if (style.glyphe === 'faceid') return <BadgeFaceId size={size} />;
+    if (style.glyphe === 'exploit') return <BadgeExploit id={badge.id} size={size} />;
     return null;
   }
 

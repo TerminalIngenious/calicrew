@@ -1,4 +1,5 @@
 import type { RankBadge, RankCategory } from '../types';
+import { defExploit, FAMILLES_EXPLOIT, styleExploit } from './badgesExploits';
 
 /** Habillage d'une catégorie de classement : couleur + libellé. */
 interface CategoryStyle {
@@ -56,7 +57,7 @@ export interface EventBadgeStyle {
    */
   rubrique: string;
   /** Le dessin au cœur du badge. */
-  glyphe: 'faceid' | 'creatine' | 'pas';
+  glyphe: 'faceid' | 'creatine' | 'pas' | 'exploit';
   /** Sa couleur. Écrite en dur, elle restait verte sur tous les badges. */
   encre: string;
   /** Monture : trois tons, comme un métal. */
@@ -394,7 +395,12 @@ export function idBadgePasTotal(pas: number): string {
  * la même correspondance, ici et chez lui.
  */
 export function badgeAcquisPourId(id: string, maintenant = Date.now()): RankBadge {
-  const famille = id.startsWith('creatine-') ? 'Créatine' : 'Pas';
+  const exploit = defExploit(id);
+  const famille = exploit
+    ? FAMILLES_EXPLOIT[exploit.famille].rubrique
+    : id.startsWith('creatine-')
+      ? 'Créatine'
+      : 'Pas';
   return badgeAcquis(id, famille, maintenant);
 }
 
@@ -425,7 +431,11 @@ export function estEvenement(badge: RankBadge): boolean {
 }
 
 export function eventStyle(badge: RankBadge): EventBadgeStyle | undefined {
-  return badge.eventId ? EVENT_BADGES[badge.eventId] : undefined;
+  if (!badge.eventId) return undefined;
+  // Les badges d'exploit ne sont pas dans EVENT_BADGES : leur habillage est
+  // calculé à partir de leur famille et de leur rang, pas écrit à la main.
+  // Les lister ici aurait fait trente-neuf entrées de plus à maintenir.
+  return EVENT_BADGES[badge.eventId] || styleExploit(badge.eventId);
 }
 
 /** 'TOP 2 Reps', ou le nom de l'événement. */
