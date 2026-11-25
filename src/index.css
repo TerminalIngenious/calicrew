@@ -11950,3 +11950,370 @@ body {
   color: var(--text-muted);
   font-size: 0.85rem;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Le récap de séance
+
+   Une carte encadrée portait la date, les catégories, trois chiffres et une
+   barre — tous du même poids typographique. Le bandeau prend la suite : la
+   date en titre, le résultat en gros, le reste en appoint sur la même ligne.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.rec-page {
+  padding-top: 0 !important;
+}
+
+.rec-entete {
+  position: relative;
+  margin: 0 -1rem 1.2rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1.1rem;
+  overflow: hidden;
+}
+
+.rec-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+}
+
+.rec-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.rec-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.rec-retour,
+.rec-crayon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.rec-crayon {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.rec-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.rec-titre {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.55rem 0 0;
+  font-size: 1.22rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.rec-titre svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* Le résultat de la séance en gros, son unité juste après, et le reste —
+   durée, séries — repoussé à droite en gris. Trois chiffres de même taille
+   ne disaient pas lequel on venait chercher. */
+.rec-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.rec-chiffre {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.rec-unite {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.rec-reste {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rec-etiquettes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.rec-categories {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.rec-barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  z-index: 1;
+}
+
+.rec-barre-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+/* ── Les exercices : des blocs séparés par un filet ── */
+
+.rec-page .recap-exercises {
+  gap: 0;
+}
+
+.rec-page .recap-exercise-card {
+  padding: 1rem 0.1rem;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.rec-page .recap-exercises > .recap-exercise-card:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* Le pavé AMRAP du récap est seul sur la page : il n'a rien à encadrer. */
+.rec-page > .recap-exercise-card {
+  padding: 0 0.1rem;
+  background: none;
+  border: 0;
+}
+
+.rec-page .recap-exercise-header h3 {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+/* Les cases de série sont des valeurs, pas des boutons : elles perdent leur
+   fond plein et gardent leur filet, qui dit déjà si la série est faite. */
+.rec-page .recap-set {
+  background: none;
+  border-width: 1px;
+}
+
+.rec-page .recap-actions {
+  margin-top: 2rem;
+}
+
+/* ══ L'AMRAP en séance ══
+   Le cadran, le compteur et la zone de frappe ne bougent pas : c'est déjà
+   une seule chose en gros. Seul l'en-tête passe en bandeau plein bord, pour
+   qu'il ne reste plus de noir sous l'encoche. */
+
+.amrap-live {
+  padding-top: 0 !important;
+}
+
+.amrap-live-top {
+  position: relative;
+  display: block;
+  margin: 0 -1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 0.9rem) 1rem 0.9rem;
+  overflow: hidden;
+}
+
+.amrap-live-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+}
+
+.amrap-live-contenu {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.amrap-live-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.amrap-live-contenu .amrap-live-temps {
+  margin-left: auto;
+}
+
+/* ══ Le constructeur d'AMRAP ══
+   Il avait déjà la bonne forme — des lignes, des pastilles — mais gardait un
+   titre nu en haut de colonne et deux boîtes de trop : le champ du nom et
+   les pastilles du catalogue, remplies alors que celles des filtres juste
+   au-dessus ne le sont pas. */
+
+.amr-page {
+  padding-top: 0 !important;
+}
+
+.amr-entete {
+  position: relative;
+  margin: 0 -1rem 1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1rem;
+  overflow: hidden;
+}
+
+.amr-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+}
+
+.amr-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.amr-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.amr-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.amr-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.amr-titre {
+  margin: 0.55rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.amr-sous {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.amr-page .amrap-builder-intro {
+  margin-bottom: 1.2rem;
+}
+
+.amr-page .pr-field-label {
+  margin-top: 1.2rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+}
+
+.amr-page .amrap-choix {
+  border-radius: 999px;
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Le nom se tape : un filet dessous suffit, et le texte s'aligne à gauche
+   comme partout ailleurs plutôt que d'être centré dans une boîte. */
+.amr-page .amrap-nom {
+  padding: 0.7rem 0.1rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  text-align: left;
+  font-weight: 400;
+}
+
+.amr-page .amrap-nom:focus {
+  border-bottom-color: var(--accent);
+}
+
+/* Les exercices du catalogue étaient remplis alors que les filtres juste
+   au-dessus ne le sont pas : à l'œil, c'était le catalogue qui paraissait
+   sélectionné. */
+.amr-page .amrap-exo {
+  background: none;
+}
+
+/* L'état choisi reprend le ton des autres pastilles de l'app — et surtout,
+   il doit être redéclaré ici : la règle de contraste met le texte en noir
+   sur les surfaces remplies d'accent, et le fond translucide seul aurait
+   laissé du texte noir sur du gris sombre. */
+.amr-page .amrap-choix.actif {
+  background: rgba(var(--accent-rgb), 0.16);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.amr-page .amrap-exo.choisi {
+  background: rgba(var(--accent-rgb), 0.12);
+}

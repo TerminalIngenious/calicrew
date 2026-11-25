@@ -5,7 +5,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import type { Session, Exercise, ExerciseLog } from '../types';
-import { ArrowLeft, Check, ChevronDown, ChevronUp, Timer, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown, ChevronUp, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
@@ -45,6 +45,11 @@ const ARC_BULLE = 2 * Math.PI * 25;
 const SEANCE_OUBLIEE = 3 * 3600;
 const DUREES_OUBLI = [30, 45, 60, 90, 120];
 const DUREE_OUBLI_DEFAUT = 60;
+
+/** « mardi 24 novembre » → « Mardi 24 novembre ». */
+function majuscule(texte: string): string {
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
+}
 
 export default function LiveSession() {
   const { id } = useParams<{ id: string }>();
@@ -474,59 +479,55 @@ export default function LiveSession() {
     const displayRounds = editing ? amrapRounds : (session.amrapRounds || amrapRounds);
 
     return (
-      <div className="page">
-        <header className="page-header">
-          <button className="icon-btn" onClick={() => navigate('/')}>
-            <ArrowLeft size={20} />
-          </button>
-          <h1>Récap {isAmrap ? amrapTitle(session.amrapName) : 'séance'}</h1>
-          <button className="icon-btn" onClick={() => editing ? (isAmrap ? saveAmrapEdit() : saveEdits()) : setEditing(true)}>
-            {editing ? <Check size={20} /> : <Pencil size={18} />}
-          </button>
-        </header>
-
-        <div className="recap-header-card">
-          <div className="recap-date-row">
-            <Calendar size={16} />
-            <span>{format(new Date(session.date), 'EEEE d MMMM yyyy', { locale: fr })}</span>
-          </div>
-          {session.noReward && (
-            <span className="recap-no-reward">Séance sans coffre</span>
-          )}
-          {isAmrap ? (
-            <span className="recap-categories">AMRAP — {session.amrapDuration ? Math.floor(session.amrapDuration / 60) : 20} min</span>
-          ) : (
-            categoryLabel && <span className="recap-categories">{categoryLabel}</span>
-          )}
-          <div className="recap-stats-row">
-            <div className="recap-mini-stat">
-              <Timer size={14} />
-              <span>{formatTime(displayDuration)}</span>
+      <div className="page rec-page">
+        {/* Le bandeau du récap : la date en titre, et le résultat de la
+            séance en gros — les tours pour un AMRAP, les reps sinon. Tout ça
+            tenait dans une carte encadrée où les trois chiffres avaient le
+            même poids que la date et que la liste des catégories. */}
+        <header className="rec-entete">
+          <div className="rec-entete-fond" />
+          <div className="rec-entete-contenu">
+            <div className="rec-haut">
+              <button className="rec-retour" onClick={() => navigate('/')} aria-label="Revenir à l'accueil">
+                <ArrowLeft size={20} />
+              </button>
+              <span className="rec-kicker">
+                {isAmrap ? `AMRAP · ${session.amrapDuration ? Math.floor(session.amrapDuration / 60) : 20} min` : 'Récap'}
+              </span>
+              <button
+                className="rec-crayon"
+                aria-label={editing ? 'Enregistrer' : 'Modifier'}
+                onClick={() => editing ? (isAmrap ? saveAmrapEdit() : saveEdits()) : setEditing(true)}
+              >
+                {editing ? <Check size={19} /> : <Pencil size={17} />}
+              </button>
             </div>
-            {isAmrap ? (
-              <div className="recap-mini-stat">
-                <span className="recap-mini-value">{displayRounds}</span>
-                <span>rounds</span>
-              </div>
-            ) : (
-              <>
-                <div className="recap-mini-stat">
-                  <span className="recap-mini-value">{totalReps}</span>
-                  <span>reps</span>
-                </div>
-                <div className="recap-mini-stat">
-                  <span className="recap-mini-value">{completedSets}/{totalSets}</span>
-                  <span>séries</span>
-                </div>
-              </>
-            )}
+            <h1 className="rec-titre">
+              <Calendar size={15} />
+              {/* Seule la première lettre prend la majuscule : en français le
+                  mois n'en porte pas, et capitaliser toute la ligne donnait
+                  « Mardi 24 Novembre 2026 ». */}
+              <span>{majuscule(format(new Date(session.date), 'EEEE d MMMM yyyy', { locale: fr }))}</span>
+            </h1>
+            <div className="rec-mesures">
+              <span className="rec-chiffre">{isAmrap ? displayRounds : totalReps}</span>
+              <span className="rec-unite">{isAmrap ? `round${displayRounds > 1 ? 's' : ''}` : 'reps'}</span>
+              <span className="rec-reste">
+                {formatTime(displayDuration)}
+                {!isAmrap && ` · ${completedSets}/${totalSets} séries`}
+              </span>
+            </div>
+            <div className="rec-etiquettes">
+              {session.noReward && <span className="recap-no-reward">Séance sans coffre</span>}
+              {!isAmrap && categoryLabel && <span className="rec-categories">{categoryLabel}</span>}
+            </div>
           </div>
           {!isAmrap && (
-            <div className="recap-progress-bar">
-              <div className="progress-bar" style={{ width: `${progress}%` }} />
+            <div className="rec-barre">
+              <div className="rec-barre-fill" style={{ width: `${progress}%` }} />
             </div>
           )}
-        </div>
+        </header>
 
         {isAmrap ? (
           <div className="recap-exercise-card">
@@ -747,13 +748,16 @@ export default function LiveSession() {
     return (
       <div className="page amrap-live">
         <header className="amrap-live-top">
-          <button className="icon-btn" onClick={() => navigate('/')}>
-            <ArrowLeft size={20} />
-          </button>
-          <span className="amrap-live-nom">{amrapTitle(session.amrapName)}</span>
-          <span className="amrap-live-temps">
-            {formatTime(chrono)} / {formatTime(amrapTotal)}
-          </span>
+          <div className="amrap-live-fond" />
+          <div className="amrap-live-contenu">
+            <button className="amrap-live-retour" onClick={() => navigate('/')} aria-label="Revenir à l'accueil">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="amrap-live-nom">{amrapTitle(session.amrapName)}</span>
+            <span className="amrap-live-temps">
+              {formatTime(chrono)} / {formatTime(amrapTotal)}
+            </span>
+          </div>
         </header>
 
         {/*

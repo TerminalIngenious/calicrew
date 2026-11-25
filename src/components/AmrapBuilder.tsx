@@ -120,13 +120,25 @@ export default function AmrapBuilder({
   }
 
   return (
-    <div className="page amrap-builder">
-      <header className="page-header">
-        <button className="icon-btn" onClick={onClose} aria-label="Retour">
-          <ArrowLeft size={20} />
-        </button>
-        <h1>Nouvel AMRAP</h1>
-        <div />
+    <div className="page amrap-builder amr-page">
+      <header className="amr-entete">
+        <div className="amr-entete-fond" />
+        <div className="amr-entete-contenu">
+          <div className="amr-haut">
+            <button className="amr-retour" onClick={onClose} aria-label="Retour">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="amr-kicker">Nouvelle séance</span>
+          </div>
+          <h1 className="amr-titre">{name.trim() || 'Nouvel AMRAP'}</h1>
+          {/* Le réglage en cours, rappelé sous le titre : il se décide plus
+              bas, et il faut redescendre pour le relire. */}
+          <p className="amr-sous">
+            {items.length === 0
+              ? `${minutes} min · circuit vide`
+              : `${minutes} min · ${items.length} exercice${items.length > 1 ? 's' : ''} par round`}
+          </p>
+        </div>
       </header>
 
       <p className="amrap-builder-intro">
