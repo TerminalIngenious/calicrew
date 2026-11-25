@@ -16,10 +16,15 @@
   --or: #ffd60a;
 }
 
-.av-carte.rarete-legendaire { --teinte: #ffd60a; --teinte-sombre: #6b5200; }
-.av-carte.rarete-epique { --teinte: #bf5af2; --teinte-sombre: #4a2165; }
-.av-carte.rarete-rare { --teinte: #64d2ff; --teinte-sombre: #15455c; }
-.av-carte.rarete-commune { --teinte: #a9b0bb; --teinte-sombre: #333a44; }
+/* Chaque rareté a sa teinte — c'est elle qui dit la rareté, elle ne décore
+   pas — et l'opacité de son anneau. L'or supporte d'être vu, le gris d'une
+   commune doit rester discret : sinon une commune s'annonce aussi fort
+   qu'une légendaire. Mais pas invisible non plus — à la taille d'une
+   vignette de grille, une carte sans bord a l'air inachevée. */
+.av-carte.rarete-legendaire { --teinte: #ffd60a; --teinte-sombre: #6b5200; --anneau: rgba(255, 214, 10, 0.66); }
+.av-carte.rarete-epique { --teinte: #bf5af2; --teinte-sombre: #4a2165; --anneau: rgba(191, 90, 242, 0.6); }
+.av-carte.rarete-rare { --teinte: #64d2ff; --teinte-sombre: #15455c; --anneau: rgba(100, 210, 255, 0.55); }
+.av-carte.rarete-commune { --teinte: #a9b0bb; --teinte-sombre: #333a44; --anneau: rgba(169, 176, 187, 0.44); }
 
 .av-carte.retournable { cursor: pointer; }
 
@@ -47,13 +52,25 @@
   .av-pivot { transition: none; }
 }
 
+/* ── Le cadre ──
+
+   C'était une bande de 1,6 cqw remplie d'un dégradé à trois arrêts de la
+   couleur de rareté. Vu de près ça fait un cadre doré ; vu dans une grille
+   de quarante-cinq, ça fait du plastique, et c'était l'élément le plus
+   voyant de la carte alors que c'est le moins informatif.
+
+   À la place, un seul filet net. Il dit exactement la même chose — la
+   rareté — en prenant dix fois moins de place, et la photo gagne tout ce
+   que le cadre perd. */
 .av-cadre {
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 1.6cqw;
-  border-radius: 5cqw;
-  background: linear-gradient(145deg, var(--teinte) 0%, var(--teinte-sombre) 48%, var(--teinte) 100%);
-  box-shadow: 0 0.8cqw 3cqw rgba(0, 0, 0, 0.55);
+  padding: 0;
+  border: 0.5cqw solid var(--anneau);
+  border-radius: 4.6cqw;
+  background: #0b0d12;
+  box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, 0.6);
 }
 
 .av-fond {
@@ -61,7 +78,9 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 3.6cqw;
+  /* Le rayon du cadre moins l'épaisseur du filet : sans ça, le coin du
+     fond dépasse du coin du filet et on voit un croissant clair. */
+  border-radius: 4.1cqw;
   background: linear-gradient(170deg, #121722 0%, #070a11 100%);
 }
 
@@ -123,27 +142,35 @@
 }
 
 .av-note {
-  font-size: 13cqw;
+  font-size: 12cqw;
   font-weight: 800;
   line-height: 0.9;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
   color: var(--teinte);
+  font-variant-numeric: tabular-nums;
   text-shadow: 0 0.3cqw 1cqw rgba(0, 0, 0, 0.95);
 }
 
+/* L'emblème rétrécit d'un tiers. À 18 cqw de haut il faisait jeu égal avec
+   la note, et deux choses de même poids dans le même coin, c'est une de
+   trop : on vient lire la note. */
 .av-embleme {
-  width: 9.5cqw;
-  height: 18cqw;
+  width: 6.4cqw;
+  height: 12.2cqw;
   filter: drop-shadow(0 0.3cqw 0.8cqw rgba(0, 0, 0, 0.9));
 }
 
+/* Le jour en pastille de contour, pas en pavé plein. Rempli de la couleur
+   de rareté, il entrait en concurrence avec la note, qui porte déjà cette
+   couleur — et la date d'une case n'est pas une information de rareté. */
 .av-jour {
-  padding: 0.8cqw 2cqw;
+  padding: 0.7cqw 1.9cqw;
+  border: 0.3cqw solid rgba(255, 255, 255, 0.28);
   border-radius: 99px;
-  font-size: 3.2cqw;
+  font-size: 3cqw;
   font-weight: 700;
-  color: #0a0e16;
-  background: var(--teinte);
+  color: #fff;
+  background: rgba(10, 14, 22, 0.55);
 }
 
 .av-bas {
@@ -235,10 +262,13 @@
   align-items: center;
   justify-content: center;
   gap: 3cqw;
+  /* Les rayures diagonales ont sauté : à la taille d'une vignette elles ne
+     se lisent plus comme une texture mais comme un moiré, et c'est le défaut
+     qu'on remarque en premier sur une grille de dos identiques. Reste la
+     lueur derrière l'objet, qui le détache. */
   background:
-    radial-gradient(70% 45% at 50% 38%, rgba(255, 255, 255, 0.08) 0%, transparent 70%),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 3cqw, transparent 3cqw 6cqw),
-    linear-gradient(170deg, #16203a 0%, #080b14 100%);
+    radial-gradient(64% 42% at 50% 40%, rgba(146, 180, 255, 0.11) 0%, transparent 72%),
+    linear-gradient(170deg, #141d33 0%, #070a12 100%);
 }
 
 .av-paquet {
@@ -290,17 +320,23 @@
 
 /* La congère sur le bord haut, posée sur le cadre lui-même : la même tuile
    que les dalles de l'app, pour que la carte appartienne au mois. */
+/* La crête de neige du bord haut : la même que sur les dalles de l'app, à
+   l'échelle de la carte. L'ancienne était une calotte de 9 cqw avec son
+   liseré bleu et ses gouttes qui pendent — elle mangeait le coin où vit la
+   note, et elle ne ressemblait plus à rien depuis que le décor de l'app a
+   été refait. */
 .av-neige {
   position: absolute;
-  z-index: 1;
-  top: -0.6cqw;
-  left: -1cqw;
-  right: -1cqw;
-  height: 9cqw;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='23'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M0 0 H140 V9 C128 9 126 18 112 18 C99 18 102 8 90 8 C78 8 81 16 68 16 C55 16 60 7 46 7 C33 7 36 15 24 15 C12 15 10 9 0 9 Z'/%3E%3Ccircle cx='112' cy='19.6' r='2.9'/%3E%3Ccircle cx='68' cy='17.4' r='2.1'/%3E%3C/g%3E%3C/svg%3E");
+  z-index: 3;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.4cqw;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='8'%3E%3Cpath d='M0%200%20H120%20V3.4%20C112%203.4%20109%206.6%20101%206.6%20C93%206.6%2095%202.8%2086%202.8%20C77%202.8%2079%206.1%2070%206.1%20C61%206.1%2064%203.2%2055%203.2%20C46%203.2%2048%206.8%2039%206.8%20C30%206.8%2032%203%2024%203%20C16%203%2013%205.9%206%205.9%20C3%205.9%202%204.4%200%204.2%20Z' fill='%23ffffff'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
-  background-size: 48cqw 9cqw;
-  filter: drop-shadow(0 0.4cqw 0 rgba(133, 175, 216, 0.55));
+  background-size: 51cqw 3.4cqw;
+  opacity: 0.9;
+  filter: drop-shadow(0 0.25cqw 0.4cqw rgba(0, 0, 0, 0.7));
 }
 
 /* La légendaire a un reflet qui balaie le cadre. Les autres n'en ont pas :
@@ -309,8 +345,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, transparent 38%, rgba(255, 214, 10, 0.26) 48%, transparent 58%);
-  animation: avReflet 4.5s ease-in-out infinite;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 214, 10, 0.17) 48%, transparent 56%);
+  animation: avReflet 5.5s ease-in-out infinite;
 }
 
 @keyframes avReflet {
