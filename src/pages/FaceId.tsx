@@ -166,13 +166,31 @@ export default function FaceId() {
   return (
     <div className="page fid-page">
 
-      <header className="fid-header">
-        <button className="fid-retour" onClick={() => navigate('/battlepass')} aria-label="Retour">
-          <ArrowLeft size={18} />
-        </button>
-        <div>
-          <span className="fid-kicker">Événement</span>
+      {/* Le bandeau de l'event : le compte des visages y vit, et la jauge le
+          ferme d'un bord à l'autre. Il tenait dans une carte encadrée posée
+          sous le titre. */}
+      <header className="fid-bandeau">
+        <div className="fid-bandeau-fond" />
+        <div className="fid-bandeau-contenu">
+          <div className="fid-bandeau-haut">
+            <button className="fid-retour" onClick={() => navigate('/battlepass')} aria-label="Retour">
+              <ArrowLeft size={18} />
+            </button>
+            <span className="fid-kicker">Événement</span>
+          </div>
           <h1 className="fid-titre">FaceID</h1>
+          <div className="fid-mesures">
+            <span className="fid-compteur-valeur">
+              {String(possedees).padStart(2, '0')}<em> / {TOTAL_CARTES}</em>
+            </span>
+            <span className="fid-compteur-label">
+              {complete ? 'Fichier complet' : 'visages identifiés'}
+            </span>
+          </div>
+          <span className="fid-restant">{texteRestant(enCours, maintenant)}</span>
+        </div>
+        <div className="fid-jauge">
+          <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />
         </div>
       </header>
 
@@ -181,21 +199,6 @@ export default function FaceId() {
         rassembler avant le 30 novembre — et aucune ne s'achète : elles sortent
         toutes des boosters.
       </p>
-
-      <section className="fid-compteur">
-        <div className="fid-compteur-ligne">
-          <span className="fid-compteur-valeur">
-            {String(possedees).padStart(2, '0')}<em> / {TOTAL_CARTES}</em>
-          </span>
-          <span className="fid-compteur-label">
-            {complete ? 'Fichier complet' : 'Visages identifiés'}
-          </span>
-        </div>
-        <div className="fid-jauge">
-          <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />
-        </div>
-        <span className="fid-restant">{texteRestant(enCours, maintenant)}</span>
-      </section>
 
       {complete && (
         <div className="fid-fini">

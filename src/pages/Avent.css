@@ -36,13 +36,51 @@
     #06120c;
 }
 
-/* ── En-tête ── */
+/* ── En-tête ──
+   Un bandeau plein bord, comme sur le reste de l'app : le fond monte
+   jusqu'au bord de l'écran, zone de sécurité comprise, et seul le contenu
+   est en retrait. */
 
-.avt-header {
+.avt-page {
+  padding-top: 0 !important;
+}
+
+.avt-bandeau {
+  position: relative;
+  margin: 0 -1rem 1.2rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1.1rem;
+  overflow: hidden;
+}
+
+.avt-bandeau-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 82% 0%, rgba(47, 158, 90, 0.3) 0%, transparent 60%),
+    linear-gradient(170deg, #11291c 0%, #0a1b12 60%, #06120c 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+}
+
+.avt-bandeau-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.avt-bandeau-haut {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  margin-bottom: 1rem;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Le compte en or et en gros, la légende en pastille à côté : la carte
+   d'avant leur donnait le même poids, aux deux bouts d'une même ligne. */
+.avt-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .avt-retour {
@@ -68,6 +106,7 @@
 }
 
 .avt-titre {
+  margin: 0;
   font-size: 1.85rem;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -84,21 +123,6 @@
 
 /* ── Compteur ── */
 
-.avt-compteur {
-  padding: 1rem;
-  margin-bottom: 1.1rem;
-  border: 1px solid var(--avt-trait);
-  border-radius: var(--radius);
-  background: var(--avt-carte);
-}
-
-.avt-compteur-ligne {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 0.6rem;
-}
-
 .avt-compteur-valeur {
   font-size: 1.75rem;
   font-weight: 800;
@@ -114,16 +138,20 @@
 }
 
 .avt-compteur-label {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(231, 243, 236, 0.5);
+  color: rgba(231, 243, 236, 0.55);
 }
 
+/* La jauge ferme le bandeau d'un bord à l'autre : elle n'est pas posée
+   dedans, elle en est le bas. */
 .avt-jauge {
-  height: 6px;
-  border-radius: 99px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 3px;
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
@@ -131,14 +159,13 @@
 .avt-jauge span {
   display: block;
   height: 100%;
-  border-radius: 99px;
   background: linear-gradient(90deg, var(--avt-vert), var(--avt-or));
   transition: width 0.4s ease;
 }
 
 .avt-restant {
   display: block;
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   font-size: 0.76rem;
   color: rgba(231, 243, 236, 0.5);
 }

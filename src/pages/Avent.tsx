@@ -190,13 +190,31 @@ export default function Avent() {
 
   return (
     <div className="page avt-page">
-      <header className="avt-header">
-        <button className="avt-retour" onClick={() => navigate('/battlepass')} aria-label="Retour">
-          <ArrowLeft size={18} />
-        </button>
-        <div>
-          <span className="avt-kicker">Événement</span>
+      {/* Le bandeau de l'event : le compte des cartes y vit, et la jauge le
+          ferme d'un bord à l'autre. Il tenait dans une carte encadrée posée
+          sous le titre, qui redisait en gris ce que la jauge montrait déjà. */}
+      <header className="avt-bandeau">
+        <div className="avt-bandeau-fond" />
+        <div className="avt-bandeau-contenu">
+          <div className="avt-bandeau-haut">
+            <button className="avt-retour" onClick={() => navigate('/battlepass')} aria-label="Retour">
+              <ArrowLeft size={18} />
+            </button>
+            <span className="avt-kicker">Événement</span>
+          </div>
           <h1 className="avt-titre">Branlette Hivernale</h1>
+          <div className="avt-mesures">
+            <span className="avt-compteur-valeur">
+              {String(possedees).padStart(2, '0')}<em> / {TOTAL_CARTES}</em>
+            </span>
+            <span className="avt-compteur-label">
+              {complete ? 'Calendrier terminé' : 'cartes trouvées'}
+            </span>
+          </div>
+          <span className="avt-restant">{texteRestant(ouvert, maintenant)}</span>
+        </div>
+        <div className="avt-jauge">
+          <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />
         </div>
       </header>
 
@@ -205,21 +223,6 @@ export default function Avent() {
         pas les mêmes que ton voisin : chaque calendrier est tiré à part. Les
         vingt qui manquent au tien sortent des missions.
       </p>
-
-      <section className="avt-compteur">
-        <div className="avt-compteur-ligne">
-          <span className="avt-compteur-valeur">
-            {String(possedees).padStart(2, '0')}<em> / {TOTAL_CARTES}</em>
-          </span>
-          <span className="avt-compteur-label">
-            {complete ? 'Calendrier terminé' : 'Cartes trouvées'}
-          </span>
-        </div>
-        <div className="avt-jauge">
-          <span style={{ width: `${(possedees / TOTAL_CARTES) * 100}%` }} />
-        </div>
-        <span className="avt-restant">{texteRestant(ouvert, maintenant)}</span>
-      </section>
 
       {complete && (
         <div className="avt-fini">

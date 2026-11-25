@@ -32,13 +32,49 @@
  * l'attribut et le retire en partant. */
 :root[data-page="faceid"] body { background: #0c1104; }
 
-/* ── En-tête ── */
+/* ── En-tête ──
+   Un bandeau plein bord, comme sur le reste de l'app : le fond monte
+   jusqu'au bord de l'écran, zone de sécurité comprise, et seul le contenu
+   est en retrait. */
 
-.fid-header {
+.fid-page {
+  padding-top: 0 !important;
+}
+
+.fid-bandeau {
+  position: relative;
+  margin: 0 -1rem 1.2rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1.1rem;
+  overflow: hidden;
+}
+
+.fid-bandeau-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 82% 0%, rgba(182, 255, 0, 0.16) 0%, transparent 60%),
+    linear-gradient(170deg, #1b2409 0%, #121a05 60%, #0c1104 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+}
+
+.fid-bandeau-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.fid-bandeau-haut {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  margin-bottom: 1rem;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+
+.fid-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .fid-retour {
@@ -64,6 +100,7 @@
 }
 
 .fid-titre {
+  margin: 0;
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -79,22 +116,6 @@
 }
 
 /* ── Le compteur ── */
-
-.fid-compteur {
-  margin-bottom: 1.25rem;
-  padding: 1.1rem 1.2rem;
-  background: var(--fid-carte);
-  border: 1px solid var(--fid-trait);
-  border-radius: var(--radius);
-}
-
-.fid-compteur-ligne {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
 
 /* Chiffres à chasse fixe et sur deux positions : « 07 / 24 » se lit comme un
    relevé, « 7 / 24 » comme un score de jeu. */
@@ -112,18 +133,20 @@
 }
 
 .fid-compteur-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 0.74rem;
   color: rgba(216, 245, 230, 0.55);
-  text-align: right;
 }
 
+/* La jauge ferme le bandeau d'un bord à l'autre : elle n'est pas posée
+   dedans, elle en est le bas. */
 .fid-jauge {
-  height: 4px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 3px;
   background: rgba(182, 255, 0, 0.14);
-  border-radius: 2px;
   overflow: hidden;
 }
 
@@ -137,7 +160,7 @@
 
 .fid-restant {
   display: block;
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
   font-size: 0.75rem;
   color: rgba(216, 245, 230, 0.5);
 }
