@@ -42,7 +42,19 @@
   width: 100%;
   height: 100%;
   --bst-or: #ffd60a;
-  animation: bstArrivee 0.5s cubic-bezier(0.2, 1.1, 0.4, 1);
+  /*
+   * L'arrivée, puis le flottement qui prend le relais à la fin.
+   *
+   * Les deux sont sur le sachet entier, et c'est le point important. Le
+   * flottement vivait sur .bst-corps — le corps seul — alors que la bande
+   * du haut est son élément frère : le corps se balançait de ±0,6° pendant
+   * que la bande restait rigoureusement immobile, et on voyait les deux
+   * morceaux se désolidariser à chaque oscillation. Un sachet est un seul
+   * objet, il bouge d'un seul bloc.
+   */
+  animation:
+    bstArrivee 0.5s cubic-bezier(0.2, 1.1, 0.4, 1),
+    bstFlotte 4.5s ease-in-out 0.5s infinite;
 }
 
 @keyframes bstArrivee {
@@ -51,9 +63,12 @@
 }
 
 /* Le sachet flotte légèrement tant qu'il est fermé : un objet parfaitement
-   immobile au milieu d'un écran noir a l'air d'une image, pas d'un objet. */
-.bst:not(.bst-ouvert) .bst-corps {
-  animation: bstFlotte 4.5s ease-in-out infinite;
+   immobile au milieu d'un écran noir a l'air d'une image, pas d'un objet.
+
+   À l'ouverture il s'arrête net : les deux morceaux partent chacun de leur
+   côté, et un flottement du parent viendrait se composer avec leur départ. */
+.bst-ouvert {
+  animation: none;
 }
 
 @keyframes bstFlotte {
