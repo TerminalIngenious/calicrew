@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserProgress } from '../lib/useUserProgress';
 import { getCurrentSeason } from '../lib/passes';
-import { coffreDuNiveau, coutNiveau, niveauDepuisXp, PALIERS_BADGE } from '../lib/niveaux';
+import { coffreDuNiveau, niveauDepuisXp, PALIERS_BADGE } from '../lib/niveaux';
 import PisteProfil from '../components/PisteProfil';
 import type { PalierProfil } from '../components/PisteProfil';
 import BottomNav from '../components/BottomNav';
@@ -46,7 +46,6 @@ export default function Niveaux() {
         niveau: n,
         coffre: coffreDuNiveau(n) || undefined,
         badge: badges.has(n),
-        cout: coutNiveau(n),
       });
     }
     return liste;

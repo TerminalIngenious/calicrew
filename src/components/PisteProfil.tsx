@@ -18,7 +18,7 @@ import type { CardRarity } from '../types';
  * Ici les deux sortes de paliers ne se ressemblent plus du tout :
  *
  *  — un palier sans récompense est un **cran** : 34 px, un point creux, le
- *    numéro en gris. On défile devant sans s'arrêter ;
+ *    numéro en gris, et rien d'autre. On défile devant sans s'arrêter ;
  *  — un palier qui donne quelque chose est une **station** : deux fois plus
  *    haut, un point plein, sa récompense dessinée et nommée.
  *
@@ -30,8 +30,6 @@ export interface PalierProfil {
   niveau: number;
   coffre?: CardRarity;
   badge?: boolean;
-  /** Ce qu'il en coûte pour l'atteindre. */
-  cout: number;
 }
 
 export default function PisteProfil({
@@ -114,11 +112,7 @@ export default function PisteProfil({
                     </b>
                   </span>
                 </>
-              ) : (
-                /* Un cran n'affiche que son coût, et tout à droite : c'est
-                   une graduation, pas une ligne de tableau. */
-                <span className="niv-cout">{p.cout} XP</span>
-              )}
+              ) : null}
 
               {prochain && <span className="niv-prochain">Prochain</span>}
             </li>
