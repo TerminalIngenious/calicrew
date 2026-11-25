@@ -44,6 +44,7 @@ import MaintenanceScreen from './components/MaintenanceScreen';
 import BadgeDeblocage from './components/BadgeDeblocage';
 import PorteIntergalactique from './components/PorteIntergalactique';
 import ArriveeTest from './pages/ArriveeTest';
+import TestNotif from './pages/TestNotif';
 import LimiteChargement from './components/LimiteChargement';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
@@ -254,6 +255,7 @@ function AppContent() {
             <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
             <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
             <Route path="/arrivee" element={<RouteCreateur><ArriveeTest /></RouteCreateur>} />
+            <Route path="/test-notif" element={<RouteCreateur><TestNotif /></RouteCreateur>} />
             <Route path="/avent" element={<ProtectedRoute><Avent /></ProtectedRoute>} />
             <Route path="/avent/cartes" element={<ProtectedRoute><AventCartes /></ProtectedRoute>} />
             <Route path="/avent/cartes/:uid" element={<ProtectedRoute><AventCartes /></ProtectedRoute>} />

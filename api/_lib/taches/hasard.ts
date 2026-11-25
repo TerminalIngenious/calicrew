@@ -4,33 +4,42 @@ import { lisAbonnements, veutAmbiance, lisNoms } from '../groupe.js';
 import { defiDuJour, PATRON_DU_JOUR } from '../messages.js';
 
 /**
- * Les trois créneaux du jour, en UTC — soit 8h-18h l'hiver, 9h-19h l'été.
+ * Les trois rendez-vous du jour, à l'heure de Paris.
  *
- * Trois défis par jour et non un seul, et jamais les trois mêmes heures d'un
- * jour sur l'autre. Les triplets sont écrits à la main plutôt que tirés au
- * sort : un défi ne vit que trois heures, donc deux créneaux séparés de deux
- * heures feraient disparaître le premier avant la fin de sa fenêtre. Tous
- * ceux-ci laissent au moins quatre heures entre deux défis.
+ * Ils étaient tirés au sort parmi quatre triplets, pour que le défi reste
+ * une surprise. L'effet obtenu n'était pas celui-là : personne ne savait
+ * quand regarder, et une notification manquée passait pour une notification
+ * jamais envoyée. Des heures fixes se retiennent, et c'est ce qui permet de
+ * remarquer qu'il en manque une.
  */
-const TRIPLETS = [[7, 11, 15], [9, 13, 17], [7, 11, 17], [7, 13, 17]];
+const HEURES_PARIS = [8, 14, 18];
 
 /** Autant que de créneaux : sert à décaler le texte de chaque défi. */
 const PAR_JOUR = 3;
 
+/**
+ * Le décalage de Paris sur UTC aujourd'hui : 1 l'hiver, 2 l'été.
+ *
+ * Vercel déclenche ses crons en UTC et ne connaît pas les fuseaux. Pour
+ * tomber à 8 h, 14 h et 18 h de Paris toute l'année, six crons sont donc
+ * déclarés — 6, 7, 12, 13, 16 et 17 UTC — et seuls les trois qui
+ * correspondent à l'heure de Paris du jour vont au bout.
+ *
+ * Le décalage est mesuré et non écrit en dur : c'est précisément ce qui
+ * manque aux deux crons de la créatine et du défi du jour, qui partent une
+ * heure trop tôt tout l'hiver.
+ */
+const TZ_PARIS = 'Europe/Paris';
+
+function decalageParis(): number {
+  const maintenant = new Date();
+  const paris = new Date(maintenant.toLocaleString('en-US', { timeZone: TZ_PARIS }));
+  const utc = new Date(maintenant.toLocaleString('en-US', { timeZone: 'UTC' }));
+  return Math.round((paris.getTime() - utc.getTime()) / 3600000);
+}
+
 /** Trois heures pour le faire, ensuite il disparaît. */
 const FENETRE_MS = 3 * 60 * 60 * 1000;
-
-/** Le même brassage que pour les heures d'ambiance : une suite linéaire du
-    numéro du jour redonnerait un cycle visible au bout d'une semaine. */
-function melange(n: number): number {
-  let h = n | 0;
-  h ^= h >>> 16;
-  h = Math.imul(h, 0x45d9f3b);
-  h ^= h >>> 16;
-  h = Math.imul(h, 0x45d9f3b);
-  h ^= h >>> 16;
-  return Math.abs(h);
-}
 
 /**
  * Le défi surprise de la journée.
@@ -57,7 +66,15 @@ function melange(n: number): number {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const jour = getDayNumber();
   const demandee = Number(req.query.h);
-  const creneaux = TRIPLETS[melange(jour) % TRIPLETS.length];
+  /*
+   * On compare l'heure *programmée* du cron, et non l'heure qu'il est.
+   *
+   * Vercel déclenche ses crons dans l'heure, pas à la minute : celui de
+   * 17 h UTC est parti à 17 h 48 hier. En lisant l'horloge, un cron en
+   * retard se serait cru hors créneau et le défi ne serait jamais parti.
+   * Le paramètre `h`, lui, est fixé par la déclaration du cron.
+   */
+  const creneaux = HEURES_PARIS.map((h) => h - decalageParis());
   const rang = creneaux.indexOf(demandee);
   if (rang < 0) {
     return res.status(200).json({ skipped: true, heure: demandee, creneaux });
