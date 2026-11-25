@@ -189,18 +189,14 @@ Les coffres de niveau tirent dans **la saison en cours**, comme ceux du pass.
 Aux paliers ronds : 10, 25, 50, 75, 100, 150, 200. Plus toute la liste du
 § 6, qui ne dépend pas du niveau.
 
-### Les titres — *proposition de ma part*
+### Les titres — *proposés, puis écartés*
 
-Tu n'en as pas parlé, je le propose parce que c'est le seul moyen de donner
-quelque chose aux niveaux qui n'ont ni coffre ni badge — et ils sont la
-majorité. Un titre, c'est deux mots affichés sous le pseudo, choisis parmi
-ceux qu'on a débloqués.
+J'avais proposé un titre affiché sous le pseudo pour donner quelque chose aux
+niveaux sans coffre ni badge. **Écarté** : pas de titres.
 
-> **Mattéo**
-> *Bête de somme* · niveau 47
-
-Ça ne coûte presque rien à construire (un champ, une liste, un sélecteur dans
-le profil) et ça donne une raison de monter entre deux paliers. À arbitrer.
+Ces niveaux-là ne donnent donc rien, et c'est assumé. L'échelle le montre
+franchement — ce sont des crans entre deux stations, pas des paliers qu'on
+aurait oublié de garnir.
 
 ---
 
@@ -283,7 +279,6 @@ Dans l'ordre, de haut en bas :
 1. **Le bandeau**, qui porte maintenant le niveau. Le numéro en gros, la barre
    d'XP qui ferme le bandeau d'un bord à l'autre — exactement comme le pass et
    la collection. L'avatar et le pseudo restent à gauche.
-2. **Le titre** sous le pseudo, si les titres sont retenus.
 3. **Ma progression**, inchangé.
 4. **Les badges**, en bandeau plus petit comme tu l'as demandé : 86 px au lieu
    de 124, médailles à 52 px au lieu de 74. Son résumé passe de « 2 event ·
@@ -342,8 +337,6 @@ Tout.
 xp?: number;
 /** Niveaux dont la récompense a déjà été donnée. Évite de la donner deux fois. */
 niveauxPris?: number[];
-/** Titre affiché sous le pseudo, si les titres sont retenus. */
-titre?: string;
 ```
 
 Le **niveau n'est pas stocké** : il se déduit de `xp`. Une valeur dérivée qu'on
@@ -457,7 +450,7 @@ n'ai rien changé en attendant.
    collection qui s'est élargie plutôt qu'une page de plus : les deux events
    la rejoignent en onglets, avec leur rendu propre. Les pages par joueur
    restent, elles servent à voir la collection de quelqu'un d'autre.
-7. Les titres, si retenus.
+7. ~~Les titres, si retenus.~~ **Écartés.**
 8. ~~Le renommage XP → CaliPass sur la page Pass.~~ **Fait.** Partout où la
    monnaie du pass était affichée : le bandeau, les boutons de quête,
    l'échange de doublons, la carte des pas, les bandeaux de sport co et

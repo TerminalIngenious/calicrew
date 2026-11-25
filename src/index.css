@@ -12584,26 +12584,6 @@ body {
   cursor: pointer;
 }
 
-/* Un palier qui ne donne rien : le coffre laisse la place, et seul le coût
-   reste. Sans ça, la colonne du milieu fait un trou. */
-.bp-palier-nu .bp-palier-coffre {
-  min-width: 0;
-  width: 0;
-}
-
-.bp-palier-medaille {
-  color: var(--or, #ffd60a);
-}
-
-/* Le coût du niveau, sous ce qu'il rapporte. */
-.bp-palier-note {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
 /* Le niveau du profil, quand il mène à l'échelle. */
 .pro-niveau-ligne.lien {
   border: 0;
@@ -12618,24 +12598,221 @@ body {
   color: var(--text-muted);
 }
 
-/* La pastille « badge » épinglée sur un coffre, quand le palier donne les
-   deux. En or, parce qu'un badge est une médaille — et la seule chose dorée
-   de la colonne, donc repérable sans la lire. */
-.bp-palier-coffre {
-  position: relative;
+/* ══ L'échelle des niveaux de profil ══
+
+   Deux sortes de paliers, et c'est tout le propos. Un palier qui ne donne
+   rien est un cran de 34 px qu'on dépasse sans s'arrêter ; un palier qui
+   donne quelque chose est une station deux fois plus haute. La première
+   version les traitait pareil, et deux cents lignes identiques ne font pas
+   un chemin, elles font un tableau. */
+
+.niv-rangs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.bp-palier-pin {
+.niv-rang {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 2.2rem auto 1fr;
+  align-items: center;
+  gap: 0 0.7rem;
+  padding-left: 0.1rem;
+}
+
+/* Le rail, segment par segment plutôt qu'un trait unique avec un dégradé :
+   les rangées n'ont pas toutes la même hauteur, et une jauge en pourcentage
+   serait tombée à côté des points. Chaque rangée peint le sien, donc le
+   trait est juste par construction. */
+.niv-rang::before {
+  content: '';
   position: absolute;
-  right: -2px;
-  bottom: -2px;
+  left: 12px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.niv-rang.atteint::before {
+  background: var(--accent);
+}
+
+.niv-rang:first-child::before { top: 50%; }
+.niv-rang:last-child::before { bottom: 50%; }
+
+.niv-puce {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 9px;
+  height: 9px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 2px var(--border);
+  color: #000;
+}
+
+.niv-rang.atteint .niv-puce {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+/* La station a un point deux fois plus gros : c'est lui qu'on suit du coin
+   de l'œil en défilant. */
+.niv-rang.station .niv-puce {
   width: 20px;
   height: 20px;
+  margin-left: 3px;
+}
+
+/* ── Un cran ── */
+
+.niv-rang.cran {
+  min-height: 34px;
+}
+
+.niv-rang.cran .niv-num {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.niv-cout {
+  grid-column: 3 / -1;
+  justify-self: end;
+  padding-right: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Une station ── */
+
+.niv-rang.station {
+  min-height: 68px;
+  margin: 0.1rem 0;
+}
+
+.niv-rang.station .niv-num {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.niv-recompense {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+}
+
+/* La médaille épinglée sur le coffre quand le palier donne les deux — or,
+   la seule chose dorée de la colonne, donc repérable sans la lire. */
+.niv-medaille {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd60a;
+}
+
+.niv-recompense :not(:only-child).niv-medaille {
+  position: absolute;
+  right: -2px;
+  bottom: 0;
+  width: 19px;
+  height: 19px;
   border-radius: 50%;
   background: #ffd60a;
   color: #1a1400;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.niv-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.niv-texte b {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.niv-texte em {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.niv-info {
+  display: flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Sur la rangée du prochain palier, le coût laisse la place à la pastille :
+   les deux visent le même coin droit. Ce qu'il en coûte reste lisible sur la
+   station elle-même. */
+.niv-rang.prochain .niv-cout {
+  display: none;
+}
+
+/* Ce qui est déjà pris s'efface : la page sert à voir ce qui vient. */
+.niv-rang.atteint.station .niv-texte,
+.niv-rang.atteint.station .niv-recompense,
+.niv-rang.atteint .niv-num {
+  opacity: 0.45;
+}
+
+/* ── Le prochain ── */
+
+.niv-rang.prochain {
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.13), transparent 70%);
+}
+
+.niv-rang.prochain .niv-num {
+  color: var(--accent);
+}
+
+/* Posée sur la rangée et non dedans : en cinquième enfant d'une grille à
+   quatre colonnes, elle créait une rangée implicite et débordait à gauche. */
+.niv-prochain {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.18);
+  color: var(--accent);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Le point du prochain palier. Sans ça, c'est le seul point creux de la
+   rangée mise en avant, et il s'y lit comme un trou. */
+.niv-rang.prochain .niv-puce {
+  background: var(--bg);
+  box-shadow:
+    inset 0 0 0 3px var(--accent),
+    0 0 0 4px rgba(var(--accent-rgb), 0.16);
 }

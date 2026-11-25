@@ -5,8 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserProgress } from '../lib/useUserProgress';
 import { getCurrentSeason } from '../lib/passes';
 import { coffreDuNiveau, coutNiveau, niveauDepuisXp, PALIERS_BADGE } from '../lib/niveaux';
-import PisteNiveaux from '../components/PisteNiveaux';
-import type { Palier } from '../components/PisteNiveaux';
+import PisteProfil from '../components/PisteProfil';
+import type { PalierProfil } from '../components/PisteProfil';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 
@@ -39,14 +39,14 @@ export default function Niveaux() {
 
   const badges = useMemo(() => new Set(PALIERS_BADGE), []);
 
-  const paliers: Palier[] = useMemo(() => {
-    const liste: Palier[] = [];
+  const paliers: PalierProfil[] = useMemo(() => {
+    const liste: PalierProfil[] = [];
     for (let n = 2; n <= dernier; n++) {
       liste.push({
         niveau: n,
         coffre: coffreDuNiveau(n) || undefined,
         badge: badges.has(n),
-        note: `${coutNiveau(n)} XP`,
+        cout: coutNiveau(n),
       });
     }
     return liste;
@@ -85,10 +85,9 @@ export default function Niveaux() {
         </div>
       </header>
 
-      <PisteNiveaux
+      <PisteProfil
         paliers={paliers}
         niveauActuel={niveau.niveau}
-        total={dernier}
         seasonId={getCurrentSeason()?.id || ''}
         pied={
           <button className="niv-plus" onClick={() => setJusqua(dernier + PAS)}>
