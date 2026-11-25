@@ -2600,9 +2600,15 @@ body {
   margin-bottom: 0.75rem;
 }
 
+/* Les mesures d'une sortie passent à la ligne plutôt que de déborder.
+   À cinq pastilles — temps, distance, allure, dénivelé, gain — la ligne
+   était déjà pleine avec « XP » ; elle a craqué quand la monnaie a pris son
+   nom. Un débordement coupe la dernière mesure, et c'est celle qu'on vient
+   lire. */
 .recap-stats-row {
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.25rem;
   margin-bottom: 0.75rem;
 }
 

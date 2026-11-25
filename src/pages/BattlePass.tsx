@@ -472,12 +472,13 @@ export default function BattlePass() {
             <span className="bp-hero-niv-nombre">{levelInfo.level}</span>
             <span className="bp-hero-niv-mot">Niveau</span>
             <span className="bp-hero-xp-text">
-              {levelInfo.currentLevelXp} / {levelInfo.xpForNext} XP
+              {levelInfo.currentLevelXp} / {levelInfo.xpForNext} CaliPass
             </span>
           </div>
         </div>
 
-        {/* La barre d'XP court d'un bord à l'autre, tout en bas du bandeau :
+        {/* La barre de CaliPass court d'un bord à l'autre, tout en bas du
+            bandeau :
             posée dedans, elle ajoutait une boîte de plus à une page qui en a
             déjà beaucoup. */}
         <div className="bp-hero-xp-bar">
@@ -693,7 +694,7 @@ export default function BattlePass() {
                     <span className="bp-quest-done-badge"><Check size={12} /></span>
                   ) : dailyDone ? (
                     <button className="bp-quest-claim" onClick={claimDailyQuest}>
-                      +{dailyQuest.xp} XP
+                      +{dailyQuest.xp} CaliPass
                     </button>
                   ) : (
                     <span className="bp-quest-xp-tag">+{dailyQuest.xp}</span>
@@ -843,7 +844,7 @@ export default function BattlePass() {
                           <span className="bp-quest-done-badge"><Check size={12} /></span>
                         ) : done ? (
                           <button className="bp-quest-claim" onClick={() => claimQuest(quest.id)}>
-                            +{quest.xp} XP
+                            +{quest.xp} CaliPass
                           </button>
                         ) : (
                           <span className="bp-quest-xp-tag">+{quest.xp}</span>

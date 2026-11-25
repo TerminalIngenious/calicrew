@@ -54,7 +54,7 @@ export default function PasCard() {
             {loading
               ? 'Chargement…'
               : pasDuJour > 0
-                ? `${pasDuJour.toLocaleString('fr-FR')} pas · ${pasXp(pasDuJour)} XP`
+                ? `${pasDuJour.toLocaleString('fr-FR')} pas · ${pasXp(pasDuJour)} CaliPass`
                 : `Recopie le chiffre de ton téléphone`}
           </span>
         </div>
@@ -86,9 +86,9 @@ export default function PasCard() {
       <span className="pas-card-bareme">
         {valide && valeur > 0
           ? xp > 0
-            ? `${xp} XP et ${pasKm(valeur).toFixed(1).replace('.', ',')} km — encore ${prochainPalier(valeur)} pas pour le prochain XP`
+            ? `${xp} CaliPass et ${pasKm(valeur).toFixed(1).replace('.', ',')} km — encore ${prochainPalier(valeur)} pas pour le prochain`
             : `Les ${PAS_SEUIL.toLocaleString('fr-FR')} premiers pas sont ceux de la vie courante. Plus que ${(PAS_SEUIL - valeur).toLocaleString('fr-FR')}.`
-          : `250 pas = 1 XP, au-delà des ${PAS_SEUIL.toLocaleString('fr-FR')} premiers`}
+          : `250 pas = 1 CaliPass, au-delà des ${PAS_SEUIL.toLocaleString('fr-FR')} premiers`}
       </span>
 
       {/* Sinon on se demande pourquoi le classement affiche plus de pas que

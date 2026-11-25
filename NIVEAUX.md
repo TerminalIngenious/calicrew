@@ -35,6 +35,10 @@ même remise à zéro à chaque saison.
 Seuls les libellés bougent — `passXp` reste `passXp` dans la base, on ne
 renomme pas un champ Firestore pour une question d'affichage.
 
+Attention au partage : tout ce qui verse du `passXp` doit dire « CaliPass »,
+et c'est plus large que la page Pass. Les pas, le sport co, l'endurance et
+l'échange de doublons en versent aussi, et affichaient « XP ».
+
 > **Quête finie · +75 CaliPass**
 > **Niveau 23 du pass — 1 240 / 1 500 CaliPass**
 
@@ -454,7 +458,12 @@ n'ai rien changé en attendant.
    la rejoignent en onglets, avec leur rendu propre. Les pages par joueur
    restent, elles servent à voir la collection de quelqu'un d'autre.
 7. Les titres, si retenus.
-8. Le renommage XP → CaliPass sur la page Pass.
+8. ~~Le renommage XP → CaliPass sur la page Pass.~~ **Fait.** Partout où la
+   monnaie du pass était affichée : le bandeau, les boutons de quête,
+   l'échange de doublons, la carte des pas, les bandeaux de sport co et
+   d'endurance, et les pastilles du récap d'une sortie. `passXp` ne change
+   pas de nom dans la base — on ne renomme pas un champ Firestore pour une
+   question d'affichage.
 
 Les points 1 à 3 suffisent à rouvrir l'app. Le reste peut arriver ensuite, sans
 nouvelle coupure.

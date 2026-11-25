@@ -660,7 +660,7 @@ export default function LiveSession() {
                       </div>
                       <div className="recap-mini-stat">
                         <span className="recap-mini-value">+{sportCoXp(ex.runDuration || 0)}</span>
-                        <span>XP</span>
+                        <span>CaliPass</span>
                       </div>
                     </div>
                   </div>
@@ -715,7 +715,7 @@ export default function LiveSession() {
                       {enduranceXp(ex.runDuration || 0, ex.exerciseId) > 0 && (
                         <div className="recap-mini-stat">
                           <span className="recap-mini-value">+{enduranceXp(ex.runDuration || 0, ex.exerciseId)}</span>
-                          <span>XP</span>
+                          <span>CaliPass</span>
                         </div>
                       )}
                     </div>

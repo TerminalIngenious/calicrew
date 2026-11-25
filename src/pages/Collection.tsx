@@ -224,7 +224,7 @@ export default function Collection() {
         <button className="collection-echange" onClick={() => setShowEchange(true)}>
           <Repeat size={16} />
           <span>Échanger mes doublons</span>
-          <strong>+{xpDuLot(lotDoublons)} XP</strong>
+          <strong>+{xpDuLot(lotDoublons)} CaliPass</strong>
         </button>
       )}
 

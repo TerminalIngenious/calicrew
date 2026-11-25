@@ -933,7 +933,7 @@ export default function NewSession() {
           <div className="sportco-xp-banner">
             <Zap size={16} />
             <span>
-              {sportCoPreviewXp} XP gagnés
+              {sportCoPreviewXp} CaliPass gagnés
               <em>25 XP par tranche de 30 min</em>
             </span>
           </div>
@@ -1017,7 +1017,7 @@ export default function NewSession() {
           <div className="sportco-xp-banner">
             <Zap size={16} />
             <span>
-              {endurancePreviewXp} XP gagnés
+              {endurancePreviewXp} CaliPass gagnés
               <em>12 XP par quart d'heure, moitié moins en marche</em>
             </span>
           </div>

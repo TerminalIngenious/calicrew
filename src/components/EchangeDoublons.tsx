@@ -15,7 +15,7 @@ interface Props {
 }
 
 /**
- * L'écran d'échange des doublons contre de l'XP.
+ * L'écran d'échange des doublons contre du CaliPass.
  *
  * La sélection est locale et ne part qu'à la confirmation : on détruit des
  * cartes, personne ne doit pouvoir le faire d'un seul geste par mégarde.
@@ -99,7 +99,7 @@ export default function EchangeDoublons({ uid, progress, onClose }: Props) {
         {gain ? (
           <div className="echange-fini">
             <Sparkles size={28} />
-            <strong>+{gain.xp} XP</strong>
+            <strong>+{gain.xp} CaliPass</strong>
             <span>
               {gain.cartes} carte{gain.cartes > 1 ? 's' : ''} échangée{gain.cartes > 1 ? 's' : ''}
             </span>
@@ -113,7 +113,7 @@ export default function EchangeDoublons({ uid, progress, onClose }: Props) {
           <>
             <p className="echange-intro">
               Tu gardes toujours un exemplaire de chaque carte. Les suivants se rendent contre
-              de l'XP de pass.
+              du CaliPass.
             </p>
 
             <div className="echange-tarifs">
@@ -140,7 +140,7 @@ export default function EchangeDoublons({ uid, progress, onClose }: Props) {
                     <div className="echange-nom">
                       <strong>{getCardDisplayName(d.card)}</strong>
                       <span style={{ color: RARITY_COLORS[d.card.rarity] }}>
-                        {getRarityLabel(d.card.rarity, d.card.set)} · {d.xpUnitaire} XP · {d.extra} en trop
+                        {getRarityLabel(d.card.rarity, d.card.set)} · {d.xpUnitaire} CaliPass · {d.extra} en trop
                       </span>
                     </div>
                     <div className="echange-compteur">
@@ -181,7 +181,7 @@ export default function EchangeDoublons({ uid, progress, onClose }: Props) {
                   ? `${cartes} carte${cartes > 1 ? 's' : ''} partent définitivement`
                   : cartes === 0
                     ? 'Aucune carte sélectionnée'
-                    : `${cartes} carte${cartes > 1 ? 's' : ''} → +${xp} XP`}
+                    : `${cartes} carte${cartes > 1 ? 's' : ''} → +${xp} CaliPass`}
               </span>
               <button
                 className={`primary-btn ${confirme ? 'danger' : ''}`}
