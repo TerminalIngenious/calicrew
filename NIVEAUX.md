@@ -272,8 +272,11 @@ Dans l'ordre, de haut en bas :
    la collection. L'avatar et le pseudo restent à gauche.
 2. **Le titre** sous le pseudo, si les titres sont retenus.
 3. **Ma progression**, inchangé.
-4. **Les badges**, en bandeau plus petit comme tu l'as demandé : une rangée des
-   quatre derniers gagnés et le compte, au lieu du grand bandeau actuel.
+4. **Les badges**, en bandeau plus petit comme tu l'as demandé : 86 px au lieu
+   de 124, médailles à 52 px au lieu de 74. Son résumé passe de « 2 event ·
+   1 or · 1 argent · 1 bronze » — qui tenait sur deux lignes dans le bandeau
+   raccourci — à « 5 badges · 1 or ». La répartition complète vit désormais
+   dans l'en-tête de la page des badges, où elle a la place.
 5. **Mes cartes**, nouvelle ligne qui ouvre la page du § 7.3. Elle remplace les
    étagères de saison empilées, qui prennent aujourd'hui la moitié de la page.
 6. Programmes, compte, déconnexion — inchangés.
@@ -418,7 +421,9 @@ n'ai rien changé en attendant.
    sur les deux chemins qui terminent une séance — `finishSession` et la
    création d'un log de sortie, qui ne passe jamais par le premier. Écrite
    dans la même opération que le coffre de fin, et avant toute animation.
-3. Le bandeau du profil : niveau + barre. C'est ce qui rend la chose visible.
+3. ~~Le bandeau du profil : niveau + barre.~~ **Fait.** Le niveau prend la
+   place du compte de cartes, qui partira sur la ligne « Mes cartes ». Le
+   bandeau des badges a maigri de 124 à 86 px au passage.
 4. La page `/niveaux`, à partir de `PassTrack`.
 5. Les 39 badges, et leur détection.
 6. La page `/cartes` unifiée, et les redirections.

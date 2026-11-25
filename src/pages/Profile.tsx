@@ -7,6 +7,7 @@ import { passeCache, docsEnCache } from '../lib/lectureCache';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
 import { useUserProgress } from '../lib/useUserProgress';
+import { niveauDepuisXp } from '../lib/niveaux';
 import { totalReps as sumReps } from '../lib/stats';
 import type { Session, Card, Program } from '../types';
 import { sortBadges } from '../lib/badges';
@@ -48,6 +49,12 @@ export default function Profile() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const badges = sortBadges(progress?.badges || []);
+  /* Le niveau se déduit de l'XP et n'est jamais stocké : une valeur dérivée
+     qu'on garde en base est une valeur qui peut devenir fausse. */
+  const niveau = niveauDepuisXp(progress?.xp || 0);
+  const avancement = niveau.pourSuivant > 0
+    ? Math.min(100, (niveau.dansNiveau / niveau.pourSuivant) * 100)
+    : 100;
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [editingName, setEditingName] = useState(false);
@@ -312,12 +319,26 @@ export default function Profile() {
                       </button>
                     )}
                   </h1>
-                  <span className="profile-cards-count">{uniqueCards.length} cartes</span>
+                  {/* Le niveau prend la place du compte de cartes, qui part
+                      sur la ligne « Mes cartes ». C'est le chiffre qu'on vient
+                      chercher en ouvrant un profil — le sien comme celui d'un
+                      autre — et il n'existait nulle part. */}
+                  <span className="pro-niveau-ligne">
+                    <b>Niveau {niveau.niveau}</b>
+                    <em>{niveau.dansNiveau} / {niveau.pourSuivant} XP</em>
+                  </span>
                 </>
               )}
             </div>
           </div>
           <SeasonalBadge compact />
+        </div>
+
+        {/* La barre ferme le bandeau d'un bord à l'autre : elle n'est pas un
+            objet posé dedans, elle en est le bas. Même geste que sur le pass,
+            la collection et les badges. */}
+        <div className="pro-barre">
+          <div className="pro-barre-fill" style={{ width: `${avancement}%` }} />
         </div>
       </header>
 

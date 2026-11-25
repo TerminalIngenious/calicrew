@@ -12388,3 +12388,62 @@ body {
   font-size: 0.72rem;
   color: var(--text-muted);
 }
+
+/* ── Le niveau de profil, dans le bandeau ── */
+
+.pro-niveau-ligne {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-top: 0.1rem;
+}
+
+.pro-niveau-ligne b {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.pro-niveau-ligne em {
+  font-style: normal;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pro-barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  z-index: 1;
+}
+
+.pro-barre-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+/* Le bandeau des badges, en version courte sur le profil. La hauteur passe
+   de 124 à 86 px et l'éventail se resserre à la même échelle : des médailles
+   plus petites dans la même largeur se seraient mises à flotter. */
+.profil .season-slab-wrap .season-slab {
+  min-height: 86px;
+  padding: 0.75rem 2.4rem 0.75rem 0.9rem;
+}
+
+.profil .badge-slab-bg .rank-badge:nth-child(1) { right: 12px; }
+.profil .badge-slab-bg .rank-badge:nth-child(2) { right: 44px; }
+.profil .badge-slab-bg .rank-badge:nth-child(3) { right: 76px; }
+
+/* Jamais deux lignes : le bandeau raccourci n'en a plus la place, et une
+   ligne qui passe à la ligne sous trois médailles se lit comme un défaut. */
+.profil .season-slab-count {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

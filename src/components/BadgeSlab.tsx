@@ -10,6 +10,12 @@ import type { RankBadge } from '../types';
  * section faisait 753 px — un écran et demi de téléphone avant d'atteindre la
  * suite du profil. Le bandeau reprend la forme des saisons, avec les trois
  * plus prestigieux en éventail au fond, et mène à leur page.
+ *
+ * Il a depuis maigri d'un tiers. Sur le profil il voisine maintenant avec la
+ * ligne des cartes et celle de la progression, et à 124 px de haut il pesait
+ * autant que les deux réunies alors qu'il dit moins de choses. Les médailles
+ * passent de 74 à 52 px : ce sont des vignettes qui annoncent une page, pas
+ * les objets eux-mêmes — ceux-là sont sur la page des badges.
  */
 
 interface Props {
@@ -17,17 +23,23 @@ interface Props {
   onOpen: () => void;
 }
 
-/** « 1 event · 4 or · 5 argent », en sautant ce qui manque. */
+/**
+ * « 14 badges · 4 or ».
+ *
+ * La répartition complète — or, argent, bronze, événements — tenait ici et
+ * passait sur deux lignes depuis que le bandeau a maigri. Elle vit désormais
+ * dans l'en-tête de la page des badges, où elle a la place. Ce qui reste est
+ * ce qu'on lit d'un coup d'œil : combien, et le plus prestigieux.
+ */
 function resume(badges: RankBadge[]): string {
+  const total = `${badges.length} badge${badges.length > 1 ? 's' : ''}`;
   // Les badges d'événement n'ont pas de métal : comptés par `rank`, ils
   // seraient passés pour de l'or.
-  const events = badges.filter(estEvenement).length;
   const metaux = badges.filter((b) => !estEvenement(b));
-  const parts = BADGE_RANKS.map((rang, i) => {
-    const n = metaux.filter((b) => b.rank === i).length;
-    return n > 0 ? `${n} ${rang.name.toLowerCase()}` : null;
-  });
-  return [events > 0 ? `${events} event` : null, ...parts].filter(Boolean).join(' · ');
+  const meilleur = BADGE_RANKS.findIndex((_, i) => metaux.some((b) => b.rank === i));
+  if (meilleur < 0) return total;
+  const n = metaux.filter((b) => b.rank === meilleur).length;
+  return `${total} · ${n} ${BADGE_RANKS[meilleur].name.toLowerCase()}`;
 }
 
 export default function BadgeSlab({ badges, onOpen }: Props) {
@@ -38,7 +50,7 @@ export default function BadgeSlab({ badges, onOpen }: Props) {
             plus récent — le même ordre que les cartes marquantes d'une saison. */}
         <div className="season-slab-bg badge-slab-bg" aria-hidden="true">
           {badges.slice(0, 3).map((badge) => (
-            <RankBadgeIcon key={badge.id} badge={badge} size={74} />
+            <RankBadgeIcon key={badge.id} badge={badge} size={52} />
           ))}
         </div>
         <div className="season-slab-face">
