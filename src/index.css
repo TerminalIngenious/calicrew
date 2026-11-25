@@ -12317,3 +12317,12 @@ body {
 .amr-page .amrap-exo.choisi {
   background: rgba(var(--accent-rgb), 0.12);
 }
+
+/* L'échec d'ouverture d'un coffre. Rouge, parce que quelque chose n'a pas
+   marché — et discret, parce que rien n'a été perdu. */
+.bp-chest-erreur {
+  margin: 0 0 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #ef4444;
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
@@ -45,6 +45,13 @@ export default function BattlePass() {
   const [loading, setLoading] = useState(true);
   const [openedCard, setOpenedCard] = useState<Card | null>(null);
   const [chestOpening, setChestOpening] = useState(false);
+  /** Le message affiché quand l'ouverture n'a pas pu être enregistrée. */
+  const [chestError, setChestError] = useState<string | null>(null);
+  /* Un verrou synchrone, et non `chestOpening` : l'état ne se pose plus qu'à
+     la fin de l'écriture, et deux clics rapides se glisseraient entre les
+     deux — deux cartes pour un seul coffre, puisqu'ils liraient le même
+     `progress`. Une ref change dans le clic même. */
+  const ouvertureEnCours = useRef(false);
   const [chestPhase, setChestPhase] = useState<'idle' | 'spin' | 'burst'>('idle');
   /** Rareté de la carte tirée : colore la rotation avant même la révélation. */
   const [spinRarity, setSpinRarity] = useState<CardRarity>('commune');
@@ -299,6 +306,18 @@ export default function BattlePass() {
 
   async function openChest() {
     if (progress.chestsToOpen.length === 0 || !user || !season) return;
+    if (ouvertureEnCours.current) return;
+    ouvertureEnCours.current = true;
+    setChestError(null);
+    try {
+      await ouvreLeCoffre();
+    } finally {
+      ouvertureEnCours.current = false;
+    }
+  }
+
+  async function ouvreLeCoffre() {
+    if (progress.chestsToOpen.length === 0 || !user || !season) return;
     const chest = progress.chestsToOpen[0];
     // Un coffre épinglé sur une saison retirée du code donnerait un set vide :
     // on retombe alors sur la saison en cours plutôt que de ne rien tirer.
@@ -328,8 +347,42 @@ export default function BattlePass() {
           isArchive
         );
 
-    // La carte est tirée avant l'animation : sa rareté peut dépasser celle
-    // garantie par le coffre, et c'est bien elle qui doit colorer la rotation.
+    /*
+     * Le tirage est enregistré AVANT l'animation, et pas après.
+     *
+     * L'ordre inverse était rejouable : la rotation dure 2,3 s et sa couleur
+     * annonce la rareté, mais le coffre n'était retiré qu'à la fin. Il
+     * suffisait de recharger la page pendant la rotation pour récupérer son
+     * coffre intact et retirer jusqu'à tomber sur une épique.
+     *
+     * Écrire d'abord ferme ça sans rien interdire : recharger ne fait plus
+     * que sauter l'animation, la carte est déjà dans la collection.
+     */
+    const newChests = progress.chestsToOpen.slice(1);
+    const updated: UserProgress = card
+      ? {
+          ...progress,
+          chestsToOpen: newChests,
+          ownedCards: { ...progress.ownedCards, [card.id]: (progress.ownedCards[card.id] || 0) + 1 },
+        }
+      : { ...progress, chestsToOpen: newChests };
+
+    try {
+      await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
+    } catch (err) {
+      // L'écriture a échoué : le coffre reste au joueur, et on ne joue pas
+      // une animation qui lui montrerait une carte qu'il n'a pas.
+      console.error('Ouverture du coffre impossible :', err);
+      setChestError('Le coffre n\'a pas pu s\'ouvrir. Vérifie ta connexion et réessaie.');
+      return;
+    }
+    setProgress(updated);
+    // Le groupe l'apprend : une carte dont personne ne sait qu'elle est
+    // tombée ne vaut pas plus qu'une commune.
+    if (card?.id === CARTE_INTERGALACTIQUE.id) previensIntergalactique();
+
+    // La rareté tirée peut dépasser celle garantie par le coffre, et c'est
+    // bien elle qui doit colorer la rotation.
     const rarity = card?.rarity ?? chest.rarity;
     setSpinRarity(rarity);
     // Débloque l'audio pendant le geste utilisateur : le son ne part qu'après
@@ -343,22 +396,7 @@ export default function BattlePass() {
     playCardExplosion(rarity);
     await new Promise((r) => setTimeout(r, 620));
 
-    const newChests = progress.chestsToOpen.slice(1);
-    if (card) {
-      const newOwned = { ...progress.ownedCards };
-      newOwned[card.id] = (newOwned[card.id] || 0) + 1;
-      const updated: UserProgress = { ...progress, chestsToOpen: newChests, ownedCards: newOwned };
-      setProgress(updated);
-      await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
-      // Le groupe l'apprend : une carte dont personne ne sait qu'elle est
-      // tombée ne vaut pas plus qu'une commune.
-      if (card.id === CARTE_INTERGALACTIQUE.id) previensIntergalactique();
-      setOpenedCard(card);
-    } else {
-      const updated: UserProgress = { ...progress, chestsToOpen: newChests };
-      setProgress(updated);
-      await updateDoc(doc(db, 'userProgress', user.uid), { ...updated });
-    }
+    if (card) setOpenedCard(card);
     setChestOpening(false);
     setChestPhase('idle');
   }
@@ -691,6 +729,9 @@ export default function BattlePass() {
               <h3 className="bp-section-title">
                 <Package size={16} /> Coffres ({progress.chestsToOpen.length})
               </h3>
+              {/* Rien n'a été consommé : on le dit, sinon on croit avoir
+                  perdu le coffre. */}
+              {chestError && <p className="bp-chest-erreur">{chestError}</p>}
               <div className="bp-chest-row">
                 {progress.chestsToOpen.map((chest, i) => {
                   const special = chest.rarity !== 'commune';
