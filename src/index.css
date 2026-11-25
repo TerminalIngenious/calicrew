@@ -11714,3 +11714,239 @@ body {
 .bdg-page .badge-cell-mois {
   font-size: 0.64rem;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Les programmes, et leur éditeur
+
+   La liste empilait des cartes encadrées dont le contenu était déjà fait de
+   pastilles encadrées : un cadre, dedans huit petits cadres. L'éditeur
+   faisait pareil, avec en plus un champ encadré par ligne de formulaire.
+   Tout passe en lignes séparées par des filets.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.prg-page {
+  padding-top: 0 !important;
+}
+
+.prg-entete {
+  position: relative;
+  margin: 0 -1rem 1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1rem;
+  overflow: hidden;
+}
+
+.prg-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+}
+
+.prg-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.prg-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.prg-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.prg-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.prg-titre {
+  margin: 0.55rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.prg-sous {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── La liste ── */
+
+.prg-page .programs-list {
+  gap: 0;
+}
+
+.prg-page .program-card {
+  padding: 1rem 0.1rem;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.prg-page .program-card:first-child {
+  border-top: 0;
+}
+
+.prg-page .program-card-header h3 {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+/* Les exercices d'un programme sont une énumération, pas huit objets à
+   désigner un par un : ils perdent leurs pastilles et redeviennent du
+   texte, séparés par des points médians. */
+.prg-page .program-card-exercises {
+  gap: 0;
+  margin-bottom: 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.prg-page .program-card-ex {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.prg-page .program-card-ex + .program-card-ex::before {
+  content: ' · ';
+  color: rgba(255, 255, 255, 0.24);
+}
+
+/* ── L'éditeur ── */
+
+/* Un champ de formulaire encadré par ligne faisait une pile de boîtes là où
+   il n'y a qu'une suite de questions. Le filet du bas suffit à dire où on
+   écrit. */
+.prg-page .program-form .input {
+  padding: 0.7rem 0.1rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  font-size: 1rem;
+}
+
+.prg-page .program-form .input:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+.prg-page .program-visibility {
+  padding: 0.8rem 0.1rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.prg-page .layout-switch.program-kind {
+  gap: 0.4rem;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  background: none;
+  border: 0;
+}
+
+.prg-page .layout-switch-btn {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.82rem;
+}
+
+.prg-page .layout-switch-btn.active {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+}
+
+.prg-page .program-section-title {
+  margin-top: 0.8rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.prg-page .program-ex-card {
+  padding: 0.9rem 0.1rem;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  gap: 0.15rem;
+}
+
+.prg-page .program-ex-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.prg-page .config-row {
+  font-size: 0.85rem;
+}
+
+/* Le segmenté discret, comme au réglage des objectifs. */
+.prg-page .unit-picker,
+.prg-page .weight-type-picker {
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.prg-page .unit-btn,
+.prg-page .weight-type-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  background: none;
+}
+
+.prg-page .unit-btn.active,
+.prg-page .weight-type-btn.active {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+}
+
+/* Ajouter un exercice est une ligne, pas un bouton plein : l'action qui
+   compte ici est « Enregistrer ». */
+.prg-page .program-form > .secondary-btn {
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.85rem 0.1rem;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

@@ -174,12 +174,23 @@ export default function Programs() {
     const categories = [...new Set(allExercises.map((e) => e.category))] as Exercise['category'][];
 
     return (
-      <div className="page">
-        <header className="page-header">
-          <button className="icon-btn" onClick={closeEditor} aria-label="Retour">
-            <ArrowLeft size={20} />
-          </button>
-          <h1>{isEdit ? 'Modifier le programme' : 'Nouveau programme'}</h1>
+      <div className="page prg-page">
+        <header className="prg-entete">
+          <div className="prg-entete-fond" />
+          <div className="prg-entete-contenu">
+            <div className="prg-haut">
+              <button className="prg-retour" onClick={closeEditor} aria-label="Retour">
+                <ArrowLeft size={20} />
+              </button>
+              <span className="prg-kicker">{isEdit ? 'Modification' : 'Création'}</span>
+            </div>
+            <h1 className="prg-titre">{isEdit ? name || 'Modifier le programme' : 'Nouveau programme'}</h1>
+            <p className="prg-sous">
+              {selectedExercises.length === 0
+                ? 'Aucun exercice pour l\'instant'
+                : `${selectedExercises.length} exercice${selectedExercises.length > 1 ? 's' : ''}${kind === 'amrap' ? ` · AMRAP ${amrapMinutes} min` : ''}`}
+            </p>
+          </div>
         </header>
 
         <div className="program-form">
@@ -369,13 +380,23 @@ export default function Programs() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <button className="icon-btn" onClick={() => navigate('/')}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1>Mes programmes</h1>
-        <div />
+    <div className="page prg-page">
+      <header className="prg-entete">
+        <div className="prg-entete-fond" />
+        <div className="prg-entete-contenu">
+          <div className="prg-haut">
+            <button className="prg-retour" onClick={() => navigate('/')} aria-label="Revenir à l'accueil">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="prg-kicker">Séances toutes prêtes</span>
+          </div>
+          <h1 className="prg-titre">Mes programmes</h1>
+          {programs.length > 0 && (
+            <p className="prg-sous">
+              {programs.length} programme{programs.length > 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
       </header>
 
       {programs.length === 0 ? (
