@@ -64,7 +64,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     envois.push(sendTo(sub, {
       title: '\u{1FA90} Intergalactique',
       body: `${moi} vient de trouver Tristan \u2014 Dépôt de plainte. Une par personne, et la fenêtre se referme.`,
-      tag: 'intergalactique',
+      // Une par découvreur : deux personnes peuvent la trouver le même jour.
+      tag: `intergalactique-${uid}`,
       url: '/collection',
     }));
   }

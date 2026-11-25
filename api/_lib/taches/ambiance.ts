@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getDb, configureWebPush, sendTo, getDayNumber } from '../push.js';
+import { getDb, configureWebPush, sendTo, getDayNumber, getDayKey } from '../push.js';
 import {
   lisAbonnements, veutAmbiance, lisNoms, statsDe,
   jourDeSemaine, quantieme, debutDuJour, moisCourant, heureDuJour,
@@ -72,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     abonnes.map((a) => sendTo(a, {
       title: 'CaliCrew',
       body: texte,
-      tag: 'ambiance',
+      tag: `ambiance-${getDayKey()}`,
       url: '/group',
     }))
   );

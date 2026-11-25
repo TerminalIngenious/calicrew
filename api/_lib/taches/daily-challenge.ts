@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   getDb, configureWebPush, sendTo,
-  getDayStart, getDayNumber, type Subscription,
+  getDayStart, getDayNumber, getDayKey, type Subscription,
 } from '../push.js';
 import { DAILY_CHALLENGE_MESSAGES, messageDuJour } from '../messages.js';
 
@@ -32,7 +32,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       sendTo(d.data() as Subscription, {
         title: 'Défi du jour',
         body: messageDuJour(DAILY_CHALLENGE_MESSAGES, getDayNumber()),
-        tag: 'daily-challenge',
+        tag: `daily-challenge-${getDayKey()}`,
         url: '/battlepass',
       })
     )

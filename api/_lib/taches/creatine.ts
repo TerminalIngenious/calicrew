@@ -58,7 +58,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       sendTo(d.data() as Subscription, {
         title: 'CaliCrew',
         body: messageDuJour(CREATINE_MESSAGES, getDayNumber()),
-        tag: 'creatine',
+        tag: `creatine-${getDayKey()}`,
         url: '/',
       })
     ),
@@ -69,7 +69,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
         return sendTo(d.data() as Subscription, {
           title: '🧊 Ton streak tient à un gel',
           body: `Hier n'est pas coché. Il te reste ${reste} gel${reste > 1 ? 's' : ''} ce mois-ci — pose-en un avant qu'il soit trop tard, et prends celle d'aujourd'hui.`,
-          tag: 'creatine-gel',
+          tag: `creatine-gel-${getDayKey()}`,
           url: '/',
         });
       }),

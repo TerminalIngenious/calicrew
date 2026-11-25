@@ -46,7 +46,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       sendTo(a, {
         title: 'Note tes pas 👟',
         body: messageDuJour(PAS_MESSAGES, getDayNumber()),
-        tag: 'pas',
+        tag: `pas-${getDayKey()}`,
         url: '/',
       })
     )

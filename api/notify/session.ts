@@ -75,7 +75,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     envois.push(sendTo(sub, {
       title: 'Classement',
       body: auHasard(DOUBLE)(moi, places.get(cible) || 0),
-      tag: 'double',
+      /* Une étiquette par doubleur et par jour : avec une étiquette fixe,
+         se faire doubler deux fois dans la journée n'alertait qu'une fois —
+         la seconde notification remplaçait la première en silence. */
+      tag: `double-${uid}-${getDayKey()}`,
       url: '/group',
     }));
   }
@@ -93,7 +96,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const cible of temoins) {
       const sub = parUid.get(cible);
       if (!sub || !veutGroupe(sub)) continue;
-      envois.push(sendTo(sub, { title: 'CaliCrew', body: corps, tag: 'seance', url: '/group' }));
+      /* Idem : cinq personnes qui s'entraînent le même jour, c'est cinq
+         notifications. Avec `tag: 'seance'` fixe, seule la première
+         sonnait et les quatre autres la remplaçaient sans un bruit — on
+         n'apprenait donc jamais que les autres s'étaient entraînés. */
+      envois.push(sendTo(sub, {
+        title: 'CaliCrew', body: corps, tag: `seance-${uid}-${aujourdhui}`, url: '/group',
+      }));
     }
     await progressRef.set({ moisCourant: { dernierPing: aujourdhui } }, { merge: true });
   }

@@ -114,8 +114,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await lot.commit();
   }
 
+  /*
+   * Une étiquette par défi, et non une pour tous.
+   *
+   * Deux notifications qui portent la même étiquette ne s'empilent pas : la
+   * seconde remplace la première, et ce remplacement est silencieux — ni
+   * son, ni vibration, ni bandeau. Avec `tag: 'hasard'` fixe, celui qui ne
+   * balayait pas son volet de notifications ne voyait qu'un seul des trois
+   * défis du jour, et n'était alerté qu'une fois. Le lendemain, la notif
+   * de la veille restée en place avalait encore la première.
+   *
+   * Le jour et le rang suffisent à les distinguer. Le service worker
+   * demande en plus `renotify`, mais tous les téléphones ne l'honorent pas :
+   * l'étiquette, elle, marche partout.
+   */
+  const etiquette = `hasard-${getDayKey()}-${rang}`;
   const results = await Promise.all(
-    abonnes.map((a) => sendTo(a, { title: titre, body: texte, tag: 'hasard', url: '/' }))
+    abonnes.map((a) => sendTo(a, { title: titre, body: texte, tag: etiquette, url: '/' }))
   );
 
   const sent = results.filter(Boolean).length;

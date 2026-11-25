@@ -94,6 +94,14 @@ interface PushPayload {
   icon?: string;
 }
 
+/*
+ * `renotify` a disparu du type `NotificationOptions` de TypeScript, mais les
+ * navigateurs l'honorent toujours — Chrome et Android en particulier, où
+ * vivent la quasi-totalité des installations. On étend le type plutôt que de
+ * désactiver le contrôle sur tout l'objet.
+ */
+type OptionsNotif = NotificationOptions & { renotify?: boolean };
+
 self.addEventListener('push', (event: PushEvent) => {
   let payload: PushPayload = { title: 'CaliCrew', body: '' };
   try {
@@ -110,8 +118,27 @@ self.addEventListener('push', (event: PushEvent) => {
       icon: payload.icon || '/icon-192.png',
       badge: payload.icon || '/icon-192.png',
       tag: payload.tag || 'calicrew',
+      /*
+       * Réalerter à chaque remplacement.
+       *
+       * Une notification qui porte le même `tag` qu'une notification déjà
+       * posée la remplace — c'est voulu, on ne veut pas trois défis
+       * surprises empilés dont deux sont périmés. Mais sans `renotify`, ce
+       * remplacement est *silencieux* : ni son, ni vibration, ni bandeau.
+       *
+       * C'est ce qui faisait que certains ne recevaient qu'un seul défi
+       * surprise par jour alors qu'il en part trois. Ceux qui vidaient leur
+       * volet de notifications les recevaient tous, les autres un seul — la
+       * deuxième et la troisième remplaçaient la première sans un bruit. Et
+       * le lendemain, une notification de la veille jamais balayée avalait
+       * encore la première de la journée.
+       *
+       * Vaut pour toutes les familles : créatine, pas, défi du jour,
+       * ambiance et event ont chacune une étiquette fixe elles aussi.
+       */
+      renotify: true,
       data: { url: payload.url || '/' },
-    })
+    } as OptionsNotif)
   );
 });
 
