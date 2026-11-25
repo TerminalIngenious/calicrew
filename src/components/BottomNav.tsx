@@ -1,7 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dumbbell, Users, Swords, TrendingUp, User,
-  BedDouble, Sofa, Clapperboard, Flame, Banana } from 'lucide-react';
-import { getSeasonalTheme } from '../lib/seasonalTheme';
+import { Dumbbell, Users, Swords, TrendingUp, User } from 'lucide-react';
 
 /**
  * Un onglet = un rôle. La collection de cartes a quitté la barre : c'est de la
@@ -18,26 +16,18 @@ const NAV_ITEMS = [
 ];
 
 /*
- * Le jeu d'icônes de décembre.
+ * Le jeu d'icônes de décembre a été retiré.
  *
- * Les libellés ne changent pas : une barre de navigation dont les cinq mots
- * deviennent des blagues n'est plus une barre de navigation. Seuls les
- * pictogrammes basculent, et chacun garde la place de celui qu'il remplace —
- * on retrouve ses onglets au doigt, sans les lire.
+ * Il tenait parce que les libellés restaient lisibles sous les pictogrammes :
+ * un lit, un canapé et une banane se comprenaient parce que « Accueil »,
+ * « Groupe » et « Profil » étaient écrits dessous. La barre n'affiche plus
+ * ses libellés sur téléphone depuis la refonte — il ne restait donc que la
+ * blague, et plus rien pour la rattraper.
  */
-const ICONES_FETE: Record<string, typeof Dumbbell> = {
-  '/': BedDouble,
-  '/progress': Flame,
-  '/battlepass': Clapperboard,
-  '/group': Sofa,
-  '/profile': Banana,
-};
 
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const fete = getSeasonalTheme() === 'noel';
-
   return (
     <nav className="bottom-nav">
       {/* Uniquement visible sur ordinateur, où la barre devient une colonne :
@@ -46,8 +36,7 @@ export default function BottomNav() {
         <img src="/icon.svg" alt="" width={28} height={28} />
         <span>CaliCrew</span>
       </div>
-      {NAV_ITEMS.map(({ path, icon: Normale, label }) => {
-        const Icon = (fete && ICONES_FETE[path]) || Normale;
+      {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
         return (
           <button
             key={path}

@@ -8151,24 +8151,51 @@ body {
    prend la couleur de tous les autres boutons est une information fausse.
 
    L'identité vient donc d'ailleurs — la nuit bleue dans le fond, la neige
-   posée sur les dalles, la guirlande, les sapins. Les couleurs de Noël
-   restent sur le décor, où elles ne décrivent rien. */
+   posée sur les dalles, la guirlande, la ligne d'arbres.
+
+   ── Le parti, depuis la refonte ──
+
+   Une seule idée : une nuit d'hiver. Et non l'inventaire des signes de la
+   fête, qui était l'erreur de la première version — quinze ampoules de
+   quatre couleurs qui clignotaient, deux sapins à boules et à étoile, une
+   calotte de neige de 23 px sur chaque carte avec son liseré bleu et ses
+   gouttes qui pendent. Chaque objet disait « Noël » ; ensemble ils disaient
+   « vitrine ».
+
+   Ce qui reste tient en trois gestes : la lumière est d'une seule blancheur
+   chaude, les arbres ne sont plus que des silhouettes à l'horizon, et la
+   neige — celle qui tombe comme celle qui se pose — est fine. */
 
 :root[data-season="noel"] {
-  /* La calotte de neige, en motif répété plutôt qu'étiré : une tuile de
-     48 px garde ses bosses à la même taille sur une tuile de statistique
-     comme sur une carte de séance pleine largeur. */
-  /* Le profil de la congère : quatre bosses de rayons très différents,
-     plus deux gouttes qui pendent sous les plus grosses. Des bosses de
-     même taille à pas régulier ne faisaient pas de la neige mais un
-     feston, et ça se voyait d'autant plus que la tuile se répète. */
-  --neige: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='23'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M0%200%20H140%20V9%20C128%209%20126%2018%20112%2018%20C99%2018%20102%208%2090%208%20C78%208%2081%2016%2068%2016%20C55%2016%2060%207%2046%207%20C33%207%2036%2015%2024%2015%20C12%2015%2010%209%200%209%20Z'/%3E%3Ccircle cx='112' cy='19.6' r='2.9'/%3E%3Ccircle cx='68' cy='17.4' r='2.1'/%3E%3C/g%3E%3C/svg%3E");
+  /* La crête de neige posée.
+     Une tuile de 120 × 8 px, répétée plutôt qu'étirée : elle garde ses
+     ondulations à la même taille sur une tuile étroite comme sur une carte
+     pleine largeur.
+     Trois pixels et demi d'amplitude, pas treize. Assez pour qu'on lise de
+     la neige et non une bordure claire, pas assez pour qu'elle devienne le
+     sujet de la carte. */
+  --neige: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='8'%3E%3Cpath d='M0%200%20H120%20V3.4%20C112%203.4%20109%206.6%20101%206.6%20C93%206.6%2095%202.8%2086%202.8%20C77%202.8%2079%206.1%2070%206.1%20C61%206.1%2064%203.2%2055%203.2%20C46%203.2%2048%206.8%2039%206.8%20C30%206.8%2032%203%2024%203%20C16%203%2013%205.9%206%205.9%20C3%205.9%202%204.4%200%204.2%20Z' fill='%23ffffff'/%3E%3C/svg%3E");
+
+  /* Les deux rangées de la ligne d'arbres.
+
+     Des sapins à trois étages, en ombre chinoise. Un simple triangle aux
+     flancs concaves — la première version — donnait des pics de clôture :
+     c'est le décrochement entre les étages qui fait reconnaître un sapin,
+     pas sa pointe.
+
+     La rangée du fond est plus claire que celle de devant : c'est le seul
+     indice de profondeur, et il suffit. */
+  --foret-fond: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='72'%3E%3Cpath d='M16.0%2038.0L22.3%2050.2L19.5%2050.2L26.2%2061.1L21.7%2061.1L31.0%2072L1.0%2072L10.3%2061.1L5.8%2061.1L12.5%2050.2L9.7%2050.2ZM56.0%2045.0L61.0%2054.7L58.8%2054.7L64.2%2063.4L60.6%2063.4L68.0%2072L44.0%2072L51.4%2063.4L47.8%2063.4L53.2%2054.7L51.0%2054.7ZM98.0%2030.0L105.6%2045.1L102.2%2045.1L110.2%2058.6L104.9%2058.6L116.0%2072L80.0%2072L91.1%2058.6L85.8%2058.6L93.8%2045.1L90.4%2045.1ZM144.0%2042.0L149.5%2052.8L147.1%2052.8L152.8%2062.4L149.0%2062.4L157.0%2072L131.0%2072L139.0%2062.4L135.2%2062.4L140.9%2052.8L138.5%2052.8ZM186.0%2034.0L192.7%2047.7L189.8%2047.7L196.9%2059.8L192.1%2059.8L202.0%2072L170.0%2072L179.9%2059.8L175.1%2059.8L182.2%2047.7L179.3%2047.7ZM226.0%2046.0L230.6%2055.4L228.6%2055.4L233.5%2063.7L230.2%2063.7L237.0%2072L215.0%2072L221.8%2063.7L218.5%2063.7L223.4%2055.4L221.4%2055.4ZM262.0%2037.0L268.3%2049.6L265.5%2049.6L272.2%2060.8L267.7%2060.8L277.0%2072L247.0%2072L256.3%2060.8L251.8%2060.8L258.5%2049.6L255.7%2049.6Z' fill='%231b2d33'/%3E%3C/svg%3E");
+  --foret-devant: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='72'%3E%3Cpath d='M30.0%2016.0L39.7%2036.2L35.4%2036.2L45.6%2054.1L38.8%2054.1L53.0%2072L7.0%2072L21.2%2054.1L14.4%2054.1L24.6%2036.2L20.3%2036.2ZM82.0%2028.0L89.6%2043.8L86.2%2043.8L94.2%2057.9L88.9%2057.9L100.0%2072L64.0%2072L75.1%2057.9L69.8%2057.9L77.8%2043.8L74.4%2043.8ZM130.0%208.0L140.9%2031.0L136.1%2031.0L147.7%2051.5L139.9%2051.5L156.0%2072L104.0%2072L120.1%2051.5L112.3%2051.5L123.9%2031.0L119.1%2031.0ZM186.0%2022.0L194.4%2040.0L190.7%2040.0L199.6%2056.0L193.6%2056.0L206.0%2072L166.0%2072L178.4%2056.0L172.4%2056.0L181.3%2040.0L177.6%2040.0ZM240.0%2014.0L249.7%2034.9L245.4%2034.9L255.6%2053.4L248.8%2053.4L263.0%2072L217.0%2072L231.2%2053.4L224.4%2053.4L234.6%2034.9L230.3%2034.9Z' fill='%230d181c'/%3E%3C/svg%3E");
 }
 
+/* La nuit. Le bleu descend du haut, et un reste de vert très sourd monte du
+   bas, là où commence la ligne d'arbres : sans lui, la forêt est posée sur
+   du noir et se voit comme un autocollant. */
 :root[data-season="noel"] body {
   background:
-    radial-gradient(90% 50% at 50% 0%, rgba(42, 96, 150, 0.26) 0%, transparent 72%),
-    radial-gradient(70% 40% at 50% 100%, rgba(24, 74, 48, 0.2) 0%, transparent 70%),
+    radial-gradient(95% 46% at 50% 0%, rgba(44, 92, 142, 0.24) 0%, transparent 70%),
+    radial-gradient(80% 32% at 50% 100%, rgba(22, 60, 54, 0.22) 0%, transparent 72%),
     var(--bg);
   background-attachment: fixed;
 }
@@ -8180,43 +8207,38 @@ body {
    défile. De la neige qui reste en l'air pendant que son support s'en va
    n'est plus de la neige, c'est une tache à l'écran.
 
-   La boîte dépasse de 3 px de chaque côté et remonte de 4 px : c'est ce
-   débord qui donne l'épaisseur, l'impression que la couche s'est accumulée
-   par-dessus le bord et non qu'elle y est peinte. Les deux ombres portées
-   font le reste — la première, nette et bleutée, est le dessous de la
-   couche ; la seconde, floue, décolle la dalle du fond. */
-:root[data-season="noel"] .stat-card,
-:root[data-season="noel"] .session-card,
+   La liste a beaucoup maigri. D'abord parce que le passage design a changé
+   la moitié des dalles d'avant en lignes séparées par un filet, et qu'une
+   crête de neige sur un filet ne veut rien dire. Ensuite parce que la neige
+   ne se pose que sur ce qui ressemble à un objet posé dehors : la dalle
+   d'une saison est une affiche, le bandeau du pass est le haut de l'écran —
+   ni l'un ni l'autre n'est une surface où il tomberait de la neige.
+
+   Le débord est d'un pixel de chaque côté, contre trois avant, et l'ombre
+   portée est unique, sombre et courte. Les deux ombres d'avant — une nette
+   et bleutée qui doublait la crête, une floue qui décollait la dalle du
+   fond — faisaient un objet en relief posé sur la carte. */
 :root[data-season="noel"] .creatine-card,
 :root[data-season="noel"] .pas-card,
-:root[data-season="noel"] .defi-card,
-:root[data-season="noel"] .profile-header-card,
-:root[data-season="noel"] .profile-link-card,
-:root[data-season="noel"] .season-slab {
+:root[data-season="noel"] .defi-card {
   position: relative;
 }
 
-:root[data-season="noel"] .stat-card::before,
-:root[data-season="noel"] .session-card::before,
 :root[data-season="noel"] .creatine-card::before,
 :root[data-season="noel"] .pas-card::before,
-:root[data-season="noel"] .defi-card::before,
-:root[data-season="noel"] .profile-header-card::before,
-:root[data-season="noel"] .profile-link-card::before,
-:root[data-season="noel"] .season-slab::before {
+:root[data-season="noel"] .defi-card::before {
   content: '';
   position: absolute;
-  top: -5px;
-  left: -3px;
-  right: -3px;
-  height: 23px;
+  top: -2px;
+  left: -1px;
+  right: -1px;
+  height: 8px;
   background-image: var(--neige);
   background-repeat: repeat-x;
-  background-size: 140px 23px;
-  border-radius: calc(var(--radius) + 2px) calc(var(--radius) + 2px) 0 0;
-  filter:
-    drop-shadow(0 2px 0 rgba(133, 175, 216, 0.6))
-    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.55));
+  background-size: 120px 8px;
+  border-radius: calc(var(--radius) + 1px) calc(var(--radius) + 1px) 0 0;
+  opacity: 0.82;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7));
   pointer-events: none;
 }
 
@@ -8230,11 +8252,8 @@ body {
 /* La congère ne tombe pas deux fois pareil : chaque dalle démarre la tuile
    à un endroit différent, sinon les cartes d'une liste portent toutes la
    même vague et l'œil y lit un motif de papier peint. */
-:root[data-season="noel"] .session-card:nth-child(2n)::before { background-position-x: -46px; }
-:root[data-season="noel"] .session-card:nth-child(3n)::before { background-position-x: -91px; }
-:root[data-season="noel"] .stat-card:nth-child(2n)::before { background-position-x: -67px; }
-:root[data-season="noel"] .pas-card::before { background-position-x: -38px; }
-:root[data-season="noel"] .defi-card::before { background-position-x: -103px; }
+:root[data-season="noel"] .pas-card::before { background-position-x: -41px; }
+:root[data-season="noel"] .defi-card::before { background-position-x: -83px; }
 
 /* ── Le décor ── */
 
@@ -8242,7 +8261,7 @@ body {
   position: fixed;
   inset: 0;
   /* Derrière le contenu, devant les fonds de page. À 5 le décor passait
-     par-dessus les cartes : un sapin mangeait la moitié de la dernière
+     par-dessus les cartes : un arbre mangeait la moitié de la dernière
      séance de l'accueil. Les pages qui peignent leur propre fond plein
      écran — l'event — le posent donc sous ce calque, pas au-dessus. */
   z-index: 0;
@@ -8250,31 +8269,35 @@ body {
   pointer-events: none;
 }
 
+/* La lueur du haut : le ciel au-dessus de la ville, pas un projecteur.
+   Large, basse en intensité, et sans flou logiciel — un `blur` de 20 px sur
+   un calque fixe de 520 px coûte une recomposition à chaque défilement. */
 .noel-lueur {
   position: absolute;
-  top: -140px;
+  top: -180px;
   left: 50%;
-  width: 520px;
-  height: 340px;
-  margin-left: -260px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(140, 190, 240, 0.22) 0%, transparent 68%);
-  filter: blur(20px);
+  width: 640px;
+  height: 400px;
+  margin-left: -320px;
+  background: radial-gradient(closest-side, rgba(150, 196, 244, 0.13) 0%, transparent 100%);
 }
 
-/* La guirlande, accrochée aux deux coins hauts */
-/* La guirlande descend sous l'encoche : accrochée à 0, elle passait derrière
-   la barre d'état de l'iPhone, où la moitié des ampoules disparaissait. */
-/* La guirlande est son propre calque, hors du décor : celui-ci est passé
-   derrière le contenu, et une guirlande derrière une bannière pleine
-   largeur n'existe plus. Elle est donc devant les pages (1) et sous la
-   barre de navigation (20) — comme un fil tendu au plafond. */
+/* ── La guirlande ──
+
+   Accrochée aux deux coins hauts, elle descend sous l'encoche : à 0, elle
+   passait derrière la barre d'état de l'iPhone, où la moitié des lumières
+   disparaissait.
+
+   Elle est son propre calque, hors du décor : celui-ci est passé derrière le
+   contenu, et une guirlande derrière une bannière pleine largeur n'existe
+   plus. Elle est donc devant les pages (1) et sous la barre de navigation
+   (20) — comme un fil tendu au plafond. */
 .noel-guirlande {
   position: fixed;
   /* Remontée de quelques points depuis qu'elle passe devant : les pages
      dont le titre colle au bord — celles des events — prenaient une
-     ampoule en travers des lettres. */
-  top: calc(env(safe-area-inset-top, 0px) - 7px);
+     lumière en travers des lettres. */
+  top: calc(env(safe-area-inset-top, 0px) - 8px);
   left: 0;
   right: 0;
   height: 26px;
@@ -8289,115 +8312,130 @@ body {
   height: 100%;
 }
 
-.noel-ampoule {
+/* Une lumière : un point chaud et son halo, et rien d'autre.
+   L'ampoule d'avant avait une forme de goutte et un culot dessiné en blanc
+   au-dessus — deux détails de 4 px que personne ne voit et qui, à cette
+   taille, ne font qu'un contour sale. */
+.noel-lumiere {
   position: absolute;
-  width: 7px;
-  height: 10px;
-  margin-left: -3.5px;
-  border-radius: 46% 46% 54% 54%;
-  background: currentColor;
-  box-shadow: 0 0 9px 2px currentColor;
-  animation: noelClignote 2.8s ease-in-out infinite;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: #ffe3b0;
+  box-shadow:
+    0 0 6px 1px rgba(255, 206, 128, 0.75),
+    0 0 16px 4px rgba(255, 186, 94, 0.28);
+  animation: noelRespire 4.3s ease-in-out infinite;
 }
 
-/* Le culot : sans lui, l'ampoule est une goutte posée sous un fil. */
-.noel-ampoule::before {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: 1.5px;
-  width: 4px;
-  height: 3px;
-  border-radius: 1px;
-  background: rgba(255, 255, 255, 0.4);
-}
-
-@keyframes noelClignote {
+/* Elles respirent, elles ne clignotent pas. L'amplitude est faible et la
+   période longue : un décor ne doit jamais gagner le concours d'attention
+   contre le texte qu'il entoure. */
+@keyframes noelRespire {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.32; }
+  50% { opacity: 0.62; }
 }
 
-/* La neige qui tombe */
+/* ── La neige qui tombe ── */
+
 .noel-neige {
   position: absolute;
   inset: 0;
 }
 
+/* Un disque plein et doux, pas un dégradé radial à trois arrêts : à 3 px de
+   large, le dégradé ne se voit pas et coûte une passe de peinture de plus. */
 .noel-flocon {
   position: absolute;
   top: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 38%, rgba(255, 255, 255, 0.5) 72%, transparent 100%);
+  background: #eaf4ff;
   animation-name: noelChute;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+  will-change: transform;
 }
 
 /*
  * La chute.
  *
  * La dérive horizontale est une propriété par flocon et non une valeur
- * écrite ici : seize flocons qui partent tous du même côté tombent en
+ * écrite ici : des flocons qui partent tous du même côté tombent en
  * diagonale, ce qui donne du vent et pas de la neige.
+ *
+ * L'opacité de pointe aussi est par flocon : tous à la même, la neige est
+ * un calque uniforme ; échelonnée, elle a de la profondeur.
  */
 @keyframes noelChute {
-  0% { transform: translate3d(0, -8vh, 0); opacity: 0; }
-  7% { opacity: 0.95; }
-  88% { opacity: 0.95; }
+  0% { transform: translate3d(0, -6vh, 0); opacity: 0; }
+  10% { opacity: var(--creux, 0.5); }
+  86% { opacity: var(--creux, 0.5); }
   100% { transform: translate3d(var(--derive), 106vh, 0); opacity: 0; }
 }
 
-/* Les sapins, posés dans les coins bas, juste au-dessus de la barre */
-/*
- * Les sapins sortent de derrière la barre de navigation plutôt que d'être
- * posés au-dessus : les coins bas de l'écran sont rarement vides, et un
- * sapin complet finissait caché derrière le dernier bouton de la page. À
- * moitié enterré, il ne dépasse que de la hauteur d'une cime, où il n'y a
- * jamais rien.
+/* ── La ligne d'arbres ──
+ *
+ * Deux sapins posés dans les coins étaient deux objets, et ils se faisaient
+ * manger par la barre de navigation. Une ligne d'horizon est un lieu : elle
+ * ferme le bas de l'écran au lieu de l'encombrer, et la barre flottante se
+ * détache dessus au lieu de la couper.
+ *
+ * C'est un motif répété, pas une image étirée : les arbres gardent leur
+ * forme du téléphone à l'écran large.
  */
-/* En décembre, le bas des pages recule : les sapins sont derrière le
-   contenu, et sans cette bande ils restent coincés sous la dernière carte.
-   Le décor ne doit jamais prendre la place du texte — mais il a droit à un
-   bout de sol. */
-:root[data-season="noel"] .page {
-  padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
-}
-
-.noel-sapin {
+.noel-foret {
   position: absolute;
-  bottom: calc(var(--nav-height) - 34px);
-  width: 66px;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6));
+  left: 0;
+  right: 0;
+  /* Le pied des arbres passe derrière la barre flottante, et seules les
+     cimes dépassent. Posée à 0, la ligne entière disparaissait dessous —
+     la barre fait exactement sa hauteur. */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
+  height: 72px;
 }
 
-.noel-sapin svg {
-  width: 100%;
-  height: auto;
-  display: block;
+.noel-foret-fond,
+.noel-foret-devant {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat-x;
+  background-position: bottom left;
+  background-size: 280px 72px;
 }
 
-.noel-sapin-gauche {
-  left: 6px;
-  transform: rotate(-3deg);
+.noel-foret-fond {
+  background-image: var(--foret-fond);
+  /* Décalée en hauteur et en largeur : deux rangées alignées se lisent
+     comme une seule rangée mal imprimée. */
+  bottom: 9px;
+  background-position-x: -64px;
+  opacity: 0.55;
 }
 
-.noel-sapin-droite {
-  right: 6px;
-  transform: rotate(3deg) scale(0.82);
+.noel-foret-devant {
+  background-image: var(--foret-devant);
+}
+
+/* En décembre, le bas des pages recule : la forêt est derrière le contenu,
+   et sans cette bande la dernière carte s'arrête dedans. Le décor ne doit
+   jamais prendre la place du texte — mais il a droit à un bout de sol. */
+:root[data-season="noel"] .page {
+  padding-bottom: calc(8.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 1024px) {
-  /* Sur ordinateur la barre devient une colonne à gauche : le sapin de
-     gauche tomberait derrière elle. */
-  .noel-sapin { bottom: -26px; }
-  .noel-sapin-gauche { display: none; }
-  .noel-sapin-droite { right: 24px; }
+  /* Sur ordinateur la barre devient une colonne à gauche : la forêt court
+     sous toute la largeur, elle n'a rien à éviter. */
+  .noel-foret {
+    bottom: 0;
+    height: 86px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .noel-flocon { animation: none; opacity: 0; }
-  .noel-ampoule { animation: none; }
+  .noel-lumiere { animation: none; }
 }
 
 .seasonal-noel {
