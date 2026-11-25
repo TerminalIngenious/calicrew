@@ -12612,13 +12612,18 @@ body {
   padding: 0;
 }
 
+/* Le rail passe par x = 13, et les points sont posés dessus plutôt que
+   placés dans une colonne de grille. Avec des marges, le point d'un cran et
+   celui d'une station ne tombaient pas au même endroit — 14,1 contre 14,6
+   pour un rail à 13 — et la colonne paraissait tordue. Centrés par
+   transformation, les deux sont sur l'axe quelle que soit leur taille. */
 .niv-rang {
   position: relative;
   display: grid;
-  grid-template-columns: 26px 2.2rem auto 1fr;
+  grid-template-columns: 2.2rem auto 1fr;
   align-items: center;
   gap: 0 0.7rem;
-  padding-left: 0.1rem;
+  padding-left: 26px;
 }
 
 /* Le rail, segment par segment plutôt qu'un trait unique avec un dégradé :
@@ -12628,10 +12633,11 @@ body {
 .niv-rang::before {
   content: '';
   position: absolute;
-  left: 12px;
+  left: 13px;
   top: 0;
   bottom: 0;
   width: 2px;
+  margin-left: -1px;
   background: var(--border);
 }
 
@@ -12643,14 +12649,16 @@ body {
 .niv-rang:last-child::before { bottom: 50%; }
 
 .niv-puce {
-  position: relative;
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 9px;
   height: 9px;
-  margin-left: 8px;
   border-radius: 50%;
   background: var(--bg);
   box-shadow: inset 0 0 0 2px var(--border);
@@ -12667,7 +12675,6 @@ body {
 .niv-rang.station .niv-puce {
   width: 20px;
   height: 20px;
-  margin-left: 3px;
 }
 
 /* ── Un cran ── */
@@ -12683,7 +12690,7 @@ body {
 }
 
 .niv-cout {
-  grid-column: 3 / -1;
+  grid-column: 2 / -1;
   justify-self: end;
   padding-right: 0.2rem;
   font-size: 0.72rem;

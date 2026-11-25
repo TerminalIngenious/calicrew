@@ -92,6 +92,9 @@ export default function PisteProfil({
                       </span>
                     )}
                   </span>
+                  {/* Pas de coût sous la récompense : une station dit ce
+                      qu'elle donne, et rien d'autre. Les crans qui l'entourent
+                      portent déjà le barème, c'est assez pour situer l'effort. */}
                   <span className="niv-texte">
                     <b>
                       {p.coffre
@@ -109,7 +112,6 @@ export default function PisteProfil({
                         </button>
                       )}
                     </b>
-                    <em>{p.cout} XP</em>
                   </span>
                 </>
               ) : (
