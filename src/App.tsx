@@ -28,6 +28,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Programs = lazy(() => import('./pages/Programs'));
 const Decouvrir = lazy(() => import('./pages/Decouvrir'));
 const Badges = lazy(() => import('./pages/Badges'));
+const Niveaux = lazy(() => import('./pages/Niveaux'));
 const FaceId = lazy(() => import('./pages/FaceId'));
 const Avent = lazy(() => import('./pages/Avent'));
 const AventCartes = lazy(() => import('./pages/AventCartes'));
@@ -233,6 +234,7 @@ function AppContent() {
             <Route path="/faceid" element={<ProtectedRoute><FaceId /></ProtectedRoute>} />
             <Route path="/faceid/cartes" element={<ProtectedRoute><FaceIdCartes /></ProtectedRoute>} />
             <Route path="/faceid/cartes/:uid" element={<ProtectedRoute><FaceIdCartes /></ProtectedRoute>} />
+            <Route path="/niveaux" element={<ProtectedRoute><Niveaux /></ProtectedRoute>} />
             <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
             <Route path="/badges/:uid" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
             <Route path="/programs" element={<ProtectedRoute><Programs /></ProtectedRoute>} />

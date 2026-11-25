@@ -12447,3 +12447,189 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ══ La page des niveaux de profil ══ */
+
+.niv-page {
+  padding-top: 0 !important;
+}
+
+.niv-entete {
+  position: relative;
+  margin: 0 -1rem 1.2rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1.1rem;
+  overflow: hidden;
+}
+
+.niv-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+}
+
+.niv-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.niv-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.niv-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.niv-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.niv-titre {
+  margin: 0.55rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.niv-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.niv-chiffre {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.niv-unite {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.niv-reste {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.niv-sous {
+  margin: 0.55rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.niv-barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  z-index: 1;
+}
+
+.niv-barre-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+/* Le bouton qui déroule la suite. En ligne et non en pavé : on ne vient pas
+   sur cette page pour cliquer dessus, on vient regarder l'échelle. */
+.niv-plus {
+  display: block;
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: 0.9rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Un palier qui ne donne rien : le coffre laisse la place, et seul le coût
+   reste. Sans ça, la colonne du milieu fait un trou. */
+.bp-palier-nu .bp-palier-coffre {
+  min-width: 0;
+  width: 0;
+}
+
+.bp-palier-medaille {
+  color: var(--or, #ffd60a);
+}
+
+/* Le coût du niveau, sous ce qu'il rapporte. */
+.bp-palier-note {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Le niveau du profil, quand il mène à l'échelle. */
+.pro-niveau-ligne.lien {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pro-niveau-ligne.lien svg {
+  color: var(--text-muted);
+}
+
+/* La pastille « badge » épinglée sur un coffre, quand le palier donne les
+   deux. En or, parce qu'un badge est une médaille — et la seule chose dorée
+   de la colonne, donc repérable sans la lire. */
+.bp-palier-coffre {
+  position: relative;
+}
+
+.bp-palier-pin {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffd60a;
+  color: #1a1400;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}

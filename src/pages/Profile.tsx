@@ -323,10 +323,21 @@ export default function Profile() {
                       sur la ligne « Mes cartes ». C'est le chiffre qu'on vient
                       chercher en ouvrant un profil — le sien comme celui d'un
                       autre — et il n'existait nulle part. */}
-                  <span className="pro-niveau-ligne">
-                    <b>Niveau {niveau.niveau}</b>
-                    <em>{niveau.dansNiveau} / {niveau.pourSuivant} XP</em>
-                  </span>
+                  {/* Cliquable sur son propre profil seulement : l'échelle
+                      montre ce qu'on va gagner, et celle d'un autre ne
+                      regarde que lui. */}
+                  {isOwnProfile ? (
+                    <button className="pro-niveau-ligne lien" onClick={() => navigate('/niveaux')}>
+                      <b>Niveau {niveau.niveau}</b>
+                      <em>{niveau.dansNiveau} / {niveau.pourSuivant} XP</em>
+                      <ChevronRight size={14} />
+                    </button>
+                  ) : (
+                    <span className="pro-niveau-ligne">
+                      <b>Niveau {niveau.niveau}</b>
+                      <em>{niveau.dansNiveau} / {niveau.pourSuivant} XP</em>
+                    </span>
+                  )}
                 </>
               )}
             </div>

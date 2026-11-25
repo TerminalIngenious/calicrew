@@ -424,7 +424,10 @@ n'ai rien changé en attendant.
 3. ~~Le bandeau du profil : niveau + barre.~~ **Fait.** Le niveau prend la
    place du compte de cartes, qui partira sur la ligne « Mes cartes ». Le
    bandeau des badges a maigri de 124 à 86 px au passage.
-4. La page `/niveaux`, à partir de `PassTrack`.
+4. ~~La page `/niveaux`, à partir de `PassTrack`.~~ **Fait.** L'échelle du
+   pass est devenue `PisteNiveaux`, partagée ; `PassTrack` n'en est plus
+   qu'une traduction. La page affiche le niveau atteint plus vingt et se
+   déroule par quarante.
 5. Les 39 badges, et leur détection.
 6. La page `/cartes` unifiée, et les redirections.
 7. Les titres, si retenus.
