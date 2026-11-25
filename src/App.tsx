@@ -49,14 +49,13 @@ import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
 /*
- * L'app est fermée au public pendant l'installation des niveaux de profil.
+ * Ferme l'app au public, sauf pour les comptes admin (cf. ProtectedRoute).
  *
- * Les comptes admin passent au travers (cf. ProtectedRoute), ce qui permet de
- * continuer à développer et à vérifier sur la vraie base. Les crons serveur,
- * eux, ne sont pas concernés : la créatine et le défi du jour continuent de
- * notifier. À couper de leur côté si la fermeture dure.
+ * Mise à `true` le temps d'installer les niveaux de profil, remise à `false`
+ * une fois les huit points de NIVEAUX.md livrés. À savoir si on la remonte :
+ * les crons serveur ne sont pas concernés et continuent de notifier.
  */
-const MAINTENANCE = true;
+const MAINTENANCE = false;
 /**
  * Intro de saison.
  *

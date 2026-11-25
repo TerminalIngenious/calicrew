@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, query, where, getDocs, getDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS, uniteProbable } from '../lib/exercises';
 import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason, accordeXp } from '../lib/passes';
@@ -443,14 +443,16 @@ export default function NewSession() {
           brute,
           new Date().toISOString().split('T')[0]
         );
-        await updateDoc(ref, {
+        // Fusionné : le document de progression peut ne pas exister encore,
+        // et `updateDoc` échouerait dessus en silence.
+        await setDoc(ref, {
           xp: gain.xp,
           xpJour: gain.xpJour,
           niveauxPris: gain.niveauxPris,
           ...(gain.coffres.length > 0
             ? { chestsToOpen: [...(progress.chestsToOpen || []), ...gain.coffres] }
             : {}),
-        });
+        }, { merge: true });
       } catch (err) {
         console.error('XP de profil du log impossible :', err);
       }

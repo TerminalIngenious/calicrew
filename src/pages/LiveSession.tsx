@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
@@ -435,11 +435,18 @@ export default function LiveSession() {
         const aujourdhui = new Date().toISOString().split('T')[0];
         const gain = accordeXpProfil(progress, brute, aujourdhui);
 
-        /* Une seule écriture pour le coffre de fin, l'XP et les coffres des
-           niveaux franchis. Deux écritures séparées, c'est la porte ouverte
-           à une séance qui donne son coffre mais pas son XP parce que le
-           réseau a lâché entre les deux. */
-        await updateDoc(ref, {
+        /*
+         * Une seule écriture pour le coffre de fin, l'XP et les coffres des
+         * niveaux franchis. Deux écritures séparées, c'est la porte ouverte
+         * à une séance qui donne son coffre mais pas son XP parce que le
+         * réseau a lâché entre les deux.
+         *
+         * En `setDoc` fusionné et non en `updateDoc` : un joueur du groupe a
+         * des séances mais pas encore de document de progression, et
+         * `updateDoc` échoue sur un document absent. Il serait resté au
+         * niveau 1 à vie, sans que rien ne le signale.
+         */
+        await setDoc(ref, {
           chestsToOpen: [
             ...(progress.chestsToOpen || []),
             { rarity: 'commune' as const, pool: 'current' },
@@ -448,7 +455,7 @@ export default function LiveSession() {
           xp: gain.xp,
           xpJour: gain.xpJour,
           niveauxPris: gain.niveauxPris,
-        });
+        }, { merge: true });
         setGainXp(gain);
       } catch (err) {
         // La progression peut ne pas exister encore : la séance est déjà

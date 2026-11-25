@@ -401,9 +401,14 @@ Vérifié sur les cas limites, en rejouant le vrai module :
 
 ---
 
-## 10. Ce que la maintenance coûte, et la décision qui reste
+## 10. La maintenance — close
 
-L'app est coupée à partir d'aujourd'hui, 25 novembre. **La saison 1 se termine
+L'app a rouvert le 25 novembre, les huit points livrés. Ce qui suit est le
+compte rendu de la coupure, gardé parce qu'il dit ce qui a été décidé.
+
+Elle a duré quelques heures, et la saison 1 n'a donc pas eu à être décalée.
+
+L'app a été coupée le 25 novembre. **La saison 1 se termine
 le 30 novembre**, dans cinq jours.
 
 Tu as dit de ne pas toucher aux quêtes de fin de saison, et je ne les ai pas
