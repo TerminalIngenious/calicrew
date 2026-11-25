@@ -11057,3 +11057,298 @@ body {
 .defi-note.erreur {
   color: var(--danger);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Le choix des exercices, et le réglage des objectifs
+
+   La page empilait sept blocs encadrés avant de laisser cocher quoi que ce
+   soit : raccourcis, échauffement, recherche, filtres, en-tête de résultats,
+   pastilles, bouton pointillé. Chacun avait son cadre, donc aucun ne passait
+   devant les autres. Ici, un seul bandeau porte le titre et la recherche —
+   l'outil de la page — et tout ce qui suit est séparé par des filets plutôt
+   que par des boîtes.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.exo-page {
+  padding-top: 0 !important;
+}
+
+.exo-entete {
+  position: relative;
+  margin: 0 -1rem 1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1rem;
+  overflow: hidden;
+}
+
+.exo-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+}
+
+.exo-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.exo-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.exo-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.exo-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+/* Le compte des exercices cochés vit dans le bandeau, en pastille : c'est la
+   seule chose qui change pendant qu'on parcourt le catalogue. */
+.exo-compte {
+  margin-left: auto;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.exo-titre {
+  margin: 0.55rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.exo-sous {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* La recherche dans le bandeau. Pas de cadre franc : un fond translucide
+   posé sur le dégradé se lit comme une entaille dans le bandeau, pas comme
+   une boîte ajoutée dessus. */
+.exo-entete .exo-search {
+  margin: 0.85rem 0 0;
+  padding: 0 0.7rem;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+}
+
+.exo-entete .exo-search input {
+  padding: 0.65rem 0;
+  font-size: 0.92rem;
+}
+
+/* ── Les raccourcis : des pastilles, pas des cartes ── */
+
+.exo-page .exo-raccourcis {
+  margin-bottom: 0.9rem;
+}
+
+.exo-page .exo-raccourci {
+  padding: 0.45rem 0.8rem;
+  background: none;
+  border-radius: 999px;
+  border-color: var(--border);
+  font-size: 0.8rem;
+}
+
+/* ── L'échauffement : une ligne, pas un bloc encadré ──
+   Il garde son orange — la couleur dit « échauffement », elle ne décore pas. */
+
+.exo-page .ech-bloc {
+  margin-bottom: 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+}
+
+.exo-page .ech-bloc.actif {
+  border-color: var(--border);
+  /* Le filet de gauche remplace le cadre orange : il signale l'état actif
+     sans redessiner une boîte autour de la ligne. */
+  box-shadow: inset 2px 0 0 #ff7a18;
+}
+
+.exo-page .ech-entete {
+  padding: 0.8rem 0.1rem;
+}
+
+.exo-page .ech-corps {
+  padding: 0 0.1rem 0.9rem;
+}
+
+.exo-page .ech-famille {
+  border-radius: 999px;
+}
+
+/* Les exercices d'échauffement passent parfois sur deux lignes : une pastille
+   complètement arrondie y devient un losange. Un coin doux suffit. */
+.exo-page .ech-exo {
+  border-radius: 10px;
+}
+
+/* ── Les filtres et les résultats ── */
+
+.exo-page .exo-filters {
+  margin-bottom: 0.2rem;
+  padding-top: 0.9rem;
+}
+
+.exo-page .exo-filter {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.exo-page .exo-filter.active {
+  background: rgba(var(--accent-rgb), 0.16);
+  border-color: transparent;
+}
+
+.exo-page .exo-results-head {
+  margin: 0.9rem 0 0.7rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+}
+
+.exo-page .exercise-chip {
+  background: none;
+  border-color: var(--border);
+  padding: 0.5rem 0.85rem;
+}
+
+.exo-page .exercise-chip.selected {
+  border-color: var(--accent);
+}
+
+/* Ajouter un exercice n'est pas une action de même poids que choisir dans le
+   catalogue : le grand cadre pointillé en faisait la chose la plus visible
+   du bas de page. Une ligne suffit. */
+.exo-page .add-exercise-btn {
+  justify-content: flex-start;
+  padding: 0.85rem 0.1rem;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* ── Les objectifs : une colonne de lignes, pas une pile de cartes ──
+   Neuf exercices donnaient neuf cadres contenant chacun quatre lignes déjà
+   séparées. Le cadre n'apprenait rien : le nom de l'exercice dit où
+   commence son bloc. */
+
+.exo-page .config-list {
+  gap: 0;
+}
+
+.exo-page .config-card {
+  padding: 1rem 0.1rem;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.exo-page .config-card:first-child {
+  border-top: 0;
+}
+
+.exo-page .config-card h3 {
+  margin-bottom: 0.3rem;
+  font-size: 0.98rem;
+  letter-spacing: -0.01em;
+}
+
+.exo-page .config-row {
+  margin-top: 0.55rem;
+  font-size: 0.85rem;
+}
+
+/* Le résultat du réglage est une conséquence de ce qu'on vient de régler,
+   pas un titre : il passe à droite, en gris, au lieu d'être centré en
+   couleur d'accent au milieu de la carte. */
+.exo-page .config-result {
+  margin-top: 0.7rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.exo-page .running-pace {
+  padding: 0.6rem 0;
+  background: none;
+  font-size: 0.85rem;
+}
+
+.exo-page .sportco-xp-banner {
+  border-radius: var(--radius);
+}
+
+@media (min-width: 1024px) {
+  .exo-entete {
+    margin-inline: -2rem;
+    padding-inline: 2rem;
+  }
+
+  .exo-entete .exo-search {
+    max-width: 26rem;
+  }
+}
+
+/* Les sélecteurs d'unité et de type de poids deviennent un vrai segmenté :
+   une seule piste, et le segment actif rempli discrètement. Deux pavés verts
+   pleins par exercice, sur neuf exercices, tiraient l'œil plus fort que les
+   objectifs eux-mêmes — alors que le choix par défaut est presque toujours
+   le bon. */
+.exo-page .unit-picker,
+.exo-page .weight-type-picker {
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.exo-page .unit-btn,
+.exo-page .weight-type-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  background: none;
+}
+
+.exo-page .unit-btn.active,
+.exo-page .weight-type-btn.active {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+}

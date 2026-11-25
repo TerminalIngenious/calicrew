@@ -494,13 +494,39 @@ export default function NewSession() {
 
   if (step === 'select') {
     return (
-      <div className="page">
-        <header className="page-header">
-          <button className="icon-btn" onClick={() => navigate('/')}>
-            <ArrowLeft size={20} />
-          </button>
-          <h1>Choisis tes exercices</h1>
-          <div />
+      <div className="page exo-page">
+        {/* Le bandeau porte la recherche. Sur une page dont le travail est
+            de trouver un exercice parmi cent trente-cinq, le champ de
+            recherche est l'outil principal : il n'a rien à faire en
+            quatrième position, sous trois blocs encadrés. */}
+        <header className="exo-entete">
+          <div className="exo-entete-fond" />
+          <div className="exo-entete-contenu">
+            <div className="exo-haut">
+              <button className="exo-retour" onClick={() => navigate('/')} aria-label="Revenir à l'accueil">
+                <ArrowLeft size={20} />
+              </button>
+              <span className="exo-kicker">Nouvelle séance</span>
+              {selectedExercises.length > 0 && (
+                <span className="exo-compte">{selectedExercises.length} choisi{selectedExercises.length > 1 ? 's' : ''}</span>
+              )}
+            </div>
+            <h1 className="exo-titre">Choisis tes exercices</h1>
+            <div className="exo-search">
+              <Search size={16} />
+              <input
+                type="search"
+                placeholder="Rechercher un exercice"
+                value={recherche}
+                onChange={(e) => setRecherche(e.target.value)}
+              />
+              {recherche && (
+                <button className="icon-btn" onClick={() => setRecherche('')} aria-label="Effacer">
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
         </header>
 
         {/* Les raccourcis tiennent sur une ligne. Ils occupaient deux sections
@@ -567,21 +593,6 @@ export default function NewSession() {
                 })}
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="exo-search">
-          <Search size={16} />
-          <input
-            type="search"
-            placeholder="Rechercher un exercice"
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-          />
-          {recherche && (
-            <button className="icon-btn" onClick={() => setRecherche('')} aria-label="Effacer">
-              <X size={16} />
-            </button>
           )}
         </div>
 
@@ -834,13 +845,25 @@ export default function NewSession() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <button className="icon-btn" onClick={() => setStep('select')}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1>{isVeloOnly ? 'Log vélo' : isRunningOnly ? 'Log running' : isSportCoOnly ? 'Log sport co' : 'Objectifs'}</h1>
-        <div />
+    <div className="page exo-page">
+      <header className="exo-entete">
+        <div className="exo-entete-fond" />
+        <div className="exo-entete-contenu">
+          <div className="exo-haut">
+            <button className="exo-retour" onClick={() => setStep('select')} aria-label="Revenir au choix des exercices">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="exo-kicker">Nouvelle séance</span>
+          </div>
+          <h1 className="exo-titre">
+            {isVeloOnly ? 'Log vélo' : isRunningOnly ? 'Log running' : isSportCoOnly ? 'Log sport co' : 'Objectifs'}
+          </h1>
+          <p className="exo-sous">
+            {isRunningOnly || isSportCoOnly
+              ? 'La sortie est déjà faite : on l\'enregistre.'
+              : `${exerciseConfigs.length + runningConfigs.length + sportCoConfigs.length} exercices à régler`}
+          </p>
+        </div>
       </header>
 
       <div className="config-list">
