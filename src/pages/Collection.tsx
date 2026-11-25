@@ -6,7 +6,7 @@ import { getCurrentSeason, SEASONS } from '../lib/passes';
 import { SET_INTERGALACTIQUE, joursRestants, fenetreOuverte } from '../lib/intergalactique';
 import { useUserProgress } from '../lib/useUserProgress';
 import type { Card } from '../types';
-import { Layers, Info, X, ArrowLeft, Repeat } from 'lucide-react';
+import { Info, X, ArrowLeft, Repeat } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import Loader from '../components/Loader';
 import CardDetailModal from '../components/CardDetailModal';
@@ -95,15 +95,38 @@ export default function Collection() {
   const ownedCount = cards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <button className="icon-btn" onClick={() => navigate('/profile')}>
-          <ArrowLeft size={20} />
-        </button>
-        <h1>{season ? season.theme : 'Collection'}</h1>
-        <button className="info-btn" onClick={() => setShowInfo(true)}>
-          <Info size={18} />
-        </button>
+    <div className="page col-page">
+      {/* Le bandeau porte l'avancement. C'est ce qu'on vient voir en ouvrant
+          la collection : combien il en manque. La mention tenait dans une
+          carte posée sous le titre, du même poids que le reste. */}
+      <header className="col-entete">
+        <div className="col-entete-fond" />
+        <div className="col-entete-contenu">
+          <div className="col-haut">
+            <button className="col-retour" onClick={() => navigate('/profile')} aria-label="Revenir au profil">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="col-kicker">Collection</span>
+            <button className="col-info" onClick={() => setShowInfo(true)} aria-label="Taux de drop">
+              <Info size={17} />
+            </button>
+          </div>
+          {/* L'onglet intergalactique n'a pas de thème : on retombe sur son
+              nom plutôt que d'afficher un titre vide. */}
+          <h1 className="col-titre">{viewedSeason?.theme || viewedSeason?.name || 'Collection'}</h1>
+          <div className="col-mesures">
+            <span className="col-compte">
+              {ownedCount}<em>/{cards.length}</em>
+            </span>
+            <span className="col-legende">cartes trouvées</span>
+          </div>
+        </div>
+        <div className="col-barre">
+          <div
+            className="col-barre-fill"
+            style={{ width: `${cards.length ? (ownedCount / cards.length) * 100 : 0}%` }}
+          />
+        </div>
       </header>
 
       {showInfo && (
@@ -148,11 +171,6 @@ export default function Collection() {
       {showEchange && user && progress && (
         <EchangeDoublons uid={user.uid} progress={progress} onClose={() => setShowEchange(false)} />
       )}
-
-      <div className="collection-summary">
-        <Layers size={20} />
-        <span>{ownedCount} / {cards.length} cartes</span>
-      </div>
 
       {/* Le bouton n'existe que s'il y a quelque chose à échanger : une porte
           vers une pièce vide ne sert qu'à décevoir. */}
@@ -219,8 +237,11 @@ export default function Collection() {
 
         return (
           <section key={group.key} className="section collection-rarity-section">
+            {/* Le compte passe à droite, en gris : il dit où on en est, il
+                ne fait pas partie du nom de la rareté. */}
             <h3 className="collection-rarity-header" style={{ color: group.color }}>
-              {group.label} ({ownedInGroup}/{groupCards.length})
+              <span>{group.label}</span>
+              <em>{ownedInGroup}/{groupCards.length}</em>
             </h3>
             <div className="card-grid card-grid-images">
               {groupCards.map((card) => {

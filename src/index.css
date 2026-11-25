@@ -11352,3 +11352,219 @@ body {
   background: rgba(var(--accent-rgb), 0.16);
   color: var(--accent);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   La collection
+
+   Quatre boîtes se succédaient avant la première carte : le résumé, les
+   doublons, les bascules, l'avertissement d'archive. L'avancement — la seule
+   chose qu'on vient vraiment lire — était une ligne de 0,95 rem dans la
+   première d'entre elles. Il monte dans le bandeau, en gros, et la barre de
+   progression ferme celui-ci d'un bord à l'autre.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.col-page {
+  padding-top: 0 !important;
+}
+
+.col-entete {
+  position: relative;
+  margin: 0 -1rem 1.1rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1rem;
+  overflow: hidden;
+}
+
+.col-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+
+.col-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.col-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.col-retour,
+.col-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.col-info {
+  margin-left: auto;
+  color: var(--text-muted);
+}
+
+.col-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.col-titre {
+  margin: 0.55rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* Le nombre trouvé en gros, le total en petit à côté : ce sont deux
+   informations de poids très différents, elles étaient de la même taille. */
+.col-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.col-compte {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.col-compte em {
+  font-style: normal;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.col-legende {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* La barre ferme le bandeau d'un bord à l'autre : elle n'est pas un objet
+   posé dedans, elle en est le bas. */
+.col-barre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  z-index: 1;
+}
+
+.col-barre-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+/* ── Ce qui suit perd ses cadres ── */
+
+.col-page .collection-echange {
+  padding: 0.8rem 0.1rem;
+  margin-bottom: 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
+/* Les bascules deviennent des pastilles, comme les filtres du catalogue :
+   une piste encadrée autour de deux boutons encadrés faisait trois traits
+   pour un seul choix. */
+.col-page .layout-switch {
+  gap: 0.4rem;
+  padding: 0;
+  margin: 1rem 0 0.9rem;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.col-page .layout-switch::-webkit-scrollbar {
+  display: none;
+}
+
+.col-page .layout-switch-btn {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.82rem;
+}
+
+.col-page .layout-switch-btn.active {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+}
+
+.col-page .collection-group-switch {
+  margin-top: 0;
+}
+
+/* L'avertissement d'archive est une phrase, pas une alerte : il n'a pas
+   besoin d'un encadré pour se faire lire. */
+.col-page .collection-archive-hint {
+  padding: 0;
+  margin: 0.2rem 0 1rem;
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+}
+
+/* Le titre de rareté garde sa couleur — elle dit la rareté, elle ne décore
+   pas — mais passe en intertitre : il annonçait les cartes avec le même
+   poids typographique que le titre de la page. */
+.col-page .collection-rarity-section {
+  margin-bottom: 1.3rem;
+}
+
+.col-page .collection-rarity-header {
+  margin-bottom: 0.6rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.col-page .collection-rarity-section:first-of-type .collection-rarity-header {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.col-page .card-grid-images {
+  gap: 7px;
+}
+
+.col-page .collection-rarity-header em {
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
