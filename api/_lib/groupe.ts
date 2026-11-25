@@ -18,7 +18,11 @@ export interface Abonnement extends Subscription {
 
 export async function lisAbonnements(db: Firestore): Promise<Abonnement[]> {
   const snap = await db.collection('pushSubscriptions').get();
-  return snap.docs.map((d) => d.data() as Abonnement);
+  return snap.docs
+    .map((d) => d.data() as Abonnement)
+    // Un abonnement périmé garde ses préférences, le temps que l'app le
+    // répare à la prochaine ouverture, mais n'a plus d'adresse où écrire.
+    .filter((a) => !!a.endpoint && !!a.keys);
 }
 
 export function veutAmbiance(a: Abonnement): boolean {

@@ -78,6 +78,9 @@ function subscriptionPayload(sub: PushSubscription, uid: string, prefs: PushPref
     uid,
     endpoint: json.endpoint,
     keys: json.keys,
+    // L'abonnement repart vivant : s'il avait été marqué périmé par un envoi
+    // en échec, c'est ici qu'on l'efface.
+    perime: false,
     creatine: prefs.creatine,
     dailyChallenge: prefs.dailyChallenge,
     groupe: prefs.groupe,

@@ -57,7 +57,27 @@ export async function sendTo(sub: Subscription, payload: Payload): Promise<boole
   } catch (err) {
     const status = (err as { statusCode?: number }).statusCode;
     if (status === 404 || status === 410) {
-      await getDb().collection('pushSubscriptions').doc(sub.uid).delete();
+      /*
+       * L'abonnement est mort — mais pas l'envie d'être prévenu.
+       *
+       * On supprimait le document entier. Or il porte aussi les préférences,
+       * et elles sont le seul endroit où elles vivent : en le supprimant, on
+       * effaçait la trace que cette personne avait activé ses rappels. À sa
+       * prochaine ouverture, l'app la voyait comme quelqu'un qui n'en a
+       * jamais voulu, et la réparation silencieuse prévue pour ce cas-là ne
+       * se déclenchait donc jamais.
+       *
+       * iOS révoque les abonnements tout seuls, après une mise à jour de la
+       * PWA ou quelques semaines sans ouvrir l'app : ce chemin est la règle,
+       * pas l'exception.
+       *
+       * On ne garde que les préférences, on jette l'adresse morte, et
+       * `lisAbonnements` saute les documents sans adresse.
+       */
+      await getDb().collection('pushSubscriptions').doc(sub.uid).set(
+        { endpoint: '', keys: null, perime: true, perimeLe: Date.now() },
+        { merge: true }
+      );
     } else {
       console.error(`Echec push pour ${sub.uid}:`, status, (err as Error).message);
     }

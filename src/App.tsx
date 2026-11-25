@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SessionsProvider } from './contexts/SessionsContext';
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { getCurrentSeason } from './lib/passes';
 import { getCardsBySet, getFamilies } from './lib/cards';
 import type { Season } from './types';
@@ -47,6 +47,7 @@ import ArriveeTest from './pages/ArriveeTest';
 import LimiteChargement from './components/LimiteChargement';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
+import { getPushPrefs, syncSubscription } from './lib/push';
 
 /*
  * Ferme l'app au public, sauf pour les comptes admin (cf. ProtectedRoute).
@@ -175,6 +176,29 @@ function AppContent() {
       setShowSplash(true);
     }
   }, [loading, user, splashDone, currentSeason]);
+
+  /*
+   * Réparer l'abonnement aux notifications au lancement.
+   *
+   * iOS révoque les abonnements push tout seul — mise à jour de la PWA,
+   * réinstallation, ou quelques semaines sans ouvrir l'app. La réparation
+   * existait déjà mais n'était tentée que depuis l'écran des réglages de
+   * notifications, où personne ne retourne une fois ses rappels activés :
+   * un abonnement mort le restait indéfiniment, et la personne ne recevait
+   * plus rien sans jamais l'apprendre.
+   *
+   * Une lecture de document par lancement, et rien d'autre si tout va bien.
+   * La ref évite de recommencer à chaque rendu de l'arbre.
+   */
+  const abonnementVerifie = useRef<string | null>(null);
+  useEffect(() => {
+    const uid = user?.uid;
+    if (loading || !uid || abonnementVerifie.current === uid) return;
+    abonnementVerifie.current = uid;
+    getPushPrefs(uid)
+      .then((prefs) => syncSubscription(uid, prefs))
+      .catch((err) => console.error('Abonnement push non vérifié :', err));
+  }, [loading, user]);
 
   const handleSplashDone = useCallback(() => {
     setShowSplash(false);
