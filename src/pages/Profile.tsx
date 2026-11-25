@@ -7,6 +7,7 @@ import { passeCache, docsEnCache } from '../lib/lectureCache';
 import { getCardsBySet, RARITY_ORDER, getCardDisplayName, getCardById } from '../lib/cards';
 import { SEASONS, lastStartedSeasonIndex } from '../lib/passes';
 import { useUserProgress } from '../lib/useUserProgress';
+import { Layers } from 'lucide-react';
 import { niveauDepuisXp } from '../lib/niveaux';
 import { totalReps as sumReps } from '../lib/stats';
 import type { Session, Card, Program } from '../types';
@@ -468,18 +469,37 @@ export default function Profile() {
           choses différentes. */}
       {badges.length > 0 && <hr className="profile-trait" />}
 
-      {/* Les events en cours, au-dessus des saisons : leurs cartes ne sont
-          pas des cartes de saison, et tant que l'event tourne c'est la
-          collection qu'on vient regarder en premier. */}
-      {aventActif && etagereAvent(false)}
-      {faceidActif && etagereFaceId(false)}
-
-      <section className="section">
-        <SeasonShelf
-          shelves={seasonShelves}
-          onOpen={(id) => navigate(isOwnProfile ? `/season/${id}` : `/season/${id}/${targetUid}`)}
-        />
-      </section>
+      {/*
+        * Sur son propre profil, une seule ligne mène à toutes les cartes.
+        *
+        * Les étagères empilées — une par saison, plus une par event en cours
+        * — prenaient la moitié de la page pour dire quatre fois la même
+        * chose : « voici des cartes ». Elles restent sur le profil des
+        * autres, qui n'ont pas de page « mes cartes » à ouvrir.
+        */}
+      {isOwnProfile ? (
+        <button className="profile-link-card" onClick={() => navigate('/cartes')}>
+          <Layers size={18} />
+          <div>
+            <span className="profile-link-title">Mes cartes</span>
+            <span className="profile-link-sub">
+              {uniqueCards.length} carte{uniqueCards.length > 1 ? 's' : ''} · saisons et événements
+            </span>
+          </div>
+          <ChevronRight size={18} />
+        </button>
+      ) : (
+        <>
+          {aventActif && etagereAvent(false)}
+          {faceidActif && etagereFaceId(false)}
+          <section className="section">
+            <SeasonShelf
+              shelves={seasonShelves}
+              onOpen={(id) => navigate(`/season/${id}/${targetUid}`)}
+            />
+          </section>
+        </>
+      )}
 
       {programs.length > 0 && (
         <section className="section">
@@ -526,7 +546,12 @@ export default function Profile() {
         </section>
       )}
 
-      {(aventFini || faceidFini) && (
+      {/* Les events terminés ne s'affichent plus sur son propre profil :
+          « Mes cartes » les contient depuis que la page des cartes les a
+          absorbés, et les garder ici remettait les étagères qu'on venait
+          justement d'enlever. Sur le profil d'un autre, elles restent — il
+          n'y a pas de page « ses cartes » à ouvrir. */}
+      {!isOwnProfile && (aventFini || faceidFini) && (
         <>
           <hr className="profile-trait" />
           <h3 className="profile-events-finis">Événements terminés</h3>

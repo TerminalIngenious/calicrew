@@ -4,6 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { getCardsBySet, getFamilies, isSetComplete, RARITY_ORDER, getRarityLabel, RARITY_COLORS, getCardDisplayName } from '../lib/cards';
 import { getCurrentSeason, SEASONS } from '../lib/passes';
 import { SET_INTERGALACTIQUE, joursRestants, fenetreOuverte } from '../lib/intergalactique';
+import { CARTES as CARTES_AVENT, TOTAL_CARTES as TOTAL_AVENT, lis as lisAvent } from '../lib/avent';
+import type { CarteAvent } from '../lib/avent';
+import { CARTES as CARTES_FACEID, TOTAL_CARTES as TOTAL_FACEID, lisFaceId } from '../lib/faceid';
+import type { CarteFaceId } from '../lib/faceid';
+import AventCardArt from '../components/cardArt/AventCardArt';
+import FaceIdCard from '../components/FaceIdCard';
+import FaceIdCardArt from '../components/cardArt/FaceIdCardArt';
+import '../pages/Avent.css';
+import '../pages/FaceId.css';
 import { useUserProgress } from '../lib/useUserProgress';
 import type { Card } from '../types';
 import { Info, X, ArrowLeft, Repeat } from 'lucide-react';
@@ -35,6 +44,22 @@ export default function Collection() {
   const lotDoublons = doublons(progress?.ownedCards);
 
   const [groupBy, setGroupBy] = useState<'rarity' | 'family'>('rarity');
+  /** La carte d'event qu'on regarde en grand. */
+  const [apercuAvent, setApercuAvent] = useState<CarteAvent | null>(null);
+  const [apercuFaceId, setApercuFaceId] = useState<CarteFaceId | null>(null);
+
+  /*
+   * Les deux events rejoignent les saisons dans la même bascule.
+   *
+   * Leurs cartes vivaient sur deux pages à part, avec chacune sa mise en
+   * page pour la même chose : « mes cartes ». Elles n'y apparaissent que si
+   * on en a — un onglet vide n'apprend rien, et ces events ne reviendront
+   * pas tous les ans.
+   */
+  const av = lisAvent(progress?.avent);
+  const fid = lisFaceId(progress?.faceid);
+  const cartesAvent = CARTES_AVENT.filter((c) => (av.cartes[c.slug] || 0) > 0);
+  const cartesFaceId = CARTES_FACEID.filter((c) => (fid.cartes[c.id] || 0) > 0);
 
   const season = getCurrentSeason();
 
@@ -57,9 +82,14 @@ export default function Collection() {
    * rendu sa collection impossible à terminer. L'onglet reste là une fois
    * la carte trouvée — c'est une vitrine, pas une liste de courses.
    */
+  const faux = (id: string, name: string) =>
+    ({ id, name, theme: '', startDate: 0, endDate: 0, passLevels: [], quests: [] });
+
   const viewableSeasons = [
     ...saisons,
-    { id: SET_INTERGALACTIQUE, name: 'Intergalactique', theme: '', startDate: 0, endDate: 0, passLevels: [], quests: [] },
+    faux(SET_INTERGALACTIQUE, 'Intergalactique'),
+    ...(cartesAvent.length > 0 ? [faux('avent', 'Avent')] : []),
+    ...(cartesFaceId.length > 0 ? [faux('faceid', 'FaceID')] : []),
   ];
 
   const [viewedId, setViewedId] = useState<string | null>(null);
@@ -68,7 +98,8 @@ export default function Collection() {
     : season?.id || '';
   const viewedSeason = viewableSeasons.find((s) => s.id === activeId);
 
-  const cards: Card[] = activeId ? getCardsBySet(activeId) : [];
+  const estEvent = activeId === 'avent' || activeId === 'faceid';
+  const cards: Card[] = activeId && !estEvent ? getCardsBySet(activeId) : [];
 
   // La saison 1 n'a qu'une famille : inutile de proposer la bascule.
   const families = getFamilies(cards);
@@ -92,7 +123,18 @@ export default function Collection() {
 
   if (loading) return <div className="page loading"><Loader /></div>;
 
-  const ownedCount = cards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
+  /* Le compte du bandeau suit le filtre : « 19 / 50 » sur une saison,
+     « 12 / 45 » sur l'avent. Il annonçait toujours celui des saisons. */
+  const ownedCount = activeId === 'avent'
+    ? cartesAvent.length
+    : activeId === 'faceid'
+      ? cartesFaceId.length
+      : cards.filter((c) => (ownedCards[c.id] || 0) > 0).length;
+  const totalCount = activeId === 'avent'
+    ? TOTAL_AVENT
+    : activeId === 'faceid'
+      ? TOTAL_FACEID
+      : cards.length;
 
   return (
     <div className="page col-page">
@@ -113,10 +155,14 @@ export default function Collection() {
           </div>
           {/* L'onglet intergalactique n'a pas de thème : on retombe sur son
               nom plutôt que d'afficher un titre vide. */}
-          <h1 className="col-titre">{viewedSeason?.theme || viewedSeason?.name || 'Collection'}</h1>
+          <h1 className="col-titre">
+            {activeId === 'avent'
+              ? 'Branlette Hivernale'
+              : viewedSeason?.theme || viewedSeason?.name || 'Collection'}
+          </h1>
           <div className="col-mesures">
             <span className="col-compte">
-              {ownedCount}<em>/{cards.length}</em>
+              {ownedCount}<em>/{totalCount}</em>
             </span>
             <span className="col-legende">cartes trouvées</span>
           </div>
@@ -124,7 +170,7 @@ export default function Collection() {
         <div className="col-barre">
           <div
             className="col-barre-fill"
-            style={{ width: `${cards.length ? (ownedCount / cards.length) * 100 : 0}%` }}
+            style={{ width: `${totalCount ? (ownedCount / totalCount) * 100 : 0}%` }}
           />
         </div>
       </header>
@@ -191,7 +237,14 @@ export default function Collection() {
               onClick={() => setViewedId(s.id)}
             >
               {s.name}
-              {s.id !== season?.id && s.id !== SET_INTERGALACTIQUE && <em> · terminée</em>}
+              {/* « terminée » ne vaut que pour une vraie saison passée :
+                  l'intergalactique et les deux events ne sont pas des
+                  saisons et n'ont rien à terminer. */}
+              {s.id !== season?.id
+                && s.id !== SET_INTERGALACTIQUE
+                && s.id !== 'avent'
+                && s.id !== 'faceid'
+                && <em> · terminée</em>}
             </button>
           ))}
         </div>
@@ -205,7 +258,20 @@ export default function Collection() {
               ? 'Dernier jour. Une chance sur deux cents à chaque coffre.'
               : `Une chance sur deux cents à chaque coffre, jusqu'au 3 mars. Encore ${joursRestants()} jour${joursRestants() > 1 ? 's' : ''}. Une seule par personne.`}
         </p>
+      ) : activeId === 'avent' ? (
+        <p className="collection-archive-hint">
+          Chaque calendrier est tiré à part : les cartes qui te manquent sont
+          chez quelqu'un d'autre.
+        </p>
+      ) : activeId === 'faceid' ? (
+        <p className="collection-archive-hint">
+          Deux portraits par personne. Elles ne sortent que des boosters de
+          l'événement.
+        </p>
       ) : viewedSeason && viewedSeason.id !== season?.id && (
+        /* Réservé aux vraies saisons passées. Sur un onglet d'event, cette
+           phrase s'affichait amputée de son début — le thème est vide — et
+           parlait de coffres du pass, qui n'y donnent pas ces cartes. */
         <p className="collection-archive-hint">
           {viewedSeason.theme} ne tombe plus dans les coffres du pass. La quête
           bonus hebdomadaire du Pass donne un coffre de cette saison tant qu'il
@@ -227,6 +293,59 @@ export default function Collection() {
           >
             Par famille
           </button>
+        </div>
+      )}
+
+      {/* Les deux events gardent leur propre rendu : une carte de l'avent se
+          retourne et porte son nœud, une carte FaceID a ses crochets de
+          visée. Les ramener au format vignette des saisons aurait été les
+          abîmer pour l'unique raison de partager une grille. */}
+      {activeId === 'avent' && (
+        <div className="avt-cartes-grille">
+          {cartesAvent.map((c) => (
+            <button key={c.slug} className="avt-carte-case" onClick={() => setApercuAvent(c)}>
+              <AventCardArt carte={c} />
+              {(av.cartes[c.slug] || 0) > 1 && (
+                <span className="avt-carte-doublon">×{av.cartes[c.slug]}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {activeId === 'faceid' && (
+        <div className="fid-cartes-grille">
+          {cartesFaceId.map((c) => (
+            <FaceIdCard key={c.id} carte={c} possedee onClick={() => setApercuFaceId(c)} />
+          ))}
+        </div>
+      )}
+
+      {apercuAvent && (
+        <div className="avt-apercu" onClick={() => setApercuAvent(null)}>
+          <div className="avt-apercu-carte" onClick={(e) => e.stopPropagation()}>
+            <button className="avt-apercu-fermer" onClick={() => setApercuAvent(null)} aria-label="Fermer">
+              <X size={18} />
+            </button>
+            <AventCardArt carte={apercuAvent} retournable />
+            {(av.cartes[apercuAvent.slug] || 0) > 1 && (
+              <span className="avt-apercu-doublons">×{av.cartes[apercuAvent.slug]} dans ta collection</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {apercuFaceId && (
+        <div className="fid-apercu" onClick={() => setApercuFaceId(null)}>
+          <div className="fid-apercu-carte" onClick={(e) => e.stopPropagation()}>
+            <button className="fid-apercu-fermer" onClick={() => setApercuFaceId(null)} aria-label="Fermer">
+              <X size={18} />
+            </button>
+            <FaceIdCardArt carte={apercuFaceId} />
+            {(fid.cartes[apercuFaceId.id] || 0) > 1 && (
+              <span className="fid-apercu-doublons">×{fid.cartes[apercuFaceId.id]} dans ton fichier</span>
+            )}
+          </div>
         </div>
       )}
 

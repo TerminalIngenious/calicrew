@@ -224,6 +224,9 @@ function AppContent() {
             <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
             <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
             <Route path="/battlepass" element={<ProtectedRoute><BattlePass /></ProtectedRoute>} />
+            {/* « Mes cartes » : saisons et events au même endroit. L'ancienne
+                adresse reste, elle est dans les liens déjà envoyés. */}
+            <Route path="/cartes" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
             <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
             <Route path="/season/:setId" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />
             <Route path="/season/:setId/:uid" element={<ProtectedRoute><SeasonCards /></ProtectedRoute>} />

@@ -310,10 +310,19 @@ Toutes les cartes, d'un coup, avec un filtre en haut :
 
 > **Tout** · Saison 1 · Saison 2 · Avent · FaceID · Intergalactique
 
-Aujourd'hui c'est éclaté entre `/collection` (saisons), `/avent/cartes` et
-`/faceid/cartes`, avec trois mises en page différentes pour la même chose. La
-nouvelle page absorbe les trois ; les anciennes routes redirigent dessus avec
-le bon filtre pré-sélectionné, pour ne casser aucun lien existant.
+C'était éclaté entre `/collection` (saisons), `/avent/cartes` et
+`/faceid/cartes`, avec trois mises en page différentes pour la même chose.
+
+C'est la collection qui s'est élargie, plutôt qu'une quatrième page : elle
+portait déjà la bascule, le compte, l'échange de doublons et le groupement
+par rareté. Les deux events la rejoignent en onglets — et gardent leur rendu
+propre, parce qu'une carte de l'avent se retourne et porte son nœud, et
+qu'une carte FaceID a ses crochets de visée. Les ramener au format vignette
+des saisons, c'était les abîmer pour la seule raison de partager une grille.
+
+Les pages `/avent/cartes/:uid` et `/faceid/cartes/:uid` restent : elles
+servent à voir la collection de quelqu'un d'autre, ce que la page « mes
+cartes » ne fait pas.
 
 Le compte en haut suit le filtre : « 19 / 50 » sur une saison, « 94 / 131 » sur
 Tout.
@@ -440,7 +449,10 @@ n'ai rien changé en attendant.
 5. ~~Les 39 badges, et leur détection.~~ **Fait.** Palettes calculées depuis
    la teinte de famille et le rang, sept dessins pour sept familles, et la
    détection branchée sur l'écriture de badges qui existait déjà.
-6. La page `/cartes` unifiée, et les redirections.
+6. ~~La page `/cartes` unifiée, et les redirections.~~ **Fait.** C'est la
+   collection qui s'est élargie plutôt qu'une page de plus : les deux events
+   la rejoignent en onglets, avec leur rendu propre. Les pages par joueur
+   restent, elles servent à voir la collection de quelqu'un d'autre.
 7. Les titres, si retenus.
 8. Le renommage XP → CaliPass sur la page Pass.
 
