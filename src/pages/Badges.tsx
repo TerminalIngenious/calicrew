@@ -25,26 +25,57 @@ export default function Badges() {
   const { progress, loading } = useUserProgress(targetUid);
   const badges = sortBadges(progress?.badges || []);
   const [selectedBadge, setSelectedBadge] = useState<RankBadge | null>(null);
+  /* Les badges d'événement n'ont pas de rang : les compter avec les métaux
+     ferait trois « 0 or » chez quelqu'un qui n'a que des événements. */
+  const evenements = badges.filter(estEvenement);
+  const podium = badges.filter((b) => !estEvenement(b));
 
   if (loading) return <div className="page loading"><Loader /></div>;
 
   return (
-    <div className="page">
-      <div className="page-head-row">
-        <button className="icon-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={20} />
-        </button>
-        <div className="season-page-title">
-          <span className="season-slab-kicker">Récompenses</span>
-          <h1>Badges</h1>
+    <div className="page bdg-page">
+      {/* Le bandeau porte le compte, et la répartition des métaux : c'est ce
+          qu'on vient vérifier, et c'était une ligne grise de 0,9 rem posée
+          sous le titre. Or, argent et bronze gardent leurs couleurs — elles
+          disent le rang, elles ne décorent pas. */}
+      <header className="bdg-entete">
+        <div className="bdg-entete-fond" />
+        <div className="bdg-entete-contenu">
+          <div className="bdg-haut">
+            <button className="bdg-retour" onClick={() => navigate(-1)} aria-label="Revenir en arrière">
+              <ArrowLeft size={20} />
+            </button>
+            <span className="bdg-kicker">Récompenses</span>
+          </div>
+          <h1 className="bdg-titre">Badges</h1>
+          <div className="bdg-mesures">
+            <span className="bdg-compte">{badges.length}</span>
+            <span className="bdg-legende">
+              badge{badges.length > 1 ? 's' : ''} gagné{badges.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          {badges.length > 0 && (
+            <div className="bdg-metaux">
+              {BADGE_RANKS.map((rang, i) => {
+                const combien = podium.filter((b) => b.rank === i).length;
+                if (combien === 0) return null;
+                return (
+                  <span key={rang.name} className="bdg-metal" style={{ color: rang.mid }}>
+                    <i style={{ background: rang.mid }} />
+                    {combien} {rang.name.toLowerCase()}
+                  </span>
+                );
+              })}
+              {evenements.length > 0 && (
+                <span className="bdg-metal bdg-metal-event">
+                  <i />
+                  {evenements.length} événement{evenements.length > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+          )}
         </div>
-      </div>
-
-      <div className="season-page-bar">
-        <span className="season-page-count">
-          {badges.length} badge{badges.length > 1 ? 's' : ''}
-        </span>
-      </div>
+      </header>
 
       {badges.length === 0 ? (
         <p className="empty">Aucun badge pour l'instant. Finis le mois sur le podium.</p>

@@ -11568,3 +11568,149 @@ body {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Les badges
+
+   Chaque médaille vivait dans une carte encadrée : un cadre autour d'un objet
+   déjà dessiné en relief. La grille devient une grille de médailles, et le
+   bandeau porte le compte et la répartition des métaux — qui tenaient dans
+   une ligne grise sous le titre.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.bdg-page {
+  padding-top: 0 !important;
+}
+
+.bdg-entete {
+  position: relative;
+  margin: 0 -1rem 1.3rem;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.1rem) 1rem 1.1rem;
+  overflow: hidden;
+}
+
+.bdg-entete-fond {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(110% 85% at 85% 0%, rgba(var(--accent-rgb), 0.17) 0%, transparent 58%),
+    linear-gradient(170deg, #16161b 0%, #0d0d10 62%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 100%);
+}
+
+.bdg-entete-contenu {
+  position: relative;
+  z-index: 1;
+}
+
+.bdg-haut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.bdg-retour {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.bdg-kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.bdg-titre {
+  margin: 0.55rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.bdg-mesures {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+}
+
+.bdg-compte {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bdg-legende {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+/* La répartition : une pastille de couleur et un compte. Le point de couleur
+   suffit à dire le métal, le texte le répète pour qui ne distingue pas
+   l'argent du bronze à cette taille. */
+.bdg-metaux {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.bdg-metal {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.bdg-metal i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.bdg-metal-event {
+  color: var(--text-muted);
+}
+
+.bdg-metal-event i {
+  background: currentColor;
+}
+
+/* ── La grille : des médailles, plus des cartes ── */
+
+.bdg-page .badges-grid {
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 1.5rem 0.6rem;
+}
+
+.bdg-page .badge-cell {
+  padding: 0;
+  background: none;
+  border: 0;
+  gap: 0.5rem;
+}
+
+.bdg-page .badge-cell-title {
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.bdg-page .badge-cell-mois {
+  font-size: 0.64rem;
+}
