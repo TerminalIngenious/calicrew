@@ -356,6 +356,16 @@ Les mêmes erreurs ne doivent pas revenir par la porte des niveaux.
 | Charge délirante (999 kg) | tonnage plafonné à 15 000 kg par séance |
 | Farm de micro-séances | plafond de **1 200 XP par jour**, toutes séances confondues |
 | Récompense rejouée | écriture avant animation, et `niveauxPris` empêche le doublon |
+| Double appui sur « Terminer » | verrou synchrone sur une ref, comme pour le coffre du pass |
+| Même séance loguée deux fois | une séance « sans coffre » ne donne pas d'XP non plus |
+
+### Le plafond d'une première journée
+
+Le plafond journalier de 1 200 XP permet, en théorie, d'atteindre le **niveau
+10 dès le premier jour** — il en coûte 1 169 — avec les neuf coffres qui vont
+avec, tous communs sauf le rare du palier 10. C'est assumé : les premiers
+niveaux sont faits pour tomber vite. Dès le lendemain, une journée aussi
+maximale ne rapporte plus que cinq niveaux, et l'écart se creuse ensuite.
 
 Aucun de ces plafonds ne gêne un joueur réel : le plus gros de la base est à
 528 XP sur sa meilleure séance et 886 XP sur sa meilleure semaine.
@@ -404,7 +414,10 @@ n'ai rien changé en attendant.
 1. ~~`lib/niveaux.ts` : la formule d'XP, la courbe, les paliers.~~ **Fait.**
    Vérifié sur les 382 séances réelles et sur six cas limites ; l'aller-retour
    niveau ↔ XP est exact sur 300 niveaux.
-2. L'XP accordée en fin de séance, avec ses plafonds.
+2. ~~L'XP accordée en fin de séance, avec ses plafonds.~~ **Fait.** Branchée
+   sur les deux chemins qui terminent une séance — `finishSession` et la
+   création d'un log de sortie, qui ne passe jamais par le premier. Écrite
+   dans la même opération que le coffre de fin, et avant toute animation.
 3. Le bandeau du profil : niveau + barre. C'est ce qui rend la chose visible.
 4. La page `/niveaux`, à partir de `PassTrack`.
 5. Les 39 badges, et leur détection.

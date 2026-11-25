@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserSessions } from '../contexts/SessionsContext';
-import type { Session, Exercise, ExerciseLog } from '../types';
+import type { Session, Exercise, ExerciseLog, UserProgress } from '../types';
 import { ArrowLeft, Check, ChevronDown, ChevronUp, Square, Play, Settings, Calendar, Trash2, Pencil, Plus, Minus, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CATEGORY_LABELS, DEFAULT_EXERCISES } from '../lib/exercises';
 import { amrapTitle, circuitLabel, materializeAmrapSets, repsPerRound, roundTotals } from '../lib/amrap';
 import { sportCoXp, enduranceXp } from '../lib/passes';
+import { accordeXpProfil, xpSeance } from '../lib/niveaux';
+import type { GainSeance } from '../lib/niveaux';
 import { sessionReps, getUnit, unitLabel, setWeight } from '../lib/stats';
 import { previensSeance } from '../lib/notify';
 
@@ -79,6 +81,8 @@ export default function LiveSession() {
 
   // AMRAP
   const [amrapRounds, setAmrapRounds] = useState(0);
+  /** Ce que la séance vient de rapporter, montré sur le récap. */
+  const [gainXp, setGainXp] = useState<GainSeance | null>(null);
   const [amrapTimeUp, setAmrapTimeUp] = useState(false);
   /** Coché avant de terminer : la séance ne donnera pas de coffre. */
   const [noReward, setNoReward] = useState(false);
@@ -369,7 +373,23 @@ export default function LiveSession() {
     navigate('/');
   }
 
+  /* Verrou synchrone : deux appuis rapides sur « Terminer » liraient la même
+     progression et accorderaient deux fois l'XP de la même séance. Une ref
+     change dans l'appui même, un état React seulement au rendu suivant. */
+  const finEnCours = useRef(false);
+
   async function finishSession() {
+    if (!session || !id) return;
+    if (finEnCours.current) return;
+    finEnCours.current = true;
+    try {
+      await terminerLaSeance();
+    } finally {
+      finEnCours.current = false;
+    }
+  }
+
+  async function terminerLaSeance() {
     if (!session || !id) return;
     const brut = Math.floor((Date.now() - (session.startedAt || session.createdAt)) / 1000);
     const isAmrapSession = session.mode === 'amrap';
@@ -396,13 +416,44 @@ export default function LiveSession() {
     setSession({ ...session, exercises, noReward });
     await updateDoc(doc(db, 'sessions', id), updateData);
 
+    /*
+     * Les récompenses de la séance : le coffre de fin, et l'XP de profil.
+     *
+     * Une séance « sans coffre » ne donne pas d'XP non plus. C'est tout
+     * l'objet de cette case : elle sert à enregistrer un rattrapage ou un
+     * essai juste après une vraie séance, et payer l'XP deux fois serait
+     * exactement le double paiement qu'elle existe pour éviter. Les reps,
+     * elles, comptent toujours — dans les stats et les classements.
+     */
     if (!noReward) {
       try {
-        await updateDoc(doc(db, 'userProgress', session.userId), {
-          chestsToOpen: arrayUnion({ rarity: 'commune', pool: 'current' }),
+        const ref = doc(db, 'userProgress', session.userId);
+        const snap = await getDoc(ref);
+        const progress = (snap.data() || {}) as UserProgress;
+
+        const brute = xpSeance({ exercises, duration });
+        const aujourdhui = new Date().toISOString().split('T')[0];
+        const gain = accordeXpProfil(progress, brute, aujourdhui);
+
+        /* Une seule écriture pour le coffre de fin, l'XP et les coffres des
+           niveaux franchis. Deux écritures séparées, c'est la porte ouverte
+           à une séance qui donne son coffre mais pas son XP parce que le
+           réseau a lâché entre les deux. */
+        await updateDoc(ref, {
+          chestsToOpen: [
+            ...(progress.chestsToOpen || []),
+            { rarity: 'commune' as const, pool: 'current' },
+            ...gain.coffres,
+          ],
+          xp: gain.xp,
+          xpJour: gain.xpJour,
+          niveauxPris: gain.niveauxPris,
         });
-      } catch {
-        // userProgress might not exist yet
+        setGainXp(gain);
+      } catch (err) {
+        // La progression peut ne pas exister encore : la séance est déjà
+        // enregistrée, elle, et c'est le principal.
+        console.error('XP de fin de séance impossible :', err);
       }
     }
 
@@ -518,6 +569,21 @@ export default function LiveSession() {
               </span>
             </div>
             <div className="rec-etiquettes">
+              {/* Ce que la séance vient de rapporter. Affiché seulement au
+                  retour de la séance, pas en rouvrant un vieux récap : à ce
+                  moment-là l'XP a déjà été comptée, et la réafficher ferait
+                  croire qu'on vient de la regagner. */}
+              {gainXp && gainXp.accorde > 0 && (
+                <span className="rec-gain">
+                  +{gainXp.accorde} XP
+                  {gainXp.niveauApres > gainXp.niveauAvant && (
+                    <em> · niveau {gainXp.niveauApres}</em>
+                  )}
+                </span>
+              )}
+              {gainXp?.plafonne && (
+                <span className="rec-plafond">Plafond du jour atteint</span>
+              )}
               {session.noReward && <span className="recap-no-reward">Séance sans coffre</span>}
               {!isAmrap && categoryLabel && <span className="rec-categories">{categoryLabel}</span>}
             </div>

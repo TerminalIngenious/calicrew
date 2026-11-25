@@ -7,6 +7,7 @@ import { db } from '../lib/firebase';
 import { DEFAULT_EXERCISES, CATEGORY_LABELS, uniteProbable } from '../lib/exercises';
 import { sportCoXp, enduranceXp, plafonneEndurance, getCurrentSeason, needsSeasonReset, startNewSeason, accordeXp } from '../lib/passes';
 import { buildAmrapExercises } from '../lib/amrap';
+import { accordeXpProfil, xpSeance } from '../lib/niveaux';
 import {
   EXOS_ECHAUFFEMENT, FAMILLES, doseLabel, dureeEstimee, echauffementSuggere, enItem,
 } from '../lib/echauffement';
@@ -420,6 +421,40 @@ export default function NewSession() {
         startedAt: now,
         duration: totalRunDuration,
       });
+
+      /*
+       * L'XP de profil de la sortie, accordée ici et nulle part ailleurs.
+       *
+       * Un log est créé déjà terminé : il ne passe jamais par l'écran de
+       * séance, donc jamais par `finishSession` qui accorde l'XP des autres.
+       * Sans ces lignes, courir dix kilomètres ne rapporterait aucun niveau.
+       *
+       * Et seulement pour un log : une séance mixte (course + exercices)
+       * part en séance normale et sera payée à sa fin. La payer aussi ici,
+       * c'est la payer deux fois.
+       */
+      try {
+        const ref = doc(db, 'userProgress', user!.uid);
+        const snap = await getDoc(ref);
+        const progress = (snap.data() || {}) as UserProgress;
+        const brute = xpSeance({ exercises, duration: totalRunDuration });
+        const gain = accordeXpProfil(
+          progress,
+          brute,
+          new Date().toISOString().split('T')[0]
+        );
+        await updateDoc(ref, {
+          xp: gain.xp,
+          xpJour: gain.xpJour,
+          niveauxPris: gain.niveauxPris,
+          ...(gain.coffres.length > 0
+            ? { chestsToOpen: [...(progress.chestsToOpen || []), ...gain.coffres] }
+            : {}),
+        });
+      } catch (err) {
+        console.error('XP de profil du log impossible :', err);
+      }
+
       navigate(`/session/${docRef.id}`);
     } else {
       const docRef = await addDoc(collection(db, 'sessions'), {

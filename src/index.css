@@ -12364,3 +12364,27 @@ body {
   line-height: 1.4;
   color: #ef4444;
 }
+
+/* Le gain d'XP de la séance, sur le récap. En pastille d'accent : c'est la
+   seule chose de cet écran qu'on n'avait pas avant d'arriver dessus. */
+.rec-gain {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.rec-gain em {
+  font-style: normal;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* Le plafond du jour. Gris et non rouge : rien n'a échoué, on a simplement
+   atteint la limite — et on a le droit de le savoir. */
+.rec-plafond {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}

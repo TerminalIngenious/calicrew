@@ -349,6 +349,26 @@ export interface UserProgress {
   /** Le groupe a-t-il déjà été prévenu que cette personne l'a trouvée ? */
   annonceIntergalactique?: boolean;
   passXp: number;
+  /**
+   * XP de profil, cumulée à vie.
+   *
+   * À ne pas confondre avec `passXp`, qui est le CaliPass : celui-ci monte le
+   * pass de la saison et repart de zéro à chaque saison, celle-là monte le
+   * niveau de profil et ne redescend jamais. Voir lib/niveaux.ts.
+   */
+  xp?: number;
+  /**
+   * Niveaux de profil dont la récompense a déjà été donnée.
+   *
+   * Sans cette liste, un recalcul ou une écriture concurrente redonnerait les
+   * coffres des paliers déjà franchis.
+   */
+  niveauxPris?: number[];
+  /**
+   * XP de profil déjà accordée aujourd'hui. La date est stockée avec : sans
+   * elle, le plafond d'un jour continuerait de s'appliquer le lendemain.
+   */
+  xpJour?: { date: string; xp: number };
   isPremium: boolean;
   ownedCards: Record<string, number>;
   questsClaimed: Record<string, number>;

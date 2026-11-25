@@ -322,3 +322,82 @@ export function coffresEntre(avant: number, apres: number): CardRarity[] {
   }
   return coffres;
 }
+
+// ── L'attribution ─────────────────────────────────────────────────────────
+
+/**
+ * Ce que rapporte une séance, une fois tout appliqué.
+ *
+ * Rendu en bloc plutôt qu'écrit ici : cette fonction est pure, elle se
+ * vérifie sans Firestore, et c'est l'appelant qui décide quand écrire. Il
+ * écrit **avant** d'animer quoi que ce soit — un gain montré avant d'être
+ * enregistré est un gain rejouable, on l'a déjà payé une fois sur le coffre
+ * du pass.
+ */
+export interface GainSeance {
+  /** Nouvelle XP cumulée. */
+  xp: number;
+  /** Compteur du jour, à réécrire tel quel. */
+  xpJour: { date: string; xp: number };
+  /** Niveaux dont la récompense est désormais due, à réécrire tel quel. */
+  niveauxPris: number[];
+  /** Les coffres à ajouter, déjà au format de `chestsToOpen`. */
+  coffres: { rarity: CardRarity; pool: string }[];
+  /** XP réellement accordée, une fois le plafond du jour passé. */
+  accorde: number;
+  niveauAvant: number;
+  niveauApres: number;
+  /** Vrai si le plafond du jour a rogné le gain. À dire, pas à taire. */
+  plafonne: boolean;
+}
+
+/**
+ * Accorde l'XP d'une séance et les coffres des niveaux franchis au passage.
+ *
+ * Le seul chemin par lequel l'XP de profil doit arriver, d'où qu'elle vienne.
+ * C'est la leçon de `accordeXp` côté pass : tant que chaque source écrivait
+ * l'XP à sa façon, seuls certains chemins pensaient aux coffres, et qui
+ * montait de niveau par un autre chemin franchissait le palier sans rien
+ * recevoir — une perte que personne ne peut remarquer, puisque rien n'annonce
+ * un coffre qui n'arrive pas.
+ */
+export function accordeXpProfil(
+  progress: {
+    xp?: number;
+    xpJour?: { date: string; xp: number };
+    niveauxPris?: number[];
+    chestsToOpen?: { rarity: CardRarity; pool: string }[];
+  },
+  xpBrute: number,
+  aujourdhui: string
+): GainSeance {
+  const dejaAujourdhui = progress.xpJour?.date === aujourdhui ? progress.xpJour.xp : 0;
+  const accorde = xpAccordable(xpBrute, dejaAujourdhui);
+
+  const xpAvant = progress.xp || 0;
+  const xp = xpAvant + accorde;
+  const niveauAvant = niveauDepuisXp(xpAvant).niveau;
+  const niveauApres = niveauDepuisXp(xp).niveau;
+
+  // Les paliers déjà payés ne sont jamais repayés, même si le niveau est
+  // recalculé plus tard ou si deux écritures se croisent.
+  const pris = new Set(progress.niveauxPris || []);
+  const coffres: { rarity: CardRarity; pool: string }[] = [];
+  for (let n = niveauAvant + 1; n <= niveauApres; n++) {
+    if (pris.has(n)) continue;
+    pris.add(n);
+    const coffre = coffreDuNiveau(n);
+    if (coffre) coffres.push({ rarity: coffre, pool: 'current' });
+  }
+
+  return {
+    xp,
+    xpJour: { date: aujourdhui, xp: dejaAujourdhui + accorde },
+    niveauxPris: [...pris].sort((a, b) => a - b),
+    coffres,
+    accorde,
+    niveauAvant,
+    niveauApres,
+    plafonne: accorde < xpBrute,
+  };
+}
