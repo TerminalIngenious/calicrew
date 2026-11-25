@@ -31,9 +31,13 @@ const COLONNES = [
  *
  * Rien qui promette ce qu'on ne tiendra pas, et rien sur le contenu de la
  * saison 2 : ce qui rassure, c'est de savoir ce qu'on garde.
+ *
+ * La ligne sur les dernières quêtes a sauté. Elle invitait à finir sa saison
+ * pendant que l'app est fermée — on ne peut pas demander à quelqu'un de faire
+ * quelque chose derrière une porte qu'on vient de verrouiller.
  */
 const MESSAGES = [
-  'Dernières quêtes de la saison 1. Elles comptent encore.',
+  'Les niveaux ne se remettent pas à zéro entre les saisons.',
   'Tes cartes restent à toi. Toutes, pour toujours.',
   'Tes coffres pas encore ouverts donneront des cartes de la saison 1.',
   'Le pass repart de zéro. La collection, non.',
@@ -98,9 +102,22 @@ export default function MaintenanceScreen() {
         <span className="mnt-kicker">Mise à jour en cours</span>
         <h1>La saison 2<br />arrive</h1>
 
+        {/* Ce qu'on installe, en trois lignes. Un écran de maintenance qui
+            ne dit pas ce qu'il fabrique se lit comme une panne. */}
+        <ul className="mnt-liste">
+          <li><b>Niveaux de profil</b> — ils montent à chaque séance, selon le temps, les séries, les reps et la charge. Ils ne redescendent jamais.</li>
+          <li><b>Des récompenses à chaque palier</b> — coffres, badges, et de nouveaux badges à aller chercher.</li>
+          <li><b>Une page cartes unique</b> — toute la collection, triée par saison et par événement.</li>
+        </ul>
+
         {reste && (
           <div className="mnt-compte">
-            <span className="mnt-compte-l">Ouverture dans</span>
+            {/* « Saison 2 dans » et non « Ouverture dans » : ce compte à
+                rebours est celui du début de la saison, pas celui de la
+                réouverture de l'app — qui dépend du travail, pas du calendrier.
+                Annoncer une heure de retour qu'on ne tient pas est le meilleur
+                moyen de transformer une mise à jour en panne. */}
+            <span className="mnt-compte-l">Saison 2 dans</span>
             <span className="mnt-compte-v">{reste}</span>
           </div>
         )}
@@ -110,8 +127,8 @@ export default function MaintenanceScreen() {
         <div className="mnt-barre"><div className="mnt-barre-fill" /></div>
 
         <p className="mnt-pied">
-          Profite des derniers jours pour finir tes quêtes.<br />
-          Personne ne perd ses cartes. Reviens dans un moment.
+          La saison 1 se termine pendant la fermeture.<br />
+          Tes coffres non ouverts donneront quand même ses cartes.
         </p>
       </div>
     </div>

@@ -47,7 +47,15 @@ import LimiteChargement from './components/LimiteChargement';
 import { getSeasonalTheme } from './lib/seasonalTheme';
 import { estInstallee } from './lib/install';
 
-const MAINTENANCE = false;
+/*
+ * L'app est fermée au public pendant l'installation des niveaux de profil.
+ *
+ * Les comptes admin passent au travers (cf. ProtectedRoute), ce qui permet de
+ * continuer à développer et à vérifier sur la vraie base. Les crons serveur,
+ * eux, ne sont pas concernés : la créatine et le défi du jour continuent de
+ * notifier. À couper de leur côté si la fermeture dure.
+ */
+const MAINTENANCE = true;
 /**
  * Intro de saison.
  *
