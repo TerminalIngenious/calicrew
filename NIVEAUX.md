@@ -86,18 +86,37 @@ Mesuré sur les 382 séances terminées du groupe :
 
 | | XP |
 |---|---|
-| médiane d'une séance | **106** |
-| moyenne | 126 |
-| 75ᵉ centile | 195 |
+| médiane d'une séance | **99** |
+| moyenne | 124 |
+| 75ᵉ centile | 192 |
 | 90ᵉ centile | 261 |
 | la plus grosse séance jamais faite | 528 |
 | séances qui touchent le plafond de 800 | **0** |
+| séances à 0 XP | 26, toutes réellement vides |
 
 Le plafond est donc là pour la triche, pas pour les gros entraînements : la
 plus grosse séance réelle est à 66 % du plafond.
 
-Par semaine et par joueur, les seize joueurs actifs s'étalent de **30 à
-886 XP**, médiane **228**. C'est ce chiffre qui cale la courbe ci-dessous.
+Par semaine et par joueur, les onze joueurs à plus de cinq séances s'étalent
+de **112 à 886 XP**, médiane **245**. C'est ce chiffre qui cale la courbe.
+
+### Le plancher, et l'erreur qu'il a failli coûter
+
+Première version : « moins de 3 séries **et** moins de 5 minutes → 0 XP ».
+Passée sur les vraies séances, elle en mettait **72 sur 382 à zéro**, soit une
+sur cinq. En regardant lesquelles : des séries uniques de quinze à trente
+pompes, en une minute — les **défis du jour**. Trente pompes sont trente
+pompes, elles valent leurs douze points.
+
+Le plancher est donc devenu le plus simple possible : *aucune série cochée,
+aucun kilomètre, aucun temps de sortie → 0*. Et rien d'autre. Le farm de
+micro-séances est tenu par le plafond journalier, pas par un plancher qui
+punit ceux qui jouent le jeu.
+
+Attention au piège inverse : le chrono de la séance ne compte pas comme du
+travail, sinon une séance ouverte trois quarts d'heure sans qu'une case soit
+cochée rapporterait 90 XP. Mais un match de foot d'une heure n'a ni série ni
+kilomètre et doit rapporter. D'où le relevé séparé du temps de sortie.
 
 ---
 
@@ -109,24 +128,30 @@ coût du niveau n  =  round( 40 × n^0.67 )
 
 Pas de plafond : la formule vaut pour le niveau 7 comme pour le 400.
 
-| niveau | coût | cumul | joueur lent (80/sem) | joueur médian (228/sem) | joueur rapide (550/sem) |
+Le niveau 1 est gratuit : on y commence. Le niveau 2 coûte 64 XP, soit une
+bonne séance.
+
+| niveau | coût | cumul | lent (112/sem) | médian (245/sem) | rapide (571/sem) |
 |---|---|---|---|---|---|
-| 2 | 64 | 104 | 1,3 sem | 0,5 sem | 0,2 sem |
-| 5 | 118 | 407 | 5,1 sem | 1,8 sem | 0,7 sem |
-| 10 | 187 | 1 209 | 3,5 mois | 5,3 sem | 2,2 sem |
-| 15 | 245 | 2 321 | 6,7 mois | 2,4 mois | 4,2 sem |
-| 25 | 346 | 5 341 | 15,4 mois | 5,4 mois | 2,2 mois |
-| 40 | 474 | 11 576 | 2,8 ans | 11,7 mois | 4,9 mois |
-| 50 | 550 | 16 738 | 4,0 ans | 17 mois | 7,0 mois |
-| 75 | 722 | 32 766 | 7,9 ans | 2,8 ans | 13,8 mois |
-| 100 | 875 | 52 833 | 12,7 ans | 4,5 ans | 22,2 mois |
-| 150 | 1 148 | 103 705 | 24,9 ans | 8,7 ans | 3,6 ans |
-| 200 | 1 392 | 167 440 | 40,2 ans | 14,1 ans | 5,9 ans |
+| 2 | 64 | 64 | 0,6 sem | 0,3 sem | 0,1 sem |
+| 5 | 118 | 367 | 3,3 sem | 1,5 sem | 0,6 sem |
+| 10 | 187 | 1 169 | 2,4 mois | 4,8 sem | 2,0 sem |
+| 15 | 245 | 2 281 | 4,7 mois | 2,2 mois | 4,0 sem |
+| 25 | 346 | 5 301 | 10,9 mois | 5,0 mois | 2,1 mois |
+| 40 | 474 | 11 536 | 23,8 mois | 10,9 mois | 4,7 mois |
+| 50 | 550 | 16 698 | 2,9 ans | 15,7 mois | 6,8 mois |
+| 75 | 722 | 32 726 | 5,6 ans | 2,6 ans | 13,2 mois |
+| 100 | 875 | 52 793 | 9,1 ans | 4,1 ans | 21,4 mois |
+| 150 | 1 148 | 103 665 | 17,8 ans | 8,1 ans | 3,5 ans |
+| 200 | 1 392 | 167 400 | 28,7 ans | 13,1 ans | 5,6 ans |
+
+Les trois colonnes sont les rythmes **réellement mesurés** dans le groupe :
+le plus lent des joueurs réguliers, le médian, et le plus assidu.
 
 Ce qu'il faut lire là-dedans : **les premiers niveaux tombent vite** — niveau 5
-en deux semaines, niveau 10 en un peu plus d'un mois — et le niveau 100 reste un
-objectif de plusieurs années même pour le plus assidu du groupe. C'est ce que tu
-demandais : facile au début, de plus en plus long ensuite.
+en moins de deux semaines, niveau 10 en un mois — et le niveau 100 reste un
+objectif de plusieurs années, même pour le plus assidu du groupe. C'est ce que
+tu demandais : facile au début, de plus en plus long ensuite.
 
 ---
 
@@ -327,13 +352,24 @@ Les mêmes erreurs ne doivent pas revenir par la porte des niveaux.
 |---|---|
 | Séance laissée ouverte 54 h | temps plafonné à 120 min |
 | Exercice de temps saisi en reps | `unit` est déjà fiable depuis la correction des unités ; les secondes ont leur propre terme |
-| Séance vide validée en boucle | plancher : une séance sous 3 séries **et** sous 5 min donne 0 XP |
+| Séance vide validée en boucle | aucune série, aucun km, aucun temps de sortie → 0 XP |
 | Charge délirante (999 kg) | tonnage plafonné à 15 000 kg par séance |
 | Farm de micro-séances | plafond de **1 200 XP par jour**, toutes séances confondues |
 | Récompense rejouée | écriture avant animation, et `niveauxPris` empêche le doublon |
 
 Aucun de ces plafonds ne gêne un joueur réel : le plus gros de la base est à
 528 XP sur sa meilleure séance et 886 XP sur sa meilleure semaine.
+
+Vérifié sur les cas limites, en rejouant le vrai module :
+
+| cas | XP |
+|---|---|
+| séance laissée ouverte 54 h, rien coché | **0** |
+| défi du jour, 30 pompes en 1 min | 13 |
+| gainage seul, 3 × 60 s | 44 |
+| match de foot d'1 h, ni série ni km | 120 |
+| 10 km en 50 min | 140 |
+| charge délirante, 999 kg × 100 reps | 338 *(plafonné ; 1 665 sans)* |
 
 ---
 
@@ -365,8 +401,9 @@ n'ai rien changé en attendant.
 
 ## 11. Ordre de développement
 
-1. `lib/niveaux.ts` : la formule d'XP, la courbe, les paliers. Testable seule,
-   sans aucune interface.
+1. ~~`lib/niveaux.ts` : la formule d'XP, la courbe, les paliers.~~ **Fait.**
+   Vérifié sur les 382 séances réelles et sur six cas limites ; l'aller-retour
+   niveau ↔ XP est exact sur 300 niveaux.
 2. L'XP accordée en fin de séance, avec ses plafonds.
 3. Le bandeau du profil : niveau + barre. C'est ce qui rend la chose visible.
 4. La page `/niveaux`, à partir de `PassTrack`.
